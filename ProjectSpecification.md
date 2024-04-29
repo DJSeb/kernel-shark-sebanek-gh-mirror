@@ -41,8 +41,9 @@ structured as.
 
 Since KernelShark also allows the user to use GUI to start `trace-cmd`, the project
 will also include modifications to KernelShark's source code to enable
-stacktrace capture in the GUI. For that purpose, KernelShark's Git repository shall
-be forked and the fork will be a part of the project.
+stacktrace capture in the GUI. For that purpose, KernelShark's GitHub repository 
+(https://github.com/yordan-karadzhov/kernel-shark) shall be forked and the fork
+will be a part of the project.
 
 ### Graphical structure (usage)
 
