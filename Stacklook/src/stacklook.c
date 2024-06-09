@@ -1,16 +1,25 @@
-#include <string>
+/*
+* This file is for integration with KernelShark.
+* Inner logic is in file 'Stacklook.cpp'
+*/
 
-#include "stacklook.hpp"
-#include "StacklookDetailedStack.cpp"
+#include <stdc-predef.h>
+
+// KernelShark
+#include "libkshark.h"
+#include "libkshark-plot.h"
+
+// Plugin header
+#include "stacklook.h"
 
 // Just familiarizing myself, taken from the talk video
 
-constexpr float FONT_SIZE = 30.0f;
+#define FONT_SIZE 30
 const char* font_file = "/usr/share/fonts/truetype/FreeSans.ttf";
-ksplot_font font;
+struct ksplot_font font;
 
 /*Static hello world*/
-static ksplot_font* get_font() {
+static struct ksplot_font* get_font() {
     if (!ksplot_font_is_loaded(&font)) {
         ksplot_init_font(&font, FONT_SIZE, font_file);
     }
@@ -18,16 +27,23 @@ static ksplot_font* get_font() {
     return &font;
 }
 
-static void hello_world(kshark_cpp_argv* argv_c, int sd, int val, int draw_action) {
-    ksplot_color text_col;
-    text_col.red = 128; text_col.green = 23; text_col.blue = 168;
+/** Callback **/
+static void hello_world(struct kshark_cpp_argv* argv_c, int sd, int val, int draw_action) {
+    struct ksplot_color text_col = {
+        (uint8_t)128,
+        (uint8_t)23,
+        (uint8_t)168,
+    };
     ksplot_print_text(get_font(), &text_col, 300, 100, "Hello, World!");
 }
 
+/** Load the plugin **/
 int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     kshark_register_draw_handler(stream, hello_world);
     return 1;
 }
+
+/** Unload the plugin **/
 int KSHARK_PLOT_PLUGIN_DEINITIALIZER(struct kshark_data_stream* stream) {
     kshark_unregister_draw_handler(stream, hello_world);
     return 1;

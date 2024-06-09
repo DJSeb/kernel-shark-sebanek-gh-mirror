@@ -1,6 +1,7 @@
 Devlog.md
 ExamplePrograms/*
 Stacklook/build/*
+.vscode/*
 build_modif_kshark.sh
 settings.json
 tasks.json

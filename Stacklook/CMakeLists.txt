@@ -9,29 +9,37 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Ensure existing KernelShark
 #find_package(KernelShark REQUIRED)
+find_package(Qt6Widgets 6.3.0 REQUIRED)
+find_package(Qt6 COMPONENTS Network OpenGLWidgets StateMachine REQUIRED)
 
-message("\nINFO: Plugin was developed with KernelShark v2.3.1\n")
+# include_directories(SYSTEM
+#     "/usr/include/qt6"
+#     "/usr/include/qt6/QtWidgets"
+#     "/usr/include/qt6/QtNetwork"
+#     "/usr/include/qt6/QtOpenGLWidgets"
+#     "/usr/include/qt6/QtStateMachine"
+#     "/usr/include/qt6/QtCore"
+#     "/usr/include/qt6/QtGui"
+# )
 
-set(SL_VERSION_MAJOR 0)
-set(SL_VERSION_MINOR 1)
-set(SL_VERSION_PATCH 0)
-set(SL_VERSION_STR ${SL_VERSION_MAJOR}.${SL_VERSION_MINOR}.${SL_VERSION_PATCH})
-message("Current version of Stacklook plugin: ${SL_VERSION_STR}\n")
-
+# Ensure a default build type
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE RelWithDebInfo)
+    set(CMAKE_BUILD_TYPE Debug)
 endif (NOT CMAKE_BUILD_TYPE)
 
 set(SOURCES
-    src/stacklook.cpp
+    src/stacklook.c
+    src/Stacklook.cpp
     # Maybe more later
 )
 
+set(KS_FORK_DIR "${CMAKE_CURRENT_BINARY_DIR}/../../KS_fork")
+
 add_library(stacklook SHARED ${SOURCES})
 set_target_properties(stacklook PROPERTIES PREFIX "plugin-")
-target_include_directories(stacklook PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/../../KS_fork/src/")
+target_include_directories(stacklook PRIVATE "${KS_FORK_DIR}/src")
 
-set(KS_SHARED_LIBS "${CMAKE_CURRENT_BINARY_DIR}/../../KS_fork/lib/")
+set(KS_SHARED_LIBS "${KS_FORK_DIR}/lib")
 link_directories(${KS_SHARED_LIBS})
 target_link_libraries(stacklook PRIVATE
     kshark
