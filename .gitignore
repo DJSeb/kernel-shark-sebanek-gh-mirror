@@ -1,9 +1,13 @@
 Devlog.md
 
 ExamplePrograms/*
-Stacklook/build/*
+
 build_modif_kshark.sh
 
-.vscode/*
+Stacklook/build
+
+TalkPluginExample
+
+.vscode
 settings.json
 tasks.json
