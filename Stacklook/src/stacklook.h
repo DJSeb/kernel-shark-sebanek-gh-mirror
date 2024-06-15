@@ -18,6 +18,10 @@ struct plugin_stacklook_ctx {
 
 KS_DECLARE_PLUGIN_CONTEXT_METHODS(struct plugin_stacklook_ctx)
 
+// Global funcs
+struct ksplot_font* get_font_ptr();
+void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
+                           int val, int draw_action);
 
 #ifdef __cplusplus
 }

@@ -19,7 +19,7 @@ char *font_file = NULL;
 int ss_event_id;
 
 /*Static hello world*/
-static struct ksplot_font* get_font() {
+struct ksplot_font* get_font_ptr() {
     if (!ksplot_font_is_loaded(&font)) {
         ksplot_init_font(&font, FONT_SIZE, font_file);
     }
@@ -27,15 +27,13 @@ static struct ksplot_font* get_font() {
     return &font;
 }
 
-/** Callback **/
-static void hello_world(struct kshark_cpp_argv* argv_c, int sd, int val, int draw_action) {
-    struct ksplot_color text_col = {
-        (uint8_t)128,
-        (uint8_t)23,
-        (uint8_t)168,
-    };
-    ksplot_print_text(get_font(), &text_col, 300, 100, "Hello, World!");
-}
+// /** Callback (change later?) **/
+// static void plugin_process(struct kshark_data_stream *stream,
+//                            void *rec, struct kshark_entry *entry) {
+//     if (kshark_get_event_name
+// }
+
+/** Context & plugin loading **/
 
 static void sl_free_ctx(struct plugin_stacklook_ctx* sl_ctx)
 {
@@ -63,7 +61,8 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     if (!font_file)
         return 0;
 
-    kshark_register_draw_handler(stream, hello_world);
+    
+    kshark_register_draw_handler(stream, draw_plot_buttons);
     return 1;
 }
 
@@ -74,7 +73,7 @@ int KSHARK_PLOT_PLUGIN_DEINITIALIZER(struct kshark_data_stream* stream) {
     int retval = 0;
 
     if (sl_ctx) {
-        kshark_unregister_draw_handler(stream, hello_world);
+        kshark_unregister_draw_handler(stream, draw_plot_buttons);
         retval = 1;
     }
 
