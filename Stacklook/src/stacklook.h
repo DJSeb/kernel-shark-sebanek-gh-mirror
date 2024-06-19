@@ -9,10 +9,11 @@
 extern "C" {
 #endif
 
-#define FONT_SIZE 30
+#define FONT_SIZE 20
 
 struct plugin_stacklook_ctx {
     /** Data of stack-related events. **/
+    int ss_event_id;
     struct kshark_data_container* stacks_data;
 };
 

@@ -15,8 +15,8 @@
 #include "stacklook.h"
 
 // Runtime constants
-const std::string STACK_BUTTON_TEXT = "STACK";
-const std::string SEARCHED_EVENT = "sched/sched_switch";
+const static std::string STACK_BUTTON_TEXT = "STACK";
+const static std::string SEARCHED_EVENT = "sched/sched_switch";
 
 static KsPlot::PlotObject* makeText(std::vector<const KsPlot::Graph*> graph,
                                      std::vector<int> bin,
@@ -71,35 +71,30 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
     KsCppArgV* argVCpp KS_ARGV_TO_CPP(argv_c);
     kshark_data_container* plugin_data;
 
-    // If I am to draw and on a CPU, don't do that.
+    // If I am to draw and on a CPU, don't do that (I think).
     if (!(draw_action && KSHARK_CPU_DRAW)) return;
     // Don't draw with too many bins (configurable zoom-in indicator actually)
     if (argVCpp->_histo->tot_count > 200) return;
 
-    std::cout << "(SKIP) Checking plugin context state." << std::endl;
-
     plugin_data = __get_context(sd)->stacks_data;
     // Couldn't get the context container (any reason)
-    if (!plugin_data) return;
+    if (!plugin_data) {
+        return;
+    }
 
-    std::cout << "Making check function." << std::endl;
-
-    auto checkFunc = [&] (kshark_data_container* data_c, ssize_t t) {
-        auto event_name = std::string{kshark_get_event_name(data_c->data[t]->entry)};
-        bool is_correct_event = (SEARCHED_EVENT == event_name);
-        return is_correct_event;
+    auto checkFunc = [=] (kshark_data_container* data_c, ssize_t t) {
+        bool correct_event_id = (__get_context(sd)->ss_event_id 
+                    == data_c->data[t]->entry->event_id);
+        bool correct_cpu = (data_c->data[t]->entry->cpu == val);
+        return correct_cpu && correct_event_id;
     };
 
-    std::cout << "Trying to plot triangles." << std::endl;
-
-    /*eventFieldPlotMin(argVCpp,
+    eventFieldPlotMin(argVCpp,
                       plugin_data,
                       checkFunc,
                       makeTriangle,
-                      {0x80, 0x17, 0xA8},
-                      10);*/
-    
-    std::cout << "Trying to plot text." << std::endl;
+                      {0x25, 0x69, 0x90},
+                      10);
 
     eventFieldPlotMin(argVCpp,
                       plugin_data,
