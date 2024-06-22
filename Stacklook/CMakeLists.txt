@@ -68,6 +68,7 @@ set(KS_PLUGIN_PREFIX "plugin-")
 # Project
 set(SOURCES
     src/stacklook.h
+    src/Stacklook.hpp
     src/stacklook.c
     src/Stacklook.cpp
 )

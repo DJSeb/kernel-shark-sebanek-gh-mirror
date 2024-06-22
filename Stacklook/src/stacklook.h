@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-#define FONT_SIZE 20
+#define FONT_SIZE 8
 
 struct plugin_stacklook_ctx {
     /** Data of stack-related events. **/

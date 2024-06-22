@@ -15,24 +15,32 @@
 #include "stacklook.h"
 #include "Stacklook.hpp"
 
+class SlTriangleButton : public KsPlot::Triangle {
+private:
+    void _doubleClick() const override {
+        std::cout << "Opening dialog from triangle..." << std::endl;
+    }
+};
+
 // Runtime constants
 const static std::string STACK_BUTTON_TEXT = "STACK";
 const static std::string SEARCHED_EVENT = "sched/sched_switch";
 
+// Statics
 static KsPlot::PlotObject* makeText(std::vector<const KsPlot::Graph*> graph,
                                      std::vector<int> bin,
                                      std::vector<kshark_data_field_int64*> data,
                                      KsPlot::Color c, float size) {
     // Adjust values
     int x, y;
-    x = graph[0]->bin(bin[0])._val.x() - FONT_SIZE * 0.75;
-    y = graph[0]->bin(bin[0])._val.y() - FONT_SIZE / 3;
-    KsPlot::TextBox* textBox =
+    x = graph[0]->bin(bin[0])._val.x() - 14;
+    y = graph[0]->bin(bin[0])._val.y() - 14;
+    KsPlot::TextBox* button_text = 
         new KsPlot::TextBox(get_font_ptr(),
-                            STACK_BUTTON_TEXT,
-                            c, KsPlot::Point{x, y});
+                      STACK_BUTTON_TEXT,
+                      c, KsPlot::Point{x, y});
     
-    return textBox;
+    return button_text;
 }
 
 static KsPlot::PlotObject* makeTriangle(std::vector<const KsPlot::Graph*> graph,
@@ -42,16 +50,18 @@ static KsPlot::PlotObject* makeTriangle(std::vector<const KsPlot::Graph*> graph,
     // Change below to some actual values
     // Base point
     int x, y;
-    x = graph[0]->bin(bin[0])._val.x() - FONT_SIZE * 0.75;
-    y = graph[0]->bin(bin[0])._val.y() - FONT_SIZE / 3;
+    int x_start = graph[0]->bin(bin[0])._val.x();
+    int y_start = graph[0]->bin(bin[0])._val.y();
+    x = x_start - 24;
+    y = y_start - 25;
     
     // Triangle points
     KsPlot::Point a {x, y};
-    KsPlot::Point b {x + 50, y};
-    KsPlot::Point c {x + 25, y + 20};
+    KsPlot::Point b {x + 48, y};
+    KsPlot::Point c {x + 24, y + 20};
     
     // Triangle
-    StackTriangle* backTriangle = new StackTriangle();
+    SlTriangleButton* backTriangle = new SlTriangleButton();
     backTriangle->setFill(true);
     backTriangle->setPoint(0, a);
     backTriangle->setPoint(1, b);
@@ -59,6 +69,29 @@ static KsPlot::PlotObject* makeTriangle(std::vector<const KsPlot::Graph*> graph,
 
     return backTriangle;
 }
+
+static void _draw_triangle_w_text(KsCppArgV* argv, 
+                                  kshark_data_container* dc,
+                                  IsApplicableFunc checkFunc,
+                                  int sd, int val,
+                                  int draw_action) {
+    // First drawn will be the triangles actually
+    eventFieldPlotMin(argv,
+                      dc,
+                      checkFunc,
+                      makeText,
+                      {0xFF, 0xFF, 0xFF},
+                      10);
+    // These guys don't wanna do anything???
+    eventFieldPlotMin(argv,
+                      dc,
+                      checkFunc,
+                      makeTriangle,
+                      {0x25, 0x69, 0x90},
+                      10);
+}
+
+// Globals
 
 /**
  * @brief Plugin's draw function.
@@ -92,24 +125,4 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
     };
 
     _draw_triangle_w_text(argVCpp, plugin_data, checkFunc, sd, val, draw_action);
-}
-
-static void _draw_triangle_w_text(KsCppArgV* argv, 
-                                  kshark_data_container* dc,
-                                  IsApplicableFunc checkFunc,
-                                  int sd, int val,
-                                  int draw_action) {
-    eventFieldPlotMin(argv,
-                      dc,
-                      checkFunc,
-                      makeTriangle,
-                      {0x25, 0x69, 0x90},
-                      10);
-
-    eventFieldPlotMin(argv,
-                      dc,
-                      checkFunc,
-                      makeText,
-                      {0x0F, 0x0F, 0x0F},
-                      10);
 }
