@@ -1,3 +1,5 @@
+/** TODO: Copyroght **/
+
 #ifndef _KS_PLUGIN_STACKLOOK_H
 #define _KS_PLUGIN_STACKLOOK_H
 

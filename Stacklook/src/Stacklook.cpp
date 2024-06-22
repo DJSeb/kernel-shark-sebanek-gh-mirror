@@ -11,8 +11,9 @@
 #include "KsPlugins.hpp"
 #include "KsPlotTools.hpp"
 
-// Plugin header
+// Plugin headers
 #include "stacklook.h"
+#include "Stacklook.hpp"
 
 // Runtime constants
 const static std::string STACK_BUTTON_TEXT = "STACK";
@@ -22,6 +23,7 @@ static KsPlot::PlotObject* makeText(std::vector<const KsPlot::Graph*> graph,
                                      std::vector<int> bin,
                                      std::vector<kshark_data_field_int64*> data,
                                      KsPlot::Color c, float size) {
+    // Adjust values
     int x, y;
     x = graph[0]->bin(bin[0])._val.x() - FONT_SIZE * 0.75;
     y = graph[0]->bin(bin[0])._val.y() - FONT_SIZE / 3;
@@ -49,7 +51,7 @@ static KsPlot::PlotObject* makeTriangle(std::vector<const KsPlot::Graph*> graph,
     KsPlot::Point c {x + 25, y + 20};
     
     // Triangle
-    KsPlot::Triangle* backTriangle = new KsPlot::Triangle();
+    StackTriangle* backTriangle = new StackTriangle();
     backTriangle->setFill(true);
     backTriangle->setPoint(0, a);
     backTriangle->setPoint(1, b);
@@ -89,15 +91,23 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
         return correct_cpu && correct_event_id;
     };
 
-    eventFieldPlotMin(argVCpp,
-                      plugin_data,
+    _draw_triangle_w_text(argVCpp, plugin_data, checkFunc, sd, val, draw_action);
+}
+
+static void _draw_triangle_w_text(KsCppArgV* argv, 
+                                  kshark_data_container* dc,
+                                  IsApplicableFunc checkFunc,
+                                  int sd, int val,
+                                  int draw_action) {
+    eventFieldPlotMin(argv,
+                      dc,
                       checkFunc,
                       makeTriangle,
                       {0x25, 0x69, 0x90},
                       10);
 
-    eventFieldPlotMin(argVCpp,
-                      plugin_data,
+    eventFieldPlotMin(argv,
+                      dc,
                       checkFunc,
                       makeText,
                       {0x0F, 0x0F, 0x0F},
