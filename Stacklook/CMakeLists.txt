@@ -18,7 +18,7 @@ project(stacklook)
 
 # Ensure a default build type
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE RelWithDebug)
+    set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif (NOT CMAKE_BUILD_TYPE)
     
 # Specify output directory
@@ -71,6 +71,8 @@ set(SOURCES
     src/Stacklook.hpp
     src/stacklook.c
     src/Stacklook.cpp
+    # TODO: delete later
+    src/_utilities.hpp
 )
 
 add_library(stacklook SHARED ${SOURCES})

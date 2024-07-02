@@ -8,17 +8,49 @@
 #include <iostream>
 
 // KernelShark
+#include "libkshark.h"
+#include "libkshark-plugin.h"
+#include "libkshark-plot.h"
+#include "libkshark-model.h"
 #include "KsPlugins.hpp"
+#include "KsMainWindow.hpp"
 #include "KsPlotTools.hpp"
 
 // Plugin headers
 #include "stacklook.h"
 #include "Stacklook.hpp"
 
+// Utilities
+#include "_utilities.hpp"
+
+// Statics
+static KsMainWindow* main_w_ptr;
+
+/**
+ * @brief Give the plugin a pointer to KS's main window to allow
+ * GUI manipulation.
+*/
+__hidden void* plugin_set_gui_ptr(void* gui_ptr) {
+    main_w_ptr = static_cast<KsMainWindow*>(gui_ptr);
+    return nullptr;
+}
+
+// Classes
 class SlTriangleButton : public KsPlot::Triangle {
 private:
     void _doubleClick() const override {
-        std::cout << "Opening dialog from triangle..." << std::endl;
+        log("Opening dialog from triangle...");
+    }
+};
+
+class SlTextBox : public KsPlot::TextBox {
+public:
+    SlTextBox(ksplot_font* f, const std::string& text,
+              const KsPlot::Color& col, const KsPlot::Point& pos)
+    : KsPlot::TextBox(f, text, col, pos) {}
+private:
+    void _doubleClick() const override {
+        log("Opening dialog from text...");
     }
 };
 
@@ -35,8 +67,8 @@ static KsPlot::PlotObject* makeText(std::vector<const KsPlot::Graph*> graph,
     int x, y;
     x = graph[0]->bin(bin[0])._val.x() - 14;
     y = graph[0]->bin(bin[0])._val.y() - 14;
-    KsPlot::TextBox* button_text = 
-        new KsPlot::TextBox(get_font_ptr(),
+    SlTextBox* button_text = 
+        new SlTextBox(get_font_ptr(),
                       STACK_BUTTON_TEXT,
                       c, KsPlot::Point{x, y});
     
@@ -82,7 +114,7 @@ static void _draw_triangle_w_text(KsCppArgV* argv,
                       makeText,
                       {0xFF, 0xFF, 0xFF},
                       10);
-    // These guys don't wanna do anything???
+    
     eventFieldPlotMin(argv,
                       dc,
                       checkFunc,

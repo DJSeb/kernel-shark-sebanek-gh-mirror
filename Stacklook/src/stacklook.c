@@ -5,6 +5,7 @@
 
 // C
 #include <stdc-predef.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 // KernelShark
@@ -15,9 +16,11 @@
 // Plugin header
 #include "stacklook.h"
 
-struct ksplot_font font;
-char *font_file = NULL;
-int sched_switch_id;
+static const char* no_stack_data_message = "NO STACK DATA CAPTURED.";
+static struct ksplot_font font;
+static char* font_file = NULL;
+static int sched_switch_id;
+static int kstack_eid;
 
 /** Get pointer to the font **/
 struct ksplot_font* get_font_ptr() {
@@ -28,16 +31,30 @@ struct ksplot_font* get_font_ptr() {
     return &font;
 }
 
-static void plugin_process(struct kshark_data_stream *stream,
-                           void *rec, struct kshark_entry *entry) {
+static void select_switch_events(struct kshark_data_stream* stream,
+                              void* rec, struct kshark_entry* entry,
+                              struct kshark_data_container* sl_ctx_stack_data) {
+    kshark_data_container_append(sl_ctx_stack_data, entry, -1);
+}
+
+static void plugin_process(struct kshark_data_stream* stream,
+                           void* rec, struct kshark_entry* entry) {
     
-    //TODO: Probably gonna link ftrace/kernel_stacktraces here to the data...
+    /** TODO: ~~Probably gonna link ftrace/kernel_stacktraces here to the data...~~
+     *
+     * Scratch that. That won't work (I tried, a lot).
+     * So a different approach:
+     * 1) Select the switch events.
+     * 2) Remember their timestamps
+     * 3) Select kstack events & filter for the first ones with a higher or same timestamp as the remembered ones.
+     * 4) Profit?
+     */
     
     struct kshark_data_container* sl_ctx_stack_data = 
             __get_context(stream->stream_id)->stacks_data;
 
     if (entry->event_id == sched_switch_id) {
-        kshark_data_container_append(sl_ctx_stack_data, entry, 1);
+        select_switch_events(stream, rec, entry, sl_ctx_stack_data);
     }
 }
 
@@ -68,6 +85,8 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     sched_switch_id = kshark_find_event_id(stream, "sched/sched_switch");
     sl_ctx->ss_event_id = sched_switch_id;
 
+    kstack_eid = kshark_find_event_id(stream, "ftrace/kernel_stack");
+
     if (!font_file)
         font_file = ksplot_find_font_file("FreeSans", "FreeSans");
     if (!font_file)
@@ -94,4 +113,9 @@ int KSHARK_PLOT_PLUGIN_DEINITIALIZER(struct kshark_data_stream* stream) {
     __close(stream->stream_id);
 
     return retval;
+}
+
+/** Initialize the control interface of the plugin. */
+void* KSHARK_MENU_PLUGIN_INITIALIZER(void* gui_ptr) {
+	return plugin_set_gui_ptr(gui_ptr);
 }
