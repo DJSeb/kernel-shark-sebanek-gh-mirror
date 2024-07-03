@@ -37,6 +37,30 @@ __hidden void* plugin_set_gui_ptr(void* gui_ptr) {
 
 // Classes
 class SlTriangleButton : public KsPlot::Triangle {
+public:
+    double distance(int x, int y) const override {
+        /* How it is with point ordering:
+            0 ------ 1
+             \     /
+              \   /
+               \ /
+                2      
+        */
+        int pt0_x = this->pointX(0);
+        int pt1_x = this->pointX(1);
+        int pt0_y = this->pointY(0);
+        int pt2_y = this->pointY(2);
+
+        if (x < pt0_x || x > pt1_x) {
+            return std::numeric_limits<double>::max();
+        }
+
+        if (y < pt0_y || y > pt2_y) {
+            return std::numeric_limits<double>::max();
+        }
+
+        return 0;
+    }
 private:
     void _doubleClick() const override {
         log("Opening dialog from triangle...");
@@ -48,10 +72,6 @@ public:
     SlTextBox(ksplot_font* f, const std::string& text,
               const KsPlot::Color& col, const KsPlot::Point& pos)
     : KsPlot::TextBox(f, text, col, pos) {}
-private:
-    void _doubleClick() const override {
-        log("Opening dialog from text...");
-    }
 };
 
 // Runtime constants
@@ -59,23 +79,21 @@ const static std::string STACK_BUTTON_TEXT = "STACK";
 const static std::string SEARCHED_EVENT = "sched/sched_switch";
 
 // Statics
-static KsPlot::PlotObject* makeText(std::vector<const KsPlot::Graph*> graph,
+static SlTextBox* makeText(std::vector<const KsPlot::Graph*> graph,
                                      std::vector<int> bin,
                                      std::vector<kshark_data_field_int64*> data,
-                                     KsPlot::Color c, float size) {
+                                     KsPlot::Color col, float size) {
     // Adjust values
     int x, y;
     x = graph[0]->bin(bin[0])._val.x() - 14;
     y = graph[0]->bin(bin[0])._val.y() - 14;
-    SlTextBox* button_text = 
-        new SlTextBox(get_font_ptr(),
-                      STACK_BUTTON_TEXT,
-                      c, KsPlot::Point{x, y});
+    SlTextBox* button_text = new SlTextBox(get_font_ptr(), STACK_BUTTON_TEXT,
+                                           col, KsPlot::Point{x, y});
     
     return button_text;
 }
 
-static KsPlot::PlotObject* makeTriangle(std::vector<const KsPlot::Graph*> graph,
+static SlTriangleButton* makeTriangle(std::vector<const KsPlot::Graph*> graph,
                                         std::vector<int> bin,
                                         std::vector<kshark_data_field_int64*> data,
                                         KsPlot::Color col, float size) {
@@ -93,11 +111,20 @@ static KsPlot::PlotObject* makeTriangle(std::vector<const KsPlot::Graph*> graph,
     KsPlot::Point c {x + 24, y + 20};
     
     // Triangle
+
+    /*
+       0 ------ 1
+        \     /
+         \   /
+          \ /
+           2      
+    */
     SlTriangleButton* backTriangle = new SlTriangleButton();
     backTriangle->setFill(true);
     backTriangle->setPoint(0, a);
     backTriangle->setPoint(1, b);
     backTriangle->setPoint(2, c);
+    backTriangle->_color = col;
 
     return backTriangle;
 }
@@ -108,19 +135,19 @@ static void _draw_triangle_w_text(KsCppArgV* argv,
                                   int sd, int val,
                                   int draw_action) {
     // First drawn will be the triangles actually
-    eventFieldPlotMin(argv,
+    eventFieldPlotMax(argv,
                       dc,
                       checkFunc,
                       makeText,
                       {0xFF, 0xFF, 0xFF},
-                      10);
+                      -1);
     
     eventFieldPlotMin(argv,
                       dc,
                       checkFunc,
                       makeTriangle,
-                      {0x25, 0x69, 0x90},
-                      10);
+                      {0x60, 0x69, 0x90},
+                      -1);
 }
 
 // Globals
@@ -134,14 +161,16 @@ static void _draw_triangle_w_text(KsCppArgV* argv,
  * @param draw_action: Draw action identifier.
  */
 void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
-                           int val, int draw_action) {
+                       int val, int draw_action) {
     KsCppArgV* argVCpp KS_ARGV_TO_CPP(argv_c);
     kshark_data_container* plugin_data;
 
     // If I am to draw and on a CPU, don't do that (I think).
-    if (!(draw_action && KSHARK_CPU_DRAW)) return;
+    if (!(draw_action && KSHARK_CPU_DRAW))
+        return;
     // Don't draw with too many bins (configurable zoom-in indicator actually)
-    if (argVCpp->_histo->tot_count > 200) return;
+    if (argVCpp->_histo->tot_count > 200)
+        return;
 
     plugin_data = __get_context(sd)->stacks_data;
     // Couldn't get the context container (any reason)
