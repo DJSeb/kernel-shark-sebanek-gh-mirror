@@ -88,8 +88,10 @@ If using KernelShark build method:
 
 ## Contributions & acknowledgments
 
-Yordan Karadzhov - maintains KernelShark, took inspiration from his examples and plugins
+Yordan Karadzhov - maintains KernelShark, author took inspiration from his examples and plugins
 Google Lens - extracted text from images when no sources were available
+Geeksforgeeks:
+    - [Check if a point is inside a triangle](https://www.geeksforgeeks.org/check-whether-a-given-point-lies-inside-a-triangle-or-not/)
 
 ## Support
 

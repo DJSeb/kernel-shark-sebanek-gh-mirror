@@ -23,16 +23,19 @@
 // Utilities
 #include "_utilities.hpp"
 
-// Statics
+// Static variables
 static KsMainWindow* main_w_ptr;
 
-/**
- * @brief Give the plugin a pointer to KS's main window to allow
- * GUI manipulation.
-*/
-__hidden void* plugin_set_gui_ptr(void* gui_ptr) {
-    main_w_ptr = static_cast<KsMainWindow*>(gui_ptr);
-    return nullptr;
+// Runtime constants
+const static std::string STACK_BUTTON_TEXT = "STACK";
+const static std::string SEARCHED_EVENT = "sched/sched_switch";
+
+static const double trigon_area(const ksplot_point a,
+                                const ksplot_point b,
+                                const ksplot_point c) {
+    return abs(((a.x * (b.y - c.y)) +
+                (b.x * (c.y - a.y)) +
+                (c.x * (a.y - b.y))) / 2.0);
 }
 
 // Classes
@@ -46,20 +49,20 @@ public:
                \ /
                 2      
         */
-        int pt0_x = this->pointX(0);
-        int pt1_x = this->pointX(1);
-        int pt0_y = this->pointY(0);
-        int pt2_y = this->pointY(2);
+        ksplot_point p {x, y};
+        const ksplot_point a = *this->point(0);
+        const ksplot_point b = *this->point(1);
+        const ksplot_point c = *this->point(2);
 
-        if (x < pt0_x || x > pt1_x) {
-            return std::numeric_limits<double>::max();
-        }
+        double triangle_area = trigon_area(a, b, c);
+        double pbc_area = trigon_area(p, b, c);
+        double apc_area = trigon_area(a, p, c);
+        double abp_area = trigon_area(a, b, p);
 
-        if (y < pt0_y || y > pt2_y) {
-            return std::numeric_limits<double>::max();
-        }
+        double p_areas_sum = pbc_area + apc_area + abp_area;
 
-        return 0;
+        return (triangle_area == p_areas_sum) ? 0
+                : std::numeric_limits<double>::max();
     }
 private:
     void _doubleClick() const override {
@@ -74,9 +77,6 @@ public:
     : KsPlot::TextBox(f, text, col, pos) {}
 };
 
-// Runtime constants
-const static std::string STACK_BUTTON_TEXT = "STACK";
-const static std::string SEARCHED_EVENT = "sched/sched_switch";
 
 // Statics
 static SlTextBox* makeText(std::vector<const KsPlot::Graph*> graph,
@@ -186,4 +186,13 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
     };
 
     _draw_triangle_w_text(argVCpp, plugin_data, checkFunc, sd, val, draw_action);
+}
+
+/**
+ * @brief Give the plugin a pointer to KS's main window to allow
+ * GUI manipulation.
+*/
+__hidden void* plugin_set_gui_ptr(void* gui_ptr) {
+    main_w_ptr = static_cast<KsMainWindow*>(gui_ptr);
+    return nullptr;
 }
