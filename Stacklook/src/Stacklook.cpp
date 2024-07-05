@@ -77,7 +77,6 @@ public:
     : KsPlot::TextBox(f, text, col, pos) {}
 };
 
-
 // Statics
 static SlTextBox* makeText(std::vector<const KsPlot::Graph*> graph,
                                      std::vector<int> bin,
@@ -94,9 +93,9 @@ static SlTextBox* makeText(std::vector<const KsPlot::Graph*> graph,
 }
 
 static SlTriangleButton* makeTriangle(std::vector<const KsPlot::Graph*> graph,
-                                        std::vector<int> bin,
-                                        std::vector<kshark_data_field_int64*> data,
-                                        KsPlot::Color col, float size) {
+                                      std::vector<int> bin,
+                                      std::vector<kshark_data_field_int64*> data,
+                                      KsPlot::Color col, float size) {
     // Change below to some actual values
     // Base point
     int x, y;
@@ -111,7 +110,6 @@ static SlTriangleButton* makeTriangle(std::vector<const KsPlot::Graph*> graph,
     KsPlot::Point c {x + 24, y + 20};
     
     // Triangle
-
     /*
        0 ------ 1
         \     /
@@ -135,18 +133,12 @@ static void _draw_triangle_w_text(KsCppArgV* argv,
                                   int sd, int val,
                                   int draw_action) {
     // First drawn will be the triangles actually
-    eventFieldPlotMax(argv,
-                      dc,
-                      checkFunc,
-                      makeText,
-                      {0xFF, 0xFF, 0xFF},
+    eventFieldPlotMax(argv, dc, checkFunc,
+                      makeText, {0xFF, 0xFF, 0xFF},
                       -1);
     
-    eventFieldPlotMin(argv,
-                      dc,
-                      checkFunc,
-                      makeTriangle,
-                      {0x60, 0x69, 0x90},
+    eventFieldPlotMin(argv, dc, checkFunc,
+                      makeTriangle, {0x60, 0x69, 0x90},
                       -1);
 }
 
