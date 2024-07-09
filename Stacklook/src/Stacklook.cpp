@@ -19,6 +19,7 @@
 // Plugin headers
 #include "stacklook.h"
 #include "Stacklook.hpp"
+#include "SlDetailedWindow.hpp"
 
 // Utilities
 #include "_utilities.hpp"
@@ -67,6 +68,7 @@ public:
 private:
     void _doubleClick() const override {
         log("Opening dialog from triangle...");
+        
     }
 };
 
@@ -133,13 +135,11 @@ static void _draw_triangle_w_text(KsCppArgV* argv,
                                   int sd, int val,
                                   int draw_action) {
     // First drawn will be the triangles actually
-    eventFieldPlotMax(argv, dc, checkFunc,
-                      makeText, {0xFF, 0xFF, 0xFF},
-                      -1);
+    eventFieldPlotMin(argv, dc, checkFunc, makeText,
+                      {0xFF, 0xFF, 0xFF}, -1);
     
-    eventFieldPlotMin(argv, dc, checkFunc,
-                      makeTriangle, {0x60, 0x69, 0x90},
-                      -1);
+    eventFieldPlotMin(argv, dc, checkFunc, makeTriangle,
+                      {0x60, 0x69, 0x90}, -1);
 }
 
 // Globals
