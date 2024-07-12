@@ -71,8 +71,10 @@ set(KS_PLUGIN_PREFIX "plugin-")
 set(SOURCES
     src/stacklook.h
     src/Stacklook.hpp
+    src/SlDetailedWindow.hpp
     src/stacklook.c
     src/Stacklook.cpp
+    src/SlDetailedWindow.cpp
     # TODO: delete later
     src/_utilities.hpp
 )

@@ -8,10 +8,10 @@
 // Qt
 #include <QtWidgets>
 
-class SlDetailedView : public QTextEdit {
-    Q_OBJECT
+class SlDetailedView : public QWidget {
+    //Q_OBJECT
 public:
-    explicit SlDetailedView(const std::string& data,
+    explicit SlDetailedView(const QString& data,
                             QWidget* parent = nullptr);
 private:
     explicit SlDetailedView(QWidget* parent = nullptr);

@@ -40,15 +40,7 @@ static void select_switch_events(struct kshark_data_stream* stream,
 static void plugin_process(struct kshark_data_stream* stream,
                            void* rec, struct kshark_entry* entry) {
     
-    /** TODO: ~~Probably gonna link ftrace/kernel_stacktraces here to the data...~~
-     *
-     * Scratch that. That won't work (I tried, a lot).
-     * So a different approach:
-     * 1) Select the switch events.
-     * 2) Remember their timestamps
-     * 3) Select kstack events & filter for the first ones with a higher or same timestamp as the remembered ones.
-     * 4) Profit?
-     */
+    /** TODO: */
     
     struct kshark_data_container* sl_ctx_stack_data = 
             __get_context(stream->stream_id)->stacks_data;
@@ -65,6 +57,7 @@ static void sl_free_ctx(struct plugin_stacklook_ctx* sl_ctx)
 	if (!sl_ctx)
 		return;
 
+    clean_opened_views();
 	kshark_free_data_container(sl_ctx->stacks_data);
     sl_ctx->ss_event_id = -1;
 }

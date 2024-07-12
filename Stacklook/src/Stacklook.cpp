@@ -26,6 +26,7 @@
 
 // Static variables
 static KsMainWindow* main_w_ptr;
+static std::vector<SlDetailedView*> opened_views{};
 
 // Runtime constants
 const static std::string STACK_BUTTON_TEXT = "STACK";
@@ -68,7 +69,9 @@ public:
 private:
     void _doubleClick() const override {
         log("Opening dialog from triangle...");
-        
+        auto new_view = new SlDetailedView("Hello", main_w_ptr);
+        new_view->show();
+        opened_views.push_back(new_view);
     }
 };
 
@@ -143,6 +146,14 @@ static void _draw_triangle_w_text(KsCppArgV* argv,
 }
 
 // Globals
+
+void clean_opened_views() {
+    for(auto view : opened_views) {
+        if (view != nullptr) {
+            delete view;
+        }
+    }
+}
 
 /**
  * @brief Plugin's draw function.
