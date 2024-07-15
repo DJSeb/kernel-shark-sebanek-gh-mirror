@@ -1,5 +1,8 @@
 // DO NOT SHIP WITH THIS!!!
+#ifndef _UTILITIES_HPP_
+#define _UTILITIES_HPP_
 
+#include <cstdint>
 #include <string>
 #include <iostream>
  
@@ -20,3 +23,5 @@ void log(const std::string& to_log, OtherInfoT other, bool with_newline = true) 
         std::cout << std::endl;
     ++log_counter;
 }
+
+#endif

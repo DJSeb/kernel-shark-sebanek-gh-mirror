@@ -69,7 +69,7 @@ public:
 private:
     void _doubleClick() const override {
         log("Opening dialog from triangle...");
-        auto new_view = new SlDetailedView("Hello", main_w_ptr);
+        auto new_view = new SlDetailedView("Hello\nWorld\n!", main_w_ptr);
         new_view->show();
         opened_views.push_back(new_view);
     }

@@ -17,15 +17,21 @@ private:
     explicit SlDetailedView(QWidget* parent = nullptr);
     std::shared_ptr<const std::string> event_info;
     std::shared_ptr<const std::string> stack_str;
+    void add_data_to_list_view(QListView& list_view, const QString& data);
 // Qt stuff
 private:
-    QVBoxLayout  _layout;
-    QRadioButton _choose_view;
-    QLabel       _which_event;
-    QStringList  _list_view;
-    QTextEdit    _raw_view;
+    QVBoxLayout     _layout;
+    QButtonGroup    _radio_btns;
+    QRadioButton    _raw_radio;
+    QRadioButton    _list_radio;
+    QLabel          _which_event;
+    QStackedWidget  _stacked_widget;
+    QListView       _list_view;
+    QTextEdit       _raw_view;
 public:
     QPushButton _close_button;
+private:
+    void toggle_view();
 };
 
 #endif
