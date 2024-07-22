@@ -19,20 +19,28 @@ extern "C" {
 #define FONT_SIZE 8
 
 typedef void* sorted_events_container_ptr;
+
 struct plugin_stacklook_ctx {
     /** Numerical id of sched_switch event. **/
     int ss_event_id;
+    /** Numerical id of kernel_stack event. **/
+    int kstack_event_id;
     /** Data of stack-related events. **/
     struct kshark_data_container* stacks_data;
 
     /**
-     * Sort schedswitch events by CPU & timestamp
-     * Sort ftrace_kstack by CPU & timestamp (there's many)
-     * Find next neighbour of sched_switch events in kstacks
-     * Map these into stacks data.
+     * Sort schedswitch events by CPU & timestamp -> std::map
+     * Sort ftrace_kstack by CPU & timestamp (there's many) -> std::map
+     * Find next neighbour of sched_switch events in kstacks -> ???
+     * Map these into stacks data. _________________________/
+     * 
+     * Problem is that I don't have a specific endpoint after the registered 
+     * handlers to do this sorting.
+     * To be honest, if I had, I might not even need to do the sorting at all.
+     * I could just ask the sorted histogram.
     */
 
-    // Sort containers (to be recasted in C++ code)
+    // Sort containers (to be recasted in C++ code into sorted maps)
     sorted_events_container_ptr ss_sort;
     sorted_events_container_ptr kstack_sort;
 };
@@ -47,7 +55,6 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
 // Defined in C++
 void* plugin_set_gui_ptr(void* gui_ptr);
 
-sorted_events_container_ptr plugin_create_sorted_events_container();
 void clean_opened_views();
 
 #ifdef __cplusplus

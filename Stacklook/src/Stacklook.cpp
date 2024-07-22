@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <map>
 
 // KernelShark
 #include "libkshark.h"
@@ -24,6 +25,11 @@
 // Utilities
 #include "_utilities.hpp"
 
+// Re-types with using
+using cpu_t = int16_t;
+using timestamp_t = int64_t;
+using sorted_events_container = std::map<cpu_t, std::map<timestamp_t, kshark_entry*>>;
+
 // Static variables
 static KsMainWindow* main_w_ptr;
 static std::vector<SlDetailedView*> opened_views{};
@@ -40,9 +46,33 @@ static const double trigon_area(const ksplot_point a,
                 (c.x * (a.y - b.y))) / 2.0);
 }
 
+static bool _next_is_kstack(kshark_entry* next_entry) {
+    return next_entry->event_id == __get_context(next_entry->stream_id)->kstack_event_id;
+}
+
+static char* _get_info_of_next_event(kshark_entry* entry,
+                                     std::function<bool(kshark_entry*)> predicate) {
+    char* retval = nullptr;
+
+    int16_t stream_id = entry->stream_id;
+    plugin_stacklook_ctx* ctx = __get_context(entry->stream_id);
+    kshark_entry* next_entry = entry->next;
+
+    if (predicate(next_entry)) {
+        retval = kshark_get_info(next_entry);
+    }
+
+    return retval;
+}
+
 // Classes
 class SlTriangleButton : public KsPlot::Triangle {
+private:
+    char* kstack_string_ptr = nullptr;
 public:
+    SlTriangleButton() : KsPlot::Triangle() {}
+    explicit SlTriangleButton(char* string_ptr)
+        : KsPlot::Triangle(), kstack_string_ptr(string_ptr) {}
     double distance(int x, int y) const override {
         /* How it is with point ordering:
             0 ------ 1
@@ -68,8 +98,13 @@ public:
     }
 private:
     void _doubleClick() const override {
-        log("Opening dialog from triangle...");
-        auto new_view = new SlDetailedView("Hello\nWorld\n!", main_w_ptr);
+        char* window_text = "ERROR: Nullptr in stacklook button!";
+
+        if (kstack_string_ptr != nullptr) {
+            window_text = kstack_string_ptr;
+        }
+
+        auto new_view = new SlDetailedView(window_text, main_w_ptr);
         new_view->show();
         opened_views.push_back(new_view);
     }
@@ -122,7 +157,10 @@ static SlTriangleButton* makeTriangle(std::vector<const KsPlot::Graph*> graph,
           \ /
            2      
     */
-    SlTriangleButton* backTriangle = new SlTriangleButton();
+
+   char* kstack_text = _get_info_of_next_event((data[0])->entry, _next_is_kstack);
+
+    SlTriangleButton* backTriangle = new SlTriangleButton(kstack_text);
     backTriangle->setFill(true);
     backTriangle->setPoint(0, a);
     backTriangle->setPoint(1, b);

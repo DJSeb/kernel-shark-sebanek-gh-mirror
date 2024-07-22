@@ -31,22 +31,15 @@ struct ksplot_font* get_font_ptr() {
     return &font;
 }
 
-static void select_switch_events(struct kshark_data_stream* stream,
-                              void* rec, struct kshark_entry* entry,
-                              struct kshark_data_container* sl_ctx_stack_data) {
-    kshark_data_container_append(sl_ctx_stack_data, entry, -1);
-}
-
 static void plugin_process(struct kshark_data_stream* stream,
                            void* rec, struct kshark_entry* entry) {
-    
-    /** TODO: */
-    
-    struct kshark_data_container* sl_ctx_stack_data = 
-            __get_context(stream->stream_id)->stacks_data;
+
+    struct plugin_stacklook_ctx* sl_ctx = __get_context(stream->stream_id);
+    struct kshark_data_container* sl_ctx_stack_data = sl_ctx->stacks_data;
 
     if (entry->event_id == sched_switch_id) {
-        select_switch_events(stream, rec, entry, sl_ctx_stack_data);
+        // Add this switch event to the main stackdata data container
+        kshark_data_container_append(sl_ctx_stack_data, entry, -1);
     }
 }
 
@@ -79,6 +72,7 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     sl_ctx->ss_event_id = sched_switch_id;
 
     kstack_eid = kshark_find_event_id(stream, "ftrace/kernel_stack");
+    sl_ctx->kstack_event_id = kstack_eid;
 
     if (!font_file)
         font_file = ksplot_find_font_file("FreeSans", "FreeSans");
