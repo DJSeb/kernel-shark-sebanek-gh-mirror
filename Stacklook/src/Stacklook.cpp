@@ -30,6 +30,17 @@
 static KsMainWindow* main_w_ptr;
 
 /**
+ * @brief Color table for the tasks so that the stacklook buttons look
+ * prettier.
+*/
+static KsPlot::ColorTable task_colors;
+
+/**
+ * @brief Indicates whether the colortable has already been loaded or not.
+*/
+static bool loaded_colors;
+
+/**
  * @brief Container for opened Stacklook windows. Allows more independent lifetime
  * and is easier to control their destruction.
 */
@@ -41,6 +52,18 @@ static std::vector<SlDetailedView*> opened_views{};
  * @brief Text to appear on the triangle buttons in the plot.
 */
 const static std::string STACK_BUTTON_TEXT = "STACK";
+
+// Static functions
+
+/**
+ * @brief Loads the current task colortable into `task_colors`.
+*/
+static void load_current_colortable() {
+    if (!loaded_colors) {
+        task_colors = KsPlot::taskColorTable();
+        loaded_colors = true;
+    }
+}
 
 /**
  * @brief Function which calculates (absolute value of) the area of a trigon using
@@ -188,9 +211,13 @@ static SlTriangleButton* makeSlButton(std::vector<const KsPlot::Graph*> graph,
                                       std::vector<int> bin,
                                       std::vector<kshark_data_field_int64*> data,
                                       KsPlot::Color col, float) {
+    // Constants
     constexpr int32_t BUTTON_TEXT_OFFSET = 14;
     const KsPlot::Color TEXT_COLOR {0xFF, 0xFF, 0xFF};
     const KsPlot::Color OUTLINE_COLOR {0, 0, 0};
+    
+    // Marked entry
+    kshark_entry* event_entry = data[0]->entry;
 
     // Base point
     int x = graph[0]->bin(bin[0])._val.x();
@@ -215,7 +242,13 @@ static SlTriangleButton* makeSlButton(std::vector<const KsPlot::Graph*> graph,
     inner_triangle.setPoint(0, a);
     inner_triangle.setPoint(1, b);
     inner_triangle.setPoint(2, c);
-    inner_triangle._color = col;
+
+    KsPlot::Color inner_triangle_color = col;
+    try {
+        inner_triangle_color = task_colors.at(event_entry->pid);
+    } catch (std::out_of_range&) {}
+
+    inner_triangle._color = inner_triangle_color;
 
     // Inner triangle
     auto back_triangle = KsPlot::Triangle(inner_triangle);
@@ -224,10 +257,19 @@ static SlTriangleButton* makeSlButton(std::vector<const KsPlot::Graph*> graph,
 
     int text_x = x - BUTTON_TEXT_OFFSET;
     int text_y = y - BUTTON_TEXT_OFFSET;
-    auto text = KsPlot::TextBox(get_font_ptr(), STACK_BUTTON_TEXT, TEXT_COLOR,
+
+    auto text_color = TEXT_COLOR;
+    if (inner_triangle_color.b() > 0xA0 ||
+        inner_triangle_color.g() > 0x80 ||
+        inner_triangle_color.r() > 0xA0) {
+        
+        text_color.set(0, 0, 0);
+    }
+
+    auto text = KsPlot::TextBox(get_font_ptr(), STACK_BUTTON_TEXT, text_color,
                                 KsPlot::Point{text_x, text_y});
 
-    auto sl_button = new SlTriangleButton(data[0]->entry, back_triangle,
+    auto sl_button = new SlTriangleButton(event_entry, back_triangle,
                                           inner_triangle, text);
 
     return sl_button;
@@ -278,9 +320,11 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
     if (!(draw_action == KSHARK_CPU_DRAW))
         return;
     // Don't draw with too many bins (configurable zoom-in indicator actually)
-    if (argVCpp->_histo->tot_count > 200)
+    if (argVCpp->_histo->tot_count > 200) {
+        loaded_colors = false;
         return;
-
+    }
+    
     plugin_data = __get_context(sd)->stacks_data;
     // Couldn't get the context container (any reason)
     if (!plugin_data) {
@@ -293,6 +337,8 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
         bool correct_cpu = (data_c->data[t]->entry->cpu == val);
         return correct_cpu && correct_event_id;
     };
+
+    load_current_colortable();
 
     _draw_stacklook_button(argVCpp, plugin_data, checkFunc);
 }

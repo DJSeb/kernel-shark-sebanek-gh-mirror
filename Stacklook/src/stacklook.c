@@ -16,7 +16,6 @@
 // Plugin header
 #include "stacklook.h"
 
-static const char* no_stack_data_message = "NO STACK DATA CAPTURED.";
 static struct ksplot_font font;
 static char* font_file = NULL;
 static int sched_switch_id;
@@ -32,7 +31,7 @@ struct ksplot_font* get_font_ptr() {
 }
 
 static void plugin_process(struct kshark_data_stream* stream,
-                           void* rec, struct kshark_entry* entry) {
+                           void*, struct kshark_entry* entry) {
 
     struct plugin_stacklook_ctx* sl_ctx = __get_context(stream->stream_id);
     struct kshark_data_container* sl_ctx_stack_data = sl_ctx->stacks_data;
@@ -81,6 +80,7 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
 
     kshark_register_event_handler(stream, sched_switch_id, plugin_process);
     kshark_register_draw_handler(stream, draw_plot_buttons);
+
     return 1;
 }
 
