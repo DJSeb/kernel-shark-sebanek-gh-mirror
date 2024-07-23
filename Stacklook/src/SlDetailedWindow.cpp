@@ -5,21 +5,39 @@
 
 #include "SlDetailedWindow.hpp"
 
-void SlDetailedView::add_data_to_list_view(QListView& list_view, const QString& data) {
-    QStringList list_data = data.split('\n');
-    list_view.setModel(new QStringListModel{list_data, this});
+/** @brief
+ * 
+*/
+static QString prettify_data(char* data) {
+    std::string empty_str = "";
+    std::string base_string{data};
+
+    // Cut off '<stack trace >' text
+    int first_newline = base_string.find_first_of('\n');
+    // Mark what's the top (just to make it clearer)
+    std::string new_string = "(top)" + base_string.substr(first_newline);
+
+    // Return new QString
+    return QString(new_string.c_str());
 }
 
-SlDetailedView::SlDetailedView(const QString& data, QWidget* parent)
+void SlDetailedView::add_data_to_list_widget(QListWidget& list_widget, const QString& data) {
+    QStringList list_data = data.split('\n');
+    list_widget.addItems(list_data);
+}
+
+SlDetailedView::SlDetailedView(char* label, char* data, QWidget* parent)
 : QWidget(parent),
     _radio_btns(this),
     _raw_radio("Raw view", this),
     _list_radio("List view", this),
-    _which_event("Some event", this),
+    _which_event("Kernlestack for task '" + QString(label) + "':", this),
     _stacked_widget(this),
-    _raw_view(data, this),
     _list_view(this),
+    _raw_view(this),
     _close_button("Close", this) {
+
+    QString new_data = prettify_data(data);
 
     setWindowTitle("Stacklook - Detailed Stack View");
     // Set window flags to make it independent with header buttons
@@ -32,10 +50,14 @@ SlDetailedView::SlDetailedView(const QString& data, QWidget* parent)
     _radio_btns.addButton(&_list_radio);
     _raw_radio.setChecked(true);
 
+    _raw_view.setReadOnly(true);
+    _raw_view.setAcceptRichText(true);
+    _raw_view.setText(QString(new_data));
+
     _stacked_widget.addWidget(&_raw_view);
     _stacked_widget.addWidget(&_list_view);
 
-    add_data_to_list_view(_list_view, data);
+    add_data_to_list_widget(_list_view, new_data);
 
     _layout.addWidget(&_which_event);
     _layout.addWidget(&_raw_radio);
