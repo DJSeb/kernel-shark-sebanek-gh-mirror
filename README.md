@@ -29,17 +29,21 @@ Developing Stacklook plugin's basics.
 
 - [x] Brief project description
 - [x] Specification
-- [ ] Basic working version
+- [x] Basic working version*
 - [ ] Final version
+
+* The most important things work.
 
 ### Roadmap
 
+Things not in specification aren't mandatory, but would be pretty useful.
+
 - [x] KernelShark Record adjustment for stacktracing
 - [ ] Stacklook
-    * [ ] Get scheduler event for when the task was about to go to sleep and the stacktracing event
-    * [ ] Add clickable shapes above each sleep event
+    * [x] Get scheduler event for when the task was about to go to sleep and the stacktracing event
+    * [x] Add clickable shapes above each sleep event
         * [ ] *(Not in specification) Add such clickable shapes into entry viewer*
-    * [ ] Show a dialogue/window with detailed stack information
+    * [x] Show a dialogue/window with detailed stack information
     * [ ] Display preview of the stack in the top info bar
     * [x] Create CMake build instructions
         * NOTE: Could be circumvented if the plugin files were put into KernelShark's `src/plugins` directory
@@ -49,7 +53,8 @@ Developing Stacklook plugin's basics.
         * [ ] Technical documentation (Doxygen)
         * [ ] User documentation (Markdown or HTML)
     * [ ] Create an example `trace.dat` file for demonstration
-        * [ ] Write a program that will do some stack shenanigans 
+        * [ ] Write a program that will do some stack shenanigans
+    * [ ] *(Not in specification) Add a settings menu for the plugin*
 
 ## Requirements
 
