@@ -55,6 +55,7 @@ Things not in specification aren't mandatory, but would be pretty useful.
     * [ ] Create an example `trace.dat` file for demonstration
         * [ ] Write a program that will do some stack shenanigans
     * [ ] *(Not in specification) Add a settings menu for the plugin*
+    * [ ] *(implied)* Make it work for CPU and task plots
 
 ## Requirements
 
