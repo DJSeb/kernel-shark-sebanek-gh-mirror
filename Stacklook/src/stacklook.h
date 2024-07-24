@@ -24,11 +24,14 @@ extern "C" {
 */
 struct plugin_stacklook_ctx {
     /** Numerical id of sched_switch event. **/
-    int ss_event_id;
+    int sswitch_event_id;
     /** Numerical id of kernel_stack event. **/
     int kstack_event_id;
-    /** Data of stack-related events. **/
-    struct kshark_data_container* stacks_data;
+    /** Numerical id of sched_wakeup event. */
+    int swake_event_id;
+
+    /** Collected switch or wakeup events. **/
+    struct kshark_data_container* wakes_or_switches;
 };
 
 KS_DECLARE_PLUGIN_CONTEXT_METHODS(struct plugin_stacklook_ctx)

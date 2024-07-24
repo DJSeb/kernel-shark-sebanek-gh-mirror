@@ -31,7 +31,7 @@ private: // Data members
      * @brief What event the button points at and gets data from for
      * the window.
     */
-    kshark_entry* _switch_event;
+    kshark_entry* _switch_or_wake_event;
     // Graphical
     /**
      * @brief Triangle which creates the outline of the button.
@@ -49,11 +49,12 @@ private: // Data members
     KsPlot::TextBox _text;
 public: // Functions
     SlTriangleButton() : KsPlot::PlotObject() {}
-    explicit SlTriangleButton(kshark_entry* switch_entry,
+    explicit SlTriangleButton(kshark_entry* switch_or_wake_entry,
                               KsPlot::Triangle& outer,
                               KsPlot::Triangle& inner,
                               KsPlot::TextBox& text)
-        : _switch_event(switch_entry), _outline_triangle(outer),
+        : _switch_or_wake_event(switch_or_wake_entry),
+          _outline_triangle(outer),
           _inner_triangle(inner), _text(text) {}
 
     double distance(int x, int y) const override;

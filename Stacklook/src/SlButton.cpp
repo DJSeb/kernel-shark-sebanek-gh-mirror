@@ -95,16 +95,19 @@ double SlTriangleButton::distance(int x, int y) const {
 void SlTriangleButton::_doubleClick() const {
     std::string window_text = "ERROR: No info on kernelstack!\n"
                                 "Try zooming in and out and come back here again :)";
-    char* window_labeltext = kshark_get_task(_switch_event);
+    char* window_labeltext = kshark_get_task(_switch_or_wake_event);
 
     /** NOTE: This could be a bit more rigorous: check the event ID, check the task and maybe even the
-     * top of the stack for confirmation it is indeed a stacktrace of the kernel for the switch event.
+     * top of the stack for confirmation it is indeed a stacktrace of the kernel for the switch or wakeup
+     * event.
+     * 
      * However, since the stacktrace is done immediately after every event when using trace-cmd's
      * '-T' option, events are always sorted so that stacktraces appear right after their events,
      * so this checking would be redundant.
     */
 
-    char* kstack_string_ptr = _get_info_of_next_event(_switch_event, _next_is_kstack);
+    char* kstack_string_ptr = _get_info_of_next_event(_switch_or_wake_event,
+                                                      _next_is_kstack);
 
     if (kstack_string_ptr != nullptr) {
         window_text = kstack_string_ptr;

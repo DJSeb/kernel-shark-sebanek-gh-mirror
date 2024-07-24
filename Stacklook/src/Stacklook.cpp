@@ -21,7 +21,9 @@
 #include "SlDetailedWindow.hpp"
 #include "SlButton.hpp"
 
-// Static functions
+// Static variables
+
+const static KsPlot::Color DEFAULT_BUTTON_COL{0x60, 0x69, 0x90};
 
 /**
  * @brief Color table for the tasks so that the stacklook buttons look
@@ -33,6 +35,8 @@ static KsPlot::ColorTable task_colors;
  * @brief Indicates whether the colortable has already been loaded or not.
 */
 static bool loaded_colors;
+
+// Static functions
 
 /**
  * @brief Loads the current task colortable into `task_colors`.
@@ -87,30 +91,32 @@ static float _get_color_intensity(const KsPlot::Color& c) {
     return (c.b() * 0.114f) + (c.g() * 0.587f) + (c.r() * 0.299f);
 }
 
-
-// Classes
-
-
-
-static SlTriangleButton* makeSlButton(std::vector<const KsPlot::Graph*> graph,
-                                      std::vector<int> bin,
-                                      std::vector<kshark_data_field_int64*> data,
-                                      KsPlot::Color col, float) {
+/**
+ * @brief Creates a clickable button for Stacklook when drawing CPU plots.
+ * 
+ * @param graph: s 
+ * @param bin: s
+ * @param data: s
+ * @param col: s
+*/
+static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
+                                            std::vector<int> bin,
+                                            std::vector<kshark_data_field_int64*> data,
+                                            KsPlot::Color col, float) {
     // Constants
     constexpr int32_t BUTTON_TEXT_OFFSET = 14;
     const std::string STACK_BUTTON_TEXT = "STACK";
     const KsPlot::Color OUTLINE_COLOR {0, 0, 0};
 
-    if (data.size() > 1) {
-        std::cout << data.size() << std::endl;
-    }
-
     // Marked entry
     kshark_entry* event_entry = data[0]->entry;
 
     // Base point
-    int x = graph[0]->bin(bin[0])._val.x();
-    int y = graph[0]->bin(bin[0])._val.y();
+    KsPlot::Point base_point = graph[0]->bin(bin[0])._val;
+
+    // Coords
+    int x = base_point.x();
+    int y = base_point.y();
     
     // Triangle points
     /*
@@ -132,14 +138,10 @@ static SlTriangleButton* makeSlButton(std::vector<const KsPlot::Graph*> graph,
     inner_triangle.setPoint(1, b);
     inner_triangle.setPoint(2, c);
 
-    /* We are targetting next, because it is tied to the actual task,
-     * Sched switches are usually a part of some other task when it comes to
-     * colors. 
-     * 
-     * And ->next exists, because event_entry is a sched_switch
-     * event, which necessitates it sparked a stacktrace as the next event.
+    /** Colors are a bit wonky with sched_switch events. Using the function
+     * makes it consistent across the board.
     */
-    inner_triangle._color = _get_color(event_entry->next->pid, col);
+    inner_triangle._color = _get_color(kshark_get_pid(event_entry), col);
 
     // Inner triangle
     auto back_triangle = KsPlot::Triangle(inner_triangle);
@@ -170,9 +172,10 @@ static SlTriangleButton* makeSlButton(std::vector<const KsPlot::Graph*> graph,
 */
 static void _draw_stacklook_button(KsCppArgV* argv, 
                                    kshark_data_container* dc,
-                                   IsApplicableFunc checkFunc) {    
-    eventFieldPlotMin(argv, dc, checkFunc, makeSlButton,
-                      {0x60, 0x69, 0x90}, -1);
+                                   IsApplicableFunc checkFunc,
+                                   pluginShapeFunc makeButton) {    
+    eventFieldPlotMin(argv, dc, checkFunc, makeButton,
+                      DEFAULT_BUTTON_COL, -1);
 }
 
 // Global functions
@@ -200,44 +203,56 @@ void clean_opened_views() {
 void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
                        int val, int draw_action) {
     KsCppArgV* argVCpp KS_ARGV_TO_CPP(argv_c);
+    plugin_stacklook_ctx* ctx = __get_context(sd);
     kshark_data_container* plugin_data;
 
     // If Don't draw if not drawing tasks or CPUs.
-    if (!(draw_action == KSHARK_CPU_DRAW || draw_action == KSHARK_TASK_DRAW))
+    if (!(draw_action == KSHARK_CPU_DRAW || draw_action == KSHARK_TASK_DRAW)) {
         return;
+    }
+
     // Don't draw with too many bins (configurable zoom-in indicator actually)
     if (argVCpp->_histo->tot_count > 200) {
-        loaded_colors = false;
+        if (loaded_colors) {
+            loaded_colors = false;
+        }
         return;
     }
     
-    plugin_data = __get_context(sd)->stacks_data;
+    plugin_data = __get_context(sd)->wakes_or_switches;
     // Couldn't get the context container (any reason)
     if (!plugin_data) {
         return;
     }
 
+    _load_current_colortable();
+    
     IsApplicableFunc check_func;
     
     if (draw_action == KSHARK_TASK_DRAW) {
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
+            kshark_entry* entry = data_c->data[t]->entry;
+
             bool correct_event_id = 
-                (__get_context(sd)->ss_event_id == data_c->data[t]->entry->event_id);
-            bool correct_pid = (data_c->data[t]->entry->pid == val);
-            return correct_pid && correct_event_id;
+                (ctx->sswitch_event_id == entry->event_id)
+                || (ctx->swake_event_id == entry->event_id);
+            bool correct_pid = (entry->pid == val);
+
+            return correct_event_id && correct_pid;
         };
-    } else {
+    } else if (draw_action == KSHARK_CPU_DRAW) {
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
+            kshark_entry* entry = data_c->data[t]->entry;
+
             bool correct_event_id = 
-                (__get_context(sd)->ss_event_id == data_c->data[t]->entry->event_id);
+                (ctx->sswitch_event_id == entry->event_id)
+                || (ctx->swake_event_id == entry->event_id);
             bool correct_cpu = (data_c->data[t]->entry->cpu == val);
-            return correct_cpu && correct_event_id;
+            return correct_event_id && correct_cpu;
         };
     }
 
-    _load_current_colortable();
-
-    _draw_stacklook_button(argVCpp, plugin_data, check_func);
+    _draw_stacklook_button(argVCpp, plugin_data, check_func, make_sl_button);
 }
 
 /**
