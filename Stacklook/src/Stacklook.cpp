@@ -46,23 +46,59 @@ static bool loaded_colors;
 */
 static std::vector<SlDetailedView*> opened_views{};
 
-// Runtime constants
-
-/**
- * @brief Text to appear on the triangle buttons in the plot.
-*/
-const static std::string STACK_BUTTON_TEXT = "STACK";
-
 // Static functions
 
 /**
  * @brief Loads the current task colortable into `task_colors`.
 */
-static void load_current_colortable() {
+static void _load_current_colortable() {
     if (!loaded_colors) {
         task_colors = KsPlot::taskColorTable();
         loaded_colors = true;
     }
+}
+
+/**
+ * @brief Returns either a default color or one present in the`task_colors`
+ * color table.
+ * 
+ * @param task_pid: task PID to index `task_colors`.
+ * @param default_color: color to be used in case we fail in finding a color
+ * in the colortable.
+*/
+static KsPlot::Color _get_color(int32_t task_pid, KsPlot::Color default_color) {
+    KsPlot::Color triangle_color = default_color;
+    try {
+        triangle_color = task_colors.at(task_pid);
+    } catch (std::out_of_range&) {
+        triangle_color = default_color;
+    }
+
+    return triangle_color;
+}
+
+/**
+ * @brief Returns either black if the background color's intensity is too great,
+ * otherwise returns white. Limit to intensity is `128.0`.
+ * 
+ * @param bg_color_intensity: computed intensity from an RGB color.
+*/
+static KsPlot::Color _black_or_white_text(float bg_color_intensity) {
+    const KsPlot::Color WHITE {0xFF, 0xFF, 0xFF};
+    const KsPlot::Color BLACK {0, 0, 0};
+    constexpr float INTENSITY_LIMIT = 128.f;
+
+    return (bg_color_intensity > INTENSITY_LIMIT) ? BLACK : WHITE;
+}
+
+/**
+ * @brief Gets the color intensity using the formula
+ * `(red * 0.299) + (green * 0.587) + (blue * 0.114)`.
+ * 
+ * @param c: RGB color value whose components will be checked.
+*/
+static float _get_color_intensity(const KsPlot::Color& c) {
+    return (c.b() * 0.114f) + (c.g() * 0.587f) + (c.r() * 0.299f);
 }
 
 /**
@@ -74,7 +110,7 @@ static void load_current_colortable() {
  * @param b: point B of the triangle.
  * @param c: point C of the triangle.
 */
-static constexpr double trigon_area(const ksplot_point a,
+static constexpr double _trigon_area(const ksplot_point a,
                                 const ksplot_point b,
                                 const ksplot_point c) {
     return abs(((a.x * (b.y - c.y)) +
@@ -95,10 +131,9 @@ static bool _next_is_kstack(kshark_entry* next_entry) {
 
 /**
  * @brief Simple function that returns the C-string of the info field of a KernelShark entry
- * next to the one in the argument.
+ * next to the one in the argument or a nullptr on failing to fulfill the predicate in arguments.
  * @note Requires the entry in the argument to have its next field
  * initialized, otherwise it'd access nullptr.
- * @note The next entry must fulfill the predicate function given as an argument.
  * 
  * @param entry: entry whose next neighbour's info we wish to get.
  * @param predicate: function which checks a KernelShark entry and returns true or false.
@@ -125,7 +160,7 @@ static char* _get_info_of_next_event(kshark_entry* entry,
  * and logical structuring is retained.
 */
 class SlTriangleButton : public KsPlot::PlotObject {
-private:
+private: // Data members
     /**
      * @brief What event the button points at and gets data from for
      * the window.
@@ -138,11 +173,15 @@ private:
     */
     KsPlot::Triangle _outline_triangle;
     /**
-     * @brief Triangle which forms the innardsof 
+     * @brief Triangle which forms the innards of the button. Color
+     * depends on the entry's PID. 
     */
     KsPlot::Triangle _inner_triangle;
+    /**
+     * @brief Textbox to specify what the button will show.
+    */
     KsPlot::TextBox _text;
-public:
+public: // Functions
     SlTriangleButton() : KsPlot::PlotObject() {}
     explicit SlTriangleButton(kshark_entry* switch_entry,
                               KsPlot::Triangle& outer,
@@ -164,17 +203,17 @@ public:
         const ksplot_point b = *(_outline_triangle.point(1));
         const ksplot_point c = *(_outline_triangle.point(2));
 
-        double triangle_area = trigon_area(a, b, c);
-        double pbc_area = trigon_area(p, b, c);
-        double apc_area = trigon_area(a, p, c);
-        double abp_area = trigon_area(a, b, p);
+        double triangle_area = _trigon_area(a, b, c);
+        double pbc_area = _trigon_area(p, b, c);
+        double apc_area = _trigon_area(a, p, c);
+        double abp_area = _trigon_area(a, b, p);
 
         double p_areas_sum = pbc_area + apc_area + abp_area;
 
         return (triangle_area == p_areas_sum) ? 0
                 : std::numeric_limits<double>::max();
     }
-private:
+private: // Functions
     void _doubleClick() const override {
         std::string window_text = "ERROR: No info on kernelstack!\n"
                                   "Try zooming in and out and come back here again :)";
@@ -200,20 +239,19 @@ private:
     }
 
     void _draw(const KsPlot::Color&, float) const override {
-        _inner_triangle.draw();
-        _outline_triangle.draw();
-        _text.draw();
+        _inner_triangle.draw(); // Draw the triangle insides first
+        _outline_triangle.draw(); // Make the outline by overlaying another triangle
+        _text.draw(); // Add text
     }
 };
 
-// Statics
 static SlTriangleButton* makeSlButton(std::vector<const KsPlot::Graph*> graph,
                                       std::vector<int> bin,
                                       std::vector<kshark_data_field_int64*> data,
                                       KsPlot::Color col, float) {
     // Constants
     constexpr int32_t BUTTON_TEXT_OFFSET = 14;
-    const KsPlot::Color TEXT_COLOR {0xFF, 0xFF, 0xFF};
+    const std::string STACK_BUTTON_TEXT = "STACK";
     const KsPlot::Color OUTLINE_COLOR {0, 0, 0};
     
     // Marked entry
@@ -243,12 +281,8 @@ static SlTriangleButton* makeSlButton(std::vector<const KsPlot::Graph*> graph,
     inner_triangle.setPoint(1, b);
     inner_triangle.setPoint(2, c);
 
-    KsPlot::Color inner_triangle_color = col;
-    try {
-        inner_triangle_color = task_colors.at(event_entry->pid);
-    } catch (std::out_of_range&) {}
-
-    inner_triangle._color = inner_triangle_color;
+    // Make into a function?
+    inner_triangle._color = _get_color(event_entry->pid, col);
 
     // Inner triangle
     auto back_triangle = KsPlot::Triangle(inner_triangle);
@@ -258,13 +292,8 @@ static SlTriangleButton* makeSlButton(std::vector<const KsPlot::Graph*> graph,
     int text_x = x - BUTTON_TEXT_OFFSET;
     int text_y = y - BUTTON_TEXT_OFFSET;
 
-    auto text_color = TEXT_COLOR;
-    if (inner_triangle_color.b() > 0xA0 ||
-        inner_triangle_color.g() > 0x80 ||
-        inner_triangle_color.r() > 0xA0) {
-        
-        text_color.set(0, 0, 0);
-    }
+    float bg_intensity = _get_color_intensity(inner_triangle._color);
+    auto text_color = _black_or_white_text(bg_intensity);
 
     auto text = KsPlot::TextBox(get_font_ptr(), STACK_BUTTON_TEXT, text_color,
                                 KsPlot::Point{text_x, text_y});
@@ -338,7 +367,7 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
         return correct_cpu && correct_event_id;
     };
 
-    load_current_colortable();
+    _load_current_colortable();
 
     _draw_stacklook_button(argVCpp, plugin_data, checkFunc);
 }
