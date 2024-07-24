@@ -5,6 +5,7 @@ ExamplePrograms/*
 build_modif_kshark.sh
 
 Stacklook/build
+Stacklook/src/_utilities.hpp
 
 TalkPluginExample
 
