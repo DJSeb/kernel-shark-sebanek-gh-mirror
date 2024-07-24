@@ -72,11 +72,11 @@ set(SOURCES
     src/stacklook.h
     src/Stacklook.hpp
     src/SlDetailedWindow.hpp
+    src/SlButton.hpp
     src/stacklook.c
     src/Stacklook.cpp
     src/SlDetailedWindow.cpp
-    # TODO: delete later
-    src/_utilities.hpp
+    src/SlButton.cpp
 )
 
 add_library(stacklook SHARED ${SOURCES})

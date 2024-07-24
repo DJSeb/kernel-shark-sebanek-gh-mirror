@@ -14,10 +14,8 @@ public:
                             char* data,
                             QWidget* = nullptr);
 private:
-    explicit SlDetailedView(QWidget* parent = nullptr);
     std::shared_ptr<const std::string> event_info;
     std::shared_ptr<const std::string> stack_str;
-    void add_data_to_list_widget(QListWidget& list_widget, const QString& data);
 // Qt stuff
 private:
     QVBoxLayout     _layout;
@@ -31,6 +29,8 @@ private:
 public:
     QPushButton _close_button;
 private:
+    explicit SlDetailedView(QWidget* parent = nullptr);
+    void add_data_to_list_widget(QListWidget& list_widget, const QString& data);
     void toggle_view();
 };
 

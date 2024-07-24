@@ -1,4 +1,4 @@
-/**
+/** TODO:
  * For internal logic.
 */
 
@@ -6,28 +6,22 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <map>
 
 // KernelShark
 #include "libkshark.h"
 #include "libkshark-plugin.h"
 #include "libkshark-plot.h"
-#include "libkshark-model.h"
 #include "KsPlugins.hpp"
 #include "KsMainWindow.hpp"
 #include "KsPlotTools.hpp"
 
 // Plugin headers
 #include "stacklook.h"
+#include "Stacklook.hpp"
 #include "SlDetailedWindow.hpp"
+#include "SlButton.hpp"
 
-// Static variables
-
-/**
- * @brief Pointer to the main window to allow manipulation and
- * window dependency (i.e. closing the main window closes the others).
-*/
-static KsMainWindow* main_w_ptr;
+// Static functions
 
 /**
  * @brief Color table for the tasks so that the stacklook buttons look
@@ -39,14 +33,6 @@ static KsPlot::ColorTable task_colors;
  * @brief Indicates whether the colortable has already been loaded or not.
 */
 static bool loaded_colors;
-
-/**
- * @brief Container for opened Stacklook windows. Allows more independent lifetime
- * and is easier to control their destruction.
-*/
-static std::vector<SlDetailedView*> opened_views{};
-
-// Static functions
 
 /**
  * @brief Loads the current task colortable into `task_colors`.
@@ -101,149 +87,10 @@ static float _get_color_intensity(const KsPlot::Color& c) {
     return (c.b() * 0.114f) + (c.g() * 0.587f) + (c.r() * 0.299f);
 }
 
-/**
- * @brief Function which calculates (absolute value of) the area of a trigon using
- * the shoelace formula (https://en.wikipedia.org/wiki/Shoelace_formula).
- * Order of points is irrelevant, as the formula works generally.
- * 
- * @param a: point A of the triangle.
- * @param b: point B of the triangle.
- * @param c: point C of the triangle.
-*/
-static constexpr double _trigon_area(const ksplot_point a,
-                                const ksplot_point b,
-                                const ksplot_point c) {
-    return abs(((a.x * (b.y - c.y)) +
-                (b.x * (c.y - a.y)) +
-                (c.x * (a.y - b.y))) / 2.0);
-}
-
-/**
- * @brief Predicate function to check that the next KernelShark entry is indeed kernel's
- * stacktrace entry.
- * 
- * @param next_entry: entry whose event ID is checked.
-*/
-static bool _next_is_kstack(kshark_entry* next_entry) {
-    plugin_stacklook_ctx* ctx = __get_context(next_entry->stream_id);
-    return next_entry->event_id == ctx->kstack_event_id;
-}
-
-/**
- * @brief Simple function that returns the C-string of the info field of a KernelShark entry
- * next to the one in the argument or a nullptr on failing to fulfill the predicate in arguments.
- * @note Requires the entry in the argument to have its next field
- * initialized, otherwise it'd access nullptr.
- * 
- * @param entry: entry whose next neighbour's info we wish to get.
- * @param predicate: function which checks a KernelShark entry and returns true or false.
-*/
-static char* _get_info_of_next_event(kshark_entry* entry,
-                                     std::function<bool(kshark_entry*)> predicate) {
-    char* retval = nullptr;
-
-    kshark_entry* next_entry = entry->next;
-
-    if (predicate(next_entry)) {
-        retval = kshark_get_info(next_entry);
-    }
-
-    return retval;
-}
 
 // Classes
 
-/**
- * @brief Special button class just for the plugin.
- * It itself is a triangle that contains another inner triangle
- * and a textbox. This is so that everything is drawn together
- * and logical structuring is retained.
-*/
-class SlTriangleButton : public KsPlot::PlotObject {
-private: // Data members
-    /**
-     * @brief What event the button points at and gets data from for
-     * the window.
-    */
-    kshark_entry* _switch_event;
-    // Graphical
-    /**
-     * @brief Triangle which creates the outline of the button.
-     * Black coloured and filled.
-    */
-    KsPlot::Triangle _outline_triangle;
-    /**
-     * @brief Triangle which forms the innards of the button. Color
-     * depends on the entry's PID. 
-    */
-    KsPlot::Triangle _inner_triangle;
-    /**
-     * @brief Textbox to specify what the button will show.
-    */
-    KsPlot::TextBox _text;
-public: // Functions
-    SlTriangleButton() : KsPlot::PlotObject() {}
-    explicit SlTriangleButton(kshark_entry* switch_entry,
-                              KsPlot::Triangle& outer,
-                              KsPlot::Triangle& inner,
-                              KsPlot::TextBox& text)
-        : _switch_event(switch_entry), _outline_triangle(outer),
-          _inner_triangle(inner), _text(text) {}
 
-    double distance(int x, int y) const override {
-        /* How it is with point ordering:
-            0 ------ 1
-             \     /
-              \   /
-               \ /
-                2      
-        */
-        ksplot_point p {x, y};
-        const ksplot_point a = *(_outline_triangle.point(0));
-        const ksplot_point b = *(_outline_triangle.point(1));
-        const ksplot_point c = *(_outline_triangle.point(2));
-
-        double triangle_area = _trigon_area(a, b, c);
-        double pbc_area = _trigon_area(p, b, c);
-        double apc_area = _trigon_area(a, p, c);
-        double abp_area = _trigon_area(a, b, p);
-
-        double p_areas_sum = pbc_area + apc_area + abp_area;
-
-        return (triangle_area == p_areas_sum) ? 0
-                : std::numeric_limits<double>::max();
-    }
-private: // Functions
-    void _doubleClick() const override {
-        std::string window_text = "ERROR: No info on kernelstack!\n"
-                                  "Try zooming in and out and come back here again :)";
-        char* window_labeltext = kshark_get_task(_switch_event);
-
-        /** NOTE: This could be a bit more rigorous: check the event ID, check the task and maybe even the
-         * top of the stack for confirmation it is indeed a stacktrace of the kernel for the switch event.
-         * However, since the stacktrace is done immediately after every event when using trace-cmd's
-         * '-T' option, events are always sorted so that stacktraces appear right after their events,
-         * so this checking would be redundant.
-        */
-
-        char* kstack_string_ptr = _get_info_of_next_event(_switch_event, _next_is_kstack);
-
-        if (kstack_string_ptr != nullptr) {
-            window_text = kstack_string_ptr;
-        }
-
-        char* window_ctext = const_cast<char*>(window_text.c_str());
-        auto new_view = new SlDetailedView(window_labeltext, window_ctext, main_w_ptr);
-        new_view->show();
-        opened_views.push_back(new_view);
-    }
-
-    void _draw(const KsPlot::Color&, float) const override {
-        _inner_triangle.draw(); // Draw the triangle insides first
-        _outline_triangle.draw(); // Make the outline by overlaying another triangle
-        _text.draw(); // Add text
-    }
-};
 
 static SlTriangleButton* makeSlButton(std::vector<const KsPlot::Graph*> graph,
                                       std::vector<int> bin,
@@ -253,7 +100,11 @@ static SlTriangleButton* makeSlButton(std::vector<const KsPlot::Graph*> graph,
     constexpr int32_t BUTTON_TEXT_OFFSET = 14;
     const std::string STACK_BUTTON_TEXT = "STACK";
     const KsPlot::Color OUTLINE_COLOR {0, 0, 0};
-    
+
+    if (data.size() > 1) {
+        std::cout << data.size() << std::endl;
+    }
+
     // Marked entry
     kshark_entry* event_entry = data[0]->entry;
 
@@ -281,8 +132,14 @@ static SlTriangleButton* makeSlButton(std::vector<const KsPlot::Graph*> graph,
     inner_triangle.setPoint(1, b);
     inner_triangle.setPoint(2, c);
 
-    // Make into a function?
-    inner_triangle._color = _get_color(event_entry->pid, col);
+    /* We are targetting next, because it is tied to the actual task,
+     * Sched switches are usually a part of some other task when it comes to
+     * colors. 
+     * 
+     * And ->next exists, because event_entry is a sched_switch
+     * event, which necessitates it sparked a stacktrace as the next event.
+    */
+    inner_triangle._color = _get_color(event_entry->next->pid, col);
 
     // Inner triangle
     auto back_triangle = KsPlot::Triangle(inner_triangle);
@@ -318,7 +175,7 @@ static void _draw_stacklook_button(KsCppArgV* argv,
                       {0x60, 0x69, 0x90}, -1);
 }
 
-// Globals
+// Global functions
 
 /**
  * @brief Function for correct destroying of opened stacklook
@@ -337,7 +194,7 @@ void clean_opened_views() {
  *
  * @param argv_c: A C pointer to be converted to KsCppArgV (C++ struct).
  * @param sd: Data stream identifier.
- * @param pid: Process Id.
+ * @param val: process or CPU ID value.
  * @param draw_action: Draw action identifier.
 */
 void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
@@ -345,8 +202,8 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
     KsCppArgV* argVCpp KS_ARGV_TO_CPP(argv_c);
     kshark_data_container* plugin_data;
 
-    // If I am to draw and on a CPU, don't do that (I think).
-    if (!(draw_action == KSHARK_CPU_DRAW))
+    // If Don't draw if not drawing tasks or CPUs.
+    if (!(draw_action == KSHARK_CPU_DRAW || draw_action == KSHARK_TASK_DRAW))
         return;
     // Don't draw with too many bins (configurable zoom-in indicator actually)
     if (argVCpp->_histo->tot_count > 200) {
@@ -360,16 +217,27 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
         return;
     }
 
-    auto checkFunc = [=] (kshark_data_container* data_c, ssize_t t) {
-        bool correct_event_id = (__get_context(sd)->ss_event_id 
-                    == data_c->data[t]->entry->event_id);
-        bool correct_cpu = (data_c->data[t]->entry->cpu == val);
-        return correct_cpu && correct_event_id;
-    };
+    IsApplicableFunc check_func;
+    
+    if (draw_action == KSHARK_TASK_DRAW) {
+        check_func = [=] (kshark_data_container* data_c, ssize_t t) {
+            bool correct_event_id = 
+                (__get_context(sd)->ss_event_id == data_c->data[t]->entry->event_id);
+            bool correct_pid = (data_c->data[t]->entry->pid == val);
+            return correct_pid && correct_event_id;
+        };
+    } else {
+        check_func = [=] (kshark_data_container* data_c, ssize_t t) {
+            bool correct_event_id = 
+                (__get_context(sd)->ss_event_id == data_c->data[t]->entry->event_id);
+            bool correct_cpu = (data_c->data[t]->entry->cpu == val);
+            return correct_cpu && correct_event_id;
+        };
+    }
 
     _load_current_colortable();
 
-    _draw_stacklook_button(argVCpp, plugin_data, checkFunc);
+    _draw_stacklook_button(argVCpp, plugin_data, check_func);
 }
 
 /**
