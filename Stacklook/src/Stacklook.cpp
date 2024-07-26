@@ -206,12 +206,20 @@ static void _draw_stacklook_button(KsCppArgV* argv,
  * @brief Function for correct destroying of opened stacklook
  * windows.
 */
-void clean_opened_views() {
-    for(auto view : opened_views) {
+void clean_opened_views(void* view_container) {
+    auto views = *(std::vector<SlDetailedView*>*)(view_container);
+    for(auto view : views) {
         if (view != nullptr) {
             delete view;
         }
     }
+    delete (std::vector<SlDetailedView*>*)(view_container);
+}
+
+void* init_views() {
+    auto views = new std::vector<SlDetailedView*>{};
+    SlTriangleButton::opened_views = views;
+    return (void*)(views);
 }
 
 /**

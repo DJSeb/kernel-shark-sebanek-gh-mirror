@@ -52,7 +52,7 @@ static void sl_free_ctx(struct plugin_stacklook_ctx* sl_ctx)
 		return;
     }
 
-    clean_opened_views();
+    clean_opened_views(sl_ctx->cpp_views_container);
 
 	kshark_free_data_container(sl_ctx->collected_events);
 
@@ -87,6 +87,8 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
         font_file = ksplot_find_font_file("FreeSans", "FreeSans");
     if (!font_file)
         return 0;
+
+    sl_ctx->cpp_views_container = init_views();
 
     kshark_register_event_handler(stream, sched_switch_id, plugin_process);
     kshark_register_event_handler(stream, sched_wake_id, plugin_process);

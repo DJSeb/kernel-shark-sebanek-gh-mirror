@@ -71,10 +71,10 @@ static constexpr double _trigon_area(const ksplot_point a,
 double SlTriangleButton::distance(int x, int y) const {
     /* How it is with point ordering:
         0 ------ 1
-            \     /
-            \   /
-            \ /
-            2      
+         \     /
+          \   /
+           \ /
+            2    
     */
     ksplot_point p {x, y};
     const ksplot_point a = *(_outline_triangle.point(0));
@@ -94,7 +94,7 @@ double SlTriangleButton::distance(int x, int y) const {
 
 void SlTriangleButton::_doubleClick() const {
     std::string window_text = "ERROR: No info on kernelstack!\n"
-                                "Try zooming in and out and come back here again :)";
+                              "Try zooming in and out and come back here again :)";
     char* window_labeltext = kshark_get_task(_switch_or_wake_event);
 
     /** NOTE: This could be a bit more rigorous: check the event ID, check the task and maybe even the
@@ -116,7 +116,7 @@ void SlTriangleButton::_doubleClick() const {
     char* window_ctext = const_cast<char*>(window_text.c_str());
     auto new_view = new SlDetailedView(window_labeltext, window_ctext, main_w_ptr);
     new_view->show();
-    opened_views.push_back(new_view);
+    SlTriangleButton::opened_views->push_back(new_view);
 }
 
 void SlTriangleButton::_draw(const KsPlot::Color&, float) const {

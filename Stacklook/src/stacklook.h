@@ -32,6 +32,9 @@ struct plugin_stacklook_ctx {
 
     /** Collected switch or wakeup events. **/
     struct kshark_data_container* collected_events;
+
+    /** Container of Stacklook window pointers. **/
+    void* cpp_views_container;
 };
 
 KS_DECLARE_PLUGIN_CONTEXT_METHODS(struct plugin_stacklook_ctx)
@@ -45,7 +48,8 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
 // Defined in C++
 
 void* plugin_set_gui_ptr(void* gui_ptr);
-void clean_opened_views();
+void clean_opened_views(void* view_container);
+void* init_views();
 
 #ifdef __cplusplus
 }

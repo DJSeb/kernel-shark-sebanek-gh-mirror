@@ -28,10 +28,4 @@
 */
 static KsMainWindow* main_w_ptr;
 
-/**
- * @brief Container for opened Stacklook windows. Allows more independent lifetime
- * and is easier to control their destruction.
-*/
-static std::vector<SlDetailedView*> opened_views{};
-
 #endif

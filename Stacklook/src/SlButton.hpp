@@ -26,6 +26,9 @@
  * and logical structuring is retained.
 */
 class SlTriangleButton : public KsPlot::PlotObject {
+public: // Data memebers
+    /** Pointer to a container for opened Stacklook windows. **/
+    inline static std::vector<SlDetailedView*>* opened_views = nullptr;
 private: // Data members
     /**
      * @brief What event the button points at and gets data from for
