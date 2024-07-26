@@ -67,6 +67,8 @@ set(KS_SLIB_GUI "${KS_SHARED_LIBS_DIR}/${KS_LIB_PREFIX}kshark-gui${KS_LIB_SUFFIX
 ### KernelShark conventions
 set(KS_PLUGIN_PREFIX "plugin-")
 
+set(CMAKE_AUTOMOC ON)
+
 # Project
 set(SOURCES
     src/stacklook.h

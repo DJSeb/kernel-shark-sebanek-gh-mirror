@@ -31,7 +31,7 @@ struct plugin_stacklook_ctx {
     int swake_event_id;
 
     /** Collected switch or wakeup events. **/
-    struct kshark_data_container* wakes_or_switches;
+    struct kshark_data_container* collected_events;
 };
 
 KS_DECLARE_PLUGIN_CONTEXT_METHODS(struct plugin_stacklook_ctx)

@@ -23,6 +23,8 @@
 
 // Static variables
 
+constexpr static int HISTO_ENTRIES_LIMIT = 200;
+
 const static KsPlot::Color DEFAULT_BUTTON_COL{0x60, 0x69, 0x90};
 
 /**
@@ -37,6 +39,26 @@ static KsPlot::ColorTable task_colors;
 static bool loaded_colors;
 
 // Static functions
+
+/**
+ * @brief General function for checking whether to show Stacklook button
+ * in the plot.
+ * 
+ * @param entry: KernelShark entry whose properties must be checked
+ * @param ctx: Stacklook plugin context
+*/
+static bool _check_function_general(kshark_entry* entry,
+                                    plugin_stacklook_ctx* ctx) {
+    bool correct_event_id = (ctx->sswitch_event_id == entry->event_id)
+                            || (ctx->swake_event_id == entry->event_id);
+
+    bool is_visible_event = entry->visible
+                            & kshark_filter_masks::KS_EVENT_VIEW_FILTER_MASK;
+    bool is_visible_graph = entry->visible
+                            & kshark_filter_masks::KS_GRAPH_VIEW_FILTER_MASK;
+    
+    return correct_event_id && is_visible_event && is_visible_graph;
+}
 
 /**
  * @brief Loads the current task colortable into `task_colors`.
@@ -92,23 +114,23 @@ static float _get_color_intensity(const KsPlot::Color& c) {
 }
 
 /**
- * @brief Creates a clickable button for Stacklook when drawing CPU plots.
+ * @brief Creates a clickable Stacklook button to be displayed on the plot.
  * 
- * @param graph: s 
- * @param bin: s
- * @param data: s
- * @param col: s
+ * @param graph: KernelShark graphs
+ * @param bin: KernelShark bins
+ * @param data: entries with auxiliary data to draw buttons for
+ * @param col: default color of the Stacklook button's insides
 */
 static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
-                                            std::vector<int> bin,
-                                            std::vector<kshark_data_field_int64*> data,
-                                            KsPlot::Color col, float) {
+                                        std::vector<int> bin,
+                                        std::vector<kshark_data_field_int64*> data,
+                                        KsPlot::Color col, float) {
     // Constants
     constexpr int32_t BUTTON_TEXT_OFFSET = 14;
     const std::string STACK_BUTTON_TEXT = "STACK";
     const KsPlot::Color OUTLINE_COLOR {0, 0, 0};
 
-    // Marked entry
+    // Marked entry (there's just one on the top)
     kshark_entry* event_entry = data[0]->entry;
 
     // Base point
@@ -195,31 +217,32 @@ void clean_opened_views() {
 /**
  * @brief Plugin's draw function.
  *
- * @param argv_c: A C pointer to be converted to KsCppArgV (C++ struct).
- * @param sd: Data stream identifier.
- * @param val: process or CPU ID value.
- * @param draw_action: Draw action identifier.
+ * @param argv_c: a C pointer to be converted to KsCppArgV
+ * @param sd: data stream identifier
+ * @param val: process or CPU ID value
+ * @param draw_action: draw action identifier
 */
 void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
                        int val, int draw_action) {
     KsCppArgV* argVCpp KS_ARGV_TO_CPP(argv_c);
     plugin_stacklook_ctx* ctx = __get_context(sd);
     kshark_data_container* plugin_data;
-
-    // If Don't draw if not drawing tasks or CPUs.
-    if (!(draw_action == KSHARK_CPU_DRAW || draw_action == KSHARK_TASK_DRAW)) {
+    
+    // Don't draw if not drawing tasks or CPUs.
+    if (!(draw_action == KSHARK_CPU_DRAW 
+          || draw_action == KSHARK_TASK_DRAW)) {
         return;
     }
-
-    // Don't draw with too many bins (configurable zoom-in indicator actually)
-    if (argVCpp->_histo->tot_count > 200) {
+    
+    // Don't draw with too many bins (configurable zoom-in indicator)
+    if (argVCpp->_histo->tot_count > HISTO_ENTRIES_LIMIT) {
         if (loaded_colors) {
             loaded_colors = false;
         }
         return;
     }
-    
-    plugin_data = __get_context(sd)->wakes_or_switches;
+
+    plugin_data = __get_context(sd)->collected_events;
     // Couldn't get the context container (any reason)
     if (!plugin_data) {
         return;
@@ -232,23 +255,14 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
     if (draw_action == KSHARK_TASK_DRAW) {
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
             kshark_entry* entry = data_c->data[t]->entry;
-
-            bool correct_event_id = 
-                (ctx->sswitch_event_id == entry->event_id)
-                || (ctx->swake_event_id == entry->event_id);
             bool correct_pid = (entry->pid == val);
-
-            return correct_event_id && correct_pid;
+            return _check_function_general(entry, ctx) && correct_pid;
         };
     } else if (draw_action == KSHARK_CPU_DRAW) {
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
             kshark_entry* entry = data_c->data[t]->entry;
-
-            bool correct_event_id = 
-                (ctx->sswitch_event_id == entry->event_id)
-                || (ctx->swake_event_id == entry->event_id);
             bool correct_cpu = (data_c->data[t]->entry->cpu == val);
-            return correct_event_id && correct_cpu;
+            return _check_function_general(entry, ctx) && correct_cpu;
         };
     }
 

@@ -35,7 +35,7 @@ static void plugin_process(struct kshark_data_stream* stream,
                            void*, struct kshark_entry* entry) {
 
     struct plugin_stacklook_ctx* sl_ctx = __get_context(stream->stream_id);
-    struct kshark_data_container* sl_ctx_stack_data = sl_ctx->wakes_or_switches;
+    struct kshark_data_container* sl_ctx_stack_data = sl_ctx->collected_events;
 
     if (entry->event_id == sched_switch_id ||
         entry->event_id == sched_wake_id) {
@@ -54,7 +54,7 @@ static void sl_free_ctx(struct plugin_stacklook_ctx* sl_ctx)
 
     clean_opened_views();
 
-	kshark_free_data_container(sl_ctx->wakes_or_switches);
+	kshark_free_data_container(sl_ctx->collected_events);
 
     sl_ctx->sswitch_event_id = -1;
     sl_ctx->kstack_event_id = -1;
@@ -67,7 +67,7 @@ KS_DEFINE_PLUGIN_CONTEXT(struct plugin_stacklook_ctx, sl_free_ctx);
 int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     
     struct plugin_stacklook_ctx* sl_ctx = __init(stream->stream_id);
-    sl_ctx->wakes_or_switches = kshark_init_data_container();
+    sl_ctx->collected_events = kshark_init_data_container();
 
     if (!sl_ctx) {
 		__close(stream->stream_id);
