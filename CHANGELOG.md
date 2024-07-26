@@ -1,3 +1,24 @@
+# Timeless info
+Currently missing:
+- Task plot buttons for sched_switch of the plotted task
+  (may be impossible without deeper KernelShark rewrite)
+- Documentation(s)
+
+# 2024-07-26
+## 1.2.0
+
+New features:
+- Can hover over buttons to display the name of the task and
+  first three items in the kernel stack for the entry's
+  stacktrace under the button.
+  * This has been made possible thanks to KernelShark
+    modification, which adds the possibility of reacting to
+    hovering over a PlotObject
+
+Fixed:
+- No longer seeing buttons even though a task or CPU plot
+  is hidden
+
 # 2024-07-24
 ## 1.1.0 Documenting and cleaning up
 Plugin is decomposed into more files, functions
@@ -13,11 +34,6 @@ New features:
       available
 - Plugin now responds to `sched/sched_wakeup` events as well
     * These are included in task plots
-    
-Currently missing:
-- Task plot buttons for sched_switch (may be impossible)
-- Preview in info bar
-- Documentation
 
 Contemplating next features:
 - Configuration menu (non-persistent)

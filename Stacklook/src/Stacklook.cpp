@@ -216,9 +216,10 @@ void clean_opened_views(void* view_container) {
     delete (std::vector<SlDetailedView*>*)(view_container);
 }
 
+/**  **/
 void* init_views() {
     auto views = new std::vector<SlDetailedView*>{};
-    SlTriangleButton::opened_views = views;
+    SlDetailedView::opened_views = views;
     return (void*)(views);
 }
 
@@ -282,6 +283,6 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
  * GUI manipulation.
 */
 __hidden void* plugin_set_gui_ptr(void* gui_ptr) {
-    main_w_ptr = static_cast<KsMainWindow*>(gui_ptr);
+    SlDetailedView::main_w_ptr = static_cast<KsMainWindow*>(gui_ptr);
     return nullptr;
 }

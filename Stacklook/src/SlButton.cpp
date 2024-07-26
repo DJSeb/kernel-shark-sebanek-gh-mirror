@@ -95,7 +95,7 @@ double SlTriangleButton::distance(int x, int y) const {
 void SlTriangleButton::_doubleClick() const {
     std::string window_text = "ERROR: No info on kernelstack!\n"
                               "Try zooming in and out and come back here again :)";
-    char* window_labeltext = kshark_get_task(_switch_or_wake_event);
+    char* window_labeltext = kshark_get_task(_event_entry);
 
     /** NOTE: This could be a bit more rigorous: check the event ID, check the task and maybe even the
      * top of the stack for confirmation it is indeed a stacktrace of the kernel for the switch or wakeup
@@ -106,21 +106,64 @@ void SlTriangleButton::_doubleClick() const {
      * so this checking would be redundant.
     */
 
-    char* kstack_string_ptr = _get_info_of_next_event(_switch_or_wake_event,
-                                                      _next_is_kstack);
+    char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _next_is_kstack);
 
     if (kstack_string_ptr != nullptr) {
         window_text = kstack_string_ptr;
     }
 
     char* window_ctext = const_cast<char*>(window_text.c_str());
-    auto new_view = new SlDetailedView(window_labeltext, window_ctext, main_w_ptr);
+    auto new_view = SlDetailedView::make_new_view(window_labeltext, window_ctext);
     new_view->show();
-    SlTriangleButton::opened_views->push_back(new_view);
+    SlDetailedView::opened_views->push_back(new_view);
 }
 
 void SlTriangleButton::_draw(const KsPlot::Color&, float) const {
     _inner_triangle.draw(); // Draw the triangle insides first
     _outline_triangle.draw(); // Make the outline by overlaying another triangle
     _text.draw(); // Add text
+}
+
+static QString _prettify_stack_items(const std::string& to_prettify) {
+    constexpr int LABEL_LIMIT = 44;
+    std::size_t name_start = to_prettify.find("=> ", 0) + 3;
+    std::size_t name_end = to_prettify.find(" (", name_start);
+    auto num_of_chars = name_end - name_start;
+
+    if (num_of_chars > LABEL_LIMIT) {
+        return QString(to_prettify.substr(name_start, LABEL_LIMIT).append("...").c_str());
+    }
+
+    return QString(to_prettify.substr(name_start, num_of_chars).c_str()); 
+}
+
+static void _get_top_three_stack_items(char* stacktrace, QString out_array[]) {
+    std::string trace_str{stacktrace};
+
+    std::size_t str_pos = 0;
+    for (uint8_t counter = 0; counter < 3; ++counter) {
+        std::size_t content_start = trace_str.find('\n', str_pos) + 1;
+        std::size_t content_end = trace_str.find('\n', content_start);
+        auto num_of_chars = content_end - content_start;
+
+        const std::string item_as_str = trace_str.substr(content_start, num_of_chars);
+
+        out_array[counter] = _prettify_stack_items(item_as_str);
+
+        str_pos = content_end + 1;
+    }
+}
+
+void SlTriangleButton::_mouseHover() const {
+    char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _next_is_kstack);
+    QString top_three_items[3]{};
+    _get_top_three_stack_items(kstack_string_ptr, top_three_items); 
+
+    SlDetailedView::main_w_ptr->graphPtr()->setPreviewLabels(
+        kshark_get_task(_event_entry),
+        top_three_items[0],
+        top_three_items[1],
+        top_three_items[2],
+        "..."
+    );
 }

@@ -23,13 +23,20 @@ static QString prettify_data(char* data) {
     return QString(new_string.c_str());
 }
 
-void SlDetailedView::add_data_to_list_widget(QListWidget& list_widget, const QString& data) {
-    QStringList list_data = data.split('\n');
-    list_widget.addItems(list_data);
+// Class functions
+
+/**
+ * @brief Factory functions
+*/
+SlDetailedView* SlDetailedView::make_new_view(char* label, char* data) {
+    return new SlDetailedView(label, data);
 }
 
-SlDetailedView::SlDetailedView(char* label, char* data, QWidget* parent)
-: QWidget(parent),
+/**
+ * @brief Constructor for Stacklook's detailed stacktrace view window.
+*/
+SlDetailedView::SlDetailedView(char* label, char* data)
+  : QWidget(SlDetailedView::main_w_ptr),
     _radio_btns(this),
     _raw_radio("Raw view", this),
     _list_radio("List view", this),
@@ -77,6 +84,11 @@ SlDetailedView::SlDetailedView(char* label, char* data, QWidget* parent)
 	setLayout(&_layout);
 
     toggle_view();
+}
+
+void SlDetailedView::add_data_to_list_widget(QListWidget& list_widget, const QString& data) {
+    QStringList list_data = data.split('\n');
+    list_widget.addItems(list_data);
 }
 
 void SlDetailedView::toggle_view() {

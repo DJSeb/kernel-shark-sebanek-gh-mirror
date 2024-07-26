@@ -44,7 +44,7 @@ Things not in specification aren't mandatory, but would be pretty useful.
     * [x] Add clickable shapes above each sleep event
         * [ ] *(Not in specification) Add such clickable shapes into entry viewer*
     * [x] Show a dialogue/window with detailed stack information
-    * [ ] Display preview of the stack in the top info bar
+    * [x] Display preview of the stack in the top info bar
     * [x] Create CMake build instructions
         * NOTE: Could be circumvented if the plugin files were put into KernelShark's `src/plugins` directory
     * [ ] Create plugin documentation (user & technical)
@@ -55,7 +55,7 @@ Things not in specification aren't mandatory, but would be pretty useful.
     * [ ] Create an example `trace.dat` file for demonstration
         * [ ] Write a program that will do some stack shenanigans
     * [ ] *(Not in specification) Add a settings menu for the plugin*
-    * [ ] *(implied)* Make it work for CPU and task plots
+    * [x] *(implied)* Make it work for CPU and task plots
 
 ## Requirements
 

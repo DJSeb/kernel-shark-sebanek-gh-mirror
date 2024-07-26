@@ -6,6 +6,11 @@
 #include <string>
 #include <iostream>
 
+// Qt
+#include <QtCore>
+#include <QEvent>
+#include <QHoverEvent>
+
 // KernelShark
 #include "libkshark.h"
 #include "libkshark-plugin.h"
@@ -26,15 +31,12 @@
  * and logical structuring is retained.
 */
 class SlTriangleButton : public KsPlot::PlotObject {
-public: // Data memebers
-    /** Pointer to a container for opened Stacklook windows. **/
-    inline static std::vector<SlDetailedView*>* opened_views = nullptr;
 private: // Data members
     /**
      * @brief What event the button points at and gets data from for
      * the window.
     */
-    kshark_entry* _switch_or_wake_event;
+    kshark_entry* _event_entry;
     // Graphical
     /**
      * @brief Triangle which creates the outline of the button.
@@ -52,20 +54,21 @@ private: // Data members
     KsPlot::TextBox _text;
 public: // Functions
     SlTriangleButton() : KsPlot::PlotObject() {}
-    explicit SlTriangleButton(kshark_entry* switch_or_wake_entry,
+    explicit SlTriangleButton(kshark_entry* event_entry,
                               KsPlot::Triangle& outer,
                               KsPlot::Triangle& inner,
                               KsPlot::TextBox& text)
-        : _switch_or_wake_event(switch_or_wake_entry),
+        : KsPlot::PlotObject(),
+          _event_entry(event_entry),
           _outline_triangle(outer),
-          _inner_triangle(inner), _text(text) {}
+          _inner_triangle(inner),
+          _text(text) {}
 
     double distance(int x, int y) const override;
-
 private: // Functions
     void _doubleClick() const override;
-
     void _draw(const KsPlot::Color&, float) const override;
+    void _mouseHover() const override;
 };
 
 #endif
