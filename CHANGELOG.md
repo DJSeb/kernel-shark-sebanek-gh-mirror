@@ -1,5 +1,5 @@
 # 2024-07-24
-## 1.0.1 Documenting and cleaning up
+## 1.1.0 Documenting and cleaning up
 Plugin is decomposed into more files, functions
 are cleaned up, unnecessities are removed. Work
 on task plotting & button hover event starts.
