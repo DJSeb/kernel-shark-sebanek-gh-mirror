@@ -42,13 +42,14 @@ Things not in specification aren't mandatory, but would be pretty useful.
 - [ ] Stacklook
     * [x] Get scheduler event for when the task was about to go to sleep and the stacktracing event
     * [x] Add clickable shapes above each sleep event
-        * [ ] *(Not in specification) Add such clickable shapes into entry viewer*
+        * [ABANDONED] *(Not in specification) Add such clickable shapes into entry viewer*
+            * NOTE: It is highly unlikely that this is easily doable as a plugin, unless a lot of KernelShark is rewritten.
     * [x] Show a dialogue/window with detailed stack information
     * [x] Display preview of the stack in the top info bar
     * [x] Create CMake build instructions
         * NOTE: Could be circumvented if the plugin files were put into KernelShark's `src/plugins` directory
     * [ ] Create plugin documentation (user & technical)
-        * NOTE: Limit thyself, author
+        <!-- NOTE: Limit thyself, author -->
         * [ ] Create build instructions for the documentation
         * [ ] Technical documentation (Doxygen)
         * [ ] User documentation (Markdown or HTML)
@@ -59,9 +60,11 @@ Things not in specification aren't mandatory, but would be pretty useful.
 
 ## Requirements
 
-KernelShark v2.3.1 (currently not tested outside of this version).
+Modified KernelShark (preview functionality is unusable otherwise).
 
-*Build file requires this version implicitly.*
+It is possible to create a plugin that would work with unomdified
+KernelShark version 2.3.1 (code that would need to be removed
+contains a comment about this).
 
 ## Installation
 
@@ -98,6 +101,9 @@ Yordan Karadzhov - maintains KernelShark, author took inspiration from his examp
 Google Lens - extracted text from images when no sources were available
 Geeksforgeeks:
     - [Check if a point is inside a triangle](https://www.geeksforgeeks.org/check-whether-a-given-point-lies-inside-a-triangle-or-not/)
+ChatGPT:
+    - perfect for finding ideas that will never work
+    - good for simple prototype brainstorming
 
 ## Support
 

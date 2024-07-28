@@ -1,28 +1,9 @@
 #ifndef _SL_BUTTON_HPP
 #define _SL_BUTTON_HPP
 
-// C++
-#include <vector>
-#include <string>
-#include <iostream>
-
-// Qt
-#include <QtCore>
-#include <QEvent>
-#include <QHoverEvent>
-
 // KernelShark
 #include "libkshark.h"
-#include "libkshark-plugin.h"
-#include "libkshark-plot.h"
-#include "libkshark-model.h"
-#include "KsPlugins.hpp"
-#include "KsMainWindow.hpp"
 #include "KsPlotTools.hpp"
-
-// Plugin headers
-#include "stacklook.h"
-#include "SlDetailedWindow.hpp"
 
 /**
  * @brief Special button class just for the plugin.

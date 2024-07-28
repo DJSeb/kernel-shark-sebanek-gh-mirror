@@ -5,26 +5,30 @@
 // C++
 #include <vector>
 #include <string>
-#include <iostream>
+#include <stdint.h>
 
 // KernelShark
 #include "libkshark.h"
 #include "libkshark-plugin.h"
-#include "libkshark-plot.h"
 #include "KsPlugins.hpp"
 #include "KsMainWindow.hpp"
 #include "KsPlotTools.hpp"
 
 // Plugin headers
 #include "stacklook.h"
-#include "Stacklook.hpp"
-#include "SlDetailedWindow.hpp"
+#include "SlDetailedView.hpp"
 #include "SlButton.hpp"
 
 // Static variables
 
+/**
+ * @brief
+*/
 constexpr static int HISTO_ENTRIES_LIMIT = 200;
 
+/**
+ * @brief
+*/
 const static KsPlot::Color DEFAULT_BUTTON_COL{0x60, 0x69, 0x90};
 
 /**
@@ -239,7 +243,7 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
     
     // Don't draw if not drawing tasks or CPUs.
     if (!(draw_action == KSHARK_CPU_DRAW 
-          || draw_action == KSHARK_TASK_DRAW)) {
+        || draw_action == KSHARK_TASK_DRAW)) {
         return;
     }
     
@@ -283,6 +287,8 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
  * GUI manipulation.
 */
 __hidden void* plugin_set_gui_ptr(void* gui_ptr) {
-    SlDetailedView::main_w_ptr = static_cast<KsMainWindow*>(gui_ptr);
+    KsMainWindow* main_w = static_cast<KsMainWindow*>(gui_ptr);
+    SlDetailedView::main_w_ptr = main_w;
+
     return nullptr;
 }

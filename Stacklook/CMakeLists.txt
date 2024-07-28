@@ -70,13 +70,12 @@ set(KS_PLUGIN_PREFIX "plugin-")
 # Project
 set(SOURCES
     src/stacklook.h
-    src/Stacklook.hpp
-    src/SlDetailedWindow.hpp
     src/SlButton.hpp
+    src/SlDetailedView.hpp
     src/stacklook.c
-    src/Stacklook.cpp
-    src/SlDetailedWindow.cpp
     src/SlButton.cpp
+    src/SlDetailedView.cpp
+    src/Stacklook.cpp
 )
 
 add_library(stacklook SHARED ${SOURCES})

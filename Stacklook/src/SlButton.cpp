@@ -14,8 +14,7 @@
 
 // Plugin headers
 #include "stacklook.h"
-#include "Stacklook.hpp"
-#include "SlDetailedWindow.hpp"
+#include "SlDetailedView.hpp"
 #include "SlButton.hpp"
 
 /**

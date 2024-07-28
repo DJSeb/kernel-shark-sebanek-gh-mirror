@@ -4,6 +4,12 @@ Currently missing:
   (may be impossible without deeper KernelShark rewrite)
 - Documentation(s)
 
+# 2024-07-28
+## 1.2.1
+
+Just cleaned some dependencies in code and leftover development
+code.
+
 # 2024-07-26
 ## 1.2.0
 
