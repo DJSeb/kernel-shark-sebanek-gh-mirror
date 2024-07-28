@@ -49,6 +49,10 @@ public: // Functions
 private: // Functions
     void _doubleClick() const override;
     void _draw(const KsPlot::Color&, float) const override;
+    /**
+     * @note WILL NOT WORK WITHOUT MODIFIED KERNELSHARK WITH SUPPORT
+     * FOR MOUSE MOVE OVER PLOTOBJECT REACTIONS
+    */
     void _mouseHover() const override;
 };
 

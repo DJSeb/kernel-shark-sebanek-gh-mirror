@@ -153,6 +153,11 @@ static void _get_top_three_stack_items(char* stacktrace, QString out_array[]) {
     }
 }
 
+
+/**
+ * @brief Action on mouse move over the plugin's plot object event.
+ * ... TODO:
+*/
 void SlTriangleButton::_mouseHover() const {
     char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _next_is_kstack);
     QString top_three_items[3]{};
