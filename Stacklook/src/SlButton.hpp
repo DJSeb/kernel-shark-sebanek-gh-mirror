@@ -1,3 +1,17 @@
+/** TODO: Copyright? **/
+
+/**
+ * @file    SlButton.hpp
+ * @brief   Declares a special plot object class holding components
+ *          of the button and its mouse interaction reactions.
+ * 
+ *          This class NECESSITATES that a modified KernelShark is used.
+ *          To remove this dependency, remove/modify the code with warnings
+ *          in its documentation.
+ * 
+ * @note    Definitions in `SlButton.cpp`.
+*/
+
 #ifndef _SL_BUTTON_HPP
 #define _SL_BUTTON_HPP
 
@@ -6,10 +20,12 @@
 #include "KsPlotTools.hpp"
 
 /**
- * @brief Special button class just for the plugin.
- * It itself is a triangle that contains another inner triangle
- * and a textbox. This is so that everything is drawn together
- * and logical structuring is retained.
+ * @brief Special button class for the Stacklook plugin, child of
+ * KernelShark's PlotObject.
+ * 
+ * Graphically, it is an outline triangle that contains another
+ * inner triangle and a textbox. This is so that everything is
+ * drawn together by KernelShark.
 */
 class SlTriangleButton : public KsPlot::PlotObject {
 private: // Data members
@@ -34,7 +50,15 @@ private: // Data members
     */
     KsPlot::TextBox _text;
 public: // Functions
-    SlTriangleButton() : KsPlot::PlotObject() {}
+    /** 
+     * @brief Explicit constructor for the button (you should use
+     * only this).
+     * 
+     * @param event_entry - entry the button gets data from
+     * @param outer - triangle used for the black outline
+     * @param inner - triangle used as the filling
+     * @param text - text on the button
+    */ 
     explicit SlTriangleButton(kshark_entry* event_entry,
                               KsPlot::Triangle& outer,
                               KsPlot::Triangle& inner,
@@ -49,10 +73,11 @@ public: // Functions
 private: // Functions
     void _doubleClick() const override;
     void _draw(const KsPlot::Color&, float) const override;
-    /**
-     * @note WILL NOT WORK WITHOUT MODIFIED KERNELSHARK WITH SUPPORT
-     * FOR MOUSE MOVE OVER PLOTOBJECT REACTIONS
-    */
+
+    /// WARN:
+    /// WILL NOT WORK WITHOUT MODIFIED KERNELSHARK WITH SUPPORT
+    /// FOR MOUSE MOVE OVER PLOTOBJECT REACTIONS
+    
     void _mouseHover() const override;
 };
 

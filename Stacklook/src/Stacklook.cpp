@@ -1,6 +1,15 @@
-/** TODO:
- * For internal logic.
+
+/** TODO: To discuss with supervisor
+ * Copyright (C) 2024, David Jaromír Šebánek <djsebofficial@gmail.com>
 */
+
+/**
+ * @file    Stacklook.cpp
+ * @brief   Central for most internal logic of the plugin, bridge between the
+ *          C code and the C++ and the Qt code.
+*/
+
+// Inclusions
 
 // C++
 #include <vector>
@@ -19,20 +28,20 @@
 #include "SlDetailedView.hpp"
 #include "SlButton.hpp"
 
+// Constants
+
+/// @brief Limit value of how many entries may be visible in a
+/// histogram for the plugin to take effect.
+constexpr static int HISTO_ENTRIES_LIMIT = 200;
+
+///
+/// @brief Default color of Stacklook buttons, white.
+const static KsPlot::Color DEFAULT_BUTTON_COL{0xFF, 0xFF, 0xFF};
+
 // Static variables
 
 /**
- * @brief
-*/
-constexpr static int HISTO_ENTRIES_LIMIT = 200;
-
-/**
- * @brief
-*/
-const static KsPlot::Color DEFAULT_BUTTON_COL{0x60, 0x69, 0x90};
-
-/**
- * @brief Color table for the tasks so that the stacklook buttons look
+ * @brief Color table of the tasks so that the Stacklook buttons look
  * prettier.
 */
 static KsPlot::ColorTable task_colors;
@@ -50,6 +59,9 @@ static bool loaded_colors;
  * 
  * @param entry: KernelShark entry whose properties must be checked
  * @param ctx: Stacklook plugin context
+ * 
+ * @returns True if the entry fulfills all of function's requirements,
+ *          false otherwise.
 */
 static bool _check_function_general(kshark_entry* entry,
                                     plugin_stacklook_ctx* ctx) {
@@ -76,11 +88,13 @@ static void _load_current_colortable() {
 
 /**
  * @brief Returns either a default color or one present in the`task_colors`
- * color table.
+ * color table based on Process ID of a task.
  * 
  * @param task_pid: task PID to index `task_colors`.
  * @param default_color: color to be used in case we fail in finding a color
  * in the colortable.
+ * 
+ * @returns Default color or one present in the`task_colors` color table.
 */
 static KsPlot::Color _get_color(int32_t task_pid, KsPlot::Color default_color) {
     KsPlot::Color triangle_color = default_color;
@@ -98,10 +112,12 @@ static KsPlot::Color _get_color(int32_t task_pid, KsPlot::Color default_color) {
  * otherwise returns white. Limit to intensity is `128.0`.
  * 
  * @param bg_color_intensity: computed intensity from an RGB color.
+ * 
+ * @returns Black on high intensity, white otheriwse.
 */
 static KsPlot::Color _black_or_white_text(float bg_color_intensity) {
-    const KsPlot::Color WHITE {0xFF, 0xFF, 0xFF};
-    const KsPlot::Color BLACK {0, 0, 0};
+    const static KsPlot::Color WHITE {0xFF, 0xFF, 0xFF};
+    const static KsPlot::Color BLACK {0, 0, 0};
     constexpr float INTENSITY_LIMIT = 128.f;
 
     return (bg_color_intensity > INTENSITY_LIMIT) ? BLACK : WHITE;
@@ -112,8 +128,13 @@ static KsPlot::Color _black_or_white_text(float bg_color_intensity) {
  * `(red * 0.299) + (green * 0.587) + (blue * 0.114)`.
  * 
  * @param c: RGB color value whose components will be checked.
+ * 
+ * @returns Color intensity as floating-point value.
 */
 static float _get_color_intensity(const KsPlot::Color& c) {
+    // Color multipliers are chosen the way they are based on human
+    // eye's receptiveness to each color (green being the color human
+    // eyes focus on the most).
     return (c.b() * 0.114f) + (c.g() * 0.587f) + (c.r() * 0.299f);
 }
 
@@ -124,6 +145,8 @@ static float _get_color_intensity(const KsPlot::Color& c) {
  * @param bin: KernelShark bins
  * @param data: entries with auxiliary data to draw buttons for
  * @param col: default color of the Stacklook button's insides
+ * 
+ * @returns Pointer to the created button.
 */
 static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
                                         std::vector<int> bin,
@@ -134,7 +157,6 @@ static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
     const std::string STACK_BUTTON_TEXT = "STACK";
     const KsPlot::Color OUTLINE_COLOR {0, 0, 0};
 
-    // Marked entry (there's just one on the top)
     kshark_entry* event_entry = data[0]->entry;
 
     // Base point
@@ -158,15 +180,14 @@ static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
     KsPlot::Point b {x + 24, y - 25};
     KsPlot::Point c {x, y - 5};
 
-   // Outer triangle
+    // Outer triangle
     auto inner_triangle = KsPlot::Triangle();
     inner_triangle.setPoint(0, a);
     inner_triangle.setPoint(1, b);
     inner_triangle.setPoint(2, c);
 
-    /** Colors are a bit wonky with sched_switch events. Using the function
-     * makes it consistent across the board.
-    */
+    // Colors are a bit wonky with sched_switch events. Using the function
+    // makes it consistent across the board.
     inner_triangle._color = _get_color(kshark_get_pid(event_entry), col);
 
     // Inner triangle
@@ -174,12 +195,15 @@ static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
     back_triangle._color = OUTLINE_COLOR;
     back_triangle.setFill(false);
 
+    // Text coords
     int text_x = x - BUTTON_TEXT_OFFSET;
     int text_y = y - BUTTON_TEXT_OFFSET;
 
+    // Colors
     float bg_intensity = _get_color_intensity(inner_triangle._color);
     auto text_color = _black_or_white_text(bg_intensity);
 
+    // Final object initialitations
     auto text = KsPlot::TextBox(get_font_ptr(), STACK_BUTTON_TEXT, text_color,
                                 KsPlot::Point{text_x, text_y});
 
@@ -190,37 +214,61 @@ static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
 }
 
 /**
- * @brief Function wrapper for drawing on the plot.
+ * @brief Function wrapper for drawing Stacklook buttons on the plot.
  * 
  * @param argv: The C++ arguments of the drawing function of the plugin.
  * @param dc: Input location for the container of the event's data.
  * @param checkFunc: check function used to select events from data container.
+ * @param makeButton: function which specifies what will be drawn and how
 */
 static void _draw_stacklook_button(KsCppArgV* argv, 
                                    kshark_data_container* dc,
                                    IsApplicableFunc checkFunc,
                                    pluginShapeFunc makeButton) {    
+    // -1 means default size
+    // The default color of buttons will hopefully be overriden when
+    // the button's entry's task PID is found.
+    
     eventFieldPlotMin(argv, dc, checkFunc, makeButton,
                       DEFAULT_BUTTON_COL, -1);
 }
 
-// Global functions
+// Functions used in C code
 
 /**
- * @brief Function for correct destroying of opened stacklook
+ * @brief Ensures correct destruction of opened Stacklook
+ * view windows and the vector which holds them.
+ * 
+ * @param view_container: vector containing opened Stacklook view
  * windows.
 */
 void clean_opened_views(void* view_container) {
-    auto views = *(std::vector<SlDetailedView*>*)(view_container);
+    auto views_ptr = (std::vector<SlDetailedView*>*)(view_container);
+    
+    // To prevent nullptr access
+    if (views_ptr == nullptr) {
+        return;
+    }
+
+    auto views = *views_ptr;
+    
+    // Cycle & destroy
     for(auto view : views) {
         if (view != nullptr) {
             delete view;
         }
     }
+
+    // Finally, destroy the vector itself
     delete (std::vector<SlDetailedView*>*)(view_container);
 }
 
-/**  **/
+/**
+ * @brief Initializes the vector managing the view windows. Also puts
+ * the typed pointer into the windows' class member.
+ * 
+ * @returns Vector's heap address as a void pointer.
+*/
 void* init_views() {
     auto views = new std::vector<SlDetailedView*>{};
     SlDetailedView::opened_views = views;
@@ -283,8 +331,12 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
 }
 
 /**
- * @brief Give the plugin a pointer to KS's main window to allow
+ * @brief Give the plugin a pointer to KernalShark's main window to allow
  * GUI manipulation.
+ * 
+ * This is where plugin menu can be made and initialized.
+ * 
+ * @returns Nullptr as there is no menu control created.
 */
 __hidden void* plugin_set_gui_ptr(void* gui_ptr) {
     KsMainWindow* main_w = static_cast<KsMainWindow*>(gui_ptr);

@@ -1,14 +1,17 @@
+/** TODO: Copyright? **/
+
+/**
+ * @file    SlButton.cpp
+ * @brief   This file defines the class functionaliteis of Stacklook
+ *          buttons as well as plot object reactions to mouse events.
+*/
 
 // C++
-#include <vector>
 #include <string>
-#include <iostream>
 
 // KernelShark
 #include "libkshark.h"
-#include "libkshark-plugin.h"
 #include "libkshark-plot.h"
-#include "KsPlugins.hpp"
 #include "KsMainWindow.hpp"
 #include "KsPlotTools.hpp"
 
@@ -17,15 +20,35 @@
 #include "SlDetailedView.hpp"
 #include "SlButton.hpp"
 
+// Static functions
+
 /**
- * @brief Predicate function to check that the next KernelShark entry is indeed kernel's
- * stacktrace entry.
+ * @brief Predicate function to check that the KernelShark entry is indeed kernel's
+ * stack trace entry.
  * 
  * @param next_entry: entry whose event ID is checked.
+ * 
+ * @returns True if the entry is a kernel stack entry, false otherwise.
 */
-static bool _next_is_kstack(kshark_entry* next_entry) {
-    plugin_stacklook_ctx* ctx = __get_context(next_entry->stream_id);
-    return next_entry->event_id == ctx->kstack_event_id;
+static bool _is_kstack(kshark_entry* entry) {
+    if (entry == nullptr) {
+        return false;
+    }
+    
+    plugin_stacklook_ctx* ctx = __get_context(entry->stream_id);
+
+    /** NOTE: This could be a bit more rigorous: check the event ID, check the task and maybe even the
+     * top of the stack for confirmation it is indeed a stacktrace of the kernel for the switch or wakeup
+     * event.
+     * 
+     * However, since the stacktrace is done immediately after every event when using trace-cmd's
+     * '-T' option, events are always sorted so that stacktraces appear right after their events,
+     * so this checking would be redundant.
+     * 
+     * Of course, if data are manipulated so that they aren't sorted by time, this approach is insufficent.
+    */
+
+    return entry->event_id == ctx->kstack_event_id;
 }
 
 /**
@@ -36,10 +59,16 @@ static bool _next_is_kstack(kshark_entry* next_entry) {
  * 
  * @param entry: entry whose next neighbour's info we wish to get.
  * @param predicate: function which checks a KernelShark entry and returns true or false.
+ * 
+ * @returns Textual form of next entry's Info field as a C-string.
 */
-static char* _get_info_of_next_event(kshark_entry* entry,
-                                     std::function<bool(kshark_entry*)> predicate) {
-    char* retval = nullptr;
+static const char* _get_info_of_next_event(kshark_entry* entry,
+                                           std::function<bool(kshark_entry*)> predicate) {
+    const char* retval = nullptr;
+
+    if (entry == nullptr) {
+        return retval;
+    }
 
     kshark_entry* next_entry = entry->next;
 
@@ -52,12 +81,14 @@ static char* _get_info_of_next_event(kshark_entry* entry,
 
 /**
  * @brief Function which calculates (absolute value of) the area of a trigon using
- * the shoelace formula (https://en.wikipedia.org/wiki/Shoelace_formula).
+ * the [shoelace formula](https://en.wikipedia.org/wiki/Shoelace_formula).
  * Order of points is irrelevant, as the formula works generally.
  * 
  * @param a: point A of the triangle.
  * @param b: point B of the triangle.
  * @param c: point C of the triangle.
+ * 
+ * @returns Area of the trigon.
 */
 static constexpr double _trigon_area(const ksplot_point a,
                                      const ksplot_point b,
@@ -67,6 +98,72 @@ static constexpr double _trigon_area(const ksplot_point a,
                 (c.x * (a.y - b.y))) / 2.0);
 }
 
+/**
+ * @brief Cuts off the address and the arrow of the textual stack item.
+ * If the item is too long, it is truncated to its 44 starting characters
+ * and joined with ellipsis.
+ *  
+ * @param to_prettify: stack item in the style of trace-cmd, i.e.
+ * `=> STACK_ITEM_NAME (ADDRESS)`
+ * 
+ * @returns Prettier text representation of the stack item.
+*/
+static QString _prettify_stack_item(const std::string& to_prettify) {
+    // Pretty arbitrary, but it does produce nice results that aren't too long
+    constexpr int LABEL_LIMIT = 44;
+
+    const std::size_t name_start = to_prettify.find("=> ", 0) + 3;
+    const std::size_t name_end = to_prettify.find(" (", name_start);
+    const std::size_t num_of_chars = name_end - name_start;
+
+    QString prettified;
+    if (num_of_chars > LABEL_LIMIT) {
+        prettified = QString(to_prettify.substr(name_start, LABEL_LIMIT).append("...").c_str());
+    } else {
+        prettified = QString(to_prettify.substr(name_start, num_of_chars).c_str());
+    }
+
+    return prettified;
+}
+
+/**
+ * @brief Puts the top three stack items from the raw C-string stack trace
+ * into a QString array after making them prettier.
+ * 
+ * @param stacktrace: C-string of the stack trace to be processed
+ * @param out_array: output array, top traces are eventually stored there
+*/
+static void _get_top_three_stack_items(const char* stacktrace, QString out_array[]) {
+    std::string trace_str{stacktrace};
+
+    std::size_t str_pos = 0;
+    for (uint8_t counter = 0; counter < 3; ++counter) {
+        std::size_t content_start = trace_str.find('\n', str_pos) + 1;
+        std::size_t content_end = trace_str.find('\n', content_start);
+        auto num_of_chars = content_end - content_start;
+
+        const std::string item_as_str = trace_str.substr(content_start, num_of_chars);
+
+        out_array[counter] = _prettify_stack_item(item_as_str);
+
+        str_pos = content_end + 1;
+    }
+}
+
+// Class functions
+
+/**
+ * @brief Checks if a point at the `x`, `y` coordinates is
+ * inside the button (specifically it's triangles).
+ * In other words, this checks if the mouse is above
+ * the button in the KernelShark plot.
+ * 
+ * @param x: horizontal coordinate of the point
+ * @param y: vertical coordinate of the point
+ * 
+ * @returns `0` if the point is inside the button, maximum value for
+ * standard C++ `double` type otherwise.
+*/
 double SlTriangleButton::distance(int x, int y) const {
     /* How it is with point ordering:
         0 ------ 1
@@ -91,75 +188,50 @@ double SlTriangleButton::distance(int x, int y) const {
             : std::numeric_limits<double>::max();
 }
 
+/**
+ * @brief Action on mouse double clicking on the plugin's plot object event.
+ * Spawns a window with the info field of the next entry after the entry the
+ * button is displayed above.
+ * 
+ * @note In the case of this plugin, the next entry always has to be an `ftrace/kernel_stack`
+ * event entry, with the field being the kernel's stack trace. Otherwise, an error message
+ * will be shown in the window instead.
+*/
 void SlTriangleButton::_doubleClick() const {
-    std::string window_text = "ERROR: No info on kernelstack!\n"
-                              "Try zooming in and out and come back here again :)";
-    char* window_labeltext = kshark_get_task(_event_entry);
+    const char* error_msg = "ERROR: No info field found!";                             
+    const char* window_labeltext = kshark_get_task(_event_entry);
+    const char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _is_kstack);
+    
+    const char* window_text = (kstack_string_ptr != nullptr) ? 
+        kstack_string_ptr : error_msg;
 
-    /** NOTE: This could be a bit more rigorous: check the event ID, check the task and maybe even the
-     * top of the stack for confirmation it is indeed a stacktrace of the kernel for the switch or wakeup
-     * event.
-     * 
-     * However, since the stacktrace is done immediately after every event when using trace-cmd's
-     * '-T' option, events are always sorted so that stacktraces appear right after their events,
-     * so this checking would be redundant.
-    */
-
-    char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _next_is_kstack);
-
-    if (kstack_string_ptr != nullptr) {
-        window_text = kstack_string_ptr;
-    }
-
-    char* window_ctext = const_cast<char*>(window_text.c_str());
-    auto new_view = SlDetailedView::make_new_view(window_labeltext, window_ctext);
+    auto new_view = new SlDetailedView(window_labeltext, window_text);
     new_view->show();
     SlDetailedView::opened_views->push_back(new_view);
 }
 
+/**
+ * @brief Draws all the basic plot objects the button is composed of.
+ * In order of drawing: the inner colorful triangle, the outline triangle
+ * and the textbox.
+ * 
+ * @note Despite the signature, the other parameters are ignored.
+*/
 void SlTriangleButton::_draw(const KsPlot::Color&, float) const {
     _inner_triangle.draw(); // Draw the triangle insides first
     _outline_triangle.draw(); // Make the outline by overlaying another triangle
     _text.draw(); // Add text
 }
 
-static QString _prettify_stack_items(const std::string& to_prettify) {
-    constexpr int LABEL_LIMIT = 44;
-    std::size_t name_start = to_prettify.find("=> ", 0) + 3;
-    std::size_t name_end = to_prettify.find(" (", name_start);
-    auto num_of_chars = name_end - name_start;
-
-    if (num_of_chars > LABEL_LIMIT) {
-        return QString(to_prettify.substr(name_start, LABEL_LIMIT).append("...").c_str());
-    }
-
-    return QString(to_prettify.substr(name_start, num_of_chars).c_str()); 
-}
-
-static void _get_top_three_stack_items(char* stacktrace, QString out_array[]) {
-    std::string trace_str{stacktrace};
-
-    std::size_t str_pos = 0;
-    for (uint8_t counter = 0; counter < 3; ++counter) {
-        std::size_t content_start = trace_str.find('\n', str_pos) + 1;
-        std::size_t content_end = trace_str.find('\n', content_start);
-        auto num_of_chars = content_end - content_start;
-
-        const std::string item_as_str = trace_str.substr(content_start, num_of_chars);
-
-        out_array[counter] = _prettify_stack_items(item_as_str);
-
-        str_pos = content_end + 1;
-    }
-}
-
-
 /**
- * @brief Action on mouse move over the plugin's plot object event.
- * ... TODO:
+ * @brief Action on mouse moving over the plugin's plot object event.
+ * Shows the task name of the stack trace and three top items in the stack.
+ *
+ * @warning WILL NOT WORK WITHOUT MODIFIED KERNELSHARK WITH SUPPORT
+ * FOR MOUSE MOVE OVER PLOTOBJECT REACTIONS
 */
 void SlTriangleButton::_mouseHover() const {
-    char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _next_is_kstack);
+    const char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _is_kstack);
     QString top_three_items[3]{};
     _get_top_three_stack_items(kstack_string_ptr, top_three_items); 
 

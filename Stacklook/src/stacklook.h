@@ -1,4 +1,13 @@
-/** TODO: Copyroght **/
+/** TODO: Copyright? **/
+
+/**
+ * @file    stacklook.h
+ * @brief   For plugin integration with KernelShark. Includes plugin context
+ *          and a few global functions either used in C++ or in C parts of the
+ *          plugin.
+ * 
+ * @note    Definitions in `Stacklook.cpp` and `stacklook.c`.
+*/
 
 #ifndef _KS_PLUGIN_STACKLOOK_H
 #define _KS_PLUGIN_STACKLOOK_H
@@ -8,14 +17,14 @@
 
 // KernelShark
 #include "libkshark.h"
-#include "libkshark-plot.h"
 #include "libkshark-plugin.h"
-#include "libkshark-model.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+///
+/// @brief Chosen font size for plugin's font.
 #define FONT_SIZE 8
 
 /**
@@ -37,6 +46,7 @@ struct plugin_stacklook_ctx {
     void* cpp_views_container;
 };
 
+// Some magic by KernelShark that makes it simpler to integrate the plugin.
 KS_DECLARE_PLUGIN_CONTEXT_METHODS(struct plugin_stacklook_ctx)
 
 // Global funcs

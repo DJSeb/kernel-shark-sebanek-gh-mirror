@@ -1,5 +1,10 @@
-/** TODO: 
- * 
+/** TODO: Copyright? **/
+
+/**
+ * @file    SlDetailedView.cpp
+ * @brief   This file defines the class functionaliteis of the dialog windows
+ *          shown by the Stacklook plugin. Includes some string manipulations
+ *          of stack trace data as well.
 */
 
 // C++
@@ -19,8 +24,14 @@
  * 
  * @returns New QString with prettier text data.
 */
-static QString prettify_data(char* data) {
+static QString prettify_data(const char* data) {
     std::string base_string{data};
+
+    // What we got is NOT a stack trace, but we'll display it anyway.
+    // This is for error messages and the like
+    if (base_string.find("<stack trace >") == std::string::npos) {
+        return QString(data);
+    }
 
     // Cut off '<stack trace >' text
     int first_newline = base_string.find_first_of('\n');
@@ -36,24 +47,12 @@ static QString prettify_data(char* data) {
 // Class functions
 
 /**
- * @brief Factory function for nicer creation.
- * 
- * @param task_name: name of the task whose stack trace is viewed
- * @param data: stack trace as text
- * 
- * @returns Pointer to the new view on the heap.
-*/
-SlDetailedView* SlDetailedView::make_new_view(char* task_name, char* data) {
-    return new SlDetailedView(task_name, data);
-}
-
-/**
  * @brief Constructor for Stacklook's detailed stack trace view window.
  * 
  * @param task_name: name of the task whose stack trace is viewed
  * @param data: stack trace as text
 */
-SlDetailedView::SlDetailedView(char* task_name, char* data)
+SlDetailedView::SlDetailedView(const char* task_name, const char* data)
   : QWidget(SlDetailedView::main_w_ptr),
     _radio_btns(this),
     _raw_radio("Raw view", this),
