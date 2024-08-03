@@ -81,6 +81,13 @@ static void _sl_free_ctx(struct plugin_stacklook_ctx* sl_ctx)
     sl_ctx->swake_event_id = -1;
 }
 
+/**
+ * @brief KernelShark-provided macro for quickly setting up necessities
+ * of a plugin context
+ *
+ * @param type: For which context the definition shall happen
+ * @param type_free: What function shall be used when freeing the plugin
+*/
 KS_DEFINE_PLUGIN_CONTEXT(struct plugin_stacklook_ctx, _sl_free_ctx);
 
 /**

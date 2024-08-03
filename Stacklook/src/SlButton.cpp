@@ -26,7 +26,7 @@
  * @brief Predicate function to check that the KernelShark entry is indeed kernel's
  * stack trace entry.
  * 
- * @param next_entry: entry whose event ID is checked.
+ * @param entry: entry whose event ID is checked.
  * 
  * @returns True if the entry is a kernel stack entry, false otherwise.
 */
