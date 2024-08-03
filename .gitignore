@@ -6,6 +6,8 @@ build_modif_kshark.sh
 
 Stacklook/build
 Stacklook/src/_utilities.hpp
+Stacklook/doc/technical/html
+Stacklook/doc/docs_build.log
 
 TalkPluginExample
 
