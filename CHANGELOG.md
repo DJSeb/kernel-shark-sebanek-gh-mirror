@@ -3,7 +3,13 @@ Currently missing:
 - Task plot buttons for sched_switch of the plotted task
   (may be impossible without deeper KernelShark rewrite)
 - User documentation
-- Documentation build instructions
+
+# 2024-08-03
+# 1.2.4
+
+Code documentation fixes & additions.
+
+Build instructions were remade.
 
 # 2024-07-30
 ## 1.2.3
