@@ -32,7 +32,7 @@ Developing Stacklook plugin's basics.
 - [x] Basic working version*
 - [ ] Final version
 
-* The most important things work.
+\* The most important things work.
 
 ### Roadmap
 
@@ -50,7 +50,7 @@ Things not in specification aren't mandatory, but would be pretty useful.
         * NOTE: Could be circumvented if the plugin files were put into KernelShark's `src/plugins` directory
     * [ ] Create plugin documentation (user & technical)
         <!-- NOTE: Limit thyself, author -->
-        * [ ] Create build instructions for the documentation
+        * [x] Create build instructions for the documentation
         * [ ] Technical documentation (Doxygen)
         * [ ] User documentation (Markdown or HTML)
     * [ ] Create an example `trace.dat` file for demonstration
@@ -70,9 +70,15 @@ contains a comment about this).
 
 If using plugin's build method:
 
-1) Create a build directory and go into it.
-2) Start CMake and use the provided `CMakeLists.txt` in the `Stacklook` directory.
-3) Run `make` in the build directory.
+1) Create a `build` directory in the `Stacklook` folder and go into it.
+2) Start CMake and use the provided `CMakeLists.txt` in the `Stacklook` directory (i.e. `cmake ..`).
+    - By default, the **build type** will be `RelWithDebInfo` - to change this, e.g. to `Release`, use the option `-DCMAKE_BUILD_TYPE=Release`.
+    - If **Qt6 files** aren't in `/usr/include/qt6`, use the option `-D_QT6_INCLUDE_DIR=[PATH]`, where `[PATH]` is replaced by the path to the Qt6 files.
+        - Build instructions still expect that the specified directory has same inner structure as the default case (i.e. it contains `QtCore`, `QtWidgets`, etc.).
+    - If **KernelShark source files** aren't in the relative path `../kernelshark/src` from inside `Stacklook`, use the option `-D_KS_INCLUDE_DIR=[PATH]`, where `[PATH]` is replaced by the path to KernelShark source files.
+    - If **KernelShark's shared libraries** (.so files) aren't in `/usr/local/lib64`, use the option `-D_KS_SHARED_LIBS_DIR=[PATH]`, where `[PATH]` is replaced by the path to KernelShark shared libraries.
+    - If **documentation** is wanted, use the option `-D_DOXYGEN_DOC=1`.
+3) Run `make` in the `build` directory.
 4) Plug in the plugin into KernelShark (after starting it or in CLI).
 
 If using KernelShark build method:
@@ -81,19 +87,18 @@ If using KernelShark build method:
 2) Ensure the `CMakeLists.txt` file in said subdirectory contains instructions for building the plugin (copy the style of other Qt-using GUI plugins).
 3) Build KernelShark (plugins are built automatically).
 4) Start KernelShark (plugins built this way will be loaded automatically).
+- Documentation has to be built manually
 
-
-## Usage
-
-**TODO**
 
 ## Documentation
 
-[Look here.](./Stacklook/doc)
+### User documentation
 
-## Examples of use
+[User documentation](./Stacklook/doc/user/Manual.md)
 
-**TODO**
+### Technical documentation
+
+[Doxygen html site](./Stacklook/doc/technical/html/index.html)
 
 ## Contributions & acknowledgments
 
