@@ -1,90 +1,38 @@
-# A little bit of a commentary on this file.
-# If the project source files were simply added
-# to the KernelShark/src/plugins directory and
-# the plugins CMakeLists file were slightly changed,
-# then this file would not be necessary, as KernelShark
-# already provides the build instructions.
-#
-# This will still link all the necessary libraries, and
-# include necessary files, but a bit more verbosely due
-# to the location of the plugin project :)
-
 # CMake config
-
-# Like KernelShark's
 cmake_minimum_required(VERSION 3.1.2 FATAL_ERROR)
-
 project(stacklook)
 
-# Ensure a default build type
-if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE RelWithDebInfo)
-endif (NOT CMAKE_BUILD_TYPE)
-    
-# Specify output directory
-set(FINAL_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/build/bin")
-make_directory(${FINAL_OUTPUT_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${FINAL_OUTPUT_DIR})
-
-# Set C++ standard to 20
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall -Wextra -pthread -fPIC -fno-common")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread -fPIC -fno-common")
-
-# Dependencies
-## Ensure existing Qt6
-find_package(Qt6Widgets 6.3.0 REQUIRED)
-find_package(Qt6 COMPONENTS Network OpenGLWidgets StateMachine REQUIRED)
-
-set(QT6_INCLUDES "/usr/include/qt6")
-set(QT6_ALL_INCLUDES
-    ${QT6_INCLUDES}
-    "${QT6_INCLUDES}/QtWidgets"
-    "${QT6_INCLUDES}/QtNetwork"
-    "${QT6_INCLUDES}/QtOpenGLWidgets"
-    "${QT6_INCLUDES}/QtStateMachine"
-    "${QT6_INCLUDES}/QtCore"
-    "${QT6_INCLUDES}/QtGui"
-)
-
-## KernelShark
-### KernelShark meta
+# KernelShark meta
 set(KS_VERSION "2.3.1")
 
-### KernelShark files
-set(KS_PROJECT_DIR "${CMAKE_CURRENT_BINARY_DIR}/../../KS_fork")
-set(KS_INCLUDES "${KS_PROJECT_DIR}/src")
+# Ensure a default build type
+## For customisability by the user
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE RelWithDebInfo)
+endif ()
 
-set(KS_SHARED_LIBS_DIR "/usr/local/lib64")
-set(KS_LIB_SUFFIX ".so.${KS_VERSION}")
-set(KS_LIB_PREFIX "lib")
+# Build the plugin itself
+add_subdirectory("./src")
 
-set(KS_SLIB_CORE "${KS_SHARED_LIBS_DIR}/${KS_LIB_PREFIX}kshark${KS_LIB_SUFFIX}")
-set(KS_SLIB_PLOT "${KS_SHARED_LIBS_DIR}/${KS_LIB_PREFIX}kshark-plot${KS_LIB_SUFFIX}")
-set(KS_SLIB_GUI "${KS_SHARED_LIBS_DIR}/${KS_LIB_PREFIX}kshark-gui${KS_LIB_SUFFIX}")
+# If documentation was specified, attempt to find Doxygen and if found, add
+# documentation build instructions to the Makefile.
+# Otherwise, the user is free to generate the documentation themselves.
+if (_DOXYGEN_DOC)
+    find_package(Doxygen)
+    if (DOXYGEN_FOUND)
+        message("[INFO] Adding documentation instructions into Makefile...")
+        
+        set(DOX_CONFIG "${CMAKE_SOURCE_DIR}/doc/Doxyfile")
+        set(DOX_BUILD_LOG "${CMAKE_SOURCE_DIR}/doc/docs_build.log")
 
-### KernelShark conventions
-set(KS_PLUGIN_PREFIX "plugin-")
-
-# Project
-set(SOURCES
-    src/stacklook.h
-    src/SlButton.hpp
-    src/SlDetailedView.hpp
-    src/stacklook.c
-    src/SlButton.cpp
-    src/SlDetailedView.cpp
-    src/Stacklook.cpp
-)
-
-add_library(stacklook SHARED ${SOURCES})
-set_target_properties(stacklook PROPERTIES PREFIX ${KS_PLUGIN_PREFIX})
-
-target_include_directories(stacklook PRIVATE ${KS_INCLUDES})
-
-# Below are included as system header files in KShark, hence SYSTEM here
-target_include_directories(stacklook SYSTEM PRIVATE ${QT6_ALL_INCLUDES})
-target_link_libraries(stacklook PRIVATE
-    ${KS_SLIB_CORE}  ${KS_SLIB_PLOT}  ${KS_SLIB_GUI}
-)
+        add_custom_target(docs ALL)
+        add_custom_command(TARGET docs
+                           COMMAND doxygen ${DOX_CONFIG} > ${DOX_BUILD_LOG}
+                           WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/doc")
+        set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
+                    "${CMAKE_SOURCE_DIR}/docs_build.log"
+                    "${CMAKE_SOURCE_DIR}/technical/html")
+    else()
+        message("[ERROR] Doxygen not found, can't generate build instructions.")
+    endif()
+endif()
