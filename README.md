@@ -37,6 +37,9 @@ Making documentation.
 
 \* The most important things work.
 
+### Changelog
+[Here.](./CHANGELOG.md)
+
 ### Roadmap
 
 Things not in specification aren't mandatory, but would be pretty useful.
@@ -69,7 +72,13 @@ It is possible to create a plugin that would work with unomdified
 KernelShark version 2.3.1 (code that would need to be removed
 contains a comment about this).
 
-## Installation
+## Documentation
+
+[User manual](./Stacklook/doc/user/Manual.md)
+
+Technical (Doxygen HTML) - build it via Doxygen (build instructions are below).
+
+## Building
 
 *(Default)* If using this plugin's build method:
 
@@ -93,15 +102,6 @@ If using KernelShark build method:
 3) Build KernelShark (plugins are built automatically).
 4) Start KernelShark (plugins built this way will be loaded automatically).
 - Documentation has to be built manually
-
-
-## Documentation
-
-### User documentation
-
-[User manual](./Stacklook/doc/user/Manual.md)
-
-[Technical (Doxygen HTML)](./Stacklook/doc/technical/html/index.html)
 
 ## Contributions & acknowledgments
 
