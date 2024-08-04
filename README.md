@@ -11,14 +11,17 @@ Jan Kára RNDr.
 
 ## Repository layout
 
-You are in `root`.
+You are in **root**.
 
-- `root`
-    - `Stacklook` <= All files related to the plugin
-        - `src` <= All source code of the plugin
-        - `doc` <= Doxygen configuration and documentation files
+- **root**
+    - Directory `Stacklook` <= All files related to the plugin
+        - Directory `src` <= All source code of the plugin
+        - Directory `doc` <= Doxygen configuration and documentation files
         - Other files include: `CMakeLists.txt`
-    - `KS_fork` <= Submodule, a link to a GitHub repository hosting a GitHub fork of the main KernelShark repository
+    - Submodule `KS_fork` <= Link to a GitHub repository hosting a GitHub fork of the main KernelShark repository
+    - File `CHANGELOG.md` <= Brief change summaries to the program, starting from the first version that basically worked
+    - File `ProjectSpecification.md` <= Outlines how the project should look like
+    - Other files include: `LICENSE`, `.gitignore`, `.gitmodules`, `README.md` *(you are reading this \:D)*.
 
 
 ## Project status
