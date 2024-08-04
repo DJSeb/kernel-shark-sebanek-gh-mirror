@@ -83,6 +83,7 @@ contains a comment about this).
     - If **documentation** is wanted, use the option `-D_DOXYGEN_DOC=1`.
 3) Run `make` in the `build` directory.
     - If only a part of building is necessary, select a target of your choice.
+    - Just running `make` builds: **documentation** (target `docs`), **the plugin** (target `stacklook`), **symlink** to the plugin SO (target `stacklook_symlink`).
 4) Plug in the plugin into KernelShark (after starting it or in CLI).
 
 If using KernelShark build method:
