@@ -3,5 +3,73 @@
  * 
  * @section intro Introduction
  * 
- * @section install idk
+ * Stacklook allows the user to check kernel stack data of a task
+ * captured by trace-cmd after a task is switched by the scheduler
+ * or woken up by it. The plugin works with minimal changes to the
+ * original KernelShark code in full (and if necessary, can have
+ * its code easily modfied) to work with vanilla KernelShark as well.
+ * 
+ * @section features Features
+ * 
+ * @subsection btns Buttons
+ * 
+ * Above each `sched/sched_switch` and `sched/sched_wakeup`
+ * event in the KernelShark plot, an upside down triangle button will
+ * appear when the plugin is loaded in. 
+ * 
+ * **Hovering** over them with
+ * the mouse cursor will show the top three items on the kernel stack
+ * as well as the name of the task the stack is for
+ * 
+ * **Double clicking** on a button will spawn a window with the full
+ * kernel stack trace in its text form.
+ * 
+ * The buttons will only appear when there are no more than **200**
+ * entries shown on the KernelShark plot in the main window with
+ * the graph.
+ * 
+ * Color of the buttons depends on the color of the tasks. The buttons
+ * work for both task and CPU plots.s
+ * 
+ * @subsection windows Windows
+ * 
+ * Aforementioned windows show the kernel stack of a specific task.
+ * The stack is in text form and can be viewed as raw text with newlines
+ * or a list of strings. A text is shown above the stack text with the
+ * name of the task the stack belongs to.
+ * 
+ * The windows can be closed, resized and minimzed. When KernelShark's
+ * main window closes, so do the, but not the other way around.
+ * 
+ * There can be multiple windows spawned for a single entry or different
+ * entries.
+ * 
+ * Windows are made using Qt6, just like KernelShark and do not spawn
+ * their own processes, rather they are objects belonging to KernelShark,
+ * specifically Stacklook.
+ * 
+ * @section other_features Changes made to KernelShark
+ * 
+ * Visit @ref ks_modifs.
+ * 
+ * @section not_my_job What the plugin does NOT do
+ * 
+ * The plugin won't show the buttons above any other events other
+ * than those specified above and in code.
+ * 
+ * Noticeably, task plots do not
+ * include switch events from the task the plot is about, but just
+ * the ones that happen from other tasks that switch into this one.
+ * This is how KernelShark does it and it isn't modified by the plugin.
+ * 
+ * There is no customization of: the text in the buttons, the default button
+ * color (for if the color cannot be gotten), limit of entries visible
+ * until the buttons are shown, windows, adding or excluding
+ * events to show buttons for, button sizes or positions.
+ * 
+ * @section sl_future What the plugin might do in the future
+ * 
+ * Add a plugin settings menu, which would allow customizing:
+ * events which the buttons will be displayed over, default
+ * button color, limit of entries visible until the buttons are shown.
 */

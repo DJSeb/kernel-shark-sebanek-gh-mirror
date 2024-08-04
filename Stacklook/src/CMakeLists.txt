@@ -8,7 +8,7 @@
 # This will still link all the necessary libraries, and
 # include necessary files, but a bit more verbosely due
 # to the location of the plugin project :)
-    
+
 # Specify output directory
 set(FINAL_OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin")
 make_directory(${FINAL_OUTPUT_DIR})

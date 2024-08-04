@@ -26,7 +26,7 @@ You are in **root**.
 
 ## Project status
 
-Making documentation.
+Making user documentation.
 
 ### NPRG045 general tasks
 
@@ -57,12 +57,12 @@ Things not in specification aren't mandatory, but would be pretty useful.
     * [ ] Create plugin documentation (user & technical)
         <!-- NOTE: Limit thyself, author -->
         * [x] Create build instructions for the documentation
-        * [ ] Technical documentation (Doxygen)
+        * [x] Technical documentation (Doxygen)
         * [ ] User documentation (Markdown or HTML)
-    * [ ] Create an example `trace.dat` file for demonstration
-        * [ ] Write a program that will do some stack shenanigans
     * [ ] *(Not in specification) Add a settings menu for the plugin*
     * [x] *(implied)* Make it work for CPU and task plots
+* [ ] Create an example `trace.dat` file for demonstration
+    * [ ] Write a program that will do some stack shenanigans
 
 ## Requirements
 
@@ -77,6 +77,8 @@ contains a comment about this).
 [User manual](./Stacklook/doc/user/Manual.md)
 
 Technical (Doxygen HTML) - build it via Doxygen (build instructions are below).
+- Or do not generate it and read the comments in code and .doxygen files in
+  the `docs` folder.
 
 ## Building
 
@@ -102,6 +104,9 @@ If using KernelShark build method:
 3) Build KernelShark (plugins are built automatically).
 4) Start KernelShark (plugins built this way will be loaded automatically).
 - Documentation has to be built manually
+
+Do note that the instructions won't remove previous versions. For that, just use `rm` in the directory
+where the SO files are to clean what you need.
 
 ## Contributions & acknowledgments
 
