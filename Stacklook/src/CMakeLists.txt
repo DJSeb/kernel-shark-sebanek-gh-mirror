@@ -80,7 +80,9 @@ set(SOURCES
 
 ## Creating the shared library
 add_library(stacklook SHARED ${SOURCES})
-set_target_properties(stacklook PROPERTIES PREFIX ${KS_PLUGIN_PREFIX})
+set_target_properties(stacklook PROPERTIES
+                      PREFIX ${KS_PLUGIN_PREFIX}
+                      SUFFIX ".so.${SL_VERSION}")
 
 ## Include KernelShark headers
 target_include_directories(stacklook PRIVATE ${_KS_INCLUDE_DIR})
@@ -91,3 +93,8 @@ target_include_directories(stacklook SYSTEM PRIVATE ${QT6_ALL_INCLUDES})
 target_link_libraries(stacklook PRIVATE
     ${KS_SLIB_CORE}  ${KS_SLIB_PLOT}  ${KS_SLIB_GUI}
 )
+
+set(SL_SYMLINK_NAME "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}stacklook.so")
+set(SL_SYMLINK_TARGET "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}stacklook.so.${SL_VERSION}")
+add_custom_target(stacklook_symlink ALL
+                  COMMAND ${CMAKE_COMMAND} -E create_symlink ${SL_SYMLINK_TARGET} ${SL_SYMLINK_NAME})
