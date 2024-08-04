@@ -4,6 +4,15 @@ Currently missing:
   (may be impossible without deeper KernelShark rewrite)
 - User documentation
 
+# 2024-09-04
+# 1.2.5
+
+Added final technical documentation page (or at least final until
+revisions come).
+
+Added a symlink in the build process and Stacklook's version as a
+suffix to the actual SO file.
+
 # 2024-08-03
 # 1.2.4
 
