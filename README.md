@@ -1,11 +1,11 @@
 # Stacklook
 *Plugin for visualizing stacktraces in KernelShark.*
 
-## Author
+### Author
 
 David Jaromír Šebánek
 
-## Supervisor
+### Supervisor
 
 Jan Kára RNDr.
 
@@ -18,12 +18,12 @@ You are in `root`.
         - `src` <= All source code of the plugin
         - `doc` <= Doxygen configuration and documentation files
         - Other files include: `CMakeLists.txt`
-    - `KS_fork` <= Link to a GitHub repository hosting a GitHub fork of the main KernelShark repository
+    - `KS_fork` <= Submodule, a link to a GitHub repository hosting a GitHub fork of the main KernelShark repository
 
 
 ## Project status
 
-Developing Stacklook plugin's basics.
+Making documentation.
 
 ### NPRG045 general tasks
 
@@ -68,7 +68,7 @@ contains a comment about this).
 
 ## Installation
 
-If using plugin's build method:
+*(Default)* If using this plugin's build method:
 
 1) Create a `build` directory in the `Stacklook` folder and go into it.
 2) Start CMake and use the provided `CMakeLists.txt` in the `Stacklook` directory (i.e. `cmake ..`).
@@ -79,6 +79,7 @@ If using plugin's build method:
     - If **KernelShark's shared libraries** (.so files) aren't in `/usr/local/lib64`, use the option `-D_KS_SHARED_LIBS_DIR=[PATH]`, where `[PATH]` is replaced by the path to KernelShark shared libraries.
     - If **documentation** is wanted, use the option `-D_DOXYGEN_DOC=1`.
 3) Run `make` in the `build` directory.
+    - If only a part of building is necessary, select a target of your choice.
 4) Plug in the plugin into KernelShark (after starting it or in CLI).
 
 If using KernelShark build method:
@@ -94,21 +95,19 @@ If using KernelShark build method:
 
 ### User documentation
 
-[User documentation](./Stacklook/doc/user/Manual.md)
+[User manual](./Stacklook/doc/user/Manual.md)
 
-### Technical documentation
-
-[Doxygen html site](./Stacklook/doc/technical/html/index.html)
+[Technical (Doxygen HTML)](./Stacklook/doc/technical/html/index.html)
 
 ## Contributions & acknowledgments
 
-Yordan Karadzhov - maintains KernelShark, author took inspiration from his examples and plugins
-Google Lens - extracted text from images when no sources were available
-Geeksforgeeks:
-    - [Check if a point is inside a triangle](https://www.geeksforgeeks.org/check-whether-a-given-point-lies-inside-a-triangle-or-not/)
-ChatGPT:
-    - perfect for finding ideas that will never work
-    - good for simple prototype brainstorming
+**Yordan Karadzhov** - maintains KernelShark, author (me) took inspiration from his examples and plugins
+**Google Lens** - extracted text from images when no sources were available
+**Geeksforgeeks** - [Check if a point is inside a triangle](https://www.geeksforgeeks.org/check-whether-a-given-point-lies-inside-a-triangle-or-not/)
+
+**ChatGPT**:
+- perfect for finding ideas that will never work
+- good for simple prototype brainstorming
 
 ## Support
 
