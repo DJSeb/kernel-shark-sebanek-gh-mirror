@@ -49,14 +49,14 @@ struct plugin_stacklook_ctx {
 // Some magic by KernelShark that makes it simpler to integrate the plugin.
 KS_DECLARE_PLUGIN_CONTEXT_METHODS(struct plugin_stacklook_ctx)
 
-// Global funcs
+// Global functions, defined in C
 
 struct ksplot_font* get_font_ptr();
+
+// Global functions, defined in C++
+
 void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
                        int val, int draw_action);
-
-// Defined in C++
-
 void* plugin_set_gui_ptr(void* gui_ptr);
 void clean_opened_views(void* view_container);
 void* init_views();
