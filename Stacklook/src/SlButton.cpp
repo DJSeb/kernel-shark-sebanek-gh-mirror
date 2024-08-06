@@ -232,14 +232,22 @@ void SlTriangleButton::_draw(const KsPlot::Color&, float) const {
 */
 void SlTriangleButton::_mouseHover() const {
     const char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _is_kstack);
-    QString top_three_items[3]{};
-    _get_top_three_stack_items(kstack_string_ptr, top_three_items); 
+    
+    if (kstack_string_ptr != nullptr) {
+        QString top_three_items[3]{};
+        _get_top_three_stack_items(kstack_string_ptr, top_three_items); 
 
-    SlDetailedView::main_w_ptr->graphPtr()->setPreviewLabels(
-        kshark_get_task(_event_entry),
-        top_three_items[0],
-        top_three_items[1],
-        top_three_items[2],
-        "..."
-    );
+        SlDetailedView::main_w_ptr->graphPtr()->setPreviewLabels(
+            kshark_get_task(_event_entry),
+            top_three_items[0],
+            top_three_items[1],
+            top_three_items[2],
+            "..."
+        );
+    } else {
+        SlDetailedView::main_w_ptr->graphPtr()->setPreviewLabels(
+            kshark_get_task(_event_entry),
+            "NO KERNEL STACK ENTRY FOUND"
+        );
+    }
 }

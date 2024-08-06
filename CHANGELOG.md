@@ -4,7 +4,13 @@ Currently missing:
   (may be impossible without deeper KernelShark rewrite)
 - User documentation
 
-# 2024-09-04
+# 2024-08-06
+# 1.2.6
+
+Fixed:
+- Unchecked nullptr in _mouseHover of SlTriangleButton
+
+# 2024-08-04
 # 1.2.5
 
 Added final technical documentation page (or at least final until

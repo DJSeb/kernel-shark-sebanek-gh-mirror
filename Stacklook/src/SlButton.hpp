@@ -37,12 +37,12 @@ private: // Data members
     // Graphical
     /**
      * @brief Triangle which creates the outline of the button.
-     * Black coloured and filled.
+     * Black coloured and not filled.
     */
     KsPlot::Triangle _outline_triangle;
     /**
      * @brief Triangle which forms the innards of the button. Color
-     * depends on the entry's PID. 
+     * depends on the entry's PID. It is filled.
     */
     KsPlot::Triangle _inner_triangle;
     /**
