@@ -19,8 +19,31 @@
 #include "stacklook.h"
 #include "SlDetailedView.hpp"
 #include "SlButton.hpp"
+#include "SlConfig.hpp"
 
 // Static functions
+
+static void _add_sched_switch_prev_state_text(const kshark_entry* event_entry,
+                                              const KsPlot::TextBox& orig_text,
+                                              const ksplot_point position) {
+    plugin_stacklook_ctx* ctx = __get_context(event_entry->stream_id);
+    if (event_entry->event_id == ctx->sswitch_event_id) {
+        // Get the state indicator
+        auto info_as_str = std::string(kshark_get_info(event_entry));
+        auto start = info_as_str.find(" ==>");
+        auto prev_state_base = info_as_str.substr(start - 1, 1);
+        std::string prev_state = std::string("(" + prev_state_base + ")");
+        
+        // Create a text box
+        KsPlot::TextBox other_text(orig_text);
+        other_text.setText(prev_state);
+        ksplot_point other_pos = position;
+        other_text.setPos(KsPlot::Point{other_pos.x - 7, other_pos.y + 5 - 10});
+
+        // Draw additional information
+        other_text.draw();
+    }
+}
 
 /**
  * @brief Predicate function to check that the KernelShark entry is indeed kernel's
@@ -117,6 +140,8 @@ static QString _prettify_stack_item(const std::string& to_prettify) {
     const std::size_t num_of_chars = name_end - name_start;
 
     QString prettified;
+    prettified = prettified.replace('\n', "");
+
     if (num_of_chars > LABEL_LIMIT) {
         prettified = QString(to_prettify.substr(name_start, LABEL_LIMIT).append("...").c_str());
     } else {
@@ -136,17 +161,43 @@ static QString _prettify_stack_item(const std::string& to_prettify) {
 static void _get_top_three_stack_items(const char* stacktrace, QString out_array[]) {
     std::string trace_str{stacktrace};
 
+    const int16_t stack_offset = SlConfig::get_instance().get_stack_offset();
     std::size_t str_pos = 0;
-    for (uint8_t counter = 0; counter < 3; ++counter) {
-        std::size_t content_start = trace_str.find('\n', str_pos) + 1;
-        std::size_t content_end = trace_str.find('\n', content_start);
+
+    for (int64_t counter = 0; counter < stack_offset; ++counter) {
+        str_pos = trace_str.find("=>", str_pos);
+        
+        if (str_pos == std::string::npos) {
+            return;
+        }
+
+        ++str_pos;
+    }
+
+    for (int64_t counter = 0; counter < 3; ++counter) {
+        std::size_t content_start = trace_str.find("=>", str_pos);
+
+        // We don't have enough entries
+        if (content_start == std::string::npos) {
+            break;
+        }
+
+        std::size_t content_end = trace_str.find("=>", content_start + 1);
+
+        // If we found the last entry, take the rest of the string
+        // and block further iteration.
+        if (content_end == std::string::npos) {
+            content_end = trace_str.length() - 1;
+            counter = 3;
+        }
+
+        // For future iteration
+        str_pos = content_end;
+
         auto num_of_chars = content_end - content_start;
-
         const std::string item_as_str = trace_str.substr(content_start, num_of_chars);
-
         out_array[counter] = _prettify_stack_item(item_as_str);
 
-        str_pos = content_end + 1;
     }
 }
 
@@ -220,7 +271,10 @@ void SlTriangleButton::_doubleClick() const {
 void SlTriangleButton::_draw(const KsPlot::Color&, float) const {
     _inner_triangle.draw(); // Draw the triangle insides first
     _outline_triangle.draw(); // Make the outline by overlaying another triangle
-    _text.draw(); // Add text
+    _text.draw();
+
+    _add_sched_switch_prev_state_text(_event_entry, _text,
+                                      *(_inner_triangle.point(2)));
 }
 
 /**
@@ -234,15 +288,16 @@ void SlTriangleButton::_mouseHover() const {
     const char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _is_kstack);
     
     if (kstack_string_ptr != nullptr) {
-        QString top_three_items[3]{};
+        QString top_three_items[3]{"-", "-", "-"};
         _get_top_three_stack_items(kstack_string_ptr, top_three_items); 
+        const char* last_item = (top_three_items[2] == "-") ? "(End of stack)" : "..."; 
 
         SlDetailedView::main_w_ptr->graphPtr()->setPreviewLabels(
             kshark_get_task(_event_entry),
             top_three_items[0],
             top_three_items[1],
             top_three_items[2],
-            "..."
+            last_item
         );
     } else {
         SlDetailedView::main_w_ptr->graphPtr()->setPreviewLabels(

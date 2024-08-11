@@ -2,7 +2,23 @@
 Currently missing:
 - Task plot buttons for sched_switch of the plotted task
   (may be impossible without deeper KernelShark rewrite)
-- User documentation
+  * Well, it seems that the culprot is the sched_switch plugin's
+    shifting of PIDs in events - turning it off fixes this
+- User documentation pictures
+- Config window
+
+# 2024-08-11
+# 1.2.7
+
+Newly, some constants have been moved to a future config window.
+
+New features:
+- Switch events now have a little letter in parentheses under the
+  STACK text of the button, this letter indicates the prev_state of
+  the task recorded in the switch event.
+
+Bugfixes:
+- No longer skipping an entry in the stack trace during preview
 
 # 2024-08-06
 # 1.2.6

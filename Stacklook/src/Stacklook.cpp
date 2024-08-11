@@ -27,16 +27,7 @@
 #include "stacklook.h"
 #include "SlDetailedView.hpp"
 #include "SlButton.hpp"
-
-// Constants
-
-/// @brief Limit value of how many entries may be visible in a
-/// histogram for the plugin to take effect.
-constexpr static int HISTO_ENTRIES_LIMIT = 200;
-
-///
-/// @brief Default color of Stacklook buttons, white.
-const static KsPlot::Color DEFAULT_BUTTON_COL{0xFF, 0xFF, 0xFF};
+#include "SlConfig.hpp"
 
 // Static variables
 
@@ -197,7 +188,7 @@ static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
 
     // Text coords
     int text_x = x - BUTTON_TEXT_OFFSET;
-    int text_y = y - BUTTON_TEXT_OFFSET;
+    int text_y = y - BUTTON_TEXT_OFFSET - 2;
 
     // Colors
     float bg_intensity = _get_color_intensity(inner_triangle._color);
@@ -224,13 +215,14 @@ static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
 static void _draw_stacklook_button(KsCppArgV* argv, 
                                    kshark_data_container* dc,
                                    IsApplicableFunc checkFunc,
-                                   pluginShapeFunc makeButton) {    
+                                   pluginShapeFunc makeButton) {
     // -1 means default size
     // The default color of buttons will hopefully be overriden when
     // the button's entry's task PID is found.
     
     eventFieldPlotMin(argv, dc, checkFunc, makeButton,
-                      DEFAULT_BUTTON_COL, -1);
+                      SlConfig::get_instance().get_default_btn_col(),
+                      -1);
 }
 
 // Functions used in C code
@@ -288,6 +280,10 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
     KsCppArgV* argVCpp KS_ARGV_TO_CPP(argv_c);
     plugin_stacklook_ctx* ctx = __get_context(sd);
     kshark_data_container* plugin_data;
+
+    // Config data
+    const SlConfig& config = SlConfig::get_instance();
+    const int HISTO_ENTRIES_LIMIT = config.get_histo_limit();
     
     // Don't draw if not drawing tasks or CPUs.
     if (!(draw_action == KSHARK_CPU_DRAW 

@@ -7,3 +7,8 @@
 */
 
 #include "SlConfig.hpp"
+
+SlConfig& SlConfig::get_instance() {
+    static SlConfig instance;
+    return instance;
+}
