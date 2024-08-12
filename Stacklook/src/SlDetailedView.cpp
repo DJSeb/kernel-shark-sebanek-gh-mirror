@@ -9,6 +9,7 @@
 
 // C++
 #include <string>
+#include <map>
 
 // Plugin headers
 #include "SlDetailedView.hpp"
@@ -24,7 +25,7 @@
  * 
  * @returns New QString with prettier text data.
 */
-static QString prettify_data(const char* data) {
+static QString _prettify_data(const char* data) {
     std::string base_string{data};
 
     // What we got is NOT a stack trace, but we'll display it anyway.
@@ -52,19 +53,21 @@ static QString prettify_data(const char* data) {
  * @param task_name: name of the task whose stack trace is viewed
  * @param data: stack trace as text
 */
-SlDetailedView::SlDetailedView(const char* task_name, const char* data)
+SlDetailedView::SlDetailedView(const char* task_name, const char* specific_info,
+                               const char* data)
   : QWidget(SlDetailedView::main_w_ptr),
     _radio_btns(this),
     _raw_radio("Raw view", this),
     _list_radio("List view", this),
     _which_task("Kernlestack for task '" + QString(task_name) + "':", this),
+    _specific_entry_info(specific_info, this),
     _stacked_widget(this),
     _list_view(this),
     _raw_view(this),
     _close_button("Close", this) {
 
     // Make the data a bit nicer
-    QString new_data = prettify_data(data);
+    QString new_data = _prettify_data(data);
 
     setWindowTitle("Stacklook - Detailed Stack View");
     // Set window flags to make header buttons
@@ -91,6 +94,7 @@ SlDetailedView::SlDetailedView(const char* task_name, const char* data)
     _list_view.addItems(new_data.split('\n'));
 
     _layout.addWidget(&_which_task);
+    _layout.addWidget(&_specific_entry_info);
     _layout.addWidget(&_raw_radio);
     _layout.addWidget(&_list_radio);
 

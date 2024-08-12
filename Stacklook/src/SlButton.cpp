@@ -20,29 +20,68 @@
 #include "SlDetailedView.hpp"
 #include "SlButton.hpp"
 #include "SlConfig.hpp"
+#include "SlPrevState.hpp"
 
 // Static functions
 
+// TODO:
+
+/**
+ * @brief 
+ * 
+ * @param event_entry 
+ * @param orig_text 
+ * @param position 
+*/
 static void _add_sched_switch_prev_state_text(const kshark_entry* event_entry,
                                               const KsPlot::TextBox& orig_text,
                                               const ksplot_point position) {
     plugin_stacklook_ctx* ctx = __get_context(event_entry->stream_id);
     if (event_entry->event_id == ctx->sswitch_event_id) {
         // Get the state indicator
-        auto info_as_str = std::string(kshark_get_info(event_entry));
-        auto start = info_as_str.find(" ==>");
-        auto prev_state_base = info_as_str.substr(start - 1, 1);
-        std::string prev_state = std::string("(" + prev_state_base + ")");
+        const std::string prev_state_base = get_switch_prev_state(event_entry);
+        const std::string prev_state = "(" + prev_state_base + ")";
         
         // Create a text box
         KsPlot::TextBox other_text(orig_text);
         other_text.setText(prev_state);
-        ksplot_point other_pos = position;
-        other_text.setPos(KsPlot::Point{other_pos.x - 7, other_pos.y + 5 - 10});
+
+        /* We take position from the southmost point of the triangle in the button.
+           Following the button placement formula from `Stacklook.cpp`, +5 is added
+           to reset to original Y from which we can appropriately adjust the text.
+        */ 
+        KsPlot::Point other_pos{position.x - 7, // Center on the X axis
+                                position.y + 5 - 10}; // Adjust Y position
+        other_text.setPos(other_pos);
 
         // Draw additional information
         other_text.draw();
     }
+}
+
+/**
+ * @brief 
+ * @param entry 
+ * @return 
+ */
+static const std::string _get_specific_info(const kshark_entry* entry) {
+    plugin_stacklook_ctx* ctx = __get_context(entry->stream_id);
+    static const std::map<int32_t, const char*> SPECIFIC_INFO_MAP{{
+        {ctx->sswitch_event_id, "Task was in state "},
+        {ctx->swake_event_id,   "Task has woken up."}
+    }};
+    static const char* NO_MAP_VAL{"No specific info for event."};
+
+    const int32_t entry_event_id = kshark_get_event_id(entry);
+    const bool not_mapped = (SPECIFIC_INFO_MAP.count(entry_event_id) == 0);
+    std::string spec_info{
+        (not_mapped) ? NO_MAP_VAL : SPECIFIC_INFO_MAP.at(entry_event_id)};
+    
+    if (entry_event_id == ctx->sswitch_event_id) {
+        spec_info = spec_info.append(get_longer_prev_state(entry) + ".");
+    }
+
+    return spec_info;
 }
 
 /**
@@ -255,8 +294,9 @@ void SlTriangleButton::_doubleClick() const {
     
     const char* window_text = (kstack_string_ptr != nullptr) ? 
         kstack_string_ptr : error_msg;
+    const std::string specific_entry_info{_get_specific_info(_event_entry)};
 
-    auto new_view = new SlDetailedView(window_labeltext, window_text);
+    auto new_view = new SlDetailedView(window_labeltext, specific_entry_info.c_str(), window_text);
     new_view->show();
     SlDetailedView::opened_views->push_back(new_view);
 }

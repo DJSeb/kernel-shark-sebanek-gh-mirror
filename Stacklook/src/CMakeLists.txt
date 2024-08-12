@@ -73,11 +73,13 @@ set(SOURCES
     SlButton.hpp
     SlDetailedView.hpp
     SlConfig.hpp
+    SlPrevState.hpp
     stacklook.c
     SlButton.cpp
     SlDetailedView.cpp
     Stacklook.cpp
     SlConfig.cpp
+    SlPrevState.cpp
 )
 
 ## Creating the shared library

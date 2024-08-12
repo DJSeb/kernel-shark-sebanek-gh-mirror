@@ -146,7 +146,6 @@ static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
     // Constants
     constexpr int32_t BUTTON_TEXT_OFFSET = 14;
     const std::string STACK_BUTTON_TEXT = "STACK";
-    const KsPlot::Color OUTLINE_COLOR {0, 0, 0};
 
     kshark_entry* event_entry = data[0]->entry;
 
@@ -183,7 +182,7 @@ static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
 
     // Inner triangle
     auto back_triangle = KsPlot::Triangle(inner_triangle);
-    back_triangle._color = OUTLINE_COLOR;
+    back_triangle._color = SlConfig::get_instance().get_default_outline_col();
     back_triangle.setFill(false);
 
     // Text coords

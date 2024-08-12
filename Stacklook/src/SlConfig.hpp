@@ -20,6 +20,9 @@
 // KernelShark
 #include "KsPlotTools.hpp"
 
+// Plugin
+#include "SlPrevState.hpp"
+
 /**
  * @brief Singleton class for the config window.
 */
@@ -30,28 +33,33 @@ private: // Data members
     int32_t _histo_entries_limit{200};
     
     /// @brief How many entries would be skipped when using the preview
-    /// bar.
-    int16_t _stack_offset{40};
+    /// bar. By default, it's 3.
+    int16_t _stack_offset{3};
 
     ///
     /// @brief Default color of Stacklook buttons, white.
     KsPlot::Color _default_btn_col{0xFF, 0xFF, 0xFF};
 
-public: // Functions
-    static SlConfig& get_instance();
+    ///
+    /// @brief Default color of Stacklook buttons' outlines.
+    KsPlot::Color _default_outline_col{0, 0, 0};
 
-    int32_t get_histo_limit() const { return _histo_entries_limit; }
-    int16_t get_stack_offset() const { return _stack_offset; }
-    const KsPlot::Color get_default_btn_col() const { return _default_btn_col; }
 private: // Functions
 private: // Qt data members
     ///
     /// @brief Layout for the widget's control elements.
     QVBoxLayout     _layout;
 private: // Qt functions
+public: // Functions
+    static SlConfig& get_instance();
+    int32_t get_histo_limit() const;
+    int16_t get_stack_offset() const;    
+    const KsPlot::Color get_default_btn_col() const; 
+    const KsPlot::Color get_default_outline_col() const;
+public: // Qt data members
+    ///
+    /// @brief Close button for the widget.
+    QPushButton     _close_button;
 };
-
-// Qt
-#include <QtWidgets>
 
 #endif

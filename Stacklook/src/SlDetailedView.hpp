@@ -59,6 +59,10 @@ private: // Qt data members
     /// @brief Name of the task whose stack trace we are viewing.
     QLabel          _which_task;
     
+    /// @brief Information specific to a type of an event.
+    /// For example, sched_switch events will show their prev state.
+    QLabel          _specific_entry_info;
+
     ///
     /// @brief For toggling between views.
     QStackedWidget  _stacked_widget;
@@ -77,7 +81,8 @@ public: // Qt data members
 private: // Functions
     void _toggle_view();
 public: // Functions
-    explicit SlDetailedView(const char* task_name, const char* data);
+    explicit SlDetailedView(const char* task_name, const char* specific_info,
+                            const char* data);
 };
 
 #endif
