@@ -55,7 +55,7 @@ static QString _prettify_data(const char* data) {
 */
 SlDetailedView::SlDetailedView(const char* task_name, const char* specific_info,
                                const char* data)
-  : QWidget(SlDetailedView::main_w_ptr),
+  : QWidget(SlConfig::main_w_ptr),
     _radio_btns(this),
     _raw_radio("Raw view", this),
     _list_radio("List view", this),
@@ -64,7 +64,8 @@ SlDetailedView::SlDetailedView(const char* task_name, const char* specific_info,
     _stacked_widget(this),
     _list_view(this),
     _raw_view(this),
-    _close_button("Close", this) {
+    _close_button("Close", this)
+{
 
     // Make the data a bit nicer
     QString new_data = _prettify_data(data);

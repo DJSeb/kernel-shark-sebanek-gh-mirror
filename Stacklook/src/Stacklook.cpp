@@ -58,13 +58,15 @@ static bool _check_function_general(kshark_entry* entry,
                                     plugin_stacklook_ctx* ctx) {
     bool correct_event_id = (ctx->sswitch_event_id == entry->event_id)
                             || (ctx->swake_event_id == entry->event_id);
+    
+    bool is_config_allowed = SlConfig::get_instance().is_event_allowed(entry);
 
     bool is_visible_event = entry->visible
                             & kshark_filter_masks::KS_EVENT_VIEW_FILTER_MASK;
     bool is_visible_graph = entry->visible
                             & kshark_filter_masks::KS_GRAPH_VIEW_FILTER_MASK;
-    
-    return correct_event_id && is_visible_event && is_visible_graph;
+    return correct_event_id && is_config_allowed && is_visible_event
+           && is_visible_graph;
 }
 
 /**
@@ -224,6 +226,10 @@ static void _draw_stacklook_button(KsCppArgV* argv,
                       -1);
 }
 
+static void config_upshow([[maybe_unused]] KsMainWindow* main_w) {
+    SlConfig::get_instance().upshow();
+}
+
 // Functions used in C code
 
 /**
@@ -329,13 +335,16 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
  * @brief Give the plugin a pointer to KernalShark's main window to allow
  * GUI manipulation.
  * 
- * This is where plugin menu can be made and initialized.
+ * This is where plugin menu is be made and initialized.
  * 
- * @returns Nullptr as there is no menu control created.
+ * @returns Pointer to the config instance.
 */
 __hidden void* plugin_set_gui_ptr(void* gui_ptr) {
     KsMainWindow* main_w = static_cast<KsMainWindow*>(gui_ptr);
-    SlDetailedView::main_w_ptr = main_w;
+    SlConfig::main_w_ptr = main_w;
+
+    QString menu("Tools/Stacklook Configuration");
+    main_w->addPluginMenu(menu, config_upshow);
 
     return nullptr;
 }

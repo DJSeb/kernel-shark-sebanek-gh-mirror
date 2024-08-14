@@ -34,10 +34,6 @@ public: // Class data members
     ///
     /// @brief Pointer to a vector of opened Stacklook windows.
     inline static std::vector<SlDetailedView*>* opened_views = nullptr;
-
-    ///
-    /// @brief Pointer to the main window used for window hierarchy. 
-    inline static KsMainWindow* main_w_ptr = nullptr;
 private: // Qt data members
     ///
     /// @brief Layout for the widget's control elements.

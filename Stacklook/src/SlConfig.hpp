@@ -13,28 +13,38 @@
 
 //C++
 #include <stdint.h>
+#include <map>
 
 // Qt
 #include <QtWidgets>
 
 // KernelShark
+#include "libkshark.h"
 #include "KsPlotTools.hpp"
+#include "KsMainWindow.hpp"
 
 // Plugin
-#include "SlPrevState.hpp"
 
+// Usings
+using depth_t = uint16_t;
+using allowed_t = bool;
+using event_meta_t = std::pair<allowed_t, depth_t>;
+using event_name_t = std::string;
+using event_depths_t = std::map<event_name_t, event_meta_t>;
+
+// Class
 /**
  * @brief Singleton class for the config window.
 */
 class SlConfig : public QWidget {
+public: // Class data members
+    ///
+    /// @brief Pointer to the main window used for window hierarchy. 
+    inline static KsMainWindow* main_w_ptr = nullptr;
 private: // Data members
     /// @brief Limit value of how many entries may be visible in a
     /// histogram for the plugin to take effect.
     int32_t _histo_entries_limit{200};
-    
-    /// @brief How many entries would be skipped when using the preview
-    /// bar. By default, it's 3.
-    int16_t _stack_offset{3};
 
     ///
     /// @brief Default color of Stacklook buttons, white.
@@ -44,22 +54,41 @@ private: // Data members
     /// @brief Default color of Stacklook buttons' outlines.
     KsPlot::Color _default_outline_col{0, 0, 0};
 
-private: // Functions
+    /**
+     * @brief Collection of event names with data about:
+     * 
+     * 1) Being allowed to be shown.
+     * 2) Offset when viewing the stack items in the preview.
+    */
+    event_depths_t _events_meta{
+        {{"sched/sched_switch", {true, 3}},
+         {"sched/sched_wakeup", {false, 3}}}};
 private: // Qt data members
     ///
     /// @brief Layout for the widget's control elements.
     QVBoxLayout     _layout;
+
+    ///
+    /// @brief
+    //QHBoxLayout     _events_layout;
+private: // Functions
+    SlConfig();
 private: // Qt functions
-public: // Functions
-    static SlConfig& get_instance();
-    int32_t get_histo_limit() const;
-    int16_t get_stack_offset() const;    
-    const KsPlot::Color get_default_btn_col() const; 
-    const KsPlot::Color get_default_outline_col() const;
+    void update_controls();
 public: // Qt data members
     ///
     /// @brief Close button for the widget.
     QPushButton     _close_button;
+public: // Functions
+    static SlConfig& get_instance();
+    int32_t get_histo_limit() const;
+    uint16_t get_stack_offset(event_name_t evt_name) const;    
+    const KsPlot::Color get_default_btn_col() const; 
+    const KsPlot::Color get_default_outline_col() const;
+    //const event_depths_t get_events_meta() const;
+    bool is_event_allowed(kshark_entry* entry) const;
+
+    void upshow();
 };
 
 #endif

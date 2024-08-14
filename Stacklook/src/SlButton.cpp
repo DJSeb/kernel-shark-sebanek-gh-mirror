@@ -197,10 +197,12 @@ static QString _prettify_stack_item(const std::string& to_prettify) {
  * @param stacktrace: C-string of the stack trace to be processed
  * @param out_array: output array, top traces are eventually stored there
 */
-static void _get_top_three_stack_items(const char* stacktrace, QString out_array[]) {
+static void _get_top_three_stack_items(const char* stacktrace,
+                                       const std::string& evt_name,
+                                       QString out_array[]) {
     std::string trace_str{stacktrace};
 
-    const int16_t stack_offset = SlConfig::get_instance().get_stack_offset();
+    const int16_t stack_offset = SlConfig::get_instance().get_stack_offset(evt_name);
     std::size_t str_pos = 0;
 
     for (int64_t counter = 0; counter < stack_offset; ++counter) {
@@ -329,10 +331,12 @@ void SlTriangleButton::_mouseHover() const {
     
     if (kstack_string_ptr != nullptr) {
         QString top_three_items[3]{"-", "-", "-"};
-        _get_top_three_stack_items(kstack_string_ptr, top_three_items); 
+        _get_top_three_stack_items(kstack_string_ptr,
+                                   kshark_get_event_name(_event_entry),
+                                   top_three_items); 
         const char* last_item = (top_three_items[2] == "-") ? "(End of stack)" : "..."; 
 
-        SlDetailedView::main_w_ptr->graphPtr()->setPreviewLabels(
+        SlConfig::main_w_ptr->graphPtr()->setPreviewLabels(
             kshark_get_task(_event_entry),
             top_three_items[0],
             top_three_items[1],
@@ -340,7 +344,7 @@ void SlTriangleButton::_mouseHover() const {
             last_item
         );
     } else {
-        SlDetailedView::main_w_ptr->graphPtr()->setPreviewLabels(
+        SlConfig::main_w_ptr->graphPtr()->setPreviewLabels(
             kshark_get_task(_event_entry),
             "NO KERNEL STACK ENTRY FOUND"
         );
