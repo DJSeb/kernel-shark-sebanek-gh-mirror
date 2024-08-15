@@ -32,6 +32,11 @@
 // Static variables
 
 /**
+ * @brief 
+ */
+static SlConfigWindow* cfg_window;
+
+/**
  * @brief Color table of the tasks so that the Stacklook buttons look
  * prettier.
 */
@@ -227,7 +232,7 @@ static void _draw_stacklook_button(KsCppArgV* argv,
 }
 
 static void config_upshow([[maybe_unused]] KsMainWindow* main_w) {
-    SlConfig::get_instance().upshow();
+    cfg_window->upshow();
 }
 
 // Functions used in C code
@@ -343,8 +348,12 @@ __hidden void* plugin_set_gui_ptr(void* gui_ptr) {
     KsMainWindow* main_w = static_cast<KsMainWindow*>(gui_ptr);
     SlConfig::main_w_ptr = main_w;
 
+    if (cfg_window == nullptr) {
+        cfg_window = new SlConfigWindow();
+    }
+
     QString menu("Tools/Stacklook Configuration");
     main_w->addPluginMenu(menu, config_upshow);
 
-    return nullptr;
+    return cfg_window;
 }

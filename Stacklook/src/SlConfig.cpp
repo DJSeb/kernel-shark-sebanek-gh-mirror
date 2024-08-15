@@ -16,30 +16,7 @@
 // Plugin
 #include "SlConfig.hpp"
 
-// Classes
-
-SlConfig::SlConfig()
-    : QWidget(nullptr),
-    _close_button("Close", this)
-{
-    setWindowTitle("Stacklook Plugin Configuration");
-    // Set window flags to make header buttons
-    setWindowFlags(Qt::Window | Qt::WindowMinimizeButtonHint
-                   | Qt::WindowMaximizeButtonHint
-                   | Qt::WindowCloseButtonHint);
-    // Change size to something reasonable
-    resize(600, 450);
-
-    _layout.addWidget(&_close_button);
-
-    connect(&_close_button,	&QPushButton::pressed, this, &QWidget::close);
-
-    // Set the layout to the prepared one
-	setLayout(&_layout);
-
-}
-
-void SlConfig::update_controls() {}
+// Configuration
 
 SlConfig& SlConfig::get_instance() {
     static SlConfig instance;
@@ -99,7 +76,35 @@ bool SlConfig::is_event_allowed(kshark_entry* entry) const {
         false : _events_meta.at(evt_name).first;
 }
 
-void SlConfig::upshow() {
+// Window
+
+SlConfig& SlConfigWindow::cfg{SlConfig::get_instance()};
+
+SlConfigWindow::SlConfigWindow()
+    : QWidget(SlConfig::main_w_ptr),
+    _close_button("Close", this)
+{
+    setWindowTitle("Stacklook Plugin Configuration");
+    // Set window flags to make header buttons
+    setWindowFlags(Qt::Window | Qt::WindowMinimizeButtonHint
+                   | Qt::WindowMaximizeButtonHint
+                   | Qt::WindowCloseButtonHint);
+    // Change size to something reasonable
+    resize(600, 450);
+
+    _layout.addWidget(&_close_button);
+
+    connect(&_close_button,	&QPushButton::pressed, this, &QWidget::close);
+
+    // Set the layout to the prepared one
+	setLayout(&_layout);
+
+}
+
+void SlConfigWindow::update_controls() {}
+
+void SlConfigWindow::upshow() {
     update_controls();
     show();
 }
+

@@ -32,14 +32,17 @@ using event_meta_t = std::pair<allowed_t, depth_t>;
 using event_name_t = std::string;
 using event_depths_t = std::map<event_name_t, event_meta_t>;
 
+class SlConfigWindow;
+
 // Class
 /**
- * @brief Singleton class for the config window.
+ * @brief Singleton class for the config of the plugin.
 */
-class SlConfig : public QWidget {
+class SlConfig {
+friend class SlConfigWindow;
 public: // Class data members
     ///
-    /// @brief Pointer to the main window used for window hierarchy. 
+    /// @brief Pointer to the main window used for window hierarchies.
     inline static KsMainWindow* main_w_ptr = nullptr;
 private: // Data members
     /// @brief Limit value of how many entries may be visible in a
@@ -63,22 +66,6 @@ private: // Data members
     event_depths_t _events_meta{
         {{"sched/sched_switch", {true, 3}},
          {"sched/sched_wakeup", {false, 3}}}};
-private: // Qt data members
-    ///
-    /// @brief Layout for the widget's control elements.
-    QVBoxLayout     _layout;
-
-    ///
-    /// @brief
-    //QHBoxLayout     _events_layout;
-private: // Functions
-    SlConfig();
-private: // Qt functions
-    void update_controls();
-public: // Qt data members
-    ///
-    /// @brief Close button for the widget.
-    QPushButton     _close_button;
 public: // Functions
     static SlConfig& get_instance();
     int32_t get_histo_limit() const;
@@ -87,7 +74,27 @@ public: // Functions
     const KsPlot::Color get_default_outline_col() const;
     //const event_depths_t get_events_meta() const;
     bool is_event_allowed(kshark_entry* entry) const;
+};
 
+class SlConfigWindow : public QWidget {
+private: // Class data members
+    static SlConfig& cfg;
+private: // Qt data members
+    ///
+    /// @brief Layout for the widget's control elements.
+    QVBoxLayout     _layout;
+
+    ///
+    /// @brief
+    //QHBoxLayout     _events_layout;
+public: // Qt data members
+    ///
+    /// @brief Close button for the widget.
+    QPushButton     _close_button;
+private: // Qt functions
+    void update_controls();
+public: // Functions
+    SlConfigWindow();
     void upshow();
 };
 
