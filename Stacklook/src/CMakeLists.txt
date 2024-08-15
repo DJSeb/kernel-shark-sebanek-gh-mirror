@@ -66,6 +66,9 @@ set(KS_SLIB_GUI "${_KS_SHARED_LIBS_DIR}/${KS_LIB_PREFIX}kshark-gui${KS_LIB_SUFFI
 ### KernelShark conventions
 set(KS_PLUGIN_PREFIX "plugin-")
 
+## For Qt moc handling
+#set(CMAKE_AUTOMOC ON)
+
 # Plugin building
 ## Needed source files
 set(SOURCES

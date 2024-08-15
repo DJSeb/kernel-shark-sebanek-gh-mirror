@@ -189,7 +189,7 @@ static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
 
     // Inner triangle
     auto back_triangle = KsPlot::Triangle(inner_triangle);
-    back_triangle._color = SlConfig::get_instance().get_default_outline_col();
+    back_triangle._color = SlConfig::get_instance().get_button_outline_col();
     back_triangle.setFill(false);
 
     // Text coords
@@ -231,8 +231,9 @@ static void _draw_stacklook_button(KsCppArgV* argv,
                       -1);
 }
 
-static void config_upshow([[maybe_unused]] KsMainWindow* main_w) {
-    cfg_window->upshow();
+static void config_show([[maybe_unused]] KsMainWindow* main_w) {
+    cfg_window->load_cfg_values();
+    cfg_window->show();
 }
 
 // Functions used in C code
@@ -245,7 +246,7 @@ static void config_upshow([[maybe_unused]] KsMainWindow* main_w) {
  * windows.
 */
 void clean_opened_views(void* view_container) {
-    auto views_ptr = (std::vector<SlDetailedView*>*)(view_container);
+    auto views_ptr = (views_registry_t*)(view_container);
     
     // To prevent nullptr access
     if (views_ptr == nullptr) {
@@ -262,7 +263,7 @@ void clean_opened_views(void* view_container) {
     }
 
     // Finally, destroy the vector itself
-    delete (std::vector<SlDetailedView*>*)(view_container);
+    delete (views_registry_t*)(view_container);
 }
 
 /**
@@ -272,7 +273,7 @@ void clean_opened_views(void* view_container) {
  * @returns Vector's heap address as a void pointer.
 */
 void* init_views() {
-    auto views = new std::vector<SlDetailedView*>{};
+    auto views = new views_registry_t{};
     SlDetailedView::opened_views = views;
     return (void*)(views);
 }
@@ -293,7 +294,7 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
 
     // Config data
     const SlConfig& config = SlConfig::get_instance();
-    const int HISTO_ENTRIES_LIMIT = config.get_histo_limit();
+    const int32_t HISTO_ENTRIES_LIMIT = config.get_histo_limit();
     
     // Don't draw if not drawing tasks or CPUs.
     if (!(draw_action == KSHARK_CPU_DRAW 
@@ -353,7 +354,7 @@ __hidden void* plugin_set_gui_ptr(void* gui_ptr) {
     }
 
     QString menu("Tools/Stacklook Configuration");
-    main_w->addPluginMenu(menu, config_upshow);
+    main_w->addPluginMenu(menu, config_show);
 
     return cfg_window;
 }
