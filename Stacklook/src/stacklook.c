@@ -81,13 +81,6 @@ static void _sl_free_ctx(struct plugin_stacklook_ctx* sl_ctx)
     sl_ctx->swake_event_id = -1;
 }
 
-/**
- * @brief KernelShark-provided macro for quickly setting up necessities
- * of a plugin context
- *
- * @param type: For which context the definition shall happen
- * @param type_free: What function shall be used when freeing the plugin
-*/
 KS_DEFINE_PLUGIN_CONTEXT(struct plugin_stacklook_ctx, _sl_free_ctx);
 
 /**
@@ -95,13 +88,14 @@ KS_DEFINE_PLUGIN_CONTEXT(struct plugin_stacklook_ctx, _sl_free_ctx);
  * during plugin loading.
  * 
  * @param stream: KernelShark's data stream
+ * @param rec: Does nothing here :)
  * @param entry: KernelShark entry to be processed
  * 
  * @note Supported events are: `sched/sched_switch`,
  *                             `sched/sched_wakeup`.
 */
 static void _select_events(struct kshark_data_stream* stream,
-                           void*, struct kshark_entry* entry) {
+                           [[maybe_unused]] void* rec, struct kshark_entry* entry) {
 
     struct plugin_stacklook_ctx* sl_ctx = __get_context(stream->stream_id);
     struct kshark_data_container* sl_ctx_stack_data = sl_ctx->collected_events;
