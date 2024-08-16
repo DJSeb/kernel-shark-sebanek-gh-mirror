@@ -17,6 +17,12 @@
 // Plugin
 #include "SlConfig.hpp"
 
+// Constants
+
+/**
+ * @brief CHANGE WHEN NEW EVENTS ARE ADDED!
+ */
+constexpr int SUPPORTED_EVENTS_COUNT {2};
 
 // Static functions
 
@@ -78,54 +84,25 @@ SlConfig& SlConfig::get_instance() {
     return instance;
 }
 
-/**
- * @brief
- * 
- * @returns
-*/
 int32_t SlConfig::get_histo_limit() const
 { return _histo_entries_limit; }
 
-/**
- * @brief
- * 
- * @returns
-*/
 uint16_t SlConfig::get_stack_offset(event_name_t evt_name) const {
     return (_events_meta.count(evt_name) == 0) ?
         0 : _events_meta.at(evt_name).second;
 }
 
-/**
- * @brief
- * 
- * @returns
-*/
 const KsPlot::Color SlConfig::get_default_btn_col() const
 { return _default_btn_col; }
 
-/**
- * @brief
- * 
- * @returns
-*/
+
 const KsPlot::Color SlConfig::get_button_outline_col() const
 { return _button_outline_col; }
 
-/**
- * @brief 
- * @return 
- */
 const events_meta_t& SlConfig::get_events_meta() const {
     return _events_meta;
 }
 
-/**
- * @brief 
- * @param entry 
- * 
- * @return 
- */
 bool SlConfig::is_event_allowed(kshark_entry* entry) const {
     const std::string evt_name{kshark_get_event_name(entry)};
     return (_events_meta.count(evt_name) == 0) ?
@@ -151,11 +128,8 @@ SlConfigWindow::SlConfigWindow()
 
     setWindowTitle("Stacklook Plugin Configuration");
     // Set window flags to make header buttons
-    setWindowFlags(Qt::Window | Qt::WindowMinimizeButtonHint
-                   | Qt::WindowMaximizeButtonHint
+    setWindowFlags(Qt::Dialog | Qt::WindowMinimizeButtonHint
                    | Qt::WindowCloseButtonHint);
-    // Change size to something reasonable
-
 
     // Setup colors
     const KsPlot::Color curr_def_btn_col = cfg._default_btn_col;
@@ -186,6 +160,7 @@ SlConfigWindow::SlConfigWindow()
     _endstage_btns_layout.addWidget(&_close_button);
 
     // Create the layout
+    _layout.setSizeConstraint(QLayout::SetFixedSize);
     _layout.addLayout(&_histo_layout);
     _layout.addLayout(&_def_btn_col_ctl_layout);
     _layout.addLayout(&_btn_outline_ctl_layout);
@@ -199,8 +174,9 @@ SlConfigWindow::SlConfigWindow()
 }
 
 void SlConfigWindow::update_controls() {
-    bool event_meta_success = true;
+    bool events_meta_change = true;
     int r, g, b;
+    
     _def_btn_col.getRgb(&r, &g, &b);
     SlConfigWindow::cfg._default_btn_col =
         {(uint8_t)r, (uint8_t)g, (uint8_t)b};
@@ -211,35 +187,37 @@ void SlConfigWindow::update_controls() {
 
     SlConfigWindow::cfg._histo_entries_limit = _histo_limit.value();
 
-    for (auto&& event_entry : _events_meta_layout.children()) {
-        QHBoxLayout* typed_event_entry = (QHBoxLayout*)(event_entry);
-        auto event_name = typed_event_entry->findChild<QLabel*>("evt_name");
-        auto event_allowed = typed_event_entry->findChild<QCheckBox*>("evt_allowed");
-        auto event_depth = typed_event_entry->findChild<QSpinBox*>("evt_depth");
+    for (int i = 0; i < SUPPORTED_EVENTS_COUNT; ++i) {
+        auto index_str = std::to_string(i);
+        auto event_name = this->findChild<QLabel*>("evt_name_" + index_str);
+        auto event_allowed = this->findChild<QCheckBox*>("evt_allowed_" + index_str);
+        auto event_depth = this->findChild<QSpinBox*>("evt_depth_" + index_str);
 
-        if (event_name != nullptr && event_allowed != nullptr && event_depth != nullptr) {
+        if (event_name != nullptr &&
+            event_allowed != nullptr &&
+            event_depth != nullptr) {
             std::string event_name_str = event_name->text().toStdString();
             event_meta_t& event_meta = SlConfigWindow::cfg._events_meta.at(event_name_str);
             event_meta.first = event_allowed->isChecked();
             event_meta.second = (uint16_t)event_depth->value();
         } else {
-            event_meta_success = false;
-        }      
+            events_meta_change = false;
+        }
     }
 
-    if (!event_meta_success) {
-        auto fail_dialog = new QMessageBox(QMessageBox::Information,
-                    "Configuration change failed",
-                    "Configuration changes to specific events could not be altered!",
-                    QMessageBox::StandardButton::Ok, this);
-        fail_dialog->show();
-    } else {
-        auto confirm_dialog = new QMessageBox(QMessageBox::Information,
-                    "Configuration change",
-                    "Configuration was successfully altered!",
-                    QMessageBox::StandardButton::Ok, this);
-        confirm_dialog->show();
-    }
+    const char* change_status = events_meta_change ?
+        "Configuration change success" :
+        "Configuration change fail";
+    const char* detailed_message = events_meta_change ?
+        "Configuration was successfully altered!" :
+        "Configuration alteration wasn't fully successful.\n"
+        "Changes to specific events weren't altered.\n"
+        "Other configuration changes were successfully changed.";
+        
+    auto info_dialog = new QMessageBox(QMessageBox::Information,
+                change_status, detailed_message,
+                QMessageBox::StandardButton::Ok, this);
+    info_dialog->show();
 }
 
 void SlConfigWindow::setup_histo_section() {
@@ -272,6 +250,7 @@ void SlConfigWindow::setup_events_meta_widget() {
 
     const events_meta_t& evts_meta = SlConfigWindow::cfg.get_events_meta();
 
+    int i = 0;
     for (auto it = evts_meta.cbegin(); it != evts_meta.cend(); ++it) {
         QHBoxLayout* row = new QHBoxLayout{nullptr};
         QLabel* evt_name = new QLabel{this};
@@ -279,8 +258,11 @@ void SlConfigWindow::setup_events_meta_widget() {
         QSpinBox* evt_depth = new QSpinBox{this};
 
         evt_name->setText(it->first.c_str());
+        evt_name->setObjectName("evt_name_" + std::to_string(i));
         evt_allowed->setChecked(it->second.first);
+        evt_allowed->setObjectName("evt_allowed_" + std::to_string(i));
         evt_depth->setValue(it->second.second);
+        evt_depth->setObjectName("evt_depth_" + std::to_string(i));
         evt_depth->setMinimum(0);
 
         row->addWidget(evt_name);
@@ -290,6 +272,7 @@ void SlConfigWindow::setup_events_meta_widget() {
         row->addWidget(evt_depth);
 
         _events_meta_layout.addLayout(row);
+        ++i;
     }
 }
 
@@ -306,4 +289,25 @@ void SlConfigWindow::load_cfg_values() {
                            &_def_btn_col);
     _change_label_bg_color(&_btn_outline_preview,
                            &_btn_outline);
+    
+    const events_meta_t& cfg_evts_meta = cfg.get_events_meta();
+    for (int i = 0; i < SUPPORTED_EVENTS_COUNT; ++i) {
+        auto index_str = std::to_string(i);
+        auto event_name = this->findChild<QLabel*>("evt_name_" + index_str);
+        auto event_allowed = this->findChild<QCheckBox*>("evt_allowed_" + index_str);
+        auto event_depth = this->findChild<QSpinBox*>("evt_depth_" + index_str);
+
+        if (event_name != nullptr &&
+            event_allowed != nullptr &&
+            event_depth != nullptr) {
+            std::string event_name_str = event_name->text().toStdString();
+            const event_meta_t& specific_evt_meta = cfg_evts_meta.at(event_name_str);
+            
+            allowed_t is_allowed = specific_evt_meta.first;
+            event_allowed->setChecked(is_allowed);
+            
+            depth_t stack_depth = specific_evt_meta.second;
+            event_depth->setValue(static_cast<int>(stack_depth));
+        }
+    }
 }

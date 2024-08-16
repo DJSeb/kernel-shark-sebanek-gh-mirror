@@ -2,10 +2,32 @@
 Currently missing:
 - Task plot buttons for sched_switch of the plotted task
   (may be impossible without deeper KernelShark rewrite)
-  * Well, it seems that the culprot is the sched_switch plugin's
+  * Well, it seems that the culprit is the sched_switch plugin's
     shifting of PIDs in events - turning it off fixes this
 - User documentation pictures
-- Config window
+- Config documentation & cleanup
+
+# 2024-08-16
+# 1.3.0
+
+Config is here! (At least the first working version.)
+
+New features:
+- Tools tab of KernelShark now have a button labeled "Stacklook Configuration"
+- Configuration window allows one to change limit of entries displayed
+  in the histogram before the plugin kicks in (don't set it too high though -
+  always check what your computer can handle)
+- Configuration window allows one to change the color of Stacklook buttons'
+  outlines, which are by default black
+- Configuration window allows one to change the default color of Stacklook
+  buttons' inner area (refer to when the default color kicks in)
+  * There is a possibility to make default color or task-based color configurable as well
+- Configuration window also allows one to change what events to display from
+  the set of allowed ones (which are hard-coded) & change the offset from the top of the stack used in the preview bar (i.e. if it is set to 3, it will skip first three items from the top of the stack)
+
+Ideas:
+- Change indication of S, R, D, I, ... states in for buttons above sched_switch
+  (possibly just draw another shape next to those when hovering?)
 
 # 2024-08-11
 # 1.2.7
