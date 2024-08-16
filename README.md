@@ -59,7 +59,7 @@ Things not in specification aren't mandatory, but would be pretty useful.
         * [x] Create build instructions for the documentation
         * [x] Technical documentation (Doxygen)
         * [ ] User documentation (Markdown or HTML)
-    * [ ] *(Not in specification) Add a settings menu for the plugin*
+    * [x] *(Not in specification) Add a settings menu for the plugin*
     * [x] *(implied)* Make it work for CPU and task plots
 * [ ] Create an example `trace.dat` file for demonstration
     * [ ] Write a program that will do some stack shenanigans
@@ -117,6 +117,7 @@ where the SO files are to clean what you need.
 **ChatGPT**:
 - perfect for finding ideas that will never work
 - good for simple prototype brainstorming
+- helped with configuration dialog when designing the layouts
 
 ## Support
 
