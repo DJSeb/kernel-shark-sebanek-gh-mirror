@@ -72,6 +72,10 @@ It is possible to create a plugin that would work with unomdified
 KernelShark version 2.3.1 (code that would need to be removed
 contains a comment about this).
 
+**Newly from 1.3.1**: By specifying CMake variable `_UNMODIFED_KSHARK`,
+CMake will be able to add a definition of a preprocessor variable of the
+same name and compile the plugin SO file appropriately.
+
 ## Documentation
 
 [User manual](./Stacklook/doc/user/Manual.md)

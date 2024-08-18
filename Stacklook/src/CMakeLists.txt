@@ -69,6 +69,11 @@ set(KS_PLUGIN_PREFIX "plugin-")
 ## For Qt moc handling
 #set(CMAKE_AUTOMOC ON)
 
+## Add definitions if using modifed KernelShark (preview support)
+if (_UNMODIFIED_KSHARK)
+    add_definitions(-D_UNMODIFIED_KSHARK)
+endif()
+
 # Plugin building
 ## Needed source files
 set(SOURCES

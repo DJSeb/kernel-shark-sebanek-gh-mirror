@@ -7,8 +7,14 @@ Currently missing:
 - User documentation pictures
 - Config documentation & cleanup
 
+# 2024-08-17
+## 1.3.1
+
+Build instructions were modifed - if the plugin is to be used by unmodified
+KernelShark, the user can specify that via a CMake variable.
+
 # 2024-08-16
-# 1.3.0
+## 1.3.0
 
 Config is here! (At least the first working version.)
 
@@ -30,7 +36,7 @@ Ideas:
   (possibly just draw another shape next to those when hovering?)
 
 # 2024-08-11
-# 1.2.7
+## 1.2.7
 
 Newly, some constants have been moved to a future config window.
 
@@ -43,13 +49,13 @@ Bugfixes:
 - No longer skipping an entry in the stack trace during preview
 
 # 2024-08-06
-# 1.2.6
+## 1.2.6
 
 Fixed:
 - Unchecked nullptr in _mouseHover of SlTriangleButton
 
 # 2024-08-04
-# 1.2.5
+## 1.2.5
 
 Added final technical documentation page (or at least final until
 revisions come).
@@ -58,7 +64,7 @@ Added a symlink in the build process and Stacklook's version as a
 suffix to the actual SO file.
 
 # 2024-08-03
-# 1.2.4
+## 1.2.4
 
 Code documentation fixes & additions.
 

@@ -339,11 +339,14 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
 
 /**
  * @brief Give the plugin a pointer to KernalShark's main window to allow
- * GUI manipulation.
+ * GUI manipulation and menu creation.
  * 
- * This is where plugin menu is be made and initialized.
+ * This is where plugin menu is made and initialized first. It's lifetime
+ * is managed by KernelShark afterward.
  * 
- * @returns Pointer to the config instance.
+ * @param gui_ptr: Pointer to the main KernelShark window.
+ * 
+ * @returns Pointer to the configuration menu instance.
 */
 __hidden void* plugin_set_gui_ptr(void* gui_ptr) {
     KsMainWindow* main_w = static_cast<KsMainWindow*>(gui_ptr);
