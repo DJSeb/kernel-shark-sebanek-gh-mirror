@@ -177,9 +177,9 @@ static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
     */
 
     // Triangle points
-    KsPlot::Point a {x - 24, y - 25};
-    KsPlot::Point b {x + 24, y - 25};
-    KsPlot::Point c {x, y - 5};
+    KsPlot::Point a {x - 24, y - 27};
+    KsPlot::Point b {x + 24, y - 27};
+    KsPlot::Point c {x, y - 2};
 
     // Outer triangle
     auto inner_triangle = KsPlot::Triangle();
