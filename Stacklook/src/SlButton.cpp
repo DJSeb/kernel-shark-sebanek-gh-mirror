@@ -22,20 +22,53 @@
 #include "SlConfig.hpp"
 #include "SlPrevState.hpp"
 
-// Static functions
+// TODO: Comments
 
-// TODO:
+// Static variables
 
 /**
- * @brief 
+ * @brief Variable for the bold font.
+ */
+static ksplot_font bold_font;
+
+// Static functions
+
+/**
+ * @brief Checks if the bold font is loaded. If it isn't loaded yet, it initializes it.
  * 
- * @param event_entry 
- * @param orig_text 
- * @param position 
+ * @note Font to be loaded is *FreeSansBold*. This shouldn't produce issues,
+ * as KernelShark uses said font, but not bold. If it does produce an issue,
+ * change below `bold_font_path` to the font file you wish to use.
+ * 
+ * @returns True if font is loaded, false otherwise.
+ */
+static bool have_bold_font() {
+    bool is_ready = ksplot_font_is_loaded(&bold_font);
+
+    if (!is_ready) {
+        char* bold_font_path = ksplot_find_font_file("FreeSans", "FreeSansBold");
+        is_ready = ksplot_init_font(&bold_font, FONT_SIZE + 2, bold_font_path);
+    }
+    
+    return is_ready;
+}
+
+/**
+ * @brief Adds text to a Stacklook button of a sched_switch event - text shows
+ * "(PREVS_STATE)", where PREV_STATE is a letter representing what state the task
+ * was in before it was switched. Text box with the new text is then also placed under
+ * the always-present "STACK" text.
+ * 
+ * @param event_entry: entry whose prev_state we take if it is a sched_switch
+ * @param orig_text: text box for consistent style and position coordinates
+ * @param triangle_position: position of the triangle button containing the text
+ * 
+ * @note: `triangle_position` is necessary, as KernelShark's text boxes can't
+ * return their own position and cannot be utilized as such.
 */
 static void _add_sched_switch_prev_state_text(const kshark_entry* event_entry,
                                               const KsPlot::TextBox& orig_text,
-                                              const ksplot_point position) {
+                                              const ksplot_point triangle_position) {
     plugin_stacklook_ctx* ctx = __get_context(event_entry->stream_id);
     if (event_entry->event_id == ctx->sswitch_event_id) {
         // Get the state indicator
@@ -44,14 +77,20 @@ static void _add_sched_switch_prev_state_text(const kshark_entry* event_entry,
         
         // Create a text box
         KsPlot::TextBox other_text(orig_text);
+
+        if (have_bold_font()) {
+            // Set a bold font for better visibility if have bold font.
+            other_text.setFont(&bold_font);
+        }
+
         other_text.setText(prev_state);
 
         /* We take position from the southmost point of the triangle in the button.
            Following the button placement formula from `Stacklook.cpp`, +5 is added
            to reset to original Y from which we can appropriately adjust the text.
         */ 
-        KsPlot::Point other_pos{position.x - 7, // Center on the X axis
-                                position.y + 5 - 10}; // Adjust Y position
+        KsPlot::Point other_pos{triangle_position.x - 9, // Center on the X axis
+                                triangle_position.y + 5 - 11}; // Adjust Y position
         other_text.setPos(other_pos);
 
         // Draw additional information
@@ -60,9 +99,13 @@ static void _add_sched_switch_prev_state_text(const kshark_entry* event_entry,
 }
 
 /**
- * @brief 
- * @param entry 
- * @return 
+ * @brief Gets text (specific info) to be displayed in the detailed window.
+ * Has a dummy value if there is no specific info.
+ * 
+ * @param entry: which entry's specific info to get
+ * 
+ * @returns Const standard string with specific info or message informing
+ * of there being no specific info.
  */
 static const std::string _get_specific_info(const kshark_entry* entry) {
     plugin_stacklook_ctx* ctx = __get_context(entry->stream_id);
