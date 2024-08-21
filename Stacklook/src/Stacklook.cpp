@@ -66,12 +66,16 @@ static bool _check_function_general(kshark_entry* entry,
     
     bool is_config_allowed = SlConfig::get_instance().is_event_allowed(entry);
 
+    int entry_evt_id = kshark_get_event_id(entry->next);
+    bool has_next_kernelstack = (ctx->kstack_event_id == entry_evt_id);
+
     bool is_visible_event = entry->visible
                             & kshark_filter_masks::KS_EVENT_VIEW_FILTER_MASK;
     bool is_visible_graph = entry->visible
                             & kshark_filter_masks::KS_GRAPH_VIEW_FILTER_MASK;
-    return correct_event_id && is_config_allowed && is_visible_event
-           && is_visible_graph;
+    
+    return correct_event_id && is_config_allowed && has_next_kernelstack
+           && is_visible_event && is_visible_graph;
 }
 
 /**
