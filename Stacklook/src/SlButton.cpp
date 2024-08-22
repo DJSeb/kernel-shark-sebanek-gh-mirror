@@ -22,8 +22,6 @@
 #include "SlConfig.hpp"
 #include "SlPrevState.hpp"
 
-// TODO: Comments
-
 // Static variables
 
 /**
@@ -77,13 +75,12 @@ static void _add_sched_switch_prev_state_text(const kshark_entry* event_entry,
         
         // Create a text box
         KsPlot::TextBox other_text(orig_text);
+        other_text.setText(prev_state);
 
         if (have_bold_font()) {
             // Set a bold font for better visibility if have bold font.
             other_text.setFont(&bold_font);
         }
-
-        other_text.setText(prev_state);
 
         /* We take position from the southmost point of the triangle in the button.
            Following the button placement formula from `Stacklook.cpp`, +5 is added
@@ -335,7 +332,7 @@ double SlTriangleButton::distance(int x, int y) const {
  * will be shown in the window instead.
 */
 void SlTriangleButton::_doubleClick() const {
-    const char* error_msg = "ERROR: No info field found!";                             
+    constexpr const char error_msg[] = "ERROR: No info field found!";                          
     const char* window_labeltext = kshark_get_task(_event_entry);
     const char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _is_kstack);
     
