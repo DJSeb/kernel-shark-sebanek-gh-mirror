@@ -90,6 +90,8 @@ Technical (Doxygen HTML) - build it via Doxygen (build instructions are below).
 
 1) Create a `build` directory in the `Stacklook` folder and go into it.
 2) Start CMake and use the provided `CMakeLists.txt` in the `Stacklook` directory (i.e. `cmake ..`).
+    - If using unmodified KernelShark, specify so via `-D_UNMODIFIED_KSHARK=1` to build a binary without unnecessary code.
+    - If you wish to enable WIP nap rectangles in the plot, use `-D_WIP_NAPS=1`.
     - By default, the **build type** will be `RelWithDebInfo` - to change this, e.g. to `Release`, use the option `-DCMAKE_BUILD_TYPE=Release`.
     - If **Qt6 files** aren't in `/usr/include/qt6`, use the option `-D_QT6_INCLUDE_DIR=[PATH]`, where `[PATH]` is replaced by the path to the Qt6 files.
         - Build instructions still expect that the specified directory has same inner structure as the default case (i.e. it contains `QtCore`, `QtWidgets`, etc.).
@@ -105,6 +107,7 @@ If using KernelShark build method:
 
 1) Ensure all source files (`.c`, `.cpp`, `.h`) of Stacklook are in the `src/plugins` subdirectory of your KernelShark project directory.
 2) Ensure the `CMakeLists.txt` file in said subdirectory contains instructions for building the plugin (copy the style of other Qt-using GUI plugins).
+    - You may need to modify them a bit further regarding options `_WIP_NAPS` and `_UNMODIFIED_KSHARK`.
 3) Build KernelShark (plugins are built automatically).
 4) Start KernelShark (plugins built this way will be loaded automatically).
 - Documentation has to be built manually

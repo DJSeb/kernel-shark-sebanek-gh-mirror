@@ -90,6 +90,11 @@ set(SOURCES
     SlPrevState.cpp
 )
 
+if (_WIP_NAPS)
+    add_definitions(-D_WIP_NAPS)
+    list(APPEND SOURCES SlNapRectangle.hpp)
+endif()
+
 ## Creating the shared library
 add_library(stacklook SHARED ${SOURCES})
 set_target_properties(stacklook PROPERTIES

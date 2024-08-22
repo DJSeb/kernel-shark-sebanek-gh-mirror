@@ -10,9 +10,17 @@
 
 // C++
 #include <string>
+#include <map>
 
 // KernelShark
 #include "libkshark.h"
+
+static const std::map<char, const char*> LETTER_TO_NAME {{
+    {'S', "sleeping"}, {'D', "uninterruptible (disk) sleep"},
+    {'R', "running"}, {'I', "idle"}, {'T', "stopped"},
+    {'t', "tracing stop"}, {'X', "dead"}, {'Z', "zombie"},
+    {'P', "parked"}
+}};
 
 // Global functions
 const std::string get_switch_prev_state(const kshark_entry* entry);

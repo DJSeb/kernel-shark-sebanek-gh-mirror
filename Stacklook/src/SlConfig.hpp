@@ -95,6 +95,12 @@ private: // Data members
     /// Used when the buttons couldn't get the color of their task.
     KsPlot::Color _button_outline_col{0, 0, 0};
 
+#ifdef _WIP_NAPS
+    /// @brief Whether to draw rectangles with text between sched_switches
+    /// and sched_wakeups or not.
+    bool _draw_naps{true};
+#endif
+
 #ifndef _UNMODIFIED_KSHARK
     /**
      * @brief Map of event names keyed by their names with values:
@@ -109,7 +115,7 @@ private: // Data members
     */
     events_meta_t _events_meta{
         {{"sched/sched_switch", {true, 3}},
-         {"sched/sched_wakeup", {false, 3}}}};
+         {"sched/sched_wakeup", {true, 3}}}};
 #else
     /**
      * @brief Map of event names keyed by their names with values:
@@ -132,7 +138,10 @@ public: // Functions
     const KsPlot::Color get_default_btn_col() const; 
     const KsPlot::Color get_button_outline_col() const;
     const events_meta_t& get_events_meta() const;
-    bool is_event_allowed(kshark_entry* entry) const;
+#ifdef _WIP_NAPS
+    bool get_draw_naps() const;
+#endif
+    bool is_event_allowed(const kshark_entry* entry) const;
 };
 
 
@@ -213,6 +222,21 @@ private: // Qt data members
     /// before Stacklook buttons show up.
     QSpinBox        _histo_limit;
 
+#ifdef _WIP_NAPS
+    // Nap rectangles
+
+    /// @brief Layout used for the button and explanation of
+    /// what it does.
+    QHBoxLayout     _nap_rects_layout;
+
+    ///
+    /// @brief Explanation of what the checkbox next to it does.
+    QLabel          _nap_rects_label;
+
+    /// @brief Toggles whether to show nap rectangles or not.
+    QCheckBox       _nap_rects_btn;
+#endif
+
     // Events meta
 
     /// @brief Layout used for the section of the config window
@@ -229,6 +253,9 @@ public: // Qt data members
 private: // Qt functions
     void update_cfg();
     void setup_histo_section();
+#ifdef _WIP_NAPS
+    void setup_nap_rects();
+#endif
     void setup_events_meta_widget();
     void setup_layout();
     void setup_endstage();

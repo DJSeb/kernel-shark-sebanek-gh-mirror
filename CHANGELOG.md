@@ -7,11 +7,16 @@ Currently missing:
 - User documentation pictures
 - Config documentation & cleanup
 
+# 2024-08-22
+# 1.3.3
+
+Tried getting some more prominent prev state visibility through rectangles, doesn't work very well, so it's compile-option opt-in and labeled as WIP. Updated CMakeLists and source appropriately.
+
 # 2024-08-17
 ## 1.3.1
 
 Build instructions were modifed - if the plugin is to be used by unmodified
-KernelShark, the user can specify that via a CMake variable.
+KernelShark, the user can specify that via a CMake variable `_UNMODIFIED_KSHARK`.
 
 # 2024-08-16
 ## 1.3.0

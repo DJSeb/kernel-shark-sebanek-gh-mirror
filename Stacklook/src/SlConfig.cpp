@@ -91,7 +91,7 @@ const events_meta_t& SlConfig::get_events_meta() const {
  * 
  * @returns True if event is allowed, false otherwise.
 */
-bool SlConfig::is_event_allowed(kshark_entry* entry) const {
+bool SlConfig::is_event_allowed(const kshark_entry* entry) const {
     const std::string evt_name{kshark_get_event_name(entry)};
     return (_events_meta.count(evt_name) == 0) ?
         false
@@ -102,6 +102,17 @@ bool SlConfig::is_event_allowed(kshark_entry* entry) const {
 #endif
 }
 
+#ifdef _WIP_NAPS
+/**
+ * @brief Gets a boolean flag whether to draw rectangles for 'naps', i.e.
+ * durations between sched_switch and sched_wakeup.
+ * 
+ * @return True if we should draw naps, false otherwise.
+ */
+bool SlConfig::get_draw_naps() const {
+    return _draw_naps;
+}
+#endif
 // Window
 // Static functions
 
@@ -217,6 +228,10 @@ SlConfigWindow::SlConfigWindow()
     setWindowFlags(Qt::Dialog | Qt::WindowMinimizeButtonHint
                    | Qt::WindowCloseButtonHint);
 
+    setup_histo_section();
+#ifdef _WIP_NAPS
+    setup_nap_rects();
+#endif
     // Setup colors
     const KsPlot::Color curr_def_btn_col =
         SlConfigWindow::cfg._default_btn_col;
@@ -232,8 +247,6 @@ SlConfigWindow::SlConfigWindow()
                        &_btn_outline_preview,
                        &_btn_outline_ctl_layout);
     
-    setup_histo_section();
-
     // Connect endstage buttons to actions
     setup_endstage();
 
@@ -264,7 +277,9 @@ void SlConfigWindow::update_cfg() {
         {(uint8_t)r, (uint8_t)g, (uint8_t)b};
 
     SlConfigWindow::cfg._histo_entries_limit = _histo_limit.value();
-
+#ifdef _WIP_NAPS
+    SlConfigWindow::cfg._draw_naps = _nap_rects_btn.isChecked();
+#endif
     // Dynamically added member's need special handling 
     static const int SUPPORTED_EVENTS_COUNT =
         static_cast<int>(SlConfigWindow::cfg.get_events_meta().size());
@@ -330,6 +345,17 @@ void SlConfigWindow::setup_histo_section() {
     _histo_layout.addSpacing(100);
     _histo_layout.addWidget(&_histo_limit);
 }
+
+#ifdef _WIP_NAPS
+void SlConfigWindow::setup_nap_rects() {
+    _nap_rects_label.setText("(WIP) Check to see bars between sched_switch & sched_wakeup events");
+    _nap_rects_btn.setChecked(cfg._draw_naps);
+
+    _nap_rects_layout.addWidget(&_nap_rects_label);
+    _nap_rects_layout.addSpacing(50);
+    _nap_rects_layout.addWidget(&_nap_rects_btn);
+}
+#endif
 
 /**
  * @brief Setup control elements for events meta. These control
@@ -407,6 +433,10 @@ void SlConfigWindow::setup_layout() {
 
     // Add all control elements
     _layout.addLayout(&_histo_layout);
+#ifdef _WIP_NAPS
+    _layout.addLayout(&_nap_rects_layout);
+#endif
+    _layout.addWidget(_get_hline(this));
     _layout.addLayout(&_def_btn_col_ctl_layout);
     _layout.addLayout(&_btn_outline_ctl_layout);
     _layout.addWidget(_get_hline(this));
@@ -442,6 +472,10 @@ void SlConfigWindow::load_cfg_values() {
 
     // Setting of always-present members
     _histo_limit.setValue(cfg._histo_entries_limit);
+#ifdef _WIP_NAPS
+    _nap_rects_btn.setChecked(cfg._draw_naps);
+#endif
+
     _def_btn_col.setRgb(cfg._default_btn_col.r(),
                         cfg._default_btn_col.g(),
                         cfg._default_btn_col.b());
