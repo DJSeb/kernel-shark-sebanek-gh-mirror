@@ -18,13 +18,8 @@
 // TODO:
 
 // Global functions
-/**
- * @brief 
- * 
- * @param entry
- * 
- * @returns 
-*/
+
+
 const std::string get_switch_prev_state(const kshark_entry* entry) {
     auto info_as_str = std::string(kshark_get_info(entry));
     auto start = info_as_str.find(" ==>");

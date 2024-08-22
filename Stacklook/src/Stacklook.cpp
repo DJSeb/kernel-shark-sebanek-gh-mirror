@@ -11,10 +11,14 @@
 
 // Inclusions
 
+// C
+#include <stdint.h>
+
 // C++
 #include <vector>
 #include <string>
-#include <stdint.h>
+#include <map>
+#include <unordered_set>
 
 // KernelShark
 #include "libkshark.h"
@@ -28,8 +32,27 @@
 #include "SlDetailedView.hpp"
 #include "SlButton.hpp"
 #include "SlConfig.hpp"
+#include "SlPrevState.hpp"
+
+using nap_rects_switches_t = std::map<const kshark_entry*, KsPlot::Rectangle>;
+using nap_rects_wakeups_t = std::map<const kshark_entry*, KsPlot::Rectangle*>;
+using prev_state_colors_t = std::map<char, KsPlot::Color>;
 
 // Static variables
+
+static nap_rects_switches_t nap_rects_switches{};
+static nap_rects_wakeups_t nap_rects_wakeups{};
+static const prev_state_colors_t ps_cols {
+    {'S', {0, 0, 255}}, // Blue
+    {'D', {255, 0, 0}}, // Red
+    {'R', {0, 255, 0}}, // Green
+    {'I', {255, 255, 0}}, // Yellow
+    {'T', {0, 255, 255}}, // Cyan
+    {'t', {139, 69, 19}}, // Brown
+    {'X', {255, 0, 255}}, // Magenta
+    {'Z', {128, 0, 128}}, // Purple
+    {'P', {255, 165, 0}} // Orange
+};
 
 /**
  * @brief 
@@ -140,6 +163,75 @@ static float _get_color_intensity(const KsPlot::Color& c) {
     return (c.b() * 0.114f) + (c.g() * 0.587f) + (c.r() * 0.299f);
 }
 
+// Nap rectangles
+
+static kshark_entry* _get_next_wakeup(const kshark_entry* start, int wakeup_id) {
+    kshark_entry* next_wakeup = start->next;
+    while (next_wakeup) {
+        if (next_wakeup->event_id == wakeup_id && start->pid == next_wakeup->pid) {
+            break;
+        } else {
+            next_wakeup = next_wakeup->next;
+        }
+    }
+    return next_wakeup;
+}
+
+static void _do_nap_rectangles_switches(const KsPlot::Point& base_point,
+                                        const kshark_entry* entry,
+                                        const plugin_stacklook_ctx* ctx) {
+    if (!nap_rects_switches.count(entry)) {
+        const kshark_entry* next_wakeup = _get_next_wakeup(entry, ctx->swake_event_id);
+        nap_rects_switches.insert({entry, {}});
+        nap_rects_wakeups.insert({next_wakeup, &nap_rects_switches.at(entry)});
+    }
+
+    KsPlot::Rectangle& nap_rect = nap_rects_switches.at(entry);
+    auto point_0 = KsPlot::Point{base_point.x(), base_point.y() - 28};
+    auto point_1 = KsPlot::Point{base_point.x(), base_point.y() - 16};
+
+    nap_rect.setFill(true);
+    nap_rect._color = ps_cols.at(get_switch_prev_state(entry)[0]);
+
+    nap_rect.setPoint(0, point_0);
+    nap_rect.setPoint(1, point_1);
+}
+
+static void _do_nap_rectangles_wakeups(const KsPlot::Point& base_point,
+                                       const kshark_entry* entry) {
+    if (nap_rects_wakeups.count(entry) != 0) {
+        KsPlot::Rectangle* nap_rect = nap_rects_wakeups.at(entry);
+        
+        auto point_3 = KsPlot::Point{base_point.x(), base_point.y() - 28};
+        auto point_2 = KsPlot::Point{base_point.x(), base_point.y() - 16};
+        nap_rect->setPoint(2, point_2);
+        nap_rect->setPoint(3, point_3);
+
+        /** TODO:
+        
+        !!!
+                !!!MAKE  A SPEARATE NAP RECTANGLE CLASS!!!
+        !!!
+        
+        */
+
+        // Don't draw into other plots basically.
+        if (nap_rect->pointY(0) == point_3.y()) {
+            nap_rect->draw();
+        }
+    }
+}
+
+static void _do_nap_rectangles(const KsPlot::Point& base_point,
+                               const plugin_stacklook_ctx* ctx,
+                               const kshark_entry* entry) {
+    if (entry->event_id == ctx->sswitch_event_id) {
+        _do_nap_rectangles_switches(base_point, entry, ctx);
+    } else if (entry->event_id == ctx->swake_event_id) {
+        _do_nap_rectangles_wakeups(base_point, entry);
+    }
+}
+
 /**
  * @brief Creates a clickable Stacklook button to be displayed on the plot.
  * 
@@ -150,7 +242,7 @@ static float _get_color_intensity(const KsPlot::Color& c) {
  * 
  * @returns Pointer to the created button.
 */
-static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
+static SlTriangleButton* make_sl_objects(std::vector<const KsPlot::Graph*> graph,
                                         std::vector<int> bin,
                                         std::vector<kshark_data_field_int64*> data,
                                         KsPlot::Color col, float) {
@@ -214,23 +306,53 @@ static SlTriangleButton* make_sl_button(std::vector<const KsPlot::Graph*> graph,
     return sl_button;
 }
 
+static KsPlot::PlotObject* make_sl_nap_rect(std::vector<const KsPlot::Graph*> graph,
+                                        std::vector<int> bin,
+                                        std::vector<kshark_data_field_int64*> data,
+                                        KsPlot::Color, float) {
+    class DummyPlotObject: public KsPlot::PlotObject {
+        private:
+            void _draw(const KsPlot::Color&, float) const override {}
+    };
+    
+    kshark_entry* event_entry = data[0]->entry;
+    const plugin_stacklook_ctx* ctx = __get_context(data[0]->entry->stream_id);
+
+    // Base point
+    KsPlot::Point base_point = graph[0]->bin(bin[0])._val;
+
+    // For drawing nap rectangles
+    _do_nap_rectangles(base_point, ctx, event_entry);
+
+    return new DummyPlotObject{};
+}
+
+static void _draw_stacklook_nap_rects(KsCppArgV* argv, 
+                                      kshark_data_container* dc,
+                                      IsApplicableFunc check_func,
+                                      pluginShapeFunc make_nap_rect) {    
+    eventFieldPlotMin(argv, dc, check_func, make_nap_rect,
+                      {0, 0, 0},
+                      -1);
+}
+
 /**
- * @brief Function wrapper for drawing Stacklook buttons on the plot.
+ * @brief Function wrapper for drawing Stacklook objects on the plot.
  * 
- * @param argv: The C++ arguments of the drawing function of the plugin.
- * @param dc: Input location for the container of the event's data.
- * @param checkFunc: check function used to select events from data container.
- * @param makeButton: function which specifies what will be drawn and how
+ * @param argv: The C++ arguments of the drawing function of the plugin
+ * @param dc: Input location for the container of the event's data
+ * @param check_func: check function used to select events from data container
+ * @param make_button: function which specifies what will be drawn and how
 */
-static void _draw_stacklook_button(KsCppArgV* argv, 
-                                   kshark_data_container* dc,
-                                   IsApplicableFunc checkFunc,
-                                   pluginShapeFunc makeButton) {
+static void _draw_stacklook_objects(KsCppArgV* argv, 
+                                    kshark_data_container* dc,
+                                    IsApplicableFunc check_func,
+                                    pluginShapeFunc make_button) {
     // -1 means default size
     // The default color of buttons will hopefully be overriden when
     // the button's entry's task PID is found.
     
-    eventFieldPlotMin(argv, dc, checkFunc, makeButton,
+    eventFieldPlotMin(argv, dc, check_func, make_button,
                       SlConfig::get_instance().get_default_btn_col(),
                       -1);
 }
@@ -247,7 +369,7 @@ static void config_show([[maybe_unused]] KsMainWindow* main_w) {
  * view windows and the vector which holds them.
  * 
  * @param view_container: vector containing opened Stacklook view
- * windows.
+ * windows
 */
 void clean_opened_views(void* view_container) {
     auto views_ptr = (views_registry_t*)(view_container);
@@ -323,6 +445,7 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
     _load_current_colortable();
     
     IsApplicableFunc check_func;
+    IsApplicableFunc nap_rect_check_func;
     
     if (draw_action == KSHARK_TASK_DRAW) {
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
@@ -330,15 +453,48 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
             bool correct_pid = (entry->pid == val);
             return _check_function_general(entry, ctx) && correct_pid;
         };
+        nap_rect_check_func = [=] (kshark_data_container* data_c, ssize_t t) {
+            kshark_entry* entry = data_c->data[t]->entry;
+            bool correct_pid = (entry->pid == val);
+            bool correct_event_id = (ctx->sswitch_event_id == entry->event_id)
+                            || (ctx->swake_event_id == entry->event_id);
+
+            /* Not yet
+            bool is_config_allowed = SlConfig::get_instance().is_event_allowed(entry);
+            */
+
+            bool is_visible_event = entry->visible
+                                    & kshark_filter_masks::KS_EVENT_VIEW_FILTER_MASK;
+            bool is_visible_graph = entry->visible
+                                    & kshark_filter_masks::KS_GRAPH_VIEW_FILTER_MASK;
+            return correct_event_id && is_visible_event && is_visible_graph && correct_pid;
+        };
     } else if (draw_action == KSHARK_CPU_DRAW) {
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
             kshark_entry* entry = data_c->data[t]->entry;
             bool correct_cpu = (data_c->data[t]->entry->cpu == val);
             return _check_function_general(entry, ctx) && correct_cpu;
         };
+        nap_rect_check_func = [=] (kshark_data_container* data_c, ssize_t t) {
+            kshark_entry* entry = data_c->data[t]->entry;
+            bool correct_cpu = (data_c->data[t]->entry->cpu == val);
+            bool correct_event_id = (ctx->sswitch_event_id == entry->event_id)
+                            || (ctx->swake_event_id == entry->event_id);
+
+            /* Not yet
+            bool is_config_allowed = SlConfig::get_instance().is_event_allowed(entry);
+            */
+
+            bool is_visible_event = entry->visible
+                                    & kshark_filter_masks::KS_EVENT_VIEW_FILTER_MASK;
+            bool is_visible_graph = entry->visible
+                                    & kshark_filter_masks::KS_GRAPH_VIEW_FILTER_MASK;
+            return correct_event_id && is_visible_event && is_visible_graph && correct_cpu;
+        };
     }
 
-    _draw_stacklook_button(argVCpp, plugin_data, check_func, make_sl_button);
+    _draw_stacklook_nap_rects(argVCpp, plugin_data, nap_rect_check_func, make_sl_nap_rect);
+    _draw_stacklook_objects(argVCpp, plugin_data, check_func, make_sl_objects);
 }
 
 /**
