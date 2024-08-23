@@ -110,6 +110,7 @@ static void _select_events(struct kshark_data_stream* stream,
          * isn't considered empty.
         */
         kshark_data_container_append(sl_ctx_stack_data, entry, -1);
+        kshark_data_container_sort(sl_ctx->collected_events);
     }
 }
 
