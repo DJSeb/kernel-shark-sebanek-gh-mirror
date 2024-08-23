@@ -23,7 +23,8 @@ private:
     const kshark_entry* _end_wakeup = nullptr;
     std::string         _raw_text;
 
-    KsPlot::Rectangle _outline;
+    KsPlot::Line _outline_up;
+    KsPlot::Line _outline_down;
     KsPlot::Rectangle _rect;
     KsPlot::TextBox   _text;
 private:
@@ -31,7 +32,8 @@ private:
         // Don't draw into other plots basically.
         if (_rect.pointY(0) == _rect.pointY(3)) {
             _rect.draw();
-            _outline.draw();
+            _outline_up.draw();
+            _outline_down.draw();
             
             int nap_rect_width = (_rect.pointX(3) - _rect.pointX(0));
             int minimal_width = _raw_text.size() * FONT_SIZE;
@@ -45,9 +47,17 @@ public:
                        const KsPlot::Color& outline_col) {
         _rect = rect;
 
-        _outline = rect;
-        _outline._color = outline_col;
-        _outline.setFill(false);
+        const ksplot_point upper_point_a = *rect.point(0);
+        const ksplot_point upper_point_b = *rect.point(3);
+        _outline_up._color = outline_col;
+        _outline_up.setA(upper_point_a.x, upper_point_a.y);
+        _outline_up.setB(upper_point_b.x, upper_point_b.y);
+
+        const ksplot_point lower_point_a = *rect.point(1);
+        const ksplot_point lower_point_b = *rect.point(2);
+        _outline_down._color = outline_col;
+        _outline_down.setA(lower_point_a.x, lower_point_a.y);
+        _outline_down.setB(lower_point_b.x, lower_point_b.y);
     }
 
     void set_start_entry(const kshark_entry* start) { 
@@ -67,7 +77,8 @@ public:
     { if (!_end_wakeup) _end_wakeup = end; }
 
     KsPlot::Rectangle& get_rect() { return _rect; };
-    KsPlot::Rectangle& get_outline() { return _outline; }
+    KsPlot::Line& get_up_outline() { return _outline_up; }
+    KsPlot::Line& get_down_outline() { return _outline_down; }
 public:
     void create_text() {
         int base_x_1 = _rect.pointX(0);
