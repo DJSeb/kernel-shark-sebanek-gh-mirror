@@ -90,8 +90,8 @@ set(SOURCES
     SlPrevState.cpp
 )
 
-if (_WIP_NAPS)
-    add_definitions(-D_WIP_NAPS)
+if (_VISUALIZE_NAPS)
+    add_definitions(-D_VISUALIZE_NAPS)
     list(APPEND SOURCES SlNapRectangle.hpp)
 endif()
 

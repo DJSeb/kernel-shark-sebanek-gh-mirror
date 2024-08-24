@@ -38,17 +38,13 @@
 // #########################################################################
 // Usings
 
-#ifdef _WIP_NAPS
-using nap_rects_switches_t = std::map<const kshark_entry*, SlNapRectangle>;
-using nap_rects_wakeups_t = std::map<const kshark_entry*, SlNapRectangle*>;
+#ifdef _VISUALIZE_NAPS
 using prev_state_colors_t = std::map<char, KsPlot::Color>;
 #endif
 
 // #########################################################################
 // Static variables
-#ifdef _WIP_NAPS
-static nap_rects_switches_t nap_rects_switches{};
-static nap_rects_wakeups_t nap_rects_wakeups{};
+#ifdef _VISUALIZE_NAPS
 static const prev_state_colors_t ps_cols {
     {'S', {0, 0, 255}}, // Blue
     {'D', {255, 0, 0}}, // Red
@@ -93,12 +89,15 @@ static bool loaded_colors;
 */
 static bool _check_function_general(const kshark_entry* entry,
                                     const plugin_stacklook_ctx* ctx) {
+    if (!entry) return false;
     bool correct_event_id = (ctx->sswitch_event_id == entry->event_id)
                             || (ctx->swake_event_id == entry->event_id);
     
     bool is_config_allowed = SlConfig::get_instance().is_event_allowed(entry);
 
-    int entry_evt_id = kshark_get_event_id(entry->next);
+    const kshark_entry* next_entry = entry->next;
+    if (!next_entry) return false;
+    int entry_evt_id = kshark_get_event_id(next_entry);
     bool has_next_kernelstack = (ctx->kstack_event_id == entry_evt_id);
 
     bool is_visible_event = entry->visible
@@ -110,17 +109,16 @@ static bool _check_function_general(const kshark_entry* entry,
            && is_visible_event && is_visible_graph;
 }
 
-#ifdef _WIP_NAPS
+#ifdef _VISUALIZE_NAPS
 static bool _nap_rect_check_function_general(const kshark_entry* entry,
-                                             const plugin_stacklook_ctx* ctx) {
-    bool correct_event_id = (ctx->sswitch_event_id == entry->event_id)
-                            || (ctx->swake_event_id == entry->event_id);
-
+                                             int val) {
+    if (!entry) return false;
+    bool correct_pid = (entry->pid == val);
     bool is_visible_event = entry->visible
                             & kshark_filter_masks::KS_EVENT_VIEW_FILTER_MASK;
     bool is_visible_graph = entry->visible
                             & kshark_filter_masks::KS_GRAPH_VIEW_FILTER_MASK;
-    return correct_event_id && is_visible_event && is_visible_graph;
+    return correct_pid && is_visible_event && is_visible_graph;
 }
 #endif
 
@@ -186,146 +184,80 @@ static float _get_color_intensity(const KsPlot::Color& c) {
     return (c.b() * 0.114f) + (c.g() * 0.587f) + (c.r() * 0.299f);
 }
 
-#ifdef _WIP_NAPS
+#ifdef _VISUALIZE_NAPS
 // Nap rectangles
-
-static const kshark_entry* _get_next_wakeup(const kshark_entry* start, int wakeup_id) {
-    const plugin_stacklook_ctx* ctx = __get_context(start->stream_id);
-    
-    kshark_data_field_int64** entry_ext_data = ctx->collected_events->data;
-    const ssize_t plugin_data_size = ctx->collected_events->size;
-    ssize_t start_pos_in_ext_data = -1;
-
-    // Really a primitive way, but API is of no help sadly
-    for(ssize_t i = 0; i < plugin_data_size; ++i) {
-        if (entry_ext_data[i]->entry == start) {
-            start_pos_in_ext_data = i;
-        }
-    }
-
-    if (start_pos_in_ext_data == -1) {
-        return nullptr;
-    }
-
-    const kshark_entry* next_wakeup = nullptr;
-    for(ssize_t j = start_pos_in_ext_data; j < plugin_data_size; ++j) {
-        if (entry_ext_data[j]->entry->event_id == wakeup_id
-            && entry_ext_data[j]->entry->pid == start->pid)
-        {
-            next_wakeup = entry_ext_data[j]->entry;
-            break;
-        }
-    }
-
-    return next_wakeup;
-}
-
-static void _do_nap_rectangles_switches(const KsPlot::Point& base_point,
-                                        const kshark_entry* entry,
-                                        const plugin_stacklook_ctx* ctx) {
-    if (nap_rects_switches.count(entry) == 0) {
-        const kshark_entry* next_wakeup = _get_next_wakeup(entry, ctx->swake_event_id);
-        if (next_wakeup == nullptr) {
-            return;
-        }
-
-        nap_rects_switches.insert({entry, {}});
-        nap_rects_wakeups.insert({next_wakeup, &nap_rects_switches.at(entry)});
-    }
-
-    SlNapRectangle& nap_rect = nap_rects_switches.at(entry);
-    nap_rect.set_start_entry(entry);
-    auto point_0 = KsPlot::Point{base_point.x(), base_point.y() - 27};
-    auto point_1 = KsPlot::Point{base_point.x(), base_point.y() - 15};
-    
-    KsPlot::Rectangle rect;
-    rect.setFill(true);
-    rect._color = ps_cols.at(get_switch_prev_state(entry)[0]);
-
-    rect.setPoint(0, point_0);
-    rect.setPoint(1, point_1);
-    const KsPlot::Color outline_col = _get_color(entry->pid,
-                                      SlConfig::get_instance().get_default_btn_col());
-    nap_rect.set_rectangle(rect, outline_col);
-}
-
-static void _do_nap_rectangles_wakeups(const KsPlot::Point& base_point,
-                                       const kshark_entry* entry) {
-    if (nap_rects_wakeups.count(entry) != 0) {
-        SlNapRectangle* nap_rect = nap_rects_wakeups.at(entry);
-        
-        nap_rect->set_end_entry(entry);
-        auto point_3 = KsPlot::Point{base_point.x(), base_point.y() - 27};
-        auto point_2 = KsPlot::Point{base_point.x(), base_point.y() - 15};
-        nap_rect->get_rect().setPoint(2, point_2);
-        nap_rect->get_down_outline().setPoint(1, point_2);
-        nap_rect->get_rect().setPoint(3, point_3);
-        nap_rect->get_up_outline().setPoint(1, point_3);
-
-        nap_rect->create_text();
-        nap_rect->draw();
-    }
-}
-
-static void _do_nap_rectangles(const KsPlot::Point& base_point,
-                               const plugin_stacklook_ctx* ctx,
-                               const kshark_entry* entry) {
-    if (entry->event_id == ctx->sswitch_event_id) {
-        _do_nap_rectangles_switches(base_point, entry, ctx);
-    } else if (entry->event_id == ctx->swake_event_id) {
-        _do_nap_rectangles_wakeups(base_point, entry);
-    }
-}
 
 static KsPlot::PlotObject* make_sl_nap_rect(std::vector<const KsPlot::Graph*> graph,
                                             std::vector<int> bin,
                                             std::vector<kshark_data_field_int64*> data,
                                             KsPlot::Color, float) {
-    class SacrificePlotObject: public KsPlot::PlotObject {
-        private:
-            void _draw(const KsPlot::Color&, float) const override {}
-    };
+    kshark_entry* switch_entry = data[0]->entry;
+    kshark_entry* wakeup_entry = data[1]->entry;
 
-    kshark_entry* event_entry = data[0]->entry;
-    const plugin_stacklook_ctx* ctx = __get_context(data[0]->entry->stream_id);
+    // Base points and such
+    KsPlot::Point start_base_point = graph[0]->bin(bin[0])._val;
+    KsPlot::Point end_base_point = graph[0]->bin(bin[1])._val;
+    int height = 12;
 
-    // Base point
-    KsPlot::Point base_point = graph[0]->bin(bin[0])._val;
+    auto point_0 = KsPlot::Point{start_base_point.x(), start_base_point.y() - 15 - height};
+    auto point_1 = KsPlot::Point{start_base_point.x(), start_base_point.y() - 15};
+    auto point_3 = KsPlot::Point{end_base_point.x(), end_base_point.y() - 15 - height};
+    auto point_2 = KsPlot::Point{end_base_point.x(), end_base_point.y() - 15};
+    
+    KsPlot::Rectangle rect;
+    rect.setFill(true);
+    rect._color = ps_cols.at(get_switch_prev_state(switch_entry)[0]);
 
-    // For drawing nap rectangles
-    _do_nap_rectangles(base_point, ctx, event_entry);
+    rect.setPoint(0, point_0);
+    rect.setPoint(1, point_1);
+    rect.setPoint(2, point_2);
+    rect.setPoint(3, point_3);
 
-    return new SacrificePlotObject{};
+    const KsPlot::Color outline_col = _get_color(switch_entry->pid,
+                                      SlConfig::get_instance().get_default_btn_col());
+    
+    float bg_intensity = _get_color_intensity(rect._color);
+    const KsPlot::Color text_color = _black_or_white_text(bg_intensity);
+
+    SlNapRectangle* nap_rect = new SlNapRectangle{switch_entry, wakeup_entry, rect,
+                                                  outline_col, text_color};
+    return nap_rect;
 }
 
 static void _draw_stacklook_nap_rects(KsCppArgV* argv, 
                                       kshark_data_container* dc,
-                                      IsApplicableFunc check_func,
+                                      IsApplicableFunc check_func_switch,
+                                      IsApplicableFunc check_func_wakeup,
                                       pluginShapeFunc make_nap_rect) {    
-    eventFieldPlotMin(argv, dc, check_func, make_nap_rect,
-                      {0, 0, 0}, -1);
+    eventFieldIntervalPlot(argv, dc, check_func_switch, dc,
+                           check_func_wakeup, make_nap_rect,
+                           {0, 0, 0}, -1);
 }
 
 static void _do_draw_stacklook_nap_rectangles(KsCppArgV* argVCpp,
                                               kshark_data_container* plugin_data,
                                               const plugin_stacklook_ctx* ctx,
                                               int val, int draw_action) {
-    IsApplicableFunc nap_rect_check_func;
+    IsApplicableFunc nap_rect_check_func_switch;
+    IsApplicableFunc nap_rect_check_func_wakeup;
 
     if (draw_action == KSHARK_TASK_DRAW) {
-        nap_rect_check_func = [=] (kshark_data_container* data_c, ssize_t t) {
+        nap_rect_check_func_switch = [=] (kshark_data_container* data_c, ssize_t t) {
             kshark_entry* entry = data_c->data[t]->entry;
-            bool correct_pid = (entry->pid == val);
-            return _nap_rect_check_function_general(entry, ctx) && correct_pid;
+            //bool is_not_paired = (data_c->data[t]->field != -1);
+            bool is_switch = (entry->event_id == ctx->sswitch_event_id);
+            return _nap_rect_check_function_general(entry, val) && is_switch;
         };
-        _draw_stacklook_nap_rects(argVCpp, plugin_data, nap_rect_check_func, make_sl_nap_rect);
-    } else if (draw_action == KSHARK_CPU_DRAW) {
-        //nap_rect_check_func = [=] (kshark_data_container* data_c, ssize_t t) {
-        //    kshark_entry* entry = data_c->data[t]->entry;
-        //    bool correct_cpu = (data_c->data[t]->entry->cpu == val);
-        //    return _nap_rect_check_function_general(entry, ctx) && correct_cpu;
-        //};
-       // _draw_stacklook_nap_rects(argVCpp, plugin_data, nap_rect_check_func, make_sl_nap_rect);
+
+        nap_rect_check_func_wakeup = [=] (kshark_data_container* data_container, ssize_t i) {
+            kshark_entry* entry = data_container->data[i]->entry;
+            //bool is_not_paired = (data_container->data[i]->field != -1);
+            bool is_wakeup = (entry->event_id == ctx->swake_event_id);
+            return _nap_rect_check_function_general(entry, val) && is_wakeup;
+        };
+
+        _draw_stacklook_nap_rects(argVCpp, plugin_data, nap_rect_check_func_switch,
+                                  nap_rect_check_func_wakeup, make_sl_nap_rect);
     }
 }
 #endif
@@ -480,8 +412,8 @@ void* init_views() {
  * @param val: process or CPU ID value
  * @param draw_action: draw action identifier
 */
-void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
-                       int val, int draw_action) {
+void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
+                            int val, int draw_action) {
     KsCppArgV* argVCpp KS_ARGV_TO_CPP(argv_c);
     plugin_stacklook_ctx* ctx = __get_context(sd);
     kshark_data_container* plugin_data;
@@ -504,7 +436,7 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
         return;
     }
 
-    plugin_data = __get_context(sd)->collected_events;
+    plugin_data = ctx->collected_events;
     // Couldn't get the context container (any reason)
     if (!plugin_data) {
         return;
@@ -512,19 +444,12 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
 
     _load_current_colortable();
 
-#ifdef _WIP_NAPS
-    // If the user wants to draw nap rectangles, do so
-    if (SlConfig::get_instance().get_draw_naps()) {
-        _do_draw_stacklook_nap_rectangles(argVCpp, plugin_data, ctx,
-                                          val, draw_action);
-    }
-#endif
-
     IsApplicableFunc check_func;
     
     if (draw_action == KSHARK_TASK_DRAW) {
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
             kshark_entry* entry = data_c->data[t]->entry;
+            if (!entry) return false;
             bool correct_pid = (entry->pid == val);
             return _check_function_general(entry, ctx) && correct_pid;
         };
@@ -532,12 +457,21 @@ void draw_plot_buttons(struct kshark_cpp_argv* argv_c, int sd,
     } else if (draw_action == KSHARK_CPU_DRAW) {
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
             kshark_entry* entry = data_c->data[t]->entry;
+            if (!entry) return false;
             bool correct_cpu = (data_c->data[t]->entry->cpu == val);
             return _check_function_general(entry, ctx) && correct_cpu;
         };
     }
 
     _draw_stacklook_objects(argVCpp, plugin_data, check_func, make_sl_objects);
+
+#ifdef _VISUALIZE_NAPS
+    // If the user wants to draw nap rectangles, do so
+    if (SlConfig::get_instance().get_draw_naps()) {
+        _do_draw_stacklook_nap_rectangles(argVCpp, plugin_data, ctx,
+                                          val, draw_action);
+    }
+#endif
 }
 
 /**

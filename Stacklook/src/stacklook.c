@@ -27,6 +27,10 @@
 /// @brief Font used by KernelShark when plotting.
 static struct ksplot_font font;
 
+/// @brief Font used by the plugin when highlighting
+/// harder to see text.
+static struct ksplot_font bold_font;
+
 ///
 /// @brief Path to font file.
 static char* font_file = NULL;
@@ -44,6 +48,24 @@ static int kstack_id;
 static int sched_wake_id;
 
 // Header file definitions
+
+/**
+ * @brief Checks if the bold font is loaded. If it isn't loaded yet, it initializes it.
+ * 
+ * @note Font to be loaded is *FreeSansBold*. This shouldn't produce issues,
+ * as KernelShark uses said font, but not bold. If it does produce an issue,
+ * change `bold_font_path` to the font file you wish to use.
+ * 
+ * @returns True if font is loaded, false otherwise.
+ */
+struct ksplot_font* get_bold_font_ptr() {
+    if (!ksplot_font_is_loaded(&bold_font)) {
+        char* bold_font_path = ksplot_find_font_file("FreeSans", "FreeSansBold");
+        ksplot_init_font(&bold_font, FONT_SIZE + 2, bold_font_path);
+    }
+    
+    return &bold_font;
+}
 
 /**
  * @brief Get pointer to the font. Initializes the font
@@ -110,7 +132,6 @@ static void _select_events(struct kshark_data_stream* stream,
          * isn't considered empty.
         */
         kshark_data_container_append(sl_ctx_stack_data, entry, -1);
-        kshark_data_container_sort(sl_ctx->collected_events);
     }
 }
 
@@ -151,7 +172,7 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
 
     kshark_register_event_handler(stream, sched_switch_id, _select_events);
     kshark_register_event_handler(stream, sched_wake_id, _select_events);
-    kshark_register_draw_handler(stream, draw_plot_buttons);
+    kshark_register_draw_handler(stream, draw_stacklook_objects);
 
     return 1;
 }
@@ -174,7 +195,7 @@ int KSHARK_PLOT_PLUGIN_DEINITIALIZER(struct kshark_data_stream* stream) {
     if (sl_ctx) {
         kshark_unregister_event_handler(stream, sched_switch_id, _select_events);
         kshark_unregister_event_handler(stream, sched_wake_id, _select_events);
-        kshark_unregister_draw_handler(stream, draw_plot_buttons);
+        kshark_unregister_draw_handler(stream, draw_stacklook_objects);
         retval = 1;
     }
 

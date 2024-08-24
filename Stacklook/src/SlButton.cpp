@@ -22,34 +22,7 @@
 #include "SlConfig.hpp"
 #include "SlPrevState.hpp"
 
-// Static variables
-
-/**
- * @brief Variable for the bold font.
- */
-static ksplot_font bold_font;
-
 // Static functions
-
-/**
- * @brief Checks if the bold font is loaded. If it isn't loaded yet, it initializes it.
- * 
- * @note Font to be loaded is *FreeSansBold*. This shouldn't produce issues,
- * as KernelShark uses said font, but not bold. If it does produce an issue,
- * change below `bold_font_path` to the font file you wish to use.
- * 
- * @returns True if font is loaded, false otherwise.
- */
-static bool have_bold_font() {
-    bool is_ready = ksplot_font_is_loaded(&bold_font);
-
-    if (!is_ready) {
-        char* bold_font_path = ksplot_find_font_file("FreeSans", "FreeSansBold");
-        is_ready = ksplot_init_font(&bold_font, FONT_SIZE + 2, bold_font_path);
-    }
-    
-    return is_ready;
-}
 
 /**
  * @brief Adds text to a Stacklook button of a sched_switch event - text shows
@@ -76,10 +49,10 @@ static void _add_sched_switch_prev_state_text(const kshark_entry* event_entry,
         // Create a text box
         KsPlot::TextBox other_text(orig_text);
         other_text.setText(prev_state);
-
-        if (have_bold_font()) {
-            // Set a bold font for better visibility if have bold font.
-            other_text.setFont(&bold_font);
+        ksplot_font* font_to_use = get_bold_font_ptr();
+        
+        if (!font_to_use) {
+            other_text.setFont(get_font_ptr());
         }
 
         /* We take position from the southmost point of the triangle in the button.
