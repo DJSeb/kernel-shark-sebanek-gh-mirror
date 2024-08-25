@@ -5,6 +5,8 @@ Currently missing:
 # 2024-08-25
 ## 1.4.1
 
+Fixed and updated Doxygen documentation.
+
 New features:
 - nap rectangles added - visualization of prev_state of a switch up until the next wakeup.
   * can be turned off in the configuration
