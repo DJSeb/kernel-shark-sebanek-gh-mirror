@@ -103,7 +103,7 @@ bool SlConfig::is_event_allowed(const kshark_entry* entry) const {
 #endif
 }
 
-#ifdef _VISUALIZE_NAPS
+#ifndef _NO_NAPS
 /**
  * @brief Gets a boolean flag whether to draw rectangles for 'naps', i.e.
  * durations between sched_switch and sched_wakeup.
@@ -230,7 +230,7 @@ SlConfigWindow::SlConfigWindow()
                    | Qt::WindowCloseButtonHint);
 
     setup_histo_section();
-#ifdef _VISUALIZE_NAPS
+#ifndef _NO_NAPS
     setup_nap_rects();
 #endif
     // Setup colors
@@ -278,7 +278,7 @@ void SlConfigWindow::update_cfg() {
         {(uint8_t)r, (uint8_t)g, (uint8_t)b};
 
     SlConfigWindow::cfg._histo_entries_limit = _histo_limit.value();
-#ifdef _VISUALIZE_NAPS
+#ifndef _NO_NAPS
     SlConfigWindow::cfg._draw_naps = _nap_rects_btn.isChecked();
 #endif
     // Dynamically added member's need special handling 
@@ -346,7 +346,7 @@ void SlConfigWindow::setup_histo_section() {
     _histo_layout.addWidget(&_histo_limit);
 }
 
-#ifdef _VISUALIZE_NAPS
+#ifndef _NO_NAPS
 /**
  * @brief Sets up explanation label and check box for controlling
  * display of nap rectangles.
@@ -437,7 +437,7 @@ void SlConfigWindow::setup_layout() {
 
     // Add all control elements
     _layout.addLayout(&_histo_layout);
-#ifdef _VISUALIZE_NAPS
+#ifndef _NO_NAPS
     _layout.addLayout(&_nap_rects_layout);
 #endif
     _layout.addWidget(_get_hline(this));
@@ -476,7 +476,7 @@ void SlConfigWindow::load_cfg_values() {
 
     // Setting of always-present members
     _histo_limit.setValue(cfg._histo_entries_limit);
-#ifdef _VISUALIZE_NAPS
+#ifndef _NO_NAPS
     _nap_rects_btn.setChecked(cfg._draw_naps);
 #endif
 

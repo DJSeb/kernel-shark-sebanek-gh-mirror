@@ -57,7 +57,7 @@ Things not in specification aren't mandatory, but would be pretty useful.
     * [ ] Create plugin documentation (user & technical)
         <!-- NOTE: Limit thyself, author -->
         * [x] Create build instructions for the documentation
-        * [] Technical documentation (Doxygen)
+        * [x] Technical documentation (Doxygen)
         * [ ] User documentation (Markdown or HTML)
     * [x] *(Not in specification) Add a settings menu for the plugin*
     * [x] *(Not in specification, but requested)* Visualization of prev_states after a sched/sched_switch
@@ -98,7 +98,7 @@ Technical (Doxygen HTML) - build it via Doxygen (build instructions are below).
 1) Create a `build` directory in the `Stacklook` folder and go into it.
 2) Start CMake and use the provided `CMakeLists.txt` in the `Stacklook` directory (i.e. `cmake ..`).
     - If using **unmodified KernelShark**, specify so via `-D_UNMODIFIED_KSHARK=1` to build a binary without unnecessary code.
-    - If you wish to enable **visualization of prev_states** after a sched/sched_switch event up until the next sched/sched_wakeup event via nap rectangles in the plot, use `-D_VISUALIZE_NAPS=1`.
+    - If you wish to disable **visualization of prev_states** after a sched/sched_switch event up until the next sched/sched_wakeup event via nap rectangles in the plot, use `-D_NO_NAPS=1`.
         * *Nap* is just a quick name for the time between a sched_switch and sched_wakeup, when the process doesn't do anything, but sleeps.
     - By default, the **build type** will be `RelWithDebInfo` - to change this, e.g. to `Release`, use the option `-DCMAKE_BUILD_TYPE=Release`.
     - If **Qt6 files** aren't in `/usr/include/qt6`, use the option `-D_QT6_INCLUDE_DIR=[PATH]`, where `[PATH]` is replaced by the path to the Qt6 files.
@@ -115,7 +115,7 @@ If using KernelShark build method:
 
 1) Ensure all source files (`.c`, `.cpp`, `.h`) of Stacklook are in the `src/plugins` subdirectory of your KernelShark project directory.
 2) Ensure the `CMakeLists.txt` file in said subdirectory contains instructions for building the plugin (copy the style of other Qt-using GUI plugins).
-    - You may need to modify them a bit further regarding options `_VISUALIZE_NAPS` and `_UNMODIFIED_KSHARK`.
+    - You may need to modify them a bit further regarding options `_NO_NAPS` and `_UNMODIFIED_KSHARK`.
 3) Build KernelShark (plugins are built automatically).
 4) Start KernelShark (plugins built this way will be loaded automatically).
 - Documentation has to be built manually

@@ -92,7 +92,7 @@ private: // Data members
     /// Used when the buttons couldn't get the color of their task.
     KsPlot::Color _button_outline_col{0, 0, 0};
 
-#ifdef _VISUALIZE_NAPS
+#ifndef _NO_NAPS
     /// @brief Whether to draw rectangles with text between sched_switches
     /// and sched_wakeups or not.
     bool _draw_naps{true};
@@ -135,7 +135,7 @@ public: // Functions
     const KsPlot::Color get_default_btn_col() const; 
     const KsPlot::Color get_button_outline_col() const;
     const events_meta_t& get_events_meta() const;
-#ifdef _VISUALIZE_NAPS
+#ifndef _NO_NAPS
     bool get_draw_naps() const;
 #endif
     bool is_event_allowed(const kshark_entry* entry) const;
@@ -218,7 +218,7 @@ private: // Qt data members
     /// before Stacklook buttons show up.
     QSpinBox        _histo_limit;
 
-#ifdef _VISUALIZE_NAPS
+#ifndef _NO_NAPS
     // Nap rectangles
 
     /// @brief Layout used for the button and explanation of
@@ -249,7 +249,7 @@ public: // Qt data members
 private: // Qt functions
     void update_cfg();
     void setup_histo_section();
-#ifdef _VISUALIZE_NAPS
+#ifndef _NO_NAPS
     void setup_nap_rects();
 #endif
     void setup_events_meta_widget();

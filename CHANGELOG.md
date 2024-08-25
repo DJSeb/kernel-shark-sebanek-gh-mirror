@@ -1,14 +1,16 @@
 # Timeless info
 Currently missing:
-- Task plot buttons for sched_switch of the plotted task
-  (may be impossible without deeper KernelShark rewrite)
-  * Well, it seems that the culprit is the sched_switch plugin's
-    shifting of PIDs in events - turning it off fixes this
-- User documentation pictures
-- Config documentation & cleanup
+- User documentation
+
+# 2024-08-25
+## 1.4.1
+
+New features:
+- nap rectangles added - visualization of prev_state of a switch up until the next wakeup.
+  * can be turned off in the configuration
 
 # 2024-08-22
-# 1.3.3
+## 1.3.3
 
 Tried getting some more prominent prev state visibility through rectangles, doesn't work very well, so it's compile-option opt-in and labeled as WIP. Updated CMakeLists and source appropriately.
 
