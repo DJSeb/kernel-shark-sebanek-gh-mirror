@@ -15,10 +15,20 @@
 // KernelShark
 #include "libkshark.h"
 
+// Static variables
+
+/**
+ * @brief Map of abbreviations of prev_states to their full names.
+ */
 static const std::map<char, const char*> LETTER_TO_NAME {{
-    {'S', "sleeping"}, {'D', "uninterruptible (disk) sleep"},
-    {'R', "running"}, {'I', "idle"}, {'T', "stopped"},
-    {'t', "tracing stop"}, {'X', "dead"}, {'Z', "zombie"},
+    {'S', "sleeping"},
+    {'D', "uninterruptible (disk) sleep"},
+    {'R', "running"},
+    {'I', "idle"},
+    {'T', "stopped"},
+    {'t', "tracing stop"},
+    {'X', "dead"},
+    {'Z', "zombie"},
     {'P', "parked"}
 }};
 
