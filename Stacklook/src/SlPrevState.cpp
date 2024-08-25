@@ -2,7 +2,7 @@
 
 /**
  * @file    SlPrevState.cpp
- * @brief   
+ * @brief   This file has definitions of the prev_state get-functions.
 */
 
 // C++

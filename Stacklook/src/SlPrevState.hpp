@@ -2,7 +2,9 @@
 
 /**
  * @file    SlPrevState.hpp
- * @brief   
+ * @brief   This file has declarations of the prev_state get-functions.
+ *          and also a global constant map of abbreviated prev_state names
+ *          to their full names.
 */
 
 #ifndef _SL_PREV_STATE_HPP
