@@ -131,7 +131,7 @@ where the SO files are to clean what you need.
 **Yordan Karadzhov** - maintains KernelShark, author (me) took inspiration from his examples and plugins
 **Google Lens** - extracted text from images when no sources were available
 **Geeksforgeeks** - [Check if a point is inside a triangle](https://www.geeksforgeeks.org/check-whether-a-given-point-lies-inside-a-triangle-or-not/)
-
+**Markdown PDF** - VS Code extension, allowed me to export the manual with pictures easily
 **ChatGPT**:
 - perfect for finding ideas that will never work
 - good for simple prototype brainstorming
