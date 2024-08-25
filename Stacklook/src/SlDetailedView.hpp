@@ -21,9 +21,12 @@
 // KernelShark
 #include "KsMainWindow.hpp"
 
-
+// For friending
 class SlDetailedView;
 
+/**
+ * @brief Type of the registry of opened views.
+ */
 using views_registry_t = std::vector<SlDetailedView*>;
 
 /**

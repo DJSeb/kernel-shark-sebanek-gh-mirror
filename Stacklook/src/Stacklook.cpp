@@ -399,7 +399,11 @@ static void _draw_stacklook_buttons(KsCppArgV* argv,
                       -1);
 }
 
-static void config_show([[maybe_unused]] KsMainWindow* main_w) {
+/**
+ * @brief Loads values into the configuration windows from
+ * the configuration object and shows the window afterwards.
+ */
+static void config_show([[maybe_unused]] KsMainWindow*) {
     cfg_window->load_cfg_values();
     cfg_window->show();
 }

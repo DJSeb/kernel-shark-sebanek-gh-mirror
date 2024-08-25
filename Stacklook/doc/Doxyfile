@@ -48,7 +48,7 @@ PROJECT_NAME           = "Stacklook"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = "1.2.5"
+PROJECT_NUMBER         = "1.4.1"
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -954,12 +954,17 @@ WARN_LOGFILE           =
 INPUT                  = ./mainpage.doxygen \
                          ./kernelshark_modifications.doxygen \
                          ../src/stacklook.h \
-                         ../src/stacklook.c \
-                         ../src/Stacklook.cpp \
                          ../src/SlButton.hpp \
-                         ../src/SlButton.cpp \
                          ../src/SlDetailedView.hpp \
-                         ../src/SlDetailedView.cpp 
+                         ../src/SlConfig.hpp \
+                         ../src/SlPrevState.hpp \
+                         ../src/stacklook.c \
+                         ../src/SlButton.cpp \
+                         ../src/SlDetailedView.cpp \
+                         ../src/Stacklook.cpp \
+                         ../src/SlConfig.cpp \
+                         ../src/SlPrevState.cpp \
+                         ../src/SlNapRectangle.hpp
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

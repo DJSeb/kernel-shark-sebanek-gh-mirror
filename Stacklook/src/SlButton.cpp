@@ -53,6 +53,8 @@ static void _add_sched_switch_prev_state_text(const kshark_entry* event_entry,
         
         if (!font_to_use) {
             other_text.setFont(get_font_ptr());
+        } else {
+            other_text.setFont(font_to_use);
         }
 
         /* We take position from the southmost point of the triangle in the button.
@@ -209,6 +211,7 @@ static QString _prettify_stack_item(const std::string& to_prettify) {
  * into a QString array after making them prettier.
  * 
  * @param stacktrace: C-string of the stack trace to be processed
+ * @param evt_name: for determining stack offset of an entry
  * @param out_array: output array, top traces are eventually stored there
 */
 static void _get_top_three_stack_items(const char* stacktrace,

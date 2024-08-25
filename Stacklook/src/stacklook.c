@@ -106,9 +106,11 @@ static void _sl_free_ctx(struct plugin_stacklook_ctx* sl_ctx)
     sl_ctx->swake_event_id = -1;
 }
 
+/// @cond Doxygen_Suppress
 // KernelShark-provided magic that will define the most basic
 // plugin context functionality - init, freeing and getting context.
 KS_DEFINE_PLUGIN_CONTEXT(struct plugin_stacklook_ctx, _sl_free_ctx);
+/// @endcond
 
 /**
  * @brief Selects supported events from unsorted trace file data
@@ -149,11 +151,11 @@ static void _select_events(struct kshark_data_stream* stream,
  * @returns `0` if any error happened. `1` if initialization was successful.
 */
 int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
-    if (!font_file || !bold_font_path)
+    if (!font_file || !bold_font_path) {
         font_file = ksplot_find_font_file("FreeSans", "FreeSans");
         bold_font_path = ksplot_find_font_file("FreeSans", "FreeSansBold");
-    if (!font_file || !bold_font_path)
-        return 0;
+    }
+    if (!font_file || !bold_font_path) return 0;
 
     struct plugin_stacklook_ctx* sl_ctx = __init(stream->stream_id);
 

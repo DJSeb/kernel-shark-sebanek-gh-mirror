@@ -6,7 +6,7 @@
  * @file    SlNapRectangle.hpp
  * @brief   Declarations & definitions of plugin's nap rectangle class.
  * 
- *          Nap := space in the histogram between a sched_switch and
+ * @note    Nap := space in the histogram between a sched_switch and
  *          the closest next sched_wakeup events.
 */
 

@@ -51,6 +51,7 @@ static QString _prettify_data(const char* data) {
  * @brief Constructor for Stacklook's detailed stack trace view window.
  * 
  * @param task_name: name of the task whose stack trace is viewed
+ * @param specific_info: specific info of a task
  * @param data: stack trace as text
 */
 SlDetailedView::SlDetailedView(const char* task_name, const char* specific_info,
