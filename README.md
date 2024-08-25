@@ -26,18 +26,19 @@ You are in **root**.
 
 ## Project status
 
-Making user documentation.
+Awaiting review.
 
 ### NPRG045 general tasks
 
 - [x] Brief project description
 - [x] Specification
 - [x] Basic working version*
-- [ ] Final version
+- [x] Final version
 
 \* The most important things work.
 
 ### Changelog
+
 [Here.](./CHANGELOG.md)
 
 ### Roadmap
@@ -45,7 +46,7 @@ Making user documentation.
 Things not in specification aren't mandatory, but would be pretty useful.
 
 - [x] KernelShark Record adjustment for stacktracing
-- [ ] Stacklook
+- [x] Stacklook
     * [x] Get scheduler event for when the task was about to go to sleep and the stacktracing event
     * [x] Add clickable shapes above each sleep event
         * [ABANDONED] *(Not in specification) Add such clickable shapes into entry viewer*
@@ -54,16 +55,18 @@ Things not in specification aren't mandatory, but would be pretty useful.
     * [x] Display preview of the stack in the top info bar
     * [x] Create CMake build instructions
         * NOTE: Could be circumvented if the plugin files were put into KernelShark's `src/plugins` directory
-    * [ ] Create plugin documentation (user & technical)
+    * [x] Create plugin documentation (user & technical)
         <!-- NOTE: Limit thyself, author -->
         * [x] Create build instructions for the documentation
         * [x] Technical documentation (Doxygen)
-        * [ ] User documentation (Markdown or HTML)
+        * [x] User documentation (Markdown or HTML)
     * [x] *(Not in specification) Add a settings menu for the plugin*
     * [x] *(Not in specification, but requested)* Visualization of prev_states after a sched/sched_switch
     * [x] *(implied)* Make it work for CPU and task plots
-* [ ] Create an example `trace.dat` file for demonstration
-    * [ ] Write a program that will do some stack shenanigans
+* [x] Create an example `trace.dat` file for demonstration
+    * [x] Write a program that will do some stack shenanigans (`recursive_syscall_with_sleep`)
+    * *NOTE:* It isn't great, but it does show nanosceond sleep :\)
+    * Will also include a very small trace-file to show some simple stuff (`simple_trace.dat`)
 
 ## Requirements
 
