@@ -6,8 +6,10 @@
  *          for the plugin as well as the config object.
 */
 
-// C++
+// C
 #include <stdint.h>
+
+// C++
 #include <limits>
 
 // KernelShark
@@ -17,7 +19,7 @@
 // Plugin
 #include "SlConfig.hpp"
 
-// Configuration
+// Configuration object functions
 
 /**
  * @brief Get the configuration object as a read-only reference.
@@ -79,9 +81,8 @@ const KsPlot::Color SlConfig::get_button_outline_col() const
  *  
  * @returns Const reference to the events meta.
  */
-const events_meta_t& SlConfig::get_events_meta() const {
-    return _events_meta;
-}
+const events_meta_t& SlConfig::get_events_meta() const
+{ return _events_meta; }
 
 /**
  * @brief Returns whether an event is allowed to have a Stacklook)
@@ -107,12 +108,12 @@ bool SlConfig::is_event_allowed(const kshark_entry* entry) const {
  * @brief Gets a boolean flag whether to draw rectangles for 'naps', i.e.
  * durations between sched_switch and sched_wakeup.
  * 
- * @return True if we should draw naps, false otherwise.
+ * @returns True if we should draw naps, false otherwise.
  */
-bool SlConfig::get_draw_naps() const {
-    return _draw_naps;
-}
+bool SlConfig::get_draw_naps() const
+{ return _draw_naps; }
 #endif
+
 // Window
 // Static functions
 
@@ -304,12 +305,11 @@ void SlConfigWindow::update_cfg() {
             event_meta.first = event_allowed->isChecked();
             event_meta.second = (uint16_t)event_depth->value();
 #else
-            allowed_t& is_allowed =
-                SlConfigWindow::cfg._events_meta.at(event_name_str);
+            allowed_t& is_allowed = SlConfigWindow::cfg._events_meta.at(event_name_str);
             is_allowed = event_allowed->isChecked();
             
 #endif
-        } else { // Otherwise indicate that the was a failure
+        } else { // Otherwise indicate that there was a failure
             events_meta_change = false;
         }
     }
@@ -332,7 +332,7 @@ void SlConfigWindow::update_cfg() {
 
 /**
  * @brief Sets up spinbox and explanation label.
- * Spinbox's limit values are also set. Also create
+ * Spinbox's limit values are also set. Also creates
  * aesthetic spacing. 
  */
 void SlConfigWindow::setup_histo_section() {
@@ -347,8 +347,12 @@ void SlConfigWindow::setup_histo_section() {
 }
 
 #ifdef _VISUALIZE_NAPS
+/**
+ * @brief Sets up explanation label and check box for controlling
+ * display of nap rectangles.
+ */
 void SlConfigWindow::setup_nap_rects() {
-    _nap_rects_label.setText("(WIP) Check to see bars between sched_switch & sched_wakeup events");
+    _nap_rects_label.setText("See bars between sched_switch & sched_wakeup events");
     _nap_rects_btn.setChecked(cfg._draw_naps);
 
     _nap_rects_layout.addWidget(&_nap_rects_label);

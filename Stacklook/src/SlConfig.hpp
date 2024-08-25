@@ -25,27 +25,10 @@
 
 // Usings
 
-#ifndef _UNMODIFIED_KSHARK
-/**
- * @brief From which depth in the kernel stack (top being 0)
- * the preview should start.
- */
-using depth_t = uint16_t;
-#endif
-
 /**
  * @brief Whether Stacklook buttons should show above event entries.
  */
 using allowed_t = bool;
-
-#ifndef _UNMODIFIED_KSHARK
-/**
- * @brief Object holding meta information about events in Stacklook's
- * context - that being whether buttons are allowed to show up for an
- * event and from which item in the kernel stack should the preview start. 
- */
-using event_meta_t = std::pair<allowed_t, depth_t>;
-#endif
 
 /**
  * @brief ID of the allowed events in string form.
@@ -54,6 +37,19 @@ using event_name_t = std::string;
 
 #ifndef _UNMODIFIED_KSHARK
 /**
+ * @brief From which depth in the kernel stack (top being 0)
+ * the preview should start.
+ */
+using depth_t = uint16_t;
+
+/**
+ * @brief Object holding meta information about events in Stacklook's
+ * context - that being whether buttons are allowed to show up for an
+ * event and from which item in the kernel stack should the preview start. 
+ */
+using event_meta_t = std::pair<allowed_t, depth_t>;
+
+/**
  * @brief Map of event meta objects keyed by each event's name.
  */
 using events_meta_t = std::map<event_name_t, event_meta_t>;
@@ -61,6 +57,7 @@ using events_meta_t = std::map<event_name_t, event_meta_t>;
 using events_meta_t = std::map<event_name_t, allowed_t>;
 #endif
 
+// For friending purposes :)
 class SlConfigWindow;
 
 // Class
@@ -144,14 +141,13 @@ public: // Functions
     bool is_event_allowed(const kshark_entry* entry) const;
 };
 
-
 /**
  * @brief Widget class for modifying the configuration via GUI.
  * It is a fixed size dialog window that allows modification
  * of all that is in the config object by applying changes via
  * the Apply button. Changes won't be saved unless this is done. 
  * 
- * Changes done to configuration are applied AFTER this window is
+ * Changes applied during configuration take effect AFTER this window is
  * closed.
  */
 class SlConfigWindow : public QWidget {
