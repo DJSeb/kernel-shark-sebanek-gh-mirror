@@ -36,6 +36,10 @@ static struct ksplot_font bold_font;
 static char* font_file = NULL;
 
 ///
+/// @brief Path to the bold font file.
+static char* bold_font_path = NULL;
+
+///
 /// @brief Integer ID of the `sched/sched_switch` event.
 static int sched_switch_id;
 
@@ -60,7 +64,6 @@ static int sched_wake_id;
  */
 struct ksplot_font* get_bold_font_ptr() {
     if (!ksplot_font_is_loaded(&bold_font)) {
-        char* bold_font_path = ksplot_find_font_file("FreeSans", "FreeSansBold");
         ksplot_init_font(&bold_font, FONT_SIZE + 2, bold_font_path);
     }
     
@@ -104,7 +107,7 @@ static void _sl_free_ctx(struct plugin_stacklook_ctx* sl_ctx)
 }
 
 // KernelShark-provided magic that will define the most basic
-// plugin context functionality - init, freeing and getting it.
+// plugin context functionality - init, freeing and getting context.
 KS_DEFINE_PLUGIN_CONTEXT(struct plugin_stacklook_ctx, _sl_free_ctx);
 
 /**
@@ -127,7 +130,8 @@ static void _select_events(struct kshark_data_stream* stream,
     if (entry->event_id == sched_switch_id ||
         entry->event_id == sched_wake_id) {
         /**
-         * Add the event to the plugin's collected entries' container
+         * Add the event to the plugin's collected entries' container.
+         * 
          * -1 is a nonsensical value, but necessary so that the container
          * isn't considered empty.
         */
@@ -145,9 +149,10 @@ static void _select_events(struct kshark_data_stream* stream,
  * @returns `0` if any error happened. `1` if initialization was successful.
 */
 int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
-    if (!font_file)
+    if (!font_file || !bold_font_path)
         font_file = ksplot_find_font_file("FreeSans", "FreeSans");
-    if (!font_file)
+        bold_font_path = ksplot_find_font_file("FreeSans", "FreeSansBold");
+    if (!font_file || !bold_font_path)
         return 0;
 
     struct plugin_stacklook_ctx* sl_ctx = __init(stream->stream_id);
@@ -187,7 +192,6 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
  * @returns `0` if any error happened. `1` if deinitialization was successful.
 */
 int KSHARK_PLOT_PLUGIN_DEINITIALIZER(struct kshark_data_stream* stream) {
-
     struct plugin_stacklook_ctx* sl_ctx = __get_context(stream->stream_id);
 
     int retval = 0;

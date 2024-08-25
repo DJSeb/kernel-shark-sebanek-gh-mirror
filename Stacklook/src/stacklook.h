@@ -32,17 +32,27 @@ extern "C" {
  * globally shared data.
 */
 struct plugin_stacklook_ctx {
-    /** Numerical id of sched_switch event. **/
+    /**
+     * @brief Numerical id of sched_switch event.
+    */
     int sswitch_event_id;
-    /** Numerical id of kernel_stack event. **/
+    /** 
+     * @brief Numerical id of kernel_stack event.
+    */
     int kstack_event_id;
-    /** Numerical id of sched_wakeup event. */
+    /**
+     * @brief Numerical id of sched_wakeup event.
+    */
     int swake_event_id;
 
-    /** Collected switch or wakeup events. **/
+    /** 
+     * @brief Collected switch or wakeup events.
+    */
     struct kshark_data_container* collected_events;
 
-    /** Container of Stacklook window pointers. **/
+    /**
+     * @brief Container of Stacklook window pointers.
+    */
     void* cpp_views_container;
 };
 
