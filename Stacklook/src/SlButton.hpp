@@ -5,10 +5,6 @@
  * @brief   Declares a special plot object class holding components
  *          of the button and its mouse interaction reactions.
  * 
- *          This class NECESSITATES that a modified KernelShark is used.
- *          To remove this dependency, remove/modify the code with warnings
- *          in its documentation.
- * 
  * @note    Definitions in `SlButton.cpp`.
 */
 
