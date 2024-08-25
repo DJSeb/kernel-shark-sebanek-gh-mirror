@@ -228,6 +228,7 @@ SlConfigWindow::SlConfigWindow()
     // Set window flags to make header buttons
     setWindowFlags(Qt::Dialog | Qt::WindowMinimizeButtonHint
                    | Qt::WindowCloseButtonHint);
+    setMaximumHeight(300);
 
     setup_histo_section();
 #ifndef _NO_NAPS
@@ -352,11 +353,11 @@ void SlConfigWindow::setup_histo_section() {
  * display of nap rectangles.
  */
 void SlConfigWindow::setup_nap_rects() {
-    _nap_rects_label.setText("See bars between sched_switch & sched_wakeup events");
+    _nap_rects_label.setText("Display nap rectangles: ");
     _nap_rects_btn.setChecked(cfg._draw_naps);
 
     _nap_rects_layout.addWidget(&_nap_rects_label);
-    _nap_rects_layout.addSpacing(50);
+    _nap_rects_layout.addStretch();
     _nap_rects_layout.addWidget(&_nap_rects_btn);
 }
 #endif
@@ -382,7 +383,7 @@ void SlConfigWindow::setup_events_meta_widget() {
     QLabel* header_evt_depth = new QLabel{this};
     header_evt_depth->setText("Preview stack offset");
 
-    header_row->addSpacing(16);
+    header_row->addSpacing(20);
     header_row->addWidget(header_evt_depth);
 #endif
     _events_meta_layout.addLayout(header_row);
@@ -419,7 +420,7 @@ void SlConfigWindow::setup_events_meta_widget() {
         evt_depth->setObjectName("evt_depth_" + std::to_string(i));
         evt_depth->setMinimum(0);
 
-        row->addSpacing(16);
+        row->addSpacing(20);
         row->addWidget(evt_depth);
 #endif
 
