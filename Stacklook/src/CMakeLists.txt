@@ -112,19 +112,12 @@ target_link_libraries(stacklook PRIVATE
     ${KS_SLIB_CORE}  ${KS_SLIB_PLOT}  ${KS_SLIB_GUI}
 )
 
-if (NOT _NO_NAPS)
+if (_NO_NAPS)
     ## Include trace-cmd headers
-    target_include_directories(stacklook PRIVATE
-        "/usr/include/trace-cmd" "/usr/include/traceevent"
-        "/usr/include/libtracefs"
-    )
+    target_include_directories(stacklook SYSTEM PRIVATE traceevent)
 
     ## Link trace-cmd shared libraries
-    target_link_libraries(stacklook PRIVATE
-        "/usr/lib64/libtracecmd.so"
-        "/usr/lib64/libtraceevent.so"
-        "/usr/lib64/libtracefs.so"
-    )
+    target_link_libraries(stacklook PRIVATE trace::cmd trace::event)
 endif()
 
 set(SL_SYMLINK_NAME "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}stacklook.so")
