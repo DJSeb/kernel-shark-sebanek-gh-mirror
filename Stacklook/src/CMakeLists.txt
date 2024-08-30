@@ -114,17 +114,28 @@ target_link_libraries(stacklook PRIVATE
 
 
 if (NOT _NO_NAPS)
+    ## Customized installs may differ in paths
+    if (NOT _TRACECMD_INCLUDE_DIR)
+        set(_TRACECMD_INCLUDE_DIR "/usr/include")
+    endif()
+        
     ## Include trace-cmd headers
     target_include_directories(stacklook PRIVATE
-        "/usr/include/trace-cmd" "/usr/include/traceevent"
-        "/usr/include/libtracefs"
+        "${_TRACECMD_INCLUDE_DIR}/trace-cmd"
+        "${_TRACECMD_INCLUDE_DIR}/traceevent"
+        "${_TRACECMD_INCLUDE_DIR}/libtracefs"
     )
+
+    ## Customized installs may differ in paths
+    if (NOT _TRACECMD_LIBS_DIR)
+        set(_TRACECMD_LIBS_DIR "/usr/lib64")
+    endif()
 
     ## Link trace-cmd shared libraries
     target_link_libraries(stacklook PRIVATE
-        "/usr/lib64/libtracecmd.so"
-        "/usr/lib64/libtraceevent.so"
-        "/usr/lib64/libtracefs.so"
+        "${_TRACECMD_LIBS_DIR}/libtracecmd.so"
+        "${_TRACECMD_LIBS_DIR}/libtraceevent.so"
+        "${_TRACECMD_LIBS_DIR}/libtracefs.so"
     )
 endif()
 

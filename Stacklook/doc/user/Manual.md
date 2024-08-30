@@ -108,8 +108,8 @@ us that we are seeing the end of the stack.
 Sched_switch preview, offset is set to 3:
 ![Switch variant](../images/preview_switch.png)
 
-Sched_waking preview, offset is set to reach end of kernel stack:
-![Wakeup_variant](../images/preview_wakeup_big_offset.png)
+Preview, offset is set to reach end of kernel stack:
+![Big_offset_variant](../images/preview_big_offset.png)
 
 Moving away from the button's boundaries will show nothing, i.e.
 the labels will be cleared.
