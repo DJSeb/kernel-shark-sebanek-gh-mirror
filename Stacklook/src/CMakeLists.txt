@@ -93,7 +93,7 @@ set(SOURCES
 if (_NO_NAPS)
     add_definitions(-D_NO_NAPS)
 else()
-    list(APPEND SOURCES SlNapRectangle.hpp)
+    list(APPEND SOURCES SlNapRectangle.hpp SlWakeupTepProcessing.cpp)
 endif()
 
 ## Creating the shared library
@@ -111,6 +111,14 @@ target_include_directories(stacklook SYSTEM PRIVATE ${QT6_ALL_INCLUDES})
 target_link_libraries(stacklook PRIVATE
     ${KS_SLIB_CORE}  ${KS_SLIB_PLOT}  ${KS_SLIB_GUI}
 )
+
+if (_NO_NAPS)
+    ## Include trace-cmd headers
+    target_include_directories(stacklook SYSTEM PRIVATE traceevent)
+
+    ## Link trace-cmd shared libraries
+    target_link_libraries(stacklook PRIVATE trace::cmd trace::event)
+endif()
 
 set(SL_SYMLINK_NAME "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}stacklook.so")
 set(SL_SYMLINK_TARGET "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}stacklook.so.${SL_VERSION}")
