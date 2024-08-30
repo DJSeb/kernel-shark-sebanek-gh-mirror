@@ -2,7 +2,8 @@
 
 /**
  * @file    SlWakeupTepProcessing.cpp
- * @brief
+ * @brief   Contains definition for processing event entries as tep
+ *          records.
 */
 
 // C++
@@ -17,7 +18,17 @@
 // Plugin
 #include "stacklook.h"
 
-void wakeup_evt_tep_processing(struct plugin_stacklook_ctx* ctx, 
+/**
+ * @brief Process sched_waking events as tep records during plugin loads,
+ * adds PID of who is being awoken into the sched_waking entry's auxiliary
+ * field. Else, it adds in invalid -1 (which isn't a valid PID).
+ * 
+ * @param ctx: pointer to plugin context
+ * @param stream: pointer to the KernelShark stream with data
+ * @param rec: pointer to the tep record of the entry
+ * @param entry: pointer KernelShark event entry
+ */
+void waking_evt_tep_processing(struct plugin_stacklook_ctx* ctx, 
                                struct kshark_data_stream* stream,
                                void* rec,
                                struct kshark_entry* entry) {
