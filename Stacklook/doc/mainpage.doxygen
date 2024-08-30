@@ -17,7 +17,7 @@
  * 
  * @subsection btns Buttons
  * 
- * Above each `sched/sched_switch` and `sched/sched_wakeup`
+ * Above each `sched/sched_switch` and `sched/sched_waking`
  * event in the KernelShark plot, an upside down triangle button will
  * appear when the plugin is loaded in. 
  * 
@@ -57,13 +57,13 @@
  * @subsection naps Visualizing naps
  * 
  * Firstly, what are 'naps'? **Nap** in this plugin is "a space between
- * a sched_switch event and a sched_wakeup event of the same task in
+ * a sched_switch event and a sched_waking event of the same task in
  * the plot when event entries are sorted by their timestamps".
  * 
  * The plugin will show a rectangle with upper and lower horizontal lines
  * highlighted and a text with the full name of the prev_state field of
  * a sched_switch event; this rectangle is placed between a sched_switch
- * event of a task and its closest next sched_wakeup. The rectangle'same
+ * event of a task and its closest next sched_waking. The rectangle's
  * filling color is also based on the prev_state field. Text will NOT be
  * displayed if the rectangle isn't wide enough.
  * 

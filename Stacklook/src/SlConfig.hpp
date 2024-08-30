@@ -94,7 +94,7 @@ private: // Data members
 
 #ifndef _NO_NAPS
     /// @brief Whether to draw rectangles with text between sched_switches
-    /// and sched_wakeups or not.
+    /// and sched_wakings or not.
     bool _draw_naps{false};
 #endif
 
@@ -112,7 +112,7 @@ private: // Data members
     */
     events_meta_t _events_meta{
         {{"sched/sched_switch", {true, 3}},
-         {"sched/sched_wakeup", {true, 3}}}};
+         {"sched/sched_waking", {true, 3}}}};
 #else
     /**
      * @brief Map of event names keyed by their names with values:
@@ -124,7 +124,7 @@ private: // Data members
     */
     events_meta_t _events_meta{
         {{"sched/sched_switch", true},
-         {"sched/sched_wakeup", false}}};
+         {"sched/sched_waking", false}}};
 #endif
 public: // Functions
     static const SlConfig& get_instance();

@@ -101,8 +101,8 @@ Technical (Doxygen HTML) - build it via Doxygen (build instructions are below).
 1) Create a `build` directory in the `Stacklook` folder and go into it.
 2) Start CMake and use the provided `CMakeLists.txt` in the `Stacklook` directory (i.e. `cmake ..`).
     - If using **unmodified KernelShark**, specify so via `-D_UNMODIFIED_KSHARK=1` to build a binary without unnecessary code.
-    - If you wish to disable **visualization of prev_states** after a sched/sched_switch event up until the next sched/sched_wakeup event via nap rectangles in the plot, use `-D_NO_NAPS=1`.
-        * *Nap* is just a quick name for the time between a sched_switch and sched_wakeup, when the process doesn't do anything, but sleeps.
+    - If you wish to disable **visualization of prev_states** after a sched/sched_switch event up until the next sched/sched_waking event via nap rectangles in the plot, use `-D_NO_NAPS=1`.
+        * *Nap* is just a quick name for the time between a sched_switch and sched_waking, when the process doesn't do anything, but sleeps.
     - By default, the **build type** will be `RelWithDebInfo` - to change this, e.g. to `Release`, use the option `-DCMAKE_BUILD_TYPE=Release`.
     - If **Qt6 files** aren't in `/usr/include/qt6`, use the option `-D_QT6_INCLUDE_DIR=[PATH]`, where `[PATH]` is replaced by the path to the Qt6 files.
         - Build instructions still expect that the specified directory has same inner structure as the default case (i.e. it contains `QtCore`, `QtWidgets`, etc.).

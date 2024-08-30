@@ -2,6 +2,12 @@
 Currently missing:
 - User documentation
 
+# 2024-08-30
+## 1.4.2
+
+Changed responding from sched_wakeup to sched_waking.
+Added processing of tep info for sched_wakings.
+
 # 2024-08-25
 ## 1.4.1
 

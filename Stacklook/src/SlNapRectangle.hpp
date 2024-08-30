@@ -7,7 +7,7 @@
  * @brief   Declarations & definitions of plugin's nap rectangle class.
  * 
  * @note    Nap := space in the histogram between a sched_switch and
- *          the closest next sched_wakeup events.
+ *          the closest next sched_waking events.
 */
 
 #ifndef _SL_NAP_RECTANGLE_HPP
@@ -28,7 +28,7 @@
  
 /**
  * @brief Represents a rectangle that is displayed in the "nap"
- * of a task - the sched_switch and its closest next sched_wakeup.
+ * of a task - the sched_switch and its closest next sched_waking.
  * 
  * It cannot be interacted with, only drawn and looked at.
  * 

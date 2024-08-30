@@ -56,7 +56,7 @@ PROJECT_NUMBER         = "1.4.1"
 
 PROJECT_BRIEF          = "Plugin for KernelShark, which allows inspection of \
                           ftrace/kernel_stack event entries made after \
-                          sched/sched_switch & sched/sched_wakeup entries."
+                          sched/sched_switch & sched/sched_waking entries."
 
 # With the PROJECT_LOGO tag one can specify a logo or an icon that is included
 # in the documentation. The maximum height of the logo should not exceed 55

@@ -106,7 +106,7 @@ bool SlConfig::is_event_allowed(const kshark_entry* entry) const {
 #ifndef _NO_NAPS
 /**
  * @brief Gets a boolean flag whether to draw rectangles for 'naps', i.e.
- * durations between sched_switch and sched_wakeup.
+ * durations between sched_switch and sched_waking.
  * 
  * @returns True if we should draw naps, false otherwise.
  */

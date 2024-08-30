@@ -49,7 +49,7 @@ static int sched_switch_id;
 static int kstack_id;
 
 ///
-/// @brief Integer ID of the `sched/sched_wakeup` event.
+/// @brief Integer ID of the `sched/sched_waking` event.
 static int sched_wake_id;
 
 // Header file definitions
@@ -118,12 +118,12 @@ KS_DEFINE_PLUGIN_CONTEXT(struct plugin_stacklook_ctx, _sl_free_ctx);
  * during plugin loading.
  * 
  * @param stream: KernelShark's data stream
- * @param rec: Tep record structure, used only with sched_wakeup events
+ * @param rec: Tep record structure, used only with sched_waking events
  * to determine which process is being awakened by this event.
  * @param entry: KernelShark entry to be processed
  * 
  * @note Supported events are: `sched/sched_switch`,
- *                             `sched/sched_wakeup`.
+ *                             `sched/sched_waking`.
 */
 static void _select_events(struct kshark_data_stream* stream,
                            [[maybe_unused]] void* rec, struct kshark_entry* entry) {
@@ -160,25 +160,34 @@ static void _select_events(struct kshark_data_stream* stream,
  * @returns `0` if any error happened. `1` if initialization was successful.
 */
 int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
-#ifndef _NO_NAPS
-    // This check isn't useful without naps.
-    // But it is necessary with them, otherwise the tep parsing would fail.
-    if (!kshark_is_tep(stream)) {
-        return 0;
-    }
-#endif
     if (!font_file || !bold_font_path) {
         font_file = ksplot_find_font_file("FreeSans", "FreeSans");
         bold_font_path = ksplot_find_font_file("FreeSans", "FreeSansBold");
     }
     if (!font_file || !bold_font_path) return 0;
-
+    
     struct plugin_stacklook_ctx* sl_ctx = __init(stream->stream_id);
 
     if (!sl_ctx) {
 		__close(stream->stream_id);
 		return 0;
 	}
+
+#ifndef _NO_NAPS
+    // This check isn't useful without naps.
+    // But it is necessary with them, otherwise the tep processing would fail.
+    if (!kshark_is_tep(stream)) {
+        __close(stream->stream_id);
+        return 0;
+    }
+
+    sl_ctx->tep = kshark_get_tep(stream);
+    bool wakeup_found = define_wakeup_event(sl_ctx->tep, &sl_ctx->tep_wakeup);
+
+    if (wakeup_found) {
+        sl_ctx->sched_waking_pid_field = tep_find_any_field(sl_ctx->tep_wakeup, "pid");
+    }
+#endif
 
     sl_ctx->collected_events = kshark_init_data_container();
 
@@ -188,7 +197,7 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     kstack_id = kshark_find_event_id(stream, "ftrace/kernel_stack");
     sl_ctx->kstack_event_id = kstack_id;
 
-    sched_wake_id = kshark_find_event_id(stream, "sched/sched_wakeup");
+    sched_wake_id = kshark_find_event_id(stream, "sched/sched_waking");
     sl_ctx->swake_event_id = sched_wake_id;
 
     sl_ctx->cpp_views_container = init_views();

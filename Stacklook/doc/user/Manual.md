@@ -56,7 +56,7 @@ With unmodified KernelShark specified and nap rectangles disabled:
 ### Use in a plot
 
 To use the plugin, have a trace file ready which includes
-*sched/sched_switch* and *sched/sched_wakeup* event entries.
+*sched/sched_switch* and *sched/sched_waking* event entries.
 
 After loading the plugin, zoom until less than the configured
 number of visible entries are visible in the histogram plot.
@@ -108,7 +108,7 @@ us that we are seeing the end of the stack.
 Sched_switch preview, offset is set to 3:
 ![Switch variant](../images/preview_switch.png)
 
-Sched_wakeup preview, offset is set to reach end of kernel stack:
+Sched_waking preview, offset is set to reach end of kernel stack:
 ![Wakeup_variant](../images/preview_wakeup_big_offset.png)
 
 Moving away from the button's boundaries will show nothing, i.e.
@@ -124,7 +124,7 @@ view area. On the top of the window is a small message
 with the name of the task from which we had the kernel
 stack traced. Right below it is a message specific to an
 event - sched_switches get information about their prev_state,
-sched_wakeups just reiterate that the task has woken up.
+sched_wakings just reiterate that the task has woken up.
 
 The window can be closed with the "Close"
 button at the very bottom of the window or with the "X"
@@ -234,4 +234,4 @@ In **SlNapRectangle.hpp**:
 - Class `SlNapRectangle`, a KernelShark plot object used for
   drawing nap rectangles. Nap rectangles cannot be interacted
   with and should only be drawn as an interval plot between
-  a sched_switch and sched_wakeup events.
+  a sched_switch and sched_waking events.
