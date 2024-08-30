@@ -42,7 +42,7 @@ void wakeup_evt_tep_processing(struct plugin_stacklook_ctx* ctx,
     ret = tep_read_number_field(tep_waking_pid_field, record->data, &val);
 
     if (ret == 0) {
-
+        entry->pid = (int32_t)val;
         kshark_data_container_append(collected_events, entry, val);
     } else {
         // Invalid
