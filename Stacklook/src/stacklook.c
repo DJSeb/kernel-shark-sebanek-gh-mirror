@@ -17,7 +17,6 @@
 #include "libkshark.h"
 #include "libkshark-plot.h"
 #include "libkshark-plugin.h"
-#include "libkshark-tepdata.h"
 
 // Plugin header
 #include "stacklook.h"
@@ -118,8 +117,7 @@ KS_DEFINE_PLUGIN_CONTEXT(struct plugin_stacklook_ctx, _sl_free_ctx);
  * during plugin loading.
  * 
  * @param stream: KernelShark's data stream
- * @param rec: Tep record structure, used only with sched_wakeup events
- * to determine which process is being awakened by this event.
+ * @param rec: Does nothing here :)
  * @param entry: KernelShark entry to be processed
  * 
  * @note Supported events are: `sched/sched_switch`,
@@ -129,24 +127,17 @@ static void _select_events(struct kshark_data_stream* stream,
                            [[maybe_unused]] void* rec, struct kshark_entry* entry) {
 
     struct plugin_stacklook_ctx* sl_ctx = __get_context(stream->stream_id);
-    if (!sl_ctx) return;
-    struct kshark_data_container* sl_ctx_collected_events = sl_ctx->collected_events;
-    if (!sl_ctx_collected_events) return;
+    struct kshark_data_container* sl_ctx_stack_data = sl_ctx->collected_events;
 
-    if (entry->event_id == sched_switch_id) {
+    if (entry->event_id == sched_switch_id ||
+        entry->event_id == sched_wake_id) {
         /**
          * Add the event to the plugin's collected entries' container.
          * 
          * -1 is a nonsensical value, but necessary so that the container
          * isn't considered empty.
         */
-        kshark_data_container_append(sl_ctx_collected_events, entry, (int64_t)-1);
-    } else if (entry->event_id == sched_wake_id) {
-#ifndef _NO_NAPS
-        wakeup_evt_tep_processing(sl_ctx, stream, rec, entry);
-#else
-        kshark_data_container_append(sl_ctx_collected_events, entry, (int64_t)-1);
-#endif
+        kshark_data_container_append(sl_ctx_stack_data, entry, -1);
     }
 }
 
@@ -160,13 +151,6 @@ static void _select_events(struct kshark_data_stream* stream,
  * @returns `0` if any error happened. `1` if initialization was successful.
 */
 int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
-#ifndef _NO_NAPS
-    // This check isn't useful without naps.
-    // But it is necessary with them, otherwise the tep parsing would fail.
-    if (!kshark_is_tep(stream)) {
-        return 0;
-    }
-#endif
     if (!font_file || !bold_font_path) {
         font_file = ksplot_find_font_file("FreeSans", "FreeSans");
         bold_font_path = ksplot_find_font_file("FreeSans", "FreeSansBold");

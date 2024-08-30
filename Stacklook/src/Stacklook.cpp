@@ -190,16 +190,19 @@ static float _get_color_intensity(const KsPlot::Color& c) {
  * 
  * @param entry: pointer to an event entry which could be a part of the
  * nap rectangle 
+ * @param pid: PID gotten from KernelShark to be checked against an entry
  * 
- * @returns True if entry is visible (and pointer wasn't null).
+ * @returns True if entry is of correct task and visible (and pointer wasn't null).
  */
-static bool _nap_rect_check_function_general(const kshark_entry* entry) {
+static bool _nap_rect_check_function_general(const kshark_entry* entry,
+                                             int pid) {
     if (!entry) return false;
+    bool correct_pid = (entry->pid == pid);
     bool is_visible_event = entry->visible
                             & kshark_filter_masks::KS_EVENT_VIEW_FILTER_MASK;
     bool is_visible_graph = entry->visible
                             & kshark_filter_masks::KS_GRAPH_VIEW_FILTER_MASK;
-    return is_visible_event && is_visible_graph;
+    return correct_pid && is_visible_event && is_visible_graph;
 }
 
 /**
@@ -266,38 +269,38 @@ static SlNapRectangle* _make_sl_nap_rect(std::vector<const KsPlot::Graph*> graph
  * @param plugin_data: input location for the container of the event's data
  * @param ctx: pointer to the plugin's context
  * @param val: process or CPU ID value
+ * @param draw_action: draw action identifier
  */
 static void _draw_stacklook_nap_rectangles(KsCppArgV* argVCpp,
                                            kshark_data_container* plugin_data,
                                            const plugin_stacklook_ctx* ctx,
-                                           int val) {
+                                           int val, int draw_action) {
     IsApplicableFunc nap_rect_check_func_switch;
     IsApplicableFunc nap_rect_check_func_wakeup;
 
-    nap_rect_check_func_switch = [=] (kshark_data_container* data_c, ssize_t t) {
-        kshark_entry* entry = data_c->data[t]->entry;
+    if (draw_action == KSHARK_TASK_DRAW) {
+        nap_rect_check_func_switch = [=] (kshark_data_container* data_c, ssize_t t) {
+            kshark_entry* entry = data_c->data[t]->entry;
 
-        bool is_switch = (entry->event_id == ctx->sswitch_event_id);
-        bool correct_pid = (entry->pid == val);
-        return _nap_rect_check_function_general(entry) && is_switch && correct_pid;
-    };
+            bool is_switch = (entry->event_id == ctx->sswitch_event_id);
+            return _nap_rect_check_function_general(entry, val) && is_switch;
+        };
 
-    nap_rect_check_func_wakeup = [=] (kshark_data_container* data_container, ssize_t i) {
-        kshark_entry* entry = data_container->data[i]->entry;
-        int64_t d_field = data_container->data[i]->field;
+        nap_rect_check_func_wakeup = [=] (kshark_data_container* data_container, ssize_t i) {
+            kshark_entry* entry = data_container->data[i]->entry;
 
-        bool is_wakeup = (entry->event_id == ctx->swake_event_id);
-        bool correct_waking_pid = (d_field == val);
-        return _nap_rect_check_function_general(entry) && is_wakeup && correct_waking_pid;
-    };
+            bool is_wakeup = (entry->event_id == ctx->swake_event_id);
+            return _nap_rect_check_function_general(entry, val) && is_wakeup;
+        };
 
-    // Noteworthy thing here is that KernelShark will automatically
-    // select a pair and NOT use members of it again - there won't be multiple
-    // nap rectangles from one entry.
-    // Hopefully this will never change.
-    eventFieldIntervalPlot(argVCpp, plugin_data, nap_rect_check_func_switch,
-                            plugin_data, nap_rect_check_func_wakeup,
-                            _make_sl_nap_rect, {0, 0, 0}, -1);
+        // Noteworthy thing here is that KernelShark will automatically
+        // select a pair and NOT use members of it again - there won't be multiple
+        // nap rectangles from one entry.
+        // Hopefully this will never change.
+        eventFieldIntervalPlot(argVCpp, plugin_data, nap_rect_check_func_switch,
+                               plugin_data, nap_rect_check_func_wakeup,
+                               _make_sl_nap_rect, {0, 0, 0}, -1);
+    }
 }
 #endif
 
@@ -510,9 +513,9 @@ void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
 
 #ifndef _NO_NAPS
     // If the user wants to draw nap rectangles, do so
-    if (SlConfig::get_instance().get_draw_naps()
-        && draw_action == KSHARK_TASK_DRAW) {
-        _draw_stacklook_nap_rectangles(argVCpp, plugin_data, ctx, val);
+    if (SlConfig::get_instance().get_draw_naps()) {
+        _draw_stacklook_nap_rectangles(argVCpp, plugin_data, ctx,
+                                       val, draw_action);
     }
 #endif
 }
