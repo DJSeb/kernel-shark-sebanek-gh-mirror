@@ -353,7 +353,7 @@ void SlConfigWindow::setup_histo_section() {
  * display of nap rectangles.
  */
 void SlConfigWindow::setup_nap_rects() {
-    _nap_rects_label.setText("(BROKEN) Display nap rectangles: ");
+    _nap_rects_label.setText("Display nap rectangles: ");
     _nap_rects_btn.setChecked(cfg._draw_naps);
 
     _nap_rects_layout.addWidget(&_nap_rects_label);
