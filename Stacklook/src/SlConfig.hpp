@@ -95,7 +95,7 @@ private: // Data members
 #ifndef _NO_NAPS
     /// @brief Whether to draw rectangles with text between sched_switches
     /// and sched_wakeups or not.
-    bool _draw_naps{true};
+    bool _draw_naps{false};
 #endif
 
 #ifndef _UNMODIFIED_KSHARK
