@@ -1,7 +1,4 @@
-
-/** TODO: To discuss with supervisor
- * Copyright (C) 2024, David Jaromír Šebánek <djsebofficial@gmail.com>
-*/
+/** Copyright (C) 2024, David Jaromír Šebánek <djsebofficial@gmail.com> **/
 
 /**
  * @file    Stacklook.cpp

@@ -26,7 +26,9 @@ You are in **root**.
 
 ## Project status
 
-Awaiting review #3.
+At version **1.4.3**.
+
+Approved! Project is finished.
 
 ### NPRG045 general tasks
 

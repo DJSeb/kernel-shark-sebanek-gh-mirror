@@ -1,6 +1,12 @@
 # Timeless info
-Currently missing:
-- User documentation
+
+[None]
+
+# 2024-08-02
+# 1.4.3
+
+Added copyright comments.
+Finished the project.
 
 # 2024-08-30
 ## 1.4.2

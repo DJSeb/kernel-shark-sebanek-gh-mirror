@@ -1,4 +1,4 @@
-/** TODO: Copyright? **/
+/** Copyright (C) 2024, David Jaromír Šebánek <djsebofficial@gmail.com> **/
 
 /**
  * @file    SlPrevState.cpp
