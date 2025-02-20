@@ -1,0 +1,22 @@
+# Build stuff:
+kernelshark.desktop
+libkshark.pc
+org.freedesktop.kshark-record.policy
+Documentation/doxygen
+lib
+src/KsCmakeDef.hpp
+bin
+
+build/install_manifest*
+build/cmake_install.cmake
+build/CMakeCache.txt
+build/CMakeDoxyfile.in
+build/CMakeDoxygenDefaults.cmake
+build/Makefile
+build/src
+build/examples
+build/.qt
+build/CMakeFiles
+
+# Dev stuff:
+.clang-format

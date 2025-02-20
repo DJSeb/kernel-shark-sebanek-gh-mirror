@@ -1,3 +1,0 @@
-[submodule "KS_fork"]
-	path = KS_fork
-	url = git@github.com:DJSeb/kernel-shark-stacktrace-modif.git
