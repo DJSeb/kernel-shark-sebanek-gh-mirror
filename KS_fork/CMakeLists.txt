@@ -7,7 +7,7 @@ project(kernel-shark)
 set(KS_APP_NAME "kernelshark")
 set(KS_VERSION_MAJOR 2)
 set(KS_VERSION_MINOR 3)
-set(KS_VERSION_PATCH 1)
+set(KS_VERSION_PATCH 2)
 set(KS_VERSION_STRING ${KS_VERSION_MAJOR}.${KS_VERSION_MINOR}.${KS_VERSION_PATCH})
 message("\n project: Kernel Shark: (version: ${KS_VERSION_STRING})\n")
 
@@ -18,27 +18,27 @@ execute_process(COMMAND bash "-c" "echo __LP64__ | ${CMAKE_C_COMPILER} -E -x c -
 
 if (NOT _INSTALL_PREFIX AND NOT _LIBDIR)
 
-    set(_INSTALL_PREFIX "/usr/local")
+  set(_INSTALL_PREFIX "/usr/local")
 
-    if (__LP64__ MATCHES 1)
-        set(_LIBDIR "/usr/local/lib64")
-    else (__LP64__ MATCHES 1)
-        set(_LIBDIR "/usr/local/lib")
-    endif (__LP64__ MATCHES 1)
+  if (__LP64__ MATCHES 1)
+    set(_LIBDIR "/usr/local/lib64")
+  else (__LP64__ MATCHES 1)
+    set(_LIBDIR "/usr/local/lib")
+  endif (__LP64__ MATCHES 1)
 
 elseif (NOT _INSTALL_PREFIX)
 
-    set(_INSTALL_PREFIX "/usr/local")
+  set(_INSTALL_PREFIX "/usr/local")
 
 elseif (NOT _LIBDIR)
 
-   set(_LIBDIR "${_INSTALL_PREFIX}/lib")
+  set(_LIBDIR "${_INSTALL_PREFIX}/lib")
 
 endif ()
 
 if (NOT _POLKIT_INSTALL_PREFIX)
 
-    set(_POLKIT_INSTALL_PREFIX "/usr")
+  set(_POLKIT_INSTALL_PREFIX "/usr")
 
 endif ()
 
@@ -59,7 +59,7 @@ find_package(GLUT)
 
 set(KS_FONT FreeSans)
 if (NOT TT_FONT_FILE)
-    execute_process(COMMAND  bash "-c" "fc-list '${KS_FONT}' |grep -E ${KS_FONT}'(\.otf|\.ttf)' | cut -d':' -f 1 -z"
+  execute_process(COMMAND  bash "-c" "fc-list '${KS_FONT}' |grep -E ${KS_FONT}'(\.otf|\.ttf)' | cut -d':' -f 1 -z"
                     OUTPUT_VARIABLE TT_FONT_FILE)
 endif (NOT TT_FONT_FILE)
 
@@ -89,17 +89,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE RelWithDebInfo)
+  set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif (NOT CMAKE_BUILD_TYPE)
 
 message("\n Build type: ${CMAKE_BUILD_TYPE}")
 
 if (NOT CMAKE_C_FLAGS_PACKAGE)
-    set(CMAKE_C_FLAGS_PACKAGE "-O3")
+  set(CMAKE_C_FLAGS_PACKAGE "-O3")
 endif (NOT CMAKE_C_FLAGS_PACKAGE)
 
 if (NOT CMAKE_CXX_FLAGS_PACKAGE)
-    set(CMAKE_CXX_FLAGS_PACKAGE "-O3")
+  set(CMAKE_CXX_FLAGS_PACKAGE "-O3")
 endif (NOT CMAKE_CXX_FLAGS_PACKAGE)
 
 set(KS_PLUGIN_INSTALL_PREFIX ${_LIBDIR}/${KS_APP_NAME}/plugins)
@@ -114,11 +114,11 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 if (CMAKE_BUILD_TYPE MATCHES Package)
 
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
 else (CMAKE_BUILD_TYPE MATCHES Package)
 
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
 endif (CMAKE_BUILD_TYPE MATCHES Package)
 
@@ -135,21 +135,21 @@ add_subdirectory(${KS_DIR}/examples)
 
 if (Boost_FOUND)
 
-    set(KS_TEST_DIR                      "${KS_DIR}/tests")
-    enable_testing()
-    add_subdirectory(${KS_TEST_DIR})
+  set(KS_TEST_DIR                      "${KS_DIR}/tests")
+  enable_testing()
+  add_subdirectory(${KS_TEST_DIR})
 
 endif()
 
 if (_DOXYGEN_DOC AND DOXYGEN_FOUND)
 
-    message("\n doxygen documentation ...")
-    add_custom_target(doc ALL)
-    add_custom_command(TARGET doc
+  message("\n doxygen documentation ...")
+  add_custom_target(doc ALL)
+  add_custom_command(TARGET doc
                        COMMAND doxygen dox_config > dox_build.log
                        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Documentation/doxygen)
 
-    set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
+  set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
                              "${KS_DIR}/Documentation/doxygen/dox_build.log"
                              "${KS_DIR}/Documentation/doxygen/html"
                              "${KS_DIR}/Documentation/doxygen/latex")

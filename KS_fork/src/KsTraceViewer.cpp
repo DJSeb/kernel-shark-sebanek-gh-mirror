@@ -311,7 +311,7 @@ void KsTraceViewer::_graphFollowsChanged(int state)
 
 	_graphFollows = (bool) state;
 	if (_graphFollows && row != KS_NO_ROW_SELECTED)
-		emit select(*_it); // Send a signal to the Graph widget.
+		emit select(row); // Send a signal to the Graph widget.
 }
 
 void KsTraceViewer::_search()
