@@ -28,7 +28,7 @@ find_package(Qt6 COMPONENTS Network OpenGLWidgets StateMachine REQUIRED)
 
 ## For customisability by the user
 if (NOT _QT6_INCLUDE_DIR)
-    set(_QT6_INCLUDE_DIR "/usr/include/qt6")
+  set(_QT6_INCLUDE_DIR "/usr/include/qt6")
 endif()
 
 set(QT6_ALL_INCLUDES
@@ -45,12 +45,12 @@ set(QT6_ALL_INCLUDES
 ### KernelShark files
 #### For customisability by the user
 if (NOT _KS_INCLUDE_DIR)
-    set(_KS_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../kernelshark/src")
+  set(_KS_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../kernelshark/src")
 endif()
 
 #### For customisability by the user
 if (NOT _KS_SHARED_LIBS_DIR)
-    set(_KS_SHARED_LIBS_DIR "/usr/local/lib64")
+  set(_KS_SHARED_LIBS_DIR "/usr/local/lib64")
 endif()
 
 # The below specifications of names, suffixes and prefixes seems to
@@ -71,7 +71,7 @@ set(KS_PLUGIN_PREFIX "plugin-")
 
 ## Add definitions if using modifed KernelShark (preview support)
 if (_UNMODIFIED_KSHARK)
-    add_definitions(-D_UNMODIFIED_KSHARK)
+  add_definitions(-D_UNMODIFIED_KSHARK)
 endif()
 
 # Plugin building
@@ -91,9 +91,9 @@ set(SOURCES
 )
 
 if (_NO_NAPS)
-    add_definitions(-D_NO_NAPS)
+  add_definitions(-D_NO_NAPS)
 else()
-    list(APPEND SOURCES SlNapRectangle.hpp SlWakeupTepProcessing.cpp)
+  list(APPEND SOURCES SlNapRectangle.hpp SlWakingTepProcessing.cpp)
 endif()
 
 ## Creating the shared library
@@ -114,25 +114,25 @@ target_link_libraries(stacklook PRIVATE
 
 
 if (NOT _NO_NAPS)
-    ## Customized installs may differ in paths
-    if (NOT _TRACECMD_INCLUDE_DIR)
-        set(_TRACECMD_INCLUDE_DIR "/usr/include")
-    endif()
-        
-    ## Include trace-cmd headers
-    target_include_directories(stacklook PRIVATE
+  ## Customized installs may differ in paths
+  if (NOT _TRACECMD_INCLUDE_DIR)
+    set(_TRACECMD_INCLUDE_DIR "/usr/include")
+  endif()
+
+  ## Include trace-cmd headers
+  target_include_directories(stacklook PRIVATE
         "${_TRACECMD_INCLUDE_DIR}/trace-cmd"
         "${_TRACECMD_INCLUDE_DIR}/traceevent"
         "${_TRACECMD_INCLUDE_DIR}/libtracefs"
     )
 
-    ## Customized installs may differ in paths
-    if (NOT _TRACECMD_LIBS_DIR)
-        set(_TRACECMD_LIBS_DIR "/usr/lib64")
-    endif()
+  ## Customized installs may differ in paths
+  if (NOT _TRACECMD_LIBS_DIR)
+    set(_TRACECMD_LIBS_DIR "/usr/lib64")
+  endif()
 
-    ## Link trace-cmd shared libraries
-    target_link_libraries(stacklook PRIVATE
+  ## Link trace-cmd shared libraries
+  target_link_libraries(stacklook PRIVATE
         "${_TRACECMD_LIBS_DIR}/libtracecmd.so"
         "${_TRACECMD_LIBS_DIR}/libtraceevent.so"
         "${_TRACECMD_LIBS_DIR}/libtracefs.so"

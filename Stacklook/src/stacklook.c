@@ -143,7 +143,7 @@ static void _select_events(struct kshark_data_stream* stream,
         kshark_data_container_append(sl_ctx_collected_events, entry, (int64_t)-1);
     } else if (entry->event_id == sched_wake_id) {
 #ifndef _NO_NAPS
-        wakeup_evt_tep_processing(sl_ctx, stream, rec, entry);
+        waking_evt_tep_processing(sl_ctx, stream, rec, entry);
 #else
         kshark_data_container_append(sl_ctx_collected_events, entry, (int64_t)-1);
 #endif
