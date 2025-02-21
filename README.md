@@ -18,7 +18,7 @@ You are in **root**.
         - Directory `src` <= All source code of the plugin
         - Directory `doc` <= Doxygen configuration and documentation files
         - Other files include: `CMakeLists.txt`
-    - Submodule `KS_fork` <= Link to a GitHub repository hosting a GitHub fork of the main KernelShark repository
+    - Directory `KS_fork` <= Modified copy of the main KernelShark repository with changes
     - File `CHANGELOG.md` <= Brief change summaries to the program, starting from the first version that basically worked
     - File `ProjectSpecification.md` <= Outlines how the project should look like
     - Other files include: `LICENSE`, `.gitignore`, `.gitmodules`, `README.md` *(you are reading this \:D)*.
@@ -28,7 +28,9 @@ You are in **root**.
 
 At version **1.4.3**.
 
-Approved! Project is finished.
+Semester project part is finished.
+
+Bachelor thesis project part WIP.
 
 ### NPRG045 general tasks
 
@@ -69,6 +71,42 @@ Things not in specification aren't mandatory, but would be pretty useful.
     * [x] Write a program that will do some stack shenanigans (`recursive_syscall_with_sleep`)
     * *NOTE:* It isn't great, but it does show nanosceond sleep :\)
     * Will also include a very small trace-file to show some simple stuff (`simple_trace.dat`)
+
+Below are bachelor thesis part's appended requirements:
+* [ ] Events involving two processes shall be split into initiators and targets
+    * E.g. sched_waking should be split into "awaker" and "awakened" events, one
+      belonging to each respective process
+    * [ ] Try to keep the logic inside the plugin (minimizing KernelShark changes)
+* [ ] NUMA topology visualization in KernelShark (either as a plugin or KernelShark modification)
+    * [ ] Parse data from Istopo (XML format)
+    * [ ] Visualize said data on the screen
+        * [ ] If no Istopo data are given, use default KShark visualization
+        * [ ] CPU reordering according to topology (NUMA nodes, hyperthread siblings)
+        * [ ] Tree grouping of CPUs
+            * [ ] May be collapsible (preferred)
+            * NOTE: Other grouping visualizations are possible, if
+              CPUs are sorted by topology, but tree-like is the one
+              that will be implemented as basis
+        * [ ] Colorful differentiation of different groups
+    * [ ] Configurable display method via some option in KShark's menu
+* [ ] Allow `sched_events` plugin compatibility
+    * XOR choice
+    * [ ] Either integrate Stacklook into sched_events plugin
+        * Would violate the holy Single Responsibility principle
+        * Direct approach
+        * Ensured success
+    * [ ] Or figure out how to allow compatibility while keeping plugins separate
+        * Less direct
+        * Keeps SRP
+        * Unknown probability of success
+General SW goal:
+* [ ] Debug the plugin even more, stabilise performance where necessary
+    * This requirement will likely grow in the future
+    * BUG: Changing trace files in opned KShark seg-faults.
+        * Environment: WSL2 openSUSE Tumbleweed
+        * Cause: Unknown
+    * PERF: many entries might produce too heavy a load for mouse hover functionality
+* [ ] Refactor README and other non-code parts of repository to reflect project extensions 
 
 ## Requirements
 
