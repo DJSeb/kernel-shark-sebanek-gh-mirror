@@ -9,7 +9,7 @@ David Jaromír Šebánek
 
 Jan Kára RNDr.
 
-## Repository layout
+## (WIP) Repository layout
 
 You are in **root**.
 
@@ -41,6 +41,15 @@ Bachelor thesis project part WIP.
 
 \* The most important things work.
 
+### Bachelor thesis project general tasks
+
+- [x] Brief project descrption
+- [x] Specification
+- [ ] Basic working version
+- [ ] Final version
+
+\* The most important things work.
+
 ### Changelog
 
 [Here.](./CHANGELOG.md)
@@ -60,7 +69,6 @@ Things not in specification aren't mandatory, but would be pretty useful.
     * [x] Create CMake build instructions
         * NOTE: Could be circumvented if the plugin files were put into KernelShark's `src/plugins` directory
     * [x] Create plugin documentation (user & technical)
-        <!-- NOTE: Limit thyself, author -->
         * [x] Create build instructions for the documentation
         * [x] Technical documentation (Doxygen)
         * [x] User documentation (Markdown or HTML)
@@ -101,14 +109,31 @@ Below are bachelor thesis part's appended requirements:
         * Unknown probability of success
 General SW goal:
 * [ ] Debug the plugin even more, stabilise performance where necessary
-    * This requirement will likely grow in the future
-    * BUG: Changing trace files in opned KShark seg-faults.
-        * Environment: WSL2 openSUSE Tumbleweed
-        * Cause: Unknown
-    * PERF: many entries might produce too heavy a load for mouse hover functionality
-* [ ] Refactor README and other non-code parts of repository to reflect project extensions 
+* [ ] Revise README and other non-code parts of repository to reflect project extensions 
+* [ ] *("Optional")* Create proper design document
+    * Would be quite good to include in technical documentation
+Non-software goal:
+* [ ] Survey paper
+    * [ ] Stack tracing (in Linux)
+        * Mostly basics, some more info about KernelShark's stack tracer
+        * Mainly to set context for the project
+    * [ ] Basic visualizations of trace data
+        * Not eclusive to stack tracing, but mostly about it
+    * [ ] Theoretical part of KernelShark
+        * [ ] Basic overview of design
+        * [ ] How is it visualizing the data?
+        * [ ] What are the limitations?
+            * I.e. why make the project in the first place?
+        * [ ] What is the job of plugins? / Removing limitations
+    * [ ] Theoretical part of Stacklook & KShark modifications
+        * [ ] Brief overview of plugin's design
+            * Shouldn't be too long, that's what the documentations are for
+            * Mainly to get a rough idea if only reading the paper
+        * [ ] Purpose & limits
+        * [ ] Results of implementation
 
-## Requirements
+
+## (WIP) Requirements
 
 Modified KernelShark (preview functionality is unusable otherwise).
 
@@ -120,13 +145,13 @@ contains a comment about this).
 CMake will be able to add a definition of a preprocessor variable of the
 same name and compile the plugin SO file appropriately.
 
-## Compatibility
+## (WIP) Compatibility
 
 The user is **REQUIRED** to turn off "sched_events" plugin, which causes issues
 because of reassigning "next" fields of entries. Plugin will **NOT** work
 correctly with "sched_events" enabled.
 
-## Documentation
+## (WIP) Documentation
 
 [User manual](./Stacklook/doc/user/Manual.md)
 
@@ -134,7 +159,7 @@ Technical (Doxygen HTML) - build it via Doxygen (build instructions are below).
 - Or do not generate it and read the comments in code and .doxygen files in
   the `docs` folder.
 
-## Building
+## (WIP) Building
 
 *(Default)* If using this plugin's build method:
 
@@ -173,7 +198,7 @@ If using KernelShark build method:
 Do note that the instructions won't remove previous versions. For that, just use `rm` in the directory
 where the SO files are to clean what you need.
 
-## Contributions & acknowledgments
+## (WIP) Contributions & acknowledgments
 
 **Yordan Karadzhov** - maintains KernelShark, author (me) took inspiration from his examples and plugins
 **Google Lens** - extracted text from images when no sources were available
