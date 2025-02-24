@@ -101,13 +101,13 @@ Below are bachelor thesis part's appended requirements:
   - [ ] Configurable display method via some option in KShark's menu
 - [ ] Allow `sched_events` plugin compatibility
       _ XOR choice
-      _ [ ] Either integrate Stacklook into sched_events plugin
-      _ Would violate the holy Single Responsibility principle
+      _ [ ] Either integrate Stacklook into sched*events plugin
+      * Would violate the holy Single Responsibility principle
       _ Direct approach
       _ Ensured success
       _ [ ] Or figure out how to allow compatibility while keeping plugins separate
       _ Less direct
-      _ Keeps SRP \* Unknown probability of success
+      \_ Keeps SRP \* Unknown probability of success
       General SW goal:
 - [ ] Debug the plugin even more, stabilise performance where necessary
 - [ ] Revise README and other non-code parts of repository to reflect project extensions
@@ -210,6 +210,8 @@ where the SO files are to clean what you need.
 - perfect for finding ideas that will never work
 - good for simple prototype brainstorming
 - helped with configuration dialog when designing the layouts
+
+**Doxygen Awesome CSS** - [beautiful CSS theme](https://jothepro.github.io/doxygen-awesome-css/index.html) that makes even Doxygen documentation look good
 
 ## Support
 
