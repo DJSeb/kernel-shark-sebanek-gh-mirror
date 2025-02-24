@@ -1,7 +1,7 @@
 /** Copyright (C) 2024, David Jaromír Šebánek <djsebofficial@gmail.com> **/
 
 /**
- * @file    SlWakeupTepProcessing.cpp
+ * @file    SlWakingTepProcessing.cpp
  * @brief   Contains definition for processing event entries as tep
  *          records.
 */
