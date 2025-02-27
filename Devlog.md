@@ -97,6 +97,8 @@ Migrated KernelShark from a submodule into main repository.
 
 More configuration work done on WSL.
 
+Tip for the future: if polkit is giving you trouble, just disable it via adding a specific override group :)
+
 More work done on README.md and Devlog.md
 
 ## 2025-02-24
@@ -105,3 +107,30 @@ Hopefully last configuration done on WSL.
 
 More work done on Devlog.md.
 Code changes should start after all is settled in here.
+
+## 2025-02-25
+
+No real work done, just some more configuration on WSL and Git.
+
+Really only squash-merged the Devlog, README and documentation changes into main from development.
+
+## 2025-02-25
+
+Debugged the segmentation fault bug, gdb backtrace says it wasn't Stacklook, but KernelShark itself.
+Problem might actually be the progress bar... will check source code.
+
+GDB backtrace (above and below are loads of Qt functions):
+
+```shell
+#18 0x00007ffff7f02f07 in KsWidgetsLib::KsProgressBar::setValue (this=0x7fffffffa5d0, i=0)
+    at /home/djseb-wsl/Documents/School/RP_BP/Git/KS_fork/src/KsWidgetsLib.cpp:67
+#19 0x00007ffff7f3d11d in KsMainWindow::_load (this=0x7fffffffbb90, fileName=..., append=false)
+    at /home/djseb-wsl/Documents/School/RP_BP/Git/KS_fork/src/KsMainWindow.cpp:1320
+help
+#20 0x00007ffff7f3d44f in KsMainWindow::loadDataFile (this=0x7fffffffbb90, fileName=...)
+    at /home/djseb-wsl/Documents/School/RP_BP/Git/KS_fork/src/KsMainWindow.cpp:1348
+#21 0x00007ffff7f387ee in KsMainWindow::_open (this=0x7fffffffbb90)
+    at /home/djseb-wsl/Documents/School/RP_BP/Git/KS_fork/src/KsMainWindow.cpp:597
+```
+
+Call actually ends at std::\_\_atomic_bool<QtThreadData\*>::load.
