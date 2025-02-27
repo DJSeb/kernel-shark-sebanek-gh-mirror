@@ -2,7 +2,7 @@
 kernelshark.desktop
 libkshark.pc
 org.freedesktop.kshark-record.policy
-Documentation/*
+Documentation/**
 !Documentation/doxygen
 lib
 src/KsCmakeDef.hpp
