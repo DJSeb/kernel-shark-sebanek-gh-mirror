@@ -17,9 +17,17 @@ If any bug occurs, note it here and its environment + behaviour.
 If a bug has been solved, mark it and provide explanation (or a commit ID where it was solved).
 
 - Switching between trace files results in a segmentation fault
+
   - Status: OPEN
   - Cause: Might be a problem with SlDetailedView's destructing OR with
     the map holding all opened ones.
+  - Environment: WSL-openSUSE-Tumbleweed
+
+- Switching between trace files results in Stacklook's triangle buttons
+  losing the ability to assign color to trace files
+  - Status: OPEN
+  - Cause: Most likely staticness of a variable and lack of change
+    after trace file switch.
   - Environment: WSL-openSUSE-Tumbleweed
 
 ## Performance concerns
