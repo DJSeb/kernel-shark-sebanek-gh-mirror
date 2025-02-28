@@ -18,7 +18,8 @@ If a bug has been solved, mark it and provide explanation (or a commit ID where 
 
 - Switching between trace files results in a segmentation fault
   - Status: OPEN
-  - Cause: unknown
+  - Cause: Might be a problem with SlDetailedView's destructing OR with
+    the map holding all opened ones.
   - Environment: WSL-openSUSE-Tumbleweed
 
 ## Performance concerns
@@ -134,3 +135,32 @@ help
 ```
 
 Call actually ends at std::\_\_atomic_bool<QtThreadData\*>::load.
+
+## 2025-02-28
+
+Well, seems the fault lies with Stacklook after all.
+Calls end at something Qt-related. The segfault doesn't happen when
+Stacklook isn't loaded. It most likely happens, when the Qt window
+for stacktrace details is not destructed well, though that is a guess.
+
+Probably a good idea to put a breakpoint into the destructor of the window,
+or somewhere close.
+
+...
+
+And indeed it is a good idea, seems _'clean_opened_views'_ isn't as good
+at its job as one might think. Still unsure where exactly the problem is though,
+as debug step was too large, so it's time to try more.
+
+New bug found though - switching trace files also makes it so
+that detailed stack view doesn't get data about task state properly,
+keystring here: _"No specific info for event."_ Assumedly, the problem
+will be related to pointers (keys ARE taken from _ctx->..._, which might
+be the core issue along with the fact the inner map in the function
+is static).
+
+...
+
+So, after changing the function's const variable from static to normal,
+the data are normally loaded... but we are still segfaulting. Not quite
+sure why, but it is definitely connected to the detailed views.
