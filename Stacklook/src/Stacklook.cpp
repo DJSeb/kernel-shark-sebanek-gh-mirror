@@ -139,12 +139,10 @@ static void _load_current_colortable() {
  * @returns Default color or one present in the`task_colors` color table.
 */
 static KsPlot::Color _get_color(int32_t task_pid, KsPlot::Color default_color) {
-    KsPlot::Color triangle_color = default_color;
-    try {
-        triangle_color = task_colors.at(task_pid);
-    } catch (std::out_of_range&) {
-        triangle_color = default_color;
-    }
+    bool task_color_exists = static_cast<bool>(task_colors.count(task_pid));
+
+    KsPlot::Color triangle_color = (task_color_exists) ?
+        task_colors.at(task_pid) : default_color;
 
     return triangle_color;
 }
