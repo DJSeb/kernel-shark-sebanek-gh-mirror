@@ -320,7 +320,6 @@ void SlTriangleButton::_doubleClick() const {
 
     auto new_view = new SlDetailedView(window_labeltext, specific_entry_info.c_str(), window_text);
     new_view->show();
-    SlDetailedView::opened_views->push_back(new_view);
 }
 
 /**

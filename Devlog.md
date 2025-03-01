@@ -18,9 +18,13 @@ If a bug has been solved, mark it and provide explanation (or a commit ID where 
 
 - Switching between trace files results in a segmentation fault
 
-  - Status: OPEN
-  - Cause: Might be a problem with SlDetailedView's destructing OR with
-    the map holding all opened ones.
+  - Status: CLOSED
+  - Cause: Most likely a double free in clean_opened_views.
+  - Solution: Changed semantics of detailed views - they may
+    stay after the trace file has been changed, but they will
+    be destroyed when closed by the user or when KernelShark's
+    main window closes (as its parent, it will close it
+    automatically)
   - Environment: WSL-openSUSE-Tumbleweed
 
 - Switching between trace files results in Stacklook's triangle buttons
@@ -194,3 +198,21 @@ be reversed).
 
 On the bright side, it seems that the triangle button's color bug had an
 easy fix with an on-file-load function being called.
+
+...
+
+Seems the cause of segfault bug was a double free, once in clean_opened_views,
+once somewhere else (unsure where though).
+
+...
+
+Easiest solutions are the best - instead of managing pointers and unsteady lifetimes, just make it so the detailed
+view is deleted either by closing it via the X button or
+closing via the Close button or by main window closing (i.e.
+process execution ending).
+This also makes it so that windows persist after trace file is changed - might provide more utility that way anyway, if
+not, they are one click away from being destroyed.
+Just to be sure though, destructor of the detailed views
+was implemented as empty, to hopefully lessen compiler's
+imaginative optimizations, if there were any due to it not
+being present (very speculative problem though).

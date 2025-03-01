@@ -403,46 +403,6 @@ static void config_show([[maybe_unused]] KsMainWindow*) {
 // Functions used in C code
 
 /**
- * @brief Ensures correct destruction of opened Stacklook
- * view windows and the vector which holds them.
- * 
- * @param view_container: vector containing opened Stacklook view
- * windows
-*/
-void clean_opened_views(void* view_container) {
-    auto views_ptr = (views_registry_t*)(view_container);
-    
-    // To prevent nullptr access
-    if (views_ptr == nullptr) {
-        return;
-    }
-
-    auto views = *views_ptr;
-    
-    // Cycle & destroy
-    for(auto view : views) {
-        if (view != nullptr) {
-            delete view;
-        }
-    }
-
-    // Finally, destroy the vector itself
-    delete (views_registry_t*)(view_container);
-}
-
-/**
- * @brief Initializes the vector managing the view windows. Also puts
- * the typed pointer into the windows' class member.
- * 
- * @returns Vector's heap address as a void pointer.
-*/
-void* init_views() {
-    auto views = new views_registry_t{};
-    SlDetailedView::opened_views = views;
-    return (void*)(views);
-}
-
-/**
  * @brief Deinitializes the task colors colortable, making sure it'll
  * be reloaded on new trace file load.
 */

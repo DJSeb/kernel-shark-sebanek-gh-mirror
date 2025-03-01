@@ -1,21 +1,24 @@
-# Timeless info
+# 1.4.4 - 2025-03-01
 
-[None]
-
-# 2024-08-02
-# 1.4.3
+Fixed bugs related to switching trace files, namely:
+- Program produced a segmentation fault sometimes, when 
+  opened detailed stacktrace views for a particular file
+  were and Qt was attempting to notify these deleted widgets
+- Triangle buttons of Stacklook would be unable to use
+  task colors if already in drawing distance during file
+  switch
+ 
+# 1.4.3 - 2024-08-02
 
 Added copyright comments.
 Finished the project.
 
-# 2024-08-30
-## 1.4.2
+# 1.4.2 - 2024-08-30
 
 Changed responding from sched_wakeup to sched_waking.
 Added processing of tep info for sched_wakings.
 
-# 2024-08-25
-## 1.4.1
+# 1.4.1 - 2024-08-25
 
 Fixed and updated Doxygen documentation.
 
@@ -23,19 +26,16 @@ New features:
 - nap rectangles added - visualization of prev_state of a switch up until the next wakeup.
   * can be turned off in the configuration
 
-# 2024-08-22
-## 1.3.3
+# 1.3.3 - 2024-08-22
 
 Tried getting some more prominent prev state visibility through rectangles, doesn't work very well, so it's compile-option opt-in and labeled as WIP. Updated CMakeLists and source appropriately.
 
-# 2024-08-17
-## 1.3.1
+# 1.3.1 - 2024-08-17
 
 Build instructions were modifed - if the plugin is to be used by unmodified
 KernelShark, the user can specify that via a CMake variable `_UNMODIFIED_KSHARK`.
 
-# 2024-08-16
-## 1.3.0
+# 1.3.0 - 2024-08-16
 
 Config is here! (At least the first working version.)
 
@@ -56,8 +56,7 @@ Ideas:
 - Change indication of S, R, D, I, ... states in for buttons above sched_switch
   (possibly just draw another shape next to those when hovering?)
 
-# 2024-08-11
-## 1.2.7
+# 1.2.7 - 2024-08-11
 
 Newly, some constants have been moved to a future config window.
 
@@ -69,14 +68,12 @@ New features:
 Bugfixes:
 - No longer skipping an entry in the stack trace during preview
 
-# 2024-08-06
-## 1.2.6
+# 1.2.6 - 2024-08-06
 
 Fixed:
 - Unchecked nullptr in _mouseHover of SlTriangleButton
 
-# 2024-08-04
-## 1.2.5
+# 1.2.5 - 2024-08-04
 
 Added final technical documentation page (or at least final until
 revisions come).
@@ -84,33 +81,27 @@ revisions come).
 Added a symlink in the build process and Stacklook's version as a
 suffix to the actual SO file.
 
-# 2024-08-03
-## 1.2.4
+# 1.2.4 - 2024-08-03
 
 Code documentation fixes & additions.
 
 Build instructions were remade.
 
-# 2024-07-30
-## 1.2.3
-
+# 1.2.3 - 2024-07-30
 Code documentation finished.
 
-# 2024-07-29
-## 1.2.2
+# 1.2.2 - 2024-07-29
 
 More documented code, more cleanup of development code.
 
 Code documentation is almost finished.
 
-# 2024-07-28
-## 1.2.1
+# 1.2.1 - 2024-07-28
 
 Just cleaned some dependencies in code and leftover development
 code.
 
-# 2024-07-26
-## 1.2.0
+# 1.2.0 - 2024-07-26
 
 New features:
 - Can hover over buttons to display the name of the task and
@@ -124,8 +115,8 @@ Fixed:
 - No longer seeing buttons even though a task or CPU plot
   is hidden
 
-# 2024-07-24
-## 1.1.0 Documenting and cleaning up
+# 1.1.0 - 2024-07-24
+
 Plugin is decomposed into more files, functions
 are cleaned up, unnecessities are removed. Work
 on task plotting & button hover event starts.
@@ -154,8 +145,8 @@ Bugs:
 - Turning off tasks from the graph will not hide the buttons
 - Similarly with CPUs in the graph
 
-# 2024-07-23:
-## 1.0.0 - The first working version
+# 1.0.0 - 2024-07-23:
+## The first working version
 Plugin finally works as it should in its most basic
 form.
 

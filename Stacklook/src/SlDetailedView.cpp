@@ -67,6 +67,8 @@ SlDetailedView::SlDetailedView(const char* task_name, const char* specific_info,
     _raw_view(this),
     _close_button("Close", this)
 {
+    // Delete on close
+    setAttribute(Qt::WA_DeleteOnClose);
 
     // Make the data a bit nicer
     QString new_data = _prettify_data(data);

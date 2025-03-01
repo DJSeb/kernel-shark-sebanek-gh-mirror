@@ -25,11 +25,6 @@
 class SlDetailedView;
 
 /**
- * @brief Type of the registry of opened views.
- */
-using views_registry_t = std::vector<SlDetailedView*>;
-
-/**
  * @brief This type represents the windows the user can spawn to view
  * the stack trace of an event in full. Every window of this type will be
  * dependent on the main KernelShark main window when it comes to program
@@ -38,10 +33,6 @@ using views_registry_t = std::vector<SlDetailedView*>;
  * It inherits from `QWidget`.
 */
 class SlDetailedView : public QWidget {
-public: // Class data members
-    ///
-    /// @brief Pointer to a vector of opened Stacklook windows.
-    inline static views_registry_t* opened_views = nullptr;
 private: // Qt data members
     ///
     /// @brief Layout for the widget's control elements.
