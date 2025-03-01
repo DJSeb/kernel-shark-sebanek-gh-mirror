@@ -75,7 +75,7 @@ static SlConfigWindow* cfg_window;
  * @brief Color table of the tasks so that the Stacklook buttons look
  * prettier.
 */
-static KsPlot::ColorTable task_colors;
+static KsPlot::ColorTable task_colors{};
 
 /**
  * @brief Indicates whether the colortable has already been loaded or not.
@@ -139,12 +139,10 @@ static void _load_current_colortable() {
  * @returns Default color or one present in the`task_colors` color table.
 */
 static KsPlot::Color _get_color(int32_t task_pid, KsPlot::Color default_color) {
-    KsPlot::Color triangle_color = default_color;
-    try {
-        triangle_color = task_colors.at(task_pid);
-    } catch (std::out_of_range&) {
-        triangle_color = default_color;
-    }
+    bool task_color_exists = static_cast<bool>(task_colors.count(task_pid));
+
+    KsPlot::Color triangle_color = (task_color_exists) ?
+        task_colors.at(task_pid) : default_color;
 
     return triangle_color;
 }
@@ -377,8 +375,8 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
  * 
  * @param argv: The C++ arguments of the drawing function of the plugin
  * @param dc: Input location for the container of the event's data
- * @param check_func: check function used to select events from data container
- * @param make_button: function which specifies what will be drawn and how
+ * @param check_func: Check function used to select events from data container
+ * @param make_button: Function which specifies what will be drawn and how
 */
 static void _draw_stacklook_buttons(KsCppArgV* argv, 
                                     kshark_data_container* dc,
@@ -405,43 +403,12 @@ static void config_show([[maybe_unused]] KsMainWindow*) {
 // Functions used in C code
 
 /**
- * @brief Ensures correct destruction of opened Stacklook
- * view windows and the vector which holds them.
- * 
- * @param view_container: vector containing opened Stacklook view
- * windows
+ * @brief Deinitializes the task colors colortable, making sure it'll
+ * be reloaded on new trace file load.
 */
-void clean_opened_views(void* view_container) {
-    auto views_ptr = (views_registry_t*)(view_container);
-    
-    // To prevent nullptr access
-    if (views_ptr == nullptr) {
-        return;
-    }
-
-    auto views = *views_ptr;
-    
-    // Cycle & destroy
-    for(auto view : views) {
-        if (view != nullptr) {
-            delete view;
-        }
-    }
-
-    // Finally, destroy the vector itself
-    delete (views_registry_t*)(view_container);
-}
-
-/**
- * @brief Initializes the vector managing the view windows. Also puts
- * the typed pointer into the windows' class member.
- * 
- * @returns Vector's heap address as a void pointer.
-*/
-void* init_views() {
-    auto views = new views_registry_t{};
-    SlDetailedView::opened_views = views;
-    return (void*)(views);
+void deinit_task_colors() {
+    task_colors.clear();
+    loaded_colors = false;
 }
 
 /**

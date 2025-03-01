@@ -17,8 +17,29 @@ If any bug occurs, note it here and its environment + behaviour.
 If a bug has been solved, mark it and provide explanation (or a commit ID where it was solved).
 
 - Switching between trace files results in a segmentation fault
+
+  - Status: CLOSED
+  - Cause: Most likely a double free in clean_opened_views.
+  - Solution: Changed semantics of detailed views - they may
+    stay after the trace file has been changed, but they will
+    be destroyed when closed by the user or when KernelShark's
+    main window closes (as its parent, it will close it
+    automatically)
+  - Environment: WSL-openSUSE-Tumbleweed
+
+- Switching between trace files results in Stacklook's triangle buttons
+  losing the ability to assign color to trace files
+
+  - Status: CLOSED
+  - Cause: Most likely staticness of a variable and lack of change
+    after trace file switch.
+  - Environment: WSL-openSUSE-Tumbleweed
+  - Solution: Function that restarts color table after tracefile load.
+
+- Triangle buttons are drawn in the opposite order they're accessible, i.e.
+  overlapping buttons don't visually represent the logical overlap order.
   - Status: OPEN
-  - Cause: unknown
+  - Cause: Incorrect rendering ordering
   - Environment: WSL-openSUSE-Tumbleweed
 
 ## Performance concerns
@@ -134,3 +155,64 @@ help
 ```
 
 Call actually ends at std::\_\_atomic_bool<QtThreadData\*>::load.
+
+## 2025-02-28
+
+Well, seems the fault lies with Stacklook after all.
+Calls end at something Qt-related. The segfault doesn't happen when
+Stacklook isn't loaded. It most likely happens, when the Qt window
+for stacktrace details is not destructed well, though that is a guess.
+
+Probably a good idea to put a breakpoint into the destructor of the window,
+or somewhere close.
+
+...
+
+And indeed it is a good idea, seems _'clean_opened_views'_ isn't as good
+at its job as one might think. Still unsure where exactly the problem is though,
+as debug step was too large, so it's time to try more.
+
+New bug found though - switching trace files also makes it so
+that detailed stack view doesn't get data about task state properly,
+keystring here: _"No specific info for event."_ Assumedly, the problem
+will be related to pointers (keys ARE taken from _ctx->..._, which might
+be the core issue along with the fact the inner map in the function
+is static).
+
+...
+
+So, after changing the function's const variable from static to normal,
+the data are normally loaded... but we are still segfaulting. Not quite
+sure why, but it is definitely connected to the detailed views.
+
+## 2025-03-01
+
+The more debugging happens, the more it seems like the segfault is either
+compilation optimization related or timing related, none of which are
+easy to debug. Stepping through the function seems to really just not
+trigger the bug, continuing sometimes does, sometimes does not catch it.
+
+Also, new bug, the triangle buttons should be hidden in reverse order
+(currently the one on the left is the top-most in drawing order, it should
+be reversed).
+
+On the bright side, it seems that the triangle button's color bug had an
+easy fix with an on-file-load function being called.
+
+...
+
+Seems the cause of segfault bug was a double free, once in clean_opened_views,
+once somewhere else (unsure where though).
+
+...
+
+Easiest solutions are the best - instead of managing pointers and unsteady lifetimes, just make it so the detailed
+view is deleted either by closing it via the X button or
+closing via the Close button or by main window closing (i.e.
+process execution ending).
+This also makes it so that windows persist after trace file is changed - might provide more utility that way anyway, if
+not, they are one click away from being destroyed.
+Just to be sure though, destructor of the detailed views
+was implemented as empty, to hopefully lessen compiler's
+imaginative optimizations, if there were any due to it not
+being present (very speculative problem though).

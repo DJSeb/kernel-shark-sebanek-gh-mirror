@@ -80,17 +80,19 @@ static void _add_sched_switch_prev_state_text(const kshark_entry* event_entry,
  * of there being no specific info.
  */
 static const std::string _get_specific_info(const kshark_entry* entry) {
+    static const std::string NO_MAP_VAL{"No specific info for event."};
+    
     plugin_stacklook_ctx* ctx = __get_context(entry->stream_id);
-    static const std::map<int32_t, const char*> SPECIFIC_INFO_MAP{{
-        {ctx->sswitch_event_id, "Task was in state "},
-        {ctx->swake_event_id,   "Task has woken up."}
+    const std::map<int32_t, const std::string> SPECIFIC_INFO_MAP{{
+        { ctx->sswitch_event_id, "Task was in state " },
+        { ctx->swake_event_id,   "Task has woken up." }
     }};
-    static const char* NO_MAP_VAL{"No specific info for event."};
 
     const int32_t entry_event_id = kshark_get_event_id(entry);
     const bool not_mapped = (SPECIFIC_INFO_MAP.count(entry_event_id) == 0);
-    std::string spec_info{
-        (not_mapped) ? NO_MAP_VAL : SPECIFIC_INFO_MAP.at(entry_event_id)};
+    
+    std::string spec_info{ (not_mapped) ?
+        NO_MAP_VAL : SPECIFIC_INFO_MAP.at(entry_event_id)};
     
     if (entry_event_id == ctx->sswitch_event_id) {
         spec_info = spec_info.append(get_longer_prev_state(entry) + ".");
@@ -318,7 +320,6 @@ void SlTriangleButton::_doubleClick() const {
 
     auto new_view = new SlDetailedView(window_labeltext, specific_entry_info.c_str(), window_text);
     new_view->show();
-    SlDetailedView::opened_views->push_back(new_view);
 }
 
 /**

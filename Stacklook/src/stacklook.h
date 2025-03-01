@@ -73,11 +73,6 @@ struct plugin_stacklook_ctx {
      * @brief Collected switch or wakeup events.
     */
     struct kshark_data_container* collected_events;
-
-    /**
-     * @brief Container of Stacklook window pointers.
-    */
-    void* cpp_views_container;
 };
 
 // Some magic by KernelShark that makes it simpler to integrate the plugin.
@@ -93,8 +88,7 @@ struct ksplot_font* get_bold_font_ptr();
 void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
                             int val, int draw_action);
 void* plugin_set_gui_ptr(void* gui_ptr);
-void clean_opened_views(void* view_container);
-void* init_views();
+void deinit_task_colors();
 #ifndef _NO_NAPS
 void waking_evt_tep_processing(struct plugin_stacklook_ctx* ctx, 
                                struct kshark_data_stream* stream,

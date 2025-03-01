@@ -98,8 +98,6 @@ static void _sl_free_ctx(struct plugin_stacklook_ctx* sl_ctx)
 		return;
     }
 
-    clean_opened_views(sl_ctx->cpp_views_container);
-
 	kshark_free_data_container(sl_ctx->collected_events);
 
     sl_ctx->sswitch_event_id = -1;
@@ -200,8 +198,6 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     sched_wake_id = kshark_find_event_id(stream, "sched/sched_waking");
     sl_ctx->swake_event_id = sched_wake_id;
 
-    sl_ctx->cpp_views_container = init_views();
-
     kshark_register_event_handler(stream, sched_switch_id, _select_events);
     kshark_register_event_handler(stream, sched_wake_id, _select_events);
     kshark_register_draw_handler(stream, draw_stacklook_objects);
@@ -231,6 +227,8 @@ int KSHARK_PLOT_PLUGIN_DEINITIALIZER(struct kshark_data_stream* stream) {
     }
 
     __close(stream->stream_id);
+
+    deinit_task_colors();
 
     return retval;
 }
