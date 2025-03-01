@@ -29,7 +29,7 @@
  * @param entry: pointer KernelShark event entry
  */
 void waking_evt_tep_processing(struct plugin_stacklook_ctx* ctx, 
-                               struct kshark_data_stream* stream,
+                               [[maybe_unused]] struct kshark_data_stream* stream,
                                void* rec,
                                struct kshark_entry* entry) {
     tep_record* record = (struct tep_record*)rec;
