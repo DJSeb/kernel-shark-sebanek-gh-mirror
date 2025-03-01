@@ -206,6 +206,8 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     kshark_register_event_handler(stream, sched_wake_id, _select_events);
     kshark_register_draw_handler(stream, draw_stacklook_objects);
 
+    deinit_task_colors();
+
     return 1;
 }
 

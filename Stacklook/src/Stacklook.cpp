@@ -75,7 +75,7 @@ static SlConfigWindow* cfg_window;
  * @brief Color table of the tasks so that the Stacklook buttons look
  * prettier.
 */
-static KsPlot::ColorTable task_colors;
+static KsPlot::ColorTable task_colors{};
 
 /**
  * @brief Indicates whether the colortable has already been loaded or not.
@@ -442,6 +442,15 @@ void* init_views() {
     auto views = new views_registry_t{};
     SlDetailedView::opened_views = views;
     return (void*)(views);
+}
+
+/**
+ * @brief Deinitializes the task colors colortable, making sure it'll
+ * be reloaded on new trace file load.
+*/
+void deinit_task_colors() {
+    task_colors.clear();
+    loaded_colors = false;
 }
 
 /**

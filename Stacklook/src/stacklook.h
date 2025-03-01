@@ -95,6 +95,7 @@ void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
 void* plugin_set_gui_ptr(void* gui_ptr);
 void clean_opened_views(void* view_container);
 void* init_views();
+void deinit_task_colors();
 #ifndef _NO_NAPS
 void waking_evt_tep_processing(struct plugin_stacklook_ctx* ctx, 
                                struct kshark_data_stream* stream,

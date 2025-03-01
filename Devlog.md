@@ -25,9 +25,17 @@ If a bug has been solved, mark it and provide explanation (or a commit ID where 
 
 - Switching between trace files results in Stacklook's triangle buttons
   losing the ability to assign color to trace files
-  - Status: OPEN
+
+  - Status: CLOSED
   - Cause: Most likely staticness of a variable and lack of change
     after trace file switch.
+  - Environment: WSL-openSUSE-Tumbleweed
+  - Solution: Function that restarts color table after tracefile load.
+
+- Triangle buttons are drawn in the opposite order they're accessible, i.e.
+  overlapping buttons don't visually represent the logical overlap order.
+  - Status: OPEN
+  - Cause: Incorrect rendering ordering
   - Environment: WSL-openSUSE-Tumbleweed
 
 ## Performance concerns
@@ -172,3 +180,17 @@ is static).
 So, after changing the function's const variable from static to normal,
 the data are normally loaded... but we are still segfaulting. Not quite
 sure why, but it is definitely connected to the detailed views.
+
+## 2025-03-01
+
+The more debugging happens, the more it seems like the segfault is either
+compilation optimization related or timing related, none of which are
+easy to debug. Stepping through the function seems to really just not
+trigger the bug, continuing sometimes does, sometimes does not catch it.
+
+Also, new bug, the triangle buttons should be hidden in reverse order
+(currently the one on the left is the top-most in drawing order, it should
+be reversed).
+
+On the bright side, it seems that the triangle button's color bug had an
+easy fix with an on-file-load function being called.
