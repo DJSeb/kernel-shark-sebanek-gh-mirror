@@ -377,8 +377,8 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
  * 
  * @param argv: The C++ arguments of the drawing function of the plugin
  * @param dc: Input location for the container of the event's data
- * @param check_func: check function used to select events from data container
- * @param make_button: function which specifies what will be drawn and how
+ * @param check_func: Check function used to select events from data container
+ * @param make_button: Function which specifies what will be drawn and how
 */
 static void _draw_stacklook_buttons(KsCppArgV* argv, 
                                     kshark_data_container* dc,
