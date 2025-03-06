@@ -10,12 +10,14 @@ If a bug has been solved, mark it and provide explanation (or a commit ID where 
 1. Triangle buttons are drawn in the opposite order they're accessible, i.e.
    overlapping buttons don't visually represent the logical overlap order.
 
-- Status: OPEN
+- Status: On hold (for now)
 - Cause: Incorrect rendering ordering
 - Possible solution(s):
-  1. Change how KernelShark is rendering plot objects
-  2. Change how plot objects are being added (in plugin or in kshark)
-  3. Change what the cursor is hovering over to objects added first (if possible)
+  1. Change how KernelShark is rendering plot objects (Feels weird though)
+
+~~2. Change how plot objects are being added (in plugin or in kshark)~~
+~~3. Change what the cursor is hovering over to objects added first (if possible)~~
+
 - Environment: WSL-openSUSE-Tumbleweed
 
 # Closed bugs

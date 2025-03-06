@@ -14,6 +14,7 @@
 
 // C++
 #include <forward_list>
+#include <deque>
 #include <unordered_map>
 #include <string>
 
@@ -143,7 +144,7 @@ private:
 };
 
 /** List of graphical element. */
-typedef std::forward_list<PlotObject*> PlotObjList;
+typedef std::deque<PlotObject*> PlotObjList;
 
 class Point;
 

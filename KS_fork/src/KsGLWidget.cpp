@@ -142,7 +142,18 @@ void KsGLWidget::paintGL()
 			g->draw(size);
 	}
 
-	for (auto const &s: _shapes) {
+	/** NOTE: Changed here
+	 * Now the drawing respects the order at which double clicks and hovers
+	 * are detected.
+	 * TODO: REALLY BAD HACK BY THE WAY, I have to reverse the list TWICE!
+	 * Not good for repeated drawing!
+	 */
+	//_shapes.reverse();
+	auto shapes_rev_it = _shapes.crbegin();
+	auto shapes_rev_end = _shapes.crend();
+	for (; shapes_rev_it != shapes_rev_end; ++shapes_rev_it) {
+		auto const& s = *shapes_rev_it;
+		
 		if (!s)
 			continue;
 
@@ -151,6 +162,7 @@ void KsGLWidget::paintGL()
 
 		s->draw();
 	}
+	//_shapes.reverse();
 
 	/*
 	 * Update and draw the markers. Make sure that the active marker
