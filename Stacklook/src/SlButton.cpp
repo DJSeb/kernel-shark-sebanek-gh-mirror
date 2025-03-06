@@ -8,6 +8,7 @@
 
 // C++
 #include <string>
+#include <array>
 
 // KernelShark
 #include "libkshark.h"
@@ -22,11 +23,14 @@
 #include "SlConfig.hpp"
 #include "SlPrevState.hpp"
 
+// Usings
+using top_3_stack_t = std::array<QString, 3>;
+
 // Static functions
 
 /**
  * @brief Adds text to a Stacklook button of a sched_switch event - text shows
- * "(PREVS_STATE)", where PREV_STATE is a letter representing what state the task
+ * "(PREV_STATE)", where PREV_STATE is a letter representing what state the task
  * was in before it was switched. Text box with the new text is then also placed under
  * the always-present "STACK" text.
  * 
@@ -209,56 +213,99 @@ static QString _prettify_stack_item(const std::string& to_prettify) {
 }
 
 /**
- * @brief Puts the top three stack items from the raw C-string stack trace
- * into a QString array after making them prettier.
+ * @brief Move string index to the start of the stack trace, which will be
+ * displayed to the user upon hovering over the button.
  * 
- * @param stacktrace: C-string of the stack trace to be processed
- * @param evt_name: for determining stack offset of an entry
- * @param out_array: output array, top traces are eventually stored there
+ * @param stack_offset - User-specified offset of the stack trace tot preview.
+ * @param trace_str - String of the whole stack trace to be processed.
+ * @return `std::size_t` Position from which to start reading the stack trace items.
+ * If the return value is `std::string::npos`, the stack offset was too high.
 */
-static void _get_top_three_stack_items(const char* stacktrace,
-                                       const std::string& evt_name,
-                                       QString out_array[]) {
-    std::string trace_str{stacktrace};
-
-    const int16_t stack_offset = SlConfig::get_instance().get_stack_offset(evt_name);
+static std::size_t _get_stack_start_pos(int16_t stack_offset,
+                                        const std::string& trace_str) {
     std::size_t str_pos = 0;
 
     for (int64_t counter = 0; counter < stack_offset; ++counter) {
         str_pos = trace_str.find("=>", str_pos);
-        
+
         if (str_pos == std::string::npos) {
-            return;
+        return std::string::npos;
         }
 
         ++str_pos;
     }
 
-    for (int64_t counter = 0; counter < 3; ++counter) {
+    return str_pos;
+}
+
+/**
+* @brief Get the top three stack items from the specified start of the stack trace.
+* 
+* @param str_pos - Position from which to start reading the stack trace items.
+* @param trace_str - String of the whole stack trace to be processed.
+* @return `top_3_stack_t` Array of the top three stack items after a user-set
+* amount of items was skipped.
+*/
+static top_3_stack_t _get_top_three_from_start(std::size_t str_pos,
+                                               const std::string& trace_str) {      
+    top_3_stack_t out_array{"-", "-", "-"};
+
+    for (std::size_t counter = 0; counter < 3; ++counter) {
         std::size_t content_start = trace_str.find("=>", str_pos);
+
 
         // We don't have enough entries
         if (content_start == std::string::npos) {
-            break;
+        break;
         }
 
+        // Find the end of the stack item's content
         std::size_t content_end = trace_str.find("=>", content_start + 1);
 
         // If we found the last entry, take the rest of the string
         // and block further iteration.
         if (content_end == std::string::npos) {
-            content_end = trace_str.length() - 1;
-            counter = 3;
+        content_end = trace_str.length() - 1;
+        counter = 3;
         }
 
-        // For future iteration
+        // Advance stack item iteration
         str_pos = content_end;
 
         auto num_of_chars = content_end - content_start;
         const std::string item_as_str = trace_str.substr(content_start, num_of_chars);
-        out_array[counter] = _prettify_stack_item(item_as_str);
-
+        const std::size_t array_pos = counter == 3 ? 2 : counter;
+        out_array[array_pos] = _prettify_stack_item(item_as_str);
     }
+
+    return out_array;
+}
+
+/**
+ * @brief Puts the top three stack items from the raw C-string stack trace
+ * into a QString C++ array of three members after making each item prettier.
+ * 
+ * @param stacktrace: C-string of the stack trace to be processed
+ * @param evt_name: for determining stack offset of an entry
+ * @param out_array: output C++ 3-member array, top traces are eventually stored there
+ * @return `top_3_stack_t` Array of the top three stack items after a user-set
+ * amount of items was skipped.
+ * If the offset is too high, the array will contain three dashes (i.e. "no
+ * stack items were found").
+*/
+static top_3_stack_t _get_top_three_stack_items(const char* stacktrace,
+                                                         const std::string& evt_name) {
+    std::string trace_str{stacktrace};
+    const int16_t stack_offset = SlConfig::get_instance().get_stack_offset(evt_name);    
+    
+    std::size_t str_pos = _get_stack_start_pos(stack_offset, trace_str);
+    if (str_pos == std::string::npos) {
+        return top_3_stack_t{"-", "-", "-"};
+    } 
+
+    top_3_stack_t out_array = _get_top_three_from_start(str_pos, trace_str);
+    
+    return out_array;
 }
 #endif
 
@@ -334,8 +381,9 @@ void SlTriangleButton::_draw(const KsPlot::Color&, float) const {
     _outline_triangle.draw(); // Make the outline by overlaying another triangle
     _text.draw();
 
-    _add_sched_switch_prev_state_text(_event_entry, _text,
-                                      *(_inner_triangle.point(2)));
+    ksplot_point text_position = *(_inner_triangle.point(2));
+
+    _add_sched_switch_prev_state_text(_event_entry, _text, text_position);
 }
 
 #ifndef _UNMODIFIED_KSHARK
@@ -350,10 +398,9 @@ void SlTriangleButton::_mouseHover() const {
     const char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _is_kstack);
     
     if (kstack_string_ptr != nullptr) {
-        QString top_three_items[3]{"-", "-", "-"};
-        _get_top_three_stack_items(kstack_string_ptr,
-                                   kshark_get_event_name(_event_entry),
-                                   top_three_items); 
+        auto event_name = kshark_get_event_name(_event_entry);
+        top_3_stack_t top_three_items = _get_top_three_stack_items(kstack_string_ptr,
+            event_name); 
         const char* last_item = (top_three_items[2] == "-") ? "(End of stack)" : "..."; 
 
         SlConfig::main_w_ptr->graphPtr()->setPreviewLabels(

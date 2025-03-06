@@ -186,3 +186,8 @@ was implemented as empty, to hopefully lessen compiler's
 imaginative optimizations, if there were any due to it not
 being present (very speculative problem though).
 
+## 2025-03-06
+
+After noticing an unnecessarily void function writing to a
+C-style array, I managed to change it to a function returning a C++ std::array, improving that function. The
+function was also long and was decomposed into smaller functions.

@@ -307,9 +307,9 @@ static void _draw_stacklook_nap_rectangles(KsCppArgV* argVCpp,
  * @returns Pointer to the created button.
 */
 static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph,
-                                        std::vector<int> bin,
-                                        std::vector<kshark_data_field_int64*> data,
-                                        KsPlot::Color col, float) {
+                                         std::vector<int> bin,
+                                         std::vector<kshark_data_field_int64*> data,
+                                         KsPlot::Color col, float) {
     // Constants
     constexpr int32_t BUTTON_TEXT_OFFSET = 14;
     const std::string STACK_BUTTON_TEXT = "STACK";
@@ -332,9 +332,12 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
            2      
     */
 
-    // Triangle points
-    KsPlot::Point a {x - 24, y - 27};
-    KsPlot::Point b {x + 24, y - 27};
+   constexpr int32_t TRIANGLE_HALFWIDTH = 24;
+   constexpr int32_t TRIANGLE_HEIGHT = 27;
+   
+   // Triangle points (0-a, 1-b, 2-c)
+    KsPlot::Point a {x - TRIANGLE_HALFWIDTH, y - TRIANGLE_HEIGHT};
+    KsPlot::Point b {x + TRIANGLE_HALFWIDTH, y - TRIANGLE_HEIGHT};
     KsPlot::Point c {x, y - 2};
 
     // Outer triangle
