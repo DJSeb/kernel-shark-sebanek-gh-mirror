@@ -9,38 +9,7 @@ Parts may be published later on in documentation.
 
 # Tracker
 
-These should be interchangeable with GitLab issues and their comments.
-
-## Bugs
-
-If any bug occurs, note it here and its environment + behaviour.
-If a bug has been solved, mark it and provide explanation (or a commit ID where it was solved).
-
-- Switching between trace files results in a segmentation fault
-
-  - Status: CLOSED
-  - Cause: Most likely a double free in clean_opened_views.
-  - Solution: Changed semantics of detailed views - they may
-    stay after the trace file has been changed, but they will
-    be destroyed when closed by the user or when KernelShark's
-    main window closes (as its parent, it will close it
-    automatically)
-  - Environment: WSL-openSUSE-Tumbleweed
-
-- Switching between trace files results in Stacklook's triangle buttons
-  losing the ability to assign color to trace files
-
-  - Status: CLOSED
-  - Cause: Most likely staticness of a variable and lack of change
-    after trace file switch.
-  - Environment: WSL-openSUSE-Tumbleweed
-  - Solution: Function that restarts color table after tracefile load.
-
-- Triangle buttons are drawn in the opposite order they're accessible, i.e.
-  overlapping buttons don't visually represent the logical overlap order.
-  - Status: OPEN
-  - Cause: Incorrect rendering ordering
-  - Environment: WSL-openSUSE-Tumbleweed
+(Bugs moved to [buglog](./Buglog.md)).
 
 ## Performance concerns
 
@@ -216,3 +185,4 @@ Just to be sure though, destructor of the detailed views
 was implemented as empty, to hopefully lessen compiler's
 imaginative optimizations, if there were any due to it not
 being present (very speculative problem though).
+
