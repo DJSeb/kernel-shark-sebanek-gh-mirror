@@ -175,11 +175,13 @@ once somewhere else (unsure where though).
 
 ...
 
-Easiest solutions are the best - instead of managing pointers and unsteady lifetimes, just make it so the detailed
+Easiest solutions are the best - instead of managing pointers and unsteady
+lifetimes, just make it so the detailed
 view is deleted either by closing it via the X button or
 closing via the Close button or by main window closing (i.e.
 process execution ending).
-This also makes it so that windows persist after trace file is changed - might provide more utility that way anyway, if
+This also makes it so that windows persist after trace file is changed - it
+might provide more utility that way anyway, if
 not, they are one click away from being destroyed.
 Just to be sure though, destructor of the detailed views
 was implemented as empty, to hopefully lessen compiler's
@@ -189,5 +191,109 @@ being present (very speculative problem though).
 ## 2025-03-06
 
 After noticing an unnecessarily void function writing to a
-C-style array, I managed to change it to a function returning a C++ std::array, improving that function. The
+C-style array, I managed to change it to a function returning a C++ std::array,
+improving that function. The
 function was also long and was decomposed into smaller functions.
+
+Also, a myriad of problematic solutions came forth to solve the reverse-drawing
+of stacklook buttons, yet none are elegant. This is reminiscent of when SlButton
+wasn't yet a class and just an ordered drawing procedure, when it was discovered that
+the background, foreground and text of the to-be button had to be drawn as
+text, foreground, background in this order, so reverse-drawing seems to be
+baked into KernelShark's code, yet the reason why eludes this author's mind. There
+are no `.reverse()` methods done on the `_shapes` object in `argVCpp`, meaning that
+there might be some discrepency between OpenGL's rendering and Qt detecting events on
+the shapes.
+
+But here, working software is better than no software, so the bug shall be put on hold
+for now, stay solved in separate branches until the best solution is found (such
+solution hopefully won't require massive KernelShark rewrites).
+
+## 2025-03-08
+
+(Keywords should be used for a super-compressed summary of the text.)
+
+**Keywords:** bottom list, Manage Plotting plugins, separate naps, sched_events interoperability
+
+Today is not really very code-productive, it was mainly about thinking how
+to allow coexistence of sched_events and Stacklook plugins, per specification.
+
+To achieve this, main problems between the two are:
+
+1. Stacklook needs unchanged data to properly make use of its nap rectangles
+   - This feature might actually be extracted and put into sched_events, as it doesn't really
+     have much to do with looking into the stack of a process. It might even become its
+     own separate plugin (which would make sched_events still an antagonistic force).
+2. Sched_events changes owners of sched\_\* events, especially sched_switch. Stacklook won't really be
+   affected, it will still work (excluding naps). Main issue is, it could make it harder for the user to
+   see stacktraces of events that actually occured on a specific task, though at this point, it is
+   the user who is responsible for having sched_events activated, i.e. the behaviour is as expected.
+   - It is still quite unfortunate, but if it leads to adhering to SRP and intended design, it is most
+     logical to just keep it that way. Many plugin-ready systems require the user to manage their
+     own plugins with load orders (e.g. modding videogames uses this approach immensely, one needs to
+     only look at the (in)famous The Elder Scrolls series and its modding tools)
+
+With these in mind, one course of action to be taken is extraction of nap rectangles and their integration
+into sched_events. This should allow the competitors to work together instead of against each other, as both
+will have access to the source code of the other.
+The other course of action is extraction of nap rectangles into their own plugin (if only to follow SRP
+and allow Stacklook to be "pure" when it comes to functionality). This would not solve the competition problem
+of sched_events and nap rectangles though - which means this course of action would also see addition to
+Kshark's API, a function which would return events without any plugin infestation or events with only
+selected plugin's infestation. Neither of these are easy to get to, but there is a clue it is possible.
+Kshark always reloads when plotting plugins are turned off or on in the Manage Plotting plugins menu in GUI.
+So, there has to a version of the pure events somewhere. Another clue is the bottom part of the GUI, the events
+list - that one never changes its contents, as plotting plugins don't affect it, meaning it also houses the
+pure forms of events, its accessibility seems rather barred though.
+
+## 2025-03-09
+
+**Keywords**: sched_events vs stacklook, changing owners, project requirements
+
+The problems seem to be much deeper than last day's attempts at solving this
+riddle make it seem. Let's see what the detailed problem is:
+
+Further morning hypothesizing revealed painful truths: the plugins cannot be made
+compatible because sched_events's "changing owners" behaviour fundementally alters
+semantics of task plots - events which would be there usually cannot be found, which
+means their properties in the plot (namely, position and data reference) can NOT be
+utilizied.
+For Stacklook, this means two things: it cannot show buttons over events
+that "do not belong" in the task plot, because sched_events changed their owners.
+If the user wanted to see sched_switch's kernel stacktrace of e.g. PID 1587,
+it cannot, as each sched_switch switched owners to the PID they are switching to
+(e.g. PID 3575). Implication chain:
+Sched_events is on -> sched_switch events change owners -> sched_switch events aren't
+on the task plots of their actual owners (task plots can only use events which CURRENTLY
+belong to them (plugins can manipulate that)) -> sched_events can show its boxes between
+scheduling events -> no other event, which expects original information, can work ->
+Stacklook cannot show buttons for events not in the task plot - they aren't there to begin
+with.
+
+The other issue for Stacklook are the naps. Naps, too, expect original data (fair
+assumption) - only then can they include sched_waking events into task_plots and link
+them with sched_switch from that task, showing their nap in between work. They of
+course suffer from sched_events' meddling with sched_events' owners, especially
+sched_switch events. There are nap rectangles shown, but on task plots and
+between events that shouldn't be using them - the originators can be two different
+events and the data that are pulled are incorrect.
+
+Seems there is no hope left, right? Originators and targets get switched around to
+fulfill plugin-specific actions, which clash heavily. So, what IS the solution?
+
+One of the other requirements is to show pairs when an event is regarding two processes.
+This might very well be the solution we were looking for - these event pairs, if
+explicitly shown and included from the start in the graph by KernelShark, could
+have sched_events link sched\_\*\[target\] events in the task plot they are in
+and allow sched_switch\[origin\] and sched_waking\[target\] to link up for
+Stacklook.
+
+_Author's cries: "WOW, let's hope this is the hope at the end of the tunnel or I am
+definitely getting something to punch! Who knew programs could make you this angry!"_
+
+...
+
+So, tomorrow should be the day these theories start being put to practice.
+Either this will be a change to KernelShark or a plugin upon which others can
+depend (in any case, sched_events will have to be altered, but in a hopefully
+minor way - other default plugins might not need to face such problems).
