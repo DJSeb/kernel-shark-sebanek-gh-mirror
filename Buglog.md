@@ -19,6 +19,13 @@ If a bug has been solved, mark it and provide explanation (or a commit ID where 
   - Final solution should be applied after others are compared
 - Environment: WSL-openSUSE-Tumbleweed
 
+2. Adding the plugin again will have the program do a double free on exit.
+
+- Status: OPEN
+- Cause: No protection from double plugin load
+- Possible solution: Introduce a guard check before attempting to load the plugin.
+- Environment: WSL-openSUSE-Tumbleweed
+
 # Closed bugs
 
 1. Switching between trace files results in a segmentation fault
