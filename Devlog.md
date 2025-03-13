@@ -48,6 +48,10 @@ documentation.
       supported by KShark or not at all
     - PRO - less rewrites of existing code
     - PRO - separated only into plugin's code, i.e. no SRP violation
+  - I: Implement the splitting of events and work from there - sched_events and stacklook
+    then shouldn't interfere with each other.
+    - PRO - this will have to happen anyway, might as well leverage the feature
+    - CON - will require at least some rewrites to make both plugins behave nicely
 
 - How to enable NUMA visualization support?
 
@@ -297,3 +301,13 @@ So, tomorrow should be the day these theories start being put to practice.
 Either this will be a change to KernelShark or a plugin upon which others can
 depend (in any case, sched_events will have to be altered, but in a hopefully
 minor way - other default plugins might not need to face such problems).
+
+## 2025-03-10
+
+Well, plugin way seems to not be it, as there is no way to inject events into
+an opened stream from a plugin's standpoint.
+
+## 2025-03-11 - 2025-03-12
+
+Not a lot of actual work, but work was spent on analyzing and trying to copy
+what `missed_events` custom entries do. Will test and build later though.
