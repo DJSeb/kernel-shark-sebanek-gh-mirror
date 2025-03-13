@@ -288,11 +288,11 @@ static void free_rec_list(struct rec_list **rec_list, int n_cpus,
 #define COUPLEBREAKER_ENTRY_TIME_SHIFT 1
 // Yep, childish
 #define COUPLEBREAKER_SS_TARGET_EVENT -69
-static void create_sched_switch_target_action(struct kshark_data_stream *stream,
-				       struct tep_record *record,
-				       struct kshark_entry *entry,
-					   struct tep_handle *tep)
+static struct kshark_entry* create_sched_switch_target(struct kshark_data_stream *stream,
+				       struct rec_list *temp_rec, struct tep_record *record)
 {
+	struct kshark_entry *entry = &temp_rec->entry;
+	struct tep_handle *tep = kshark_get_tep(stream);
 	/*
 	 * Use the offset field of the entry to store a magic number (TBA).
 	 * Let's store the original pid.
@@ -314,6 +314,8 @@ static void create_sched_switch_target_action(struct kshark_data_stream *stream,
 
 	/* Make the owner pid the pid of the task to be switched to. */
 	entry->pid = get_next_pid(stream, record);
+
+	return entry;
 }
 
 static ssize_t get_records(struct kshark_context *kshark_ctx,
@@ -329,8 +331,6 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 	struct tep_record *rec;
 	ssize_t count, total = 0;
 	int pid, next_pid, cpu;
-	//NOTE: Changed here.
-	struct tep_handle *tep = kshark_get_tep(stream);
 
 	input = kshark_get_tep_input(stream);
 	if (!input)
@@ -358,11 +358,13 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 			switch (type) {
 			case REC_RECORD:
 				temp_rec->rec = rec;
-				pid = tep_data_pid(tep, rec);
+				pid = tep_data_pid(kshark_get_tep(stream), rec);
 				break;
 			case REC_ENTRY: {
 				struct kshark_entry *entry;
-				
+
+				// Insert events BEFORE
+
 				if (rec->missed_events) {
 					/*
 					 * Insert a custom "missed_events" entry just
@@ -385,30 +387,6 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 						goto fail;
 				}
 
-				// NOTE: Changed here.
-				// Handle sched_switch[target] creation
-				if (tep_data_type(tep, rec) == get_sched_switch_id(stream)) {
-					/*
-					 * Insert a custom "sched_switch[target]" entry just
-					 * AFTER this record.
-					*/
-					entry = &temp_rec->entry;
-					create_sched_switch_target_action(stream, rec, entry, tep);
-
-					/* Apply time calibration. */
-					kshark_postprocess_entry(stream, rec, entry);
-
-					entry->stream_id = stream->stream_id;
-
-					temp_next = &temp_rec->next;
-					++count;
-
-					/* Now allocate a new rec_list node and continue. */
-					*temp_next = temp_rec = calloc(1, sizeof(*temp_rec));
-					if (!temp_rec)
-						goto fail;
-				}
-
 				entry = &temp_rec->entry;
 				set_entry_values(stream, rec, entry);
 
@@ -416,6 +394,26 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 					next_pid = get_next_pid(stream, rec);
 					if (next_pid >= 0)
 						register_command(stream, rec, next_pid);
+					// NOTE: Changed here.
+					temp_next = &temp_rec->next;
+
+					/* Now allocate a new rec_list node and continue. */
+					*temp_next = temp_rec = calloc(1, sizeof(*temp_rec));
+					if (!temp_rec)
+						goto fail;
+
+					/*
+					 * Insert a custom "sched_switch[target]" entry just
+					 * after sched_switch record.
+					*/
+					struct kshark_entry *sst_entry = create_sched_switch_target(stream, temp_rec, rec);
+
+					/* Apply time calibration. */
+					kshark_postprocess_entry(stream, rec, sst_entry);
+
+					sst_entry->stream_id = stream->stream_id;
+
+					++count;
 				}
 
 				entry->stream_id = stream->stream_id;
@@ -435,7 +433,7 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 				if (adv_filter && adv_filter->filters &&
 				    tep_filter_match(adv_filter, rec) != FILTER_MATCH)
 					unset_event_filter_flag(kshark_ctx, entry);
-
+				
 				tracecmd_free_record(rec);
 				break;
 			} /* REC_ENTRY */
