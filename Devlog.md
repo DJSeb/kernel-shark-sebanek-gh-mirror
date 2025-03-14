@@ -311,3 +311,13 @@ an opened stream from a plugin's standpoint.
 
 Not a lot of actual work, but work was spent on analyzing and trying to copy
 what `missed_events` custom entries do. Will test and build later though.
+
+## 2025-03-13
+
+Finally! Custom events are being successfully created after a sched_switch happens!
+They do break Stacklook, since it cannot find the stacktrace event for them yet (easy fix though).
+Similarly, sched_events change the split event's origin pid - but once they are modified too,
+the problem should be fixed.
+
+With this, we'll hit two birds with one stone - sched_events and stacklook compatibility
+and also the splitting of events.

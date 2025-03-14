@@ -289,15 +289,15 @@ static void free_rec_list(struct rec_list **rec_list, int n_cpus,
 // Yep, childish
 #define COUPLEBREAKER_SS_TARGET_EVENT -69
 static struct kshark_entry* create_sched_switch_target(struct kshark_data_stream *stream,
-				       struct rec_list *temp_rec, struct tep_record *record)
+				       struct rec_list *temp_rec, struct tep_record *record,
+					   struct kshark_entry *origin_entry)
 {
 	struct kshark_entry *entry = &temp_rec->entry;
-	struct tep_handle *tep = kshark_get_tep(stream);
 	/*
 	 * Use the offset field of the entry to store a magic number (TBA).
-	 * Let's store the original pid.
+	 * Let's store the origin entry.
 	*/
-	entry->offset = tep_data_pid(tep, record);
+	entry->offset = (int64_t)origin_entry;
 	
 	entry->cpu = record->cpu;
 
@@ -394,10 +394,12 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 					next_pid = get_next_pid(stream, rec);
 					if (next_pid >= 0)
 						register_command(stream, rec, next_pid);
+					
 					// NOTE: Changed here.
+					// Move forward to the next entry
 					temp_next = &temp_rec->next;
 
-					/* Now allocate a new rec_list node and continue. */
+					// Allocate a new rec_list node and continue.
 					*temp_next = temp_rec = calloc(1, sizeof(*temp_rec));
 					if (!temp_rec)
 						goto fail;
@@ -406,7 +408,8 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 					 * Insert a custom "sched_switch[target]" entry just
 					 * after sched_switch record.
 					*/
-					struct kshark_entry *sst_entry = create_sched_switch_target(stream, temp_rec, rec);
+					struct kshark_entry *sst_entry = create_sched_switch_target(stream,
+						temp_rec, rec, entry);
 
 					/* Apply time calibration. */
 					kshark_postprocess_entry(stream, rec, sst_entry);
@@ -912,8 +915,14 @@ static char *tepdata_get_info(struct kshark_data_stream *stream,
 		//NOTE: Changed here
 		case COUPLEBREAKER_SS_TARGET_EVENT:
 			char* buffer;
-			int64_t original_pid = entry->offset;
-			asprintf(&buffer, "Fake event for the switch target of latest sched_switch of task %ld", original_pid);
+			struct kshark_generic_stream_interface *interface = stream->interface;
+			struct kshark_entry *origin_entry = (struct kshark_entry*)entry->offset;
+			
+			int64_t original_pid = origin_entry->pid;
+			char *origin_task_name = interface->get_task(stream, origin_entry);
+			asprintf(&buffer, "Custom sched_switch[target] event for latest sched_switch of task '%s(%ld)'",
+				origin_task_name,
+				original_pid);
 			return buffer;
 		case KS_EVENT_OVERFLOW:
 			return missed_events_dump(stream, entry, true);
@@ -1048,6 +1057,29 @@ static char* tepdata_dump_custom_entry(struct kshark_data_stream *stream,
 	return NULL;
 }
 
+//NOTE: Changed here.
+static char *ss_target_dump(struct kshark_data_stream *stream,
+			    const struct kshark_entry *entry,
+			    bool get_info)
+{
+	char *buffer;
+	int size = 0;
+
+	if (get_info) {
+		struct kshark_generic_stream_interface *interface = stream->interface;
+		char *og_task = interface->get_task(stream, (struct kshark_entry*)entry->offset);
+		size = asprintf(&buffer, "origin_task_name=%s; origin_pid=%ld",
+			og_task, entry->offset);
+		free(og_task);
+	} else {
+		size = asprintf(&buffer, "sched_switch[target]");
+	}
+
+	if (size > 0)
+		return buffer;
+	return NULL;
+}
+
 /**
  * @brief Dump into a string the content of one entry. The function allocates
  *	  a null terminated string and returns a pointer to this string.
@@ -1073,7 +1105,8 @@ static char *tepdata_dump_entry(struct kshark_data_stream *stream,
 	if (!interface)
 		return NULL;
 
-	if (entry->event_id >= 0) {
+	if (entry->event_id >= 0 ||
+		entry->event_id == COUPLEBREAKER_SS_TARGET_EVENT) {
 		if (kshark_get_tep(stream)) {
 			task = interface->get_task(stream, entry);
 			latency = interface->aux_info(stream, entry);
@@ -1111,7 +1144,9 @@ static char *tepdata_dump_entry(struct kshark_data_stream *stream,
 		switch (entry->event_id) {
 		//NOTE: Changed here
 		case COUPLEBREAKER_SS_TARGET_EVENT:
-			entry_str = strdup("REWRITE THIS - sched_switch[target] custom event");
+			char *sst_specials = tepdata_dump_custom_entry(stream, entry, ss_target_dump);
+			asprintf(&entry_str, "%s; %s", sst_specials, entry_str);
+			free(sst_specials);
 			break;
 		case KS_EVENT_OVERFLOW:
 			entry_str = tepdata_dump_custom_entry(stream, entry,
