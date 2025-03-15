@@ -766,7 +766,7 @@ static char *tepdata_get_event_name(struct kshark_data_stream *stream,
 		switch (event_id) {
 		//NOTE: Changed here
 		case COUPLEBREAKER_SS_TARGET_EVENT:
-			return strdup("custom/sched_switch[target]");
+			return strdup("couplebreaker/sched_switch[target]");
 		case KS_EVENT_OVERFLOW:
 			return missed_events_dump(stream, entry, false);
 		default:

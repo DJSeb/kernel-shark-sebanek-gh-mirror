@@ -1408,7 +1408,7 @@ KsCouplebreakerDialog::KsCouplebreakerDialog(
 		"By default (setting is OFF), KernelShark shows these events as a "
 		"single entry in the data table. "
 		"With the setting ON, KernelShark will generate "
-		"'custom/(event name)[target]' entries, positioned just after "
+		"'couplebreaker/(event name)[target]' entries, positioned just after "
 		"the original ('origin') entry. "
 		"The setting is set per stream."
 		"\n\nThis feature is experimental and not quite tested through. "

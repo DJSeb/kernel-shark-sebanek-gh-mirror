@@ -354,3 +354,24 @@ QLayout bug was also quickly fixed, turns out including a parent for a layout
 makes the layout the parent's layout, so it was just about deleting a list constructor line.
 
 Pretty successful today :)
+
+...
+
+Even managed to make stacklook (except nap rectangles) compatible with
+the couplebreaker feature.
+
+_Author's note: "I might get sick from such a long name, but hey, it_
+_perfectly encapsulates what the added feature does."_
+
+Next goals:
+
+- add sched_waking to couplebreaker
+  - subgoal: make couplebreaking generic for multiple possible
+    "couple"-events (user-supplied event names in settings,
+    generic splitting in KShark code)
+- make nap rectangles compatible with couplebreaker
+- split nap rectangles from stacklook into their own plugin
+- make sched_events compatible with couplebreaker
+- change KernelShark's CMake (e.g. add suffix '-modified' to version)
+
+After finishing this, move onto the NUMA-aware feature.
