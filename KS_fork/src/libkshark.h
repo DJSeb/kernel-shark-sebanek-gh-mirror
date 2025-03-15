@@ -361,6 +361,9 @@ struct kshark_data_stream {
 	 * stream.
 	 */
 	void				*interface;
+
+	//NOTE: Changed here.
+	bool break_couples;
 };
 
 static inline char *kshark_set_data_format(char *dest_format,

@@ -321,3 +321,36 @@ the problem should be fixed.
 
 With this, we'll hit two birds with one stone - sched_events and stacklook compatibility
 and also the splitting of events.
+
+## 2025-03-14
+
+Sadly, not enough work has been done, but there is quite a bit of unfinished
+Qt-related GUI additions to dynamically control whether couplebreaking is allowed
+or not.
+
+## 2025-03-15
+
+More work on creating a Qt widget settings for couplebreaking.
+Mostly works, but it still has some bugs.
+
+Newly discovered would be:
+
+- Fault in stacklook: segmentation fault upon data reloads
+- Following error displays upon attempting to summon the settings menu
+  ```
+    QLayout: Attempting to add QLayout "" to KsWidgetsLib::KsCouplebreakerDialog "", which already has a layout
+  ```
+- Changes in data are applied only when the settings menu is opened again.
+  It should upate immediately after apply, but it seems something is missing.
+  Best solution would be to copy everything that \_pluginSelect does, but it seems
+  that was unsuccessful.
+
+...
+
+And apparently, last bug was fixed by simulating \_pluginSelect (mainly determining
+loaded plugins). Same solution also fixed the first bug, or at least it appears to.
+
+QLayout bug was also quickly fixed, turns out including a parent for a layout
+makes the layout the parent's layout, so it was just about deleting a list constructor line.
+
+Pretty successful today :)

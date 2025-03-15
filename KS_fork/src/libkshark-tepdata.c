@@ -395,28 +395,30 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 					if (next_pid >= 0)
 						register_command(stream, rec, next_pid);
 					
-					// NOTE: Changed here.
-					// Move forward to the next entry
-					temp_next = &temp_rec->next;
+					//NOTE: Changed here.
+					if (stream->break_couples) {
+						// Move forward to the next entry
+						temp_next = &temp_rec->next;
 
-					// Allocate a new rec_list node and continue.
-					*temp_next = temp_rec = calloc(1, sizeof(*temp_rec));
-					if (!temp_rec)
-						goto fail;
+						// Allocate a new rec_list node and continue.
+						*temp_next = temp_rec = calloc(1, sizeof(*temp_rec));
+						if (!temp_rec)
+							goto fail;
 
-					/*
-					 * Insert a custom "sched_switch[target]" entry just
-					 * after sched_switch record.
-					*/
-					struct kshark_entry *sst_entry = create_sched_switch_target(stream,
-						temp_rec, rec, entry);
+						/*
+						* Insert a custom "sched_switch[target]" entry just
+						* after sched_switch record.
+						*/
+						struct kshark_entry *sst_entry = create_sched_switch_target(stream,
+							temp_rec, rec, entry);
 
-					/* Apply time calibration. */
-					kshark_postprocess_entry(stream, rec, sst_entry);
+						/* Apply time calibration. */
+						kshark_postprocess_entry(stream, rec, sst_entry);
 
-					sst_entry->stream_id = stream->stream_id;
+						sst_entry->stream_id = stream->stream_id;
 
-					++count;
+						++count;
+					}
 				}
 
 				entry->stream_id = stream->stream_id;
@@ -1105,7 +1107,7 @@ static char *tepdata_dump_entry(struct kshark_data_stream *stream,
 	if (!interface)
 		return NULL;
 
-	if (entry->event_id >= 0 ||
+	if (entry->event_id >= 0 || // Sched_switch target events still house most of the origin entry's data and can be treated as a normal event
 		entry->event_id == COUPLEBREAKER_SS_TARGET_EVENT) {
 		if (kshark_get_tep(stream)) {
 			task = interface->get_task(stream, entry);

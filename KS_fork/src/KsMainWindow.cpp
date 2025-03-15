@@ -63,6 +63,7 @@ KsMainWindow::KsMainWindow(QWidget *parent)
   _addPluginsAction("Add plugins", this),
   _captureAction("Record", this),
   _addOffcetAction("Add Time Offset", this),
+  _couplebreakerOn("Couplebreaker Settings", this), //NOTE: Changed here.
   _colorAction(this),
   _colSlider(this),
   _colorPhaseSlider(Qt::Horizontal, this),
@@ -354,6 +355,11 @@ void KsMainWindow::_createActions()
 	connect(&_addOffcetAction,	&QAction::triggered,
 		this,			&KsMainWindow::_offset);
 
+	//NOTE: Changed here.
+	_couplebreakerOn.setStatusTip("Control KernelShark's couplebreaking");
+	connect(&_couplebreakerOn,	&QAction::triggered,
+		this,			&KsMainWindow::_toggleCouplebreaker);
+
 	_colorPhaseSlider.setMinimum(20);
 	_colorPhaseSlider.setMaximum(180);
 	_colorPhaseSlider.setValue(KsPlot::Color::rainbowFrequency() * 100);
@@ -505,6 +511,8 @@ void KsMainWindow::_createMenus()
 	tools->addAction(&_managePluginsAction);
 	tools->addAction(&_addPluginsAction);
 	tools->addAction(&_addOffcetAction);
+	//NOTE: Chamged here.
+	tools->addAction(&_couplebreakerOn);
 
 	/*
 	 * Enable the "Add Time Offset" menu only in the case of multiple
@@ -1656,4 +1664,54 @@ void KsMainWindow::_rootWarning()
 	connect(&cb, &QCheckBox::stateChanged, lamCbChec);
 	warn.setCheckBox(&cb);
 	warn.exec();
+}
+
+// NOTE: Changed here.
+void KsMainWindow::_toggleCouplebreaker() {
+	QVector<int> stream_ids;
+	KsCouplebreakerDialog *dialog;
+	kshark_context *kshark_ctx(nullptr);
+
+	if (!kshark_instance(&kshark_ctx)) {
+		return;
+	}
+		
+	if (kshark_ctx->n_streams == 0) {
+		QString err("Data has to be loaded first.");
+		QMessageBox msgBox;
+		msgBox.critical(nullptr, "Error", err);
+
+		return;
+	}
+		
+	dialog = new KsCouplebreakerDialog{kshark_ctx, this};
+	connect(dialog,		&KsCouplebreakerDialog::apply,
+		this,		&KsMainWindow::_updateCouplebreaks);
+
+	dialog->show();
+
+	_graph.update(&_data);
+}
+
+void KsMainWindow::_updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_couplebreaks) {
+	kshark_context *kshark_ctx(nullptr);
+
+	if (!kshark_instance(&kshark_ctx)) {
+		return;
+	}
+
+	for (auto const &sc: stream_couplebreaks) {
+		kshark_data_stream *stream = kshark_get_data_stream(kshark_ctx, sc.first);
+		if (stream) {
+			stream->break_couples = sc.second;
+		}
+
+		QVector<int> stream_plugins = _plugins.getActivePlugins(sc.first);
+		QVector<int> stream_loaded_plugins = _plugins.getPluginsByStatus(sc.first, KSHARK_PLUGIN_LOADED);
+		for (auto const &loaded: stream_loaded_plugins) {
+			stream_plugins[loaded] = 1;
+		}
+		
+		_pluginUpdate(sc.first, stream_plugins);
+	}
 }

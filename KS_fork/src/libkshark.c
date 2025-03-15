@@ -171,6 +171,9 @@ static struct kshark_data_stream *kshark_stream_alloc()
 	}
 
 	stream->filter_is_applied = false;
+	//NOTE: Changed here.
+	stream->break_couples = false;
+	
 	kshark_set_data_format(stream->data_format, KS_INVALID_DATA);
 	stream->name = strdup(KS_UNNAMED);
 
