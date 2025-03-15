@@ -103,10 +103,15 @@ static bool _check_function_general(const kshark_entry* entry,
     
     bool is_config_allowed = SlConfig::get_instance().is_event_allowed(entry);
 
-    const kshark_entry* next_entry = entry->next;
+    // Necessary Couplebreak integration
+    const bool stream_breaks_couples = kshark_get_stream_from_entry(entry)->break_couples;
+    const kshark_entry* entry_before_stack = (stream_breaks_couples) ?
+        entry->next : entry;
+    
+    const kshark_entry* kstack_entry = entry_before_stack->next;
     // We hate segfaults in this house - so they are banned!
-    if (!next_entry) return false;
-    int entry_evt_id = kshark_get_event_id(next_entry);
+    if (!kstack_entry) return false;
+    int entry_evt_id = kshark_get_event_id(kstack_entry);
     bool has_next_kernelstack = (ctx->kstack_event_id == entry_evt_id);
 
     bool is_visible_event = entry->visible

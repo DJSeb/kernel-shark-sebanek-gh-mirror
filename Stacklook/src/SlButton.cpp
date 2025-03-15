@@ -145,7 +145,7 @@ static bool _is_kstack(kshark_entry* entry) {
  * 
  * @returns Textual form of next entry's Info field as a C-string.
 */
-static const char* _get_info_of_next_event(kshark_entry* entry,
+static const char* _get_info_of_next_event(const kshark_entry* entry,
                                            std::function<bool(kshark_entry*)> predicate) {
     const char* retval = nullptr;
 
@@ -359,7 +359,13 @@ double SlTriangleButton::distance(int x, int y) const {
 void SlTriangleButton::_doubleClick() const {
     constexpr const char error_msg[] = "ERROR: No info field found!";                          
     const char* window_labeltext = kshark_get_task(_event_entry);
-    const char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _is_kstack);
+    
+    // Necessary Couplebreak integration
+    const bool stream_breaks_couples = kshark_get_stream_from_entry(_event_entry)->break_couples;
+    const kshark_entry* entry_before_stack = (stream_breaks_couples) ?
+        _event_entry->next : _event_entry;
+    
+    const char* kstack_string_ptr = _get_info_of_next_event(entry_before_stack, _is_kstack);
     
     const char* window_text = (kstack_string_ptr != nullptr) ? 
         kstack_string_ptr : error_msg;
@@ -395,7 +401,12 @@ void SlTriangleButton::_draw(const KsPlot::Color&, float) const {
  * FOR MOUSE MOVE OVER PLOTOBJECT REACTIONS
 */
 void SlTriangleButton::_mouseHover() const {
-    const char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _is_kstack);
+    // Necessary Couplebreak integration
+    const bool stream_breaks_couples = kshark_get_stream_from_entry(_event_entry)->break_couples;
+    const kshark_entry* entry_before_stack = (stream_breaks_couples) ?
+        _event_entry->next : _event_entry;
+
+    const char* kstack_string_ptr = _get_info_of_next_event(entry_before_stack, _is_kstack);
     
     if (kstack_string_ptr != nullptr) {
         auto event_name = kshark_get_event_name(_event_entry);
