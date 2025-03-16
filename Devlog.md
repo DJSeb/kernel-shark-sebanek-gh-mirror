@@ -375,3 +375,18 @@ Next goals:
 - change KernelShark's CMake (e.g. add suffix '-modified' to version)
 
 After finishing this, move onto the NUMA-aware feature.
+
+## 2025-03-16
+
+Today, sched_waking events have been made breakable,
+couplebreaking in code was made a bit more generic when adding events.
+Not generic in dealing with these found events, but I don't think that's really
+an issue.
+
+Found a problem though - applying filters makes these events disappear and
+they are also not in the filter list, not very good.
+
+This also, very frighteningly, implies that there is more stuff to do
+if couplebreak events are to be found, filtered or otherwise worked on.
+
+Scary indeed.

@@ -21,7 +21,8 @@
 /**
  * @brief Process sched_waking events as tep records during plugin loads,
  * adds PID of who is being awoken into the sched_waking entry's auxiliary
- * field. Else, it adds in invalid -1 (which isn't a valid PID).
+ * field - this pid will also become the owner of the event.
+ * Else, it adds in invalid -1 (which isn't a valid PID).
  * 
  * @param ctx: pointer to plugin context
  * @param stream: pointer to the KernelShark stream with data

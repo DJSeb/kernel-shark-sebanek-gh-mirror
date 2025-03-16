@@ -285,7 +285,7 @@ static void free_rec_list(struct rec_list **rec_list, int n_cpus,
 
 //NOTE: Changed here.
 // Copy of missed_events_action, basically
-#define COUPLEBREAKER_ENTRY_TIME_SHIFT 1
+#define COUPLEBREAKER_TARGET_ENTRY_TIME_SHIFT 1
 // Yep, childish
 #define COUPLEBREAKER_SS_TARGET_EVENT -69
 static struct kshark_entry* create_sched_switch_target(struct kshark_data_stream *stream,
@@ -305,7 +305,7 @@ static struct kshark_entry* create_sched_switch_target(struct kshark_data_stream
 	 * Position the "sched_switch[target]" entry a bit AFTER (in time)
 	 * the original record.
 	*/
-	entry->ts = record->ts + COUPLEBREAKER_ENTRY_TIME_SHIFT;
+	entry->ts = record->ts + COUPLEBREAKER_TARGET_ENTRY_TIME_SHIFT;
 
 	/* All custom entries must have negative event Identifiers. */
 	entry->event_id = COUPLEBREAKER_SS_TARGET_EVENT;
@@ -317,6 +317,93 @@ static struct kshark_entry* create_sched_switch_target(struct kshark_data_stream
 
 	return entry;
 }
+
+/* Unsure if there should be a single couplebreaker event id,
+   but I think it makes more sense if they're all different (i.e. different events).
+*/
+#define COUPLEBREAKER_SW_TARGET_EVENT -70 
+static struct kshark_entry *create_sched_waking_target(struct kshark_data_stream *stream,
+	struct rec_list *temp_rec, struct tep_record *record,
+	struct kshark_entry *origin_entry)
+{
+	struct kshark_entry *entry = &temp_rec->entry;
+	/*
+	 * Let's store the origin entry into the now useless offset field.
+	*/
+	entry->offset = (int64_t)origin_entry;
+
+	entry->cpu = record->cpu;
+
+	/*
+	 * Position the "sched_waking[target]" entry a bit AFTER (in time)
+	 * the original record.
+	*/
+	entry->ts = record->ts + COUPLEBREAKER_TARGET_ENTRY_TIME_SHIFT;
+
+	/* All custom entries must have negative event Identifiers. */
+	entry->event_id = COUPLEBREAKER_SW_TARGET_EVENT;
+
+	entry->visible = 0xFF;
+
+	/* Make the owner pid the pid of the task to be woken up. */
+	entry->pid = tep_data_pid(kshark_get_tep(stream), record);
+
+	return entry;
+}
+
+//NOTE: Changed here.
+typedef struct kshark_entry* (*target_creation_func)(
+	struct kshark_data_stream *stream,
+	struct rec_list *temp_rec,
+	struct tep_record *record,
+	struct kshark_entry *origin_entry);
+
+static int create_target_entry(struct kshark_context *kshark_ctx,
+							   struct kshark_data_stream *stream,
+							   struct tep_record *rec,
+							   struct kshark_entry *entry,
+							   struct rec_list * **temp_next, // Need to update actual value
+							   struct rec_list * *temp_rec, // Need to update actual value
+							   struct tep_event_filter *adv_filter,
+							   ssize_t *count,
+							   target_creation_func create_target_func)
+{
+	const int FAIL = 1;
+
+	// Move forward to the next entry
+	*temp_next = &((*temp_rec)->next);
+
+	// Allocate a new rec_list node and continue.
+	*(*temp_next) = (*temp_rec) = calloc(1, sizeof(*(*temp_rec)));
+	if (!(*temp_rec))
+		return FAIL;
+
+	/*
+	* Insert a custom target entry just
+	* after sched_switch record.
+	*/
+	struct kshark_entry *target_entry = create_target_func(stream,
+		*temp_rec, rec, entry);
+
+	/* Apply time calibration. */
+	kshark_postprocess_entry(stream, rec, target_entry);
+
+	target_entry->stream_id = stream->stream_id;
+
+	/* Apply Id filtering. */
+	kshark_apply_filters(kshark_ctx, stream, target_entry);
+	
+
+	/* Apply advanced event filtering. */
+	if (adv_filter && adv_filter->filters &&
+		tep_filter_match(adv_filter, rec) != FILTER_MATCH)
+		unset_event_filter_flag(kshark_ctx, target_entry);
+
+	*count = (*count) + 1;
+
+	return 0;
+}
+
 
 static ssize_t get_records(struct kshark_context *kshark_ctx,
 			   struct kshark_data_stream *stream,
@@ -397,27 +484,9 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 					
 					//NOTE: Changed here.
 					if (stream->break_couples) {
-						// Move forward to the next entry
-						temp_next = &temp_rec->next;
-
-						// Allocate a new rec_list node and continue.
-						*temp_next = temp_rec = calloc(1, sizeof(*temp_rec));
-						if (!temp_rec)
-							goto fail;
-
-						/*
-						* Insert a custom "sched_switch[target]" entry just
-						* after sched_switch record.
-						*/
-						struct kshark_entry *sst_entry = create_sched_switch_target(stream,
-							temp_rec, rec, entry);
-
-						/* Apply time calibration. */
-						kshark_postprocess_entry(stream, rec, sst_entry);
-
-						sst_entry->stream_id = stream->stream_id;
-
-						++count;
+						int retcode = create_target_entry(kshark_ctx, stream, rec, entry,
+							&temp_next, &temp_rec, adv_filter, &count, create_sched_switch_target);
+						if (retcode == 1) goto fail;
 					}
 				}
 
@@ -439,6 +508,19 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 				    tep_filter_match(adv_filter, rec) != FILTER_MATCH)
 					unset_event_filter_flag(kshark_ctx, entry);
 				
+				// NOTE: Changed here
+				// Insert AFTER
+				// Could be change to a search in a collection of allowed events to be split in a stream
+				const int sch_waking_id = kshark_find_event_id(stream, "sched/sched_waking");
+				if (entry->event_id == (int16_t)sch_waking_id) {
+					// Sched_waking only for now
+					if (stream->break_couples) {
+						int retcode = create_target_entry(kshark_ctx, stream, rec, entry,
+							&temp_next, &temp_rec, adv_filter, &count, create_sched_waking_target);
+						if (retcode == 1) goto fail;
+					}
+				}
+
 				tracecmd_free_record(rec);
 				break;
 			} /* REC_ENTRY */
@@ -767,6 +849,8 @@ static char *tepdata_get_event_name(struct kshark_data_stream *stream,
 		//NOTE: Changed here
 		case COUPLEBREAKER_SS_TARGET_EVENT:
 			return strdup("couplebreaker/sched_switch[target]");
+		case COUPLEBREAKER_SW_TARGET_EVENT:
+			return strdup("couplebreaker/sched_waking[target]");
 		case KS_EVENT_OVERFLOW:
 			return missed_events_dump(stream, entry, false);
 		default:
@@ -904,6 +988,24 @@ static char *get_info_str(struct kshark_data_stream *stream,
 	return buffer;
 }
 
+//NOTE: Changed here.
+static char *couplebreaker_get_info(struct kshark_data_stream *stream,
+			      					const struct kshark_entry *entry,
+				  					const char *which_event) {
+	char* buffer;
+	struct kshark_generic_stream_interface *interface = stream->interface;
+	struct kshark_entry *origin_entry = (struct kshark_entry*)entry->offset;
+	
+	int64_t original_pid = origin_entry->pid;
+	char *origin_task_name = interface->get_task(stream, origin_entry);
+	asprintf(&buffer, "Custom %s[target] event for latest %s of task '%s(%ld)'",
+		which_event,
+		which_event,
+		origin_task_name,
+		original_pid);
+	return buffer;
+}
+
 static char *tepdata_get_info(struct kshark_data_stream *stream,
 			      const struct kshark_entry *entry)
 {
@@ -916,16 +1018,9 @@ static char *tepdata_get_info(struct kshark_data_stream *stream,
 		switch (entry->event_id) {
 		//NOTE: Changed here
 		case COUPLEBREAKER_SS_TARGET_EVENT:
-			char* buffer;
-			struct kshark_generic_stream_interface *interface = stream->interface;
-			struct kshark_entry *origin_entry = (struct kshark_entry*)entry->offset;
-			
-			int64_t original_pid = origin_entry->pid;
-			char *origin_task_name = interface->get_task(stream, origin_entry);
-			asprintf(&buffer, "Custom sched_switch[target] event for latest sched_switch of task '%s(%ld)'",
-				origin_task_name,
-				original_pid);
-			return buffer;
+			return couplebreaker_get_info(stream, entry, "sched_switch");
+		case COUPLEBREAKER_SW_TARGET_EVENT:
+		return couplebreaker_get_info(stream, entry, "sched_waking");
 		case KS_EVENT_OVERFLOW:
 			return missed_events_dump(stream, entry, true);
 		default:
@@ -1060,7 +1155,7 @@ static char* tepdata_dump_custom_entry(struct kshark_data_stream *stream,
 }
 
 //NOTE: Changed here.
-static char *ss_target_dump(struct kshark_data_stream *stream,
+static char *couplebreaker_target_dump(struct kshark_data_stream *stream,
 			    const struct kshark_entry *entry,
 			    bool get_info)
 {
@@ -1108,7 +1203,8 @@ static char *tepdata_dump_entry(struct kshark_data_stream *stream,
 		return NULL;
 
 	if (entry->event_id >= 0 || // Sched_switch target events still house most of the origin entry's data and can be treated as a normal event
-		entry->event_id == COUPLEBREAKER_SS_TARGET_EVENT) {
+		entry->event_id == COUPLEBREAKER_SS_TARGET_EVENT ||
+		entry->event_id == COUPLEBREAKER_SW_TARGET_EVENT) { // NOTE: Changed here.
 		if (kshark_get_tep(stream)) {
 			task = interface->get_task(stream, entry);
 			latency = interface->aux_info(stream, entry);
@@ -1146,9 +1242,14 @@ static char *tepdata_dump_entry(struct kshark_data_stream *stream,
 		switch (entry->event_id) {
 		//NOTE: Changed here
 		case COUPLEBREAKER_SS_TARGET_EVENT:
-			char *sst_specials = tepdata_dump_custom_entry(stream, entry, ss_target_dump);
+			char *sst_specials = tepdata_dump_custom_entry(stream, entry, couplebreaker_target_dump);
 			asprintf(&entry_str, "%s; %s", sst_specials, entry_str);
 			free(sst_specials);
+			break;
+		case COUPLEBREAKER_SW_TARGET_EVENT:
+			char *swt_specials = tepdata_dump_custom_entry(stream, entry, couplebreaker_target_dump);
+			asprintf(&entry_str, "%s; %s", swt_specials, entry_str);
+			free(swt_specials);
 			break;
 		case KS_EVENT_OVERFLOW:
 			entry_str = tepdata_dump_custom_entry(stream, entry,
