@@ -180,10 +180,10 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     }
 
     sl_ctx->tep = kshark_get_tep(stream);
-    bool wakeup_found = define_wakeup_event(sl_ctx->tep, &sl_ctx->tep_wakeup);
+    bool wakeup_found = define_wakeup_event(sl_ctx->tep, &sl_ctx->tep_waking);
 
     if (wakeup_found) {
-        sl_ctx->sched_waking_pid_field = tep_find_any_field(sl_ctx->tep_wakeup, "pid");
+        sl_ctx->sched_waking_pid_field = tep_find_any_field(sl_ctx->tep_waking, "pid");
     }
 #endif
 

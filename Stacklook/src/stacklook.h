@@ -61,7 +61,7 @@ struct plugin_stacklook_ctx {
     /**
      * @brief Pointer to the sched_waking_event object.
     */
-    struct tep_event* tep_wakeup;
+    struct tep_event* tep_waking;
     
     /**
      * @brief Pointer to the sched_waking_pid_field format descriptor.

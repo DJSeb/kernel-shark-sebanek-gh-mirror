@@ -322,7 +322,8 @@ static struct kshark_entry* create_sched_switch_target(struct kshark_data_stream
    but I think it makes more sense if they're all different (i.e. different events).
 */
 #define COUPLEBREAKER_SW_TARGET_EVENT -70 
-static struct kshark_entry *create_sched_waking_target(struct kshark_data_stream *stream,
+static struct kshark_entry *create_sched_waking_target(
+	[[maybe_unused]] struct kshark_data_stream *stream,
 	struct rec_list *temp_rec, struct tep_record *record,
 	struct kshark_entry *origin_entry)
 {
@@ -346,7 +347,13 @@ static struct kshark_entry *create_sched_waking_target(struct kshark_data_stream
 	entry->visible = 0xFF;
 
 	/* Make the owner pid the pid of the task to be woken up. */
-	entry->pid = tep_data_pid(kshark_get_tep(stream), record);
+	unsigned long long wake_pid_val;
+	struct tep_event *sched_waking_event = NULL;
+	define_wakeup_event(kshark_get_tep(stream), &sched_waking_event);
+	struct tep_format_field *sched_waking_pid_field = tep_find_any_field(sched_waking_event, "pid");
+	int succs = tep_read_number_field(sched_waking_pid_field, record->data, &wake_pid_val);
+	
+	entry->pid = (succs == 0) ? (int32_t)wake_pid_val : origin_entry->pid;
 
 	return entry;
 }
