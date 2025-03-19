@@ -105,8 +105,6 @@ QVector<int> getEventIdList(int sd)
 //NOTE: Changed here.
 QVector<int> getCoupleBreakerIdList(int sd)
 {
-	//TODO: This is pretty ugly
-	constexpr int COUPLEBREAK_EVTS_COUNT = 2;
 	kshark_context *kshark_ctx(nullptr);
 	kshark_data_stream *stream;
 	int *ids;
@@ -122,8 +120,8 @@ QVector<int> getCoupleBreakerIdList(int sd)
 	if (!ids)
 		return {};
 
-	QVector<int> evts(COUPLEBREAK_EVTS_COUNT);
-	for (int i = 0; i < COUPLEBREAK_EVTS_COUNT; ++i)
+	QVector<int> evts(stream->n_cbreak_evts);
+	for (int i = 0; i < stream->n_cbreak_evts; ++i)
 		evts[i] = ids[i];
 	
 	free(ids);

@@ -886,7 +886,7 @@ void KsMainWindow::_showEvents()
 	auto lamFilter = [=] (int sd, QVector<int> show) {
 		QVector<int> all = KsUtils::getEventIdList(sd);
 		//NOTE: Changed here.
-		if (stream->break_couples) {
+		if (stream->cbreak_on) {
 			all.append(KsUtils::getCoupleBreakerIdList(sd));
 		}
 		_applyFilter(sd, all, show,
@@ -1707,7 +1707,7 @@ void KsMainWindow::_updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_
 	for (auto const &sc: stream_couplebreaks) {
 		kshark_data_stream *stream = kshark_get_data_stream(kshark_ctx, sc.first);
 		if (stream) {
-			stream->break_couples = sc.second;
+			stream->cbreak_on = sc.second;
 		}
 
 		QVector<int> stream_plugins = _plugins.getActivePlugins(sc.first);

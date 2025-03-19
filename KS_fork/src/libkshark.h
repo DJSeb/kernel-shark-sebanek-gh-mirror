@@ -374,7 +374,18 @@ struct kshark_data_stream {
 	void				*interface;
 
 	//NOTE: Changed here.
-	bool break_couples;
+	/** Flag indicating whether or not stream breaks couples
+	 *  (events regarding two processes).
+	 */
+	bool cbreak_on;
+
+	/** The number of couplebreak events. */
+	int n_cbreak_evts;
+
+	/** Bitmask record of couplebreak events, which were created in this stream.
+	 *  Look into the documentation for a comprehensive list of which bits correspond to which events.
+	*/
+	int cbreak_evts_flags;
 };
 
 static inline char *kshark_set_data_format(char *dest_format,

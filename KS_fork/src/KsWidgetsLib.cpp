@@ -973,10 +973,7 @@ KsEventsCheckBoxWidget::KsEventsCheckBoxWidget(kshark_data_stream *stream,
 {
 	QVector<int> eventIds = KsUtils::getEventIdList(stream->stream_id);
 	//NOTE: Changed here.
-	int cbreak_correction = 0;
-	if (stream->break_couples) {
-		cbreak_correction = 2;
-	}
+	int cbreak_correction = (stream->cbreak_on) ? 2 : 0;
 
 	_initTree();
 	if(!stream->n_events || eventIds.isEmpty())
@@ -992,7 +989,7 @@ KsEventsCheckBoxWidget::KsEventsCheckBoxWidget(kshark_data_stream *stream,
 		_makeItems(stream, eventIds);
 	
 	//NOTE: Changed here.
-	if (stream->break_couples) {
+	if (stream->cbreak_on) {
 		_addCouplebreakItems(stream);
 	}
 }
@@ -1021,9 +1018,6 @@ void KsEventsCheckBoxWidget::_addCouplebreakItems(kshark_data_stream *stream) {
 		_id[stream->n_events + i] = cbreakIds[i];
 		_cb[stream->n_events + i] = evtItem;
 	}
-
-	_tree.sortItems(0, Qt::AscendingOrder);
-	_adjustSize();
 }
 
 void KsEventsCheckBoxWidget::_makeItems(kshark_data_stream *stream,
@@ -1484,7 +1478,7 @@ KsCouplebreakerDialog::KsCouplebreakerDialog(
 		kshark_data_stream* stream = kshark_get_data_stream(kshark_ctx, sd);
 
 		// See if stream breaks couples
-		bool s_breaks_couples = stream->break_couples;
+		bool s_breaks_couples = stream->cbreak_on;
 
 		// Make Qt widgets and layout
 		QHBoxLayout* stream_couplebreak_layout = new QHBoxLayout{};

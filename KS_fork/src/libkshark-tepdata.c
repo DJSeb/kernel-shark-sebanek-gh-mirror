@@ -284,12 +284,55 @@ static void free_rec_list(struct rec_list **rec_list, int n_cpus,
 }
 
 //NOTE: Changed here.
-// Copy of missed_events_action, basically
 #define COUPLEBREAKER_TARGET_ENTRY_TIME_SHIFT 1
+
+static int cbreak_id_to_flag(int event_id)
+{
+	/*
+	|0|0|0|0|0|0|0|0| ... |0|0|0|0|0|0|0|0| <- 32 bits
+	The flags are each bits. The position of the flag corresponds to the event id,
+	all according to the switch table below.
+	*/
+	switch (event_id) {
+		case KS_COUPLEBREAKER_SS_TARGET_EVENT:
+			return 0;
+		case KS_COUPLEBREAKER_SW_TARGET_EVENT:
+			return 1;
+		default: // Represents a fault.
+			return -1;
+	}
+}
+
+static int flag_to_cbreak_id(int flag_pos)
+{
+    /*
+	|0|0|0|0|0|0|0|0| ... |0|0|0|0|0|0|0|0| <- 32 bits
+	The flags are each bits. The position of the flag corresponds to the event id,
+	all according to the switch table below.
+	*/
+	switch (flag_pos) {
+		case 0:
+			return KS_COUPLEBREAKER_SS_TARGET_EVENT;
+		case 1:
+			return KS_COUPLEBREAKER_SW_TARGET_EVENT;
+		default: // Represents a fault.
+			return -1;
+	}
+}
+
+// Copy of missed_events_action, basically
 static struct kshark_entry* create_sched_switch_target(struct kshark_data_stream *stream,
 				       struct rec_list *temp_rec, struct tep_record *record,
 					   struct kshark_entry *origin_entry)
 {
+	static bool count_new_cbreak_event = true;
+	if (count_new_cbreak_event) {
+		count_new_cbreak_event = false;
+		stream->n_cbreak_evts++;
+		int flag_pos = cbreak_id_to_flag(KS_COUPLEBREAKER_SS_TARGET_EVENT);
+		stream->cbreak_evts_flags |= (1 << flag_pos);
+	}
+
 	struct kshark_entry *entry = &temp_rec->entry;
 	/*
 	 * Use the offset field of the entry to store a magic number (TBA).
@@ -324,6 +367,14 @@ static struct kshark_entry *create_sched_waking_target(
 	struct rec_list *temp_rec, struct tep_record *record,
 	struct kshark_entry *origin_entry)
 {
+	static bool count_new_cbreak_event = true;
+	if (count_new_cbreak_event) {
+		count_new_cbreak_event = false;
+		stream->n_cbreak_evts++;
+		int flag_pos = cbreak_id_to_flag(KS_COUPLEBREAKER_SW_TARGET_EVENT);
+		stream->cbreak_evts_flags |= (1 << flag_pos);
+	}
+
 	struct kshark_entry *entry = &temp_rec->entry;
 	/*
 	 * Let's store the origin entry into the now useless offset field.
@@ -489,7 +540,7 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 						register_command(stream, rec, next_pid);
 					
 					//NOTE: Changed here.
-					if (stream->break_couples) {
+					if (stream->cbreak_on) {
 						int retcode = create_target_entry(kshark_ctx, stream, rec, entry,
 							&temp_next, &temp_rec, adv_filter, &count, create_sched_switch_target);
 						if (retcode == 1) goto fail;
@@ -520,7 +571,7 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 				const int sch_waking_id = kshark_find_event_id(stream, "sched/sched_waking");
 				if (entry->event_id == (int16_t)sch_waking_id) {
 					// Sched_waking only for now
-					if (stream->break_couples) {
+					if (stream->cbreak_on) {
 						int retcode = create_target_entry(kshark_ctx, stream, rec, entry,
 							&temp_next, &temp_rec, adv_filter, &count, create_sched_waking_target);
 						if (retcode == 1) goto fail;
@@ -792,7 +843,7 @@ static int tepdata_get_event_id(struct kshark_data_stream *stream,
 	//NOTE: Changed here.
 	bool is_couplebreaker_event = (entry->event_id == KS_COUPLEBREAKER_SS_TARGET_EVENT ||
 		entry->event_id == KS_COUPLEBREAKER_SW_TARGET_EVENT);
-	if (stream->break_couples && is_couplebreaker_event) {
+	if (stream->cbreak_on && is_couplebreaker_event) {
 		return entry->event_id;
 	}
 
@@ -897,7 +948,7 @@ static int tepdata_get_pid(struct kshark_data_stream *stream,
  	//NOTE: Changed here.
 	bool is_couplebreaker_event = (entry->event_id == KS_COUPLEBREAKER_SS_TARGET_EVENT ||
 		entry->event_id == KS_COUPLEBREAKER_SW_TARGET_EVENT); 
-	if (stream->break_couples && is_couplebreaker_event) {
+	if (stream->cbreak_on && is_couplebreaker_event) {
 		return entry->pid;
 	}
 
@@ -1462,7 +1513,7 @@ int tepdata_read_event_field(struct kshark_data_stream *stream,
 
 	bool is_couplebreaker_event = (input_entry->event_id == KS_COUPLEBREAKER_SS_TARGET_EVENT ||
 		input_entry->event_id == KS_COUPLEBREAKER_SW_TARGET_EVENT);
-	const struct kshark_entry *entry = (stream->break_couples && is_couplebreaker_event) ?
+	const struct kshark_entry *entry = (stream->cbreak_on && is_couplebreaker_event) ?
 		(struct kshark_entry*)input_entry->offset : input_entry;
 
 	evt_field = get_evt_field(stream, entry->event_id, field);
@@ -1485,10 +1536,19 @@ int tepdata_read_event_field(struct kshark_data_stream *stream,
 static int *couplebreak_get_all_ids(struct kshark_data_stream *stream)
 {
 	int *ids = NULL;
-	if (stream->break_couples) {
-		ids = calloc(2, sizeof(*ids));
-		ids[0] = KS_COUPLEBREAKER_SS_TARGET_EVENT;
-		ids[1] = KS_COUPLEBREAKER_SW_TARGET_EVENT;
+	if (stream->cbreak_on) {
+		ids = calloc(stream->n_cbreak_evts, sizeof(*ids));
+		int i = 0;
+		for (int j = 0; j < stream->n_cbreak_evts; j++) {
+			if (stream->cbreak_evts_flags & (1 << j)) {
+				ids[i] = flag_to_cbreak_id(j);
+				i++;
+				// This shouldn't really happen, since the flags are set once, just like increment is done once.
+				// But it never hurts to be careful.
+				if (i == stream->n_cbreak_evts)
+					break;
+			}
+		}
 	}
 	return ids;
 }
@@ -1599,7 +1659,11 @@ static int kshark_tep_stream_init(struct kshark_data_stream *stream,
 	stream->n_cpus = tep_get_cpus(tep_handle->tep);
 	stream->n_events = tep_get_events_count(tep_handle->tep);
 	stream->idle_pid = LINUX_IDLE_TASK_PID;
-
+	//NOTE: Changed here.
+	stream->cbreak_on = false;
+	stream->n_cbreak_evts = 0;
+	stream->cbreak_evts_flags = 0;
+	
 	tep_handle->advanced_event_filter =
 		tep_filter_alloc(tep_handle->tep);
 
@@ -1905,6 +1969,11 @@ int kshark_tep_init_local(struct kshark_data_stream *stream)
 
 	stream->n_events = tep_get_events_count(tep_handle->tep);
 	stream->n_cpus =  tep_get_cpus(tep_handle->tep);
+	//NOTE: Changed here.
+	stream->cbreak_on = false;
+	stream->n_cbreak_evts = 0;
+	stream->cbreak_evts_flags = 0;
+
 	set_tep_format(stream);
 	if (asprintf(&stream->file, "Local system") <= 0)
 		goto fail;
