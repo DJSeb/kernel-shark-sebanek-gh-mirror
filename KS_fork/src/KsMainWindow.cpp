@@ -828,7 +828,7 @@ void KsMainWindow::_applyFilter(int sd, QVector<int> all, QVector<int> show,
 		posFilter(sd, show);
 	} else {
 		/*
-		 * It is more efficiant to apply negative (do not show) filter.
+		 * It is more efficient to apply negative (do not show) filter.
 		 */
 		QVector<int> diff;
 
@@ -885,6 +885,10 @@ void KsMainWindow::_showEvents()
 
 	auto lamFilter = [=] (int sd, QVector<int> show) {
 		QVector<int> all = KsUtils::getEventIdList(sd);
+		//NOTE: Changed here.
+		if (stream->break_couples) {
+			all.append(KsUtils::getCoupleBreakerIdList(sd));
+		}
 		_applyFilter(sd, all, show,
 			     LAMBDA_FILTER(_data.applyPosEventFilter),
 			     LAMBDA_FILTER(_data.applyNegEventFilter));

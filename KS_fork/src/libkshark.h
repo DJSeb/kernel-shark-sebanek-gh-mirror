@@ -58,7 +58,10 @@ struct kshark_entry {
 	/** The PID of the task the record was generated. */
 	int32_t		pid;
 
-	/** The offset into the trace file, used to find the record. */
+	/** The offset into the trace file, used to find the record.
+	 * If couplebreak is enabled, the offset is a pointer to the origin
+	 * entry of the couple.
+	*/
 	int64_t		offset;
 
 	/**
@@ -151,6 +154,10 @@ typedef int (*stream_find_id_func) (struct kshark_data_stream *,
 
 /** A function type to be used by the method interface of the data stream. */
 typedef int *(*stream_get_ids_func) (struct kshark_data_stream *);
+
+//NOTE: Changed here.
+/** A function type to be used by the method interface of the data stream. */
+typedef int *(*stream_get_cbreak_ids_func) (struct kshark_data_stream *);
 
 /** A function type to be used by the method interface of the data stream. */
 typedef int (*stream_get_names_func) (struct kshark_data_stream *,
@@ -270,6 +277,10 @@ struct kshark_generic_stream_interface {
 
 	/** Method used to load the data in matrix form. */
 	load_matrix_func	load_matrix;
+
+	//NOTE: Changed here.
+	/** Method used to retrieve an array of Ids of all couplebreak events. */
+	stream_get_cbreak_ids_func 	get_cbreak_ids; 
 
 	/** Generic data handle. */
 	void			*handle;
@@ -466,6 +477,8 @@ int kshark_get_pid(const struct kshark_entry *entry);
 int kshark_get_event_id(const struct kshark_entry *entry);
 
 int *kshark_get_all_event_ids(struct kshark_data_stream *stream);
+
+int *kshark_get_cbreak_ids(struct kshark_data_stream *stream);
 
 int kshark_find_event_id(struct kshark_data_stream *stream,
 			 const char *event_name);

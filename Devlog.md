@@ -390,3 +390,62 @@ This also, very frighteningly, implies that there is more stuff to do
 if couplebreak events are to be found, filtered or otherwise worked on.
 
 Scary indeed.
+
+Next goals:
+
+- Modify kshark functions so that 'couplebreak/\*' events can be
+  found like any other event (at least by name) & filtered
+- Subgoal: more dynamic couplebreak events choice
+- nap rectangles indepenence
+- nap rectangles work with couplebreaking
+- sched_switch compatibility with cbreak
+- change KShark's CMake
+
+## 2025-03-18
+
+Nothing really happened (work-induced involuntary vacation for a few days),
+only an addition to KShark's CMake to add version descriptor suffix, marking
+this version as very much different.
+
+... Ok, after a little bit of frustration, there was an update to
+the interface functions of libkshark-tepdata.c, so that some of the
+searches could be done. It's hard-coded, not perfect, but it should get
+the job done with a reasonable amount of effort.
+
+They will all have a ripple effect, surely, there is also the matter
+of ease of use (currently the user MUST expect that there could be
+couplebreak enabled and MUST handle it themselves, not that great of a UX).
+
+Still, let's update next goals:
+
+- Optimize (usage-wise) couplebreak search modifications
+- nap rectangles independence
+- nap rectangles interop with couplebreak
+- sched_switch interop with couplebreak
+- subgoal: more dynamic couplebreak events choice
+  - would necessitate a more dynamic approach to the search modifications
+    too
+
+## 2025-03-19
+
+PHEW! Filtering events now interops with couplebreaker! A little bit of a
+cleanup happened to the interface functions in lib...-tepadata, seeing as
+returning more than is expected is just a bad look, especially for collections.
+However, though hardcoded now, with the Open-Close Principle's (because it's good
+to flex what we've studied) mindset, there was more of an interface extension,
+slight modifications that won't hurt during normal operations and C++-side changes
+to how the UI handles things - all to say that couplebreaker events can now
+be filtered in and out of the graph (and list).
+
+Next goals:
+
+- De-hardcode couplebreak filter & stream interface modifications, if deemed too
+  restrictive
+- nap rectangles independence
+- nap rectangles interop with couplebreak
+- sched_switch interop with couplebreak
+- subgoal: more dynamic couplebreak events choice
+  - would necessitate the hardcoded modifications to be rewritten
+
+Overall, productive enough for the 2 hours spent on this. It is time to move
+onto other goals now though, as de-harcodisation can wait.

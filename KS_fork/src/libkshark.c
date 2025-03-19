@@ -684,6 +684,21 @@ int *kshark_get_all_event_ids(struct kshark_data_stream *stream)
 	return NULL;
 }
 
+//NOTE: Changed here.
+int *kshark_get_cbreak_ids(struct kshark_data_stream *stream) {
+	struct kshark_generic_stream_interface *interface;
+
+	if (!stream)
+		return NULL;
+
+	interface = stream->interface;
+	if (interface->type == KS_GENERIC_DATA_INTERFACE &&
+	    interface->get_cbreak_ids)
+		return interface->get_cbreak_ids(stream);
+
+	return NULL;
+}
+
 /**
  * @brief Find the event Ids corresponding to a given event name.
  *

@@ -102,6 +102,35 @@ QVector<int> getEventIdList(int sd)
 	return evts;
 }
 
+//NOTE: Changed here.
+QVector<int> getCoupleBreakerIdList(int sd)
+{
+	//TODO: This is pretty ugly
+	constexpr int COUPLEBREAK_EVTS_COUNT = 2;
+	kshark_context *kshark_ctx(nullptr);
+	kshark_data_stream *stream;
+	int *ids;
+
+	if (!kshark_instance(&kshark_ctx))
+		return {};
+
+	stream = kshark_get_data_stream(kshark_ctx, sd);
+	if (!stream)
+		return {};
+
+	ids = kshark_get_cbreak_ids(stream);
+	if (!ids)
+		return {};
+
+	QVector<int> evts(COUPLEBREAK_EVTS_COUNT);
+	for (int i = 0; i < COUPLEBREAK_EVTS_COUNT; ++i)
+		evts[i] = ids[i];
+	
+	free(ids);
+
+	return evts;
+}
+
 /**
  * @brief Retrieve the unique Id of the event.
  *

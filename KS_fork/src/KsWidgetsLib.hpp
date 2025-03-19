@@ -583,6 +583,9 @@ private:
 	void _makeItems(kshark_data_stream *stream, QVector<int> eventIds);
 
 	void _makeTepEventItems(kshark_data_stream *stream, QVector<int> eventIds);
+
+	//NOTE: Changed here.
+	void _addCouplebreakItems(kshark_data_stream *stream);
 };
 
 /**

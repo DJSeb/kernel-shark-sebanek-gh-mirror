@@ -19,6 +19,11 @@
 extern "C" {
 #endif
 
+//NOTE: Changed here.
+/** Identifiers assigned to created target events. */
+#define KS_COUPLEBREAKER_SS_TARGET_EVENT -69
+#define KS_COUPLEBREAKER_SW_TARGET_EVENT -70 
+
 /** Unique identifier of the TEP tracing data format. */
 #define TEP_DATA_FORMAT_IDENTIFIER	"tep data"
 

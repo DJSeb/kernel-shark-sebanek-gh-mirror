@@ -972,18 +972,58 @@ KsEventsCheckBoxWidget::KsEventsCheckBoxWidget(kshark_data_stream *stream,
 : KsCheckBoxTreeWidget(stream->stream_id, "Events", parent)
 {
 	QVector<int> eventIds = KsUtils::getEventIdList(stream->stream_id);
+	//NOTE: Changed here.
+	int cbreak_correction = 0;
+	if (stream->break_couples) {
+		cbreak_correction = 2;
+	}
 
 	_initTree();
 	if(!stream->n_events || eventIds.isEmpty())
 		return;
 
-	_id.resize(stream->n_events);
-	_cb.resize(stream->n_events);
+	//NOTE: Changed here.
+	_id.resize(stream->n_events + cbreak_correction);
+	_cb.resize(stream->n_events + cbreak_correction);
 
 	if (kshark_is_tep(stream))
 		_makeTepEventItems(stream, eventIds);
 	else
 		_makeItems(stream, eventIds);
+	
+	//NOTE: Changed here.
+	if (stream->break_couples) {
+		_addCouplebreakItems(stream);
+	}
+}
+
+//NOTE: Changed here.
+void KsEventsCheckBoxWidget::_addCouplebreakItems(kshark_data_stream *stream) {
+	// Add couplebreak items:
+	QTreeWidgetItem *evtItem, *sysItem;
+	QString evtName;
+	QString sysName = "couplebreak";
+	QVector<int> cbreakIds = KsUtils::getCoupleBreakerIdList(stream->stream_id);
+
+	sysItem = new QTreeWidgetItem;
+	sysItem->setText(0, sysName);
+	sysItem->setCheckState(0, Qt::Checked);
+	_tree.addTopLevelItem(sysItem);
+
+	// Add the couplebreak events:
+	for (int i = 0; i < cbreakIds.size(); ++i) {
+		evtName = KsUtils::getEventName(stream->stream_id, cbreakIds[i]);
+		evtItem = new QTreeWidgetItem;
+		evtItem->setText(0, evtName);
+		evtItem->setCheckState(0, Qt::Checked);
+		evtItem->setFlags(evtItem->flags() | Qt::ItemIsUserCheckable);
+		sysItem->addChild(evtItem);
+		_id[stream->n_events + i] = cbreakIds[i];
+		_cb[stream->n_events + i] = evtItem;
+	}
+
+	_tree.sortItems(0, Qt::AscendingOrder);
+	_adjustSize();
 }
 
 void KsEventsCheckBoxWidget::_makeItems(kshark_data_stream *stream,
