@@ -322,14 +322,12 @@ static int flag_to_cbreak_id(int flag_pos)
 
 // Copy of missed_events_action, basically
 static struct kshark_entry* create_sched_switch_target(struct kshark_data_stream *stream,
-				       struct rec_list *temp_rec, struct tep_record *record,
-					   struct kshark_entry *origin_entry)
+	struct rec_list *temp_rec, struct tep_record *record,
+	struct kshark_entry *origin_entry)
 {
-	static bool count_new_cbreak_event = true;
-	if (count_new_cbreak_event) {
-		count_new_cbreak_event = false;
+	const int flag_pos = cbreak_id_to_flag(KS_COUPLEBREAKER_SS_TARGET_EVENT);
+	if (!(stream->cbreak_evts_flags & (1 << flag_pos))) {
 		stream->n_cbreak_evts++;
-		int flag_pos = cbreak_id_to_flag(KS_COUPLEBREAKER_SS_TARGET_EVENT);
 		stream->cbreak_evts_flags |= (1 << flag_pos);
 	}
 
@@ -367,11 +365,9 @@ static struct kshark_entry *create_sched_waking_target(
 	struct rec_list *temp_rec, struct tep_record *record,
 	struct kshark_entry *origin_entry)
 {
-	static bool count_new_cbreak_event = true;
-	if (count_new_cbreak_event) {
-		count_new_cbreak_event = false;
+	const int flag_pos = cbreak_id_to_flag(KS_COUPLEBREAKER_SW_TARGET_EVENT);
+	if (!(stream->cbreak_evts_flags & (1 << flag_pos))) {
 		stream->n_cbreak_evts++;
-		int flag_pos = cbreak_id_to_flag(KS_COUPLEBREAKER_SW_TARGET_EVENT);
 		stream->cbreak_evts_flags |= (1 << flag_pos);
 	}
 
@@ -475,6 +471,10 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 	struct tep_record *rec;
 	ssize_t count, total = 0;
 	int pid, next_pid, cpu;
+
+	//NOTE: Changed here.
+	stream->cbreak_evts_flags = 0;
+	stream->n_cbreak_evts = 0;
 
 	input = kshark_get_tep_input(stream);
 	if (!input)
