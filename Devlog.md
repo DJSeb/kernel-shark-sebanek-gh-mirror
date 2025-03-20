@@ -449,3 +449,14 @@ Next goals:
 
 Overall, productive enough for the 2 hours spent on this. It is time to move
 onto other goals now though, as de-harcodisation can wait.
+
+...
+
+Add an hour to that, which parametrised some hardcoded stuff that happened today,
+namely the state of couplebreaker and how many and which events have been made.
+
+...
+
+Add another hour, in which event IDs and name strings were once again de-hardcoded.
+It is a little sad that there is more string search now (as we need dynamic searching
+of couplebreak-able events), but it shouldn't be that bad for a GUI application.

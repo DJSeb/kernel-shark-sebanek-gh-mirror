@@ -19,19 +19,6 @@
 extern "C" {
 #endif
 
-//NOTE: Changed here.
-/** Identifiers assigned to created target events. */
-#define KS_COUPLEBREAKER_SS_TARGET_EVENT -69
-#define KS_COUPLEBREAKER_SW_TARGET_EVENT -70
-
-// NOTE: CHanged here.
-/** Function serves as a mapping between event Ids given above and
- *  the position of the flag in stream's flag integer for encountered
- *  couplebreak events.
- *  Returning '-1' represents an invalid event Id was given.
- */
-//int kshark_cbreak_id_to_flag(int event_id);
-
 /** Unique identifier of the TEP tracing data format. */
 #define TEP_DATA_FORMAT_IDENTIFIER	"tep data"
 
