@@ -355,7 +355,6 @@ static char *get_couplebreak_event_name(struct kshark_data_stream *stream, int e
 		return NULL; // Incorrect event Id, not a couplebreak event
 	
 	asprintf(&buffer, "couplebreak/%s[target]", origin_evt_name);
-	//free(origin_evt_name);
 
 	return buffer;
 }
@@ -504,6 +503,114 @@ static int create_target_entry(struct kshark_context *kshark_ctx,
 }
 
 
+static int pick_next_cpu(struct rec_list **rec_list, int n_cpus,
+	enum rec_type type)
+{
+	uint64_t ts = 0;
+	uint64_t rec_ts;
+	int next_cpu = -1;
+	int cpu;
+
+	for (cpu = 0; cpu < n_cpus; ++cpu) {
+		if (!rec_list[cpu])
+			continue;
+
+		switch (type) {
+		case REC_RECORD:
+			rec_ts = rec_list[cpu]->rec->ts;
+			break;
+		case REC_ENTRY:
+			rec_ts = rec_list[cpu]->entry.ts;
+			break;
+		default:
+			return -1;
+		}
+		if (!ts || rec_ts < ts) {
+			ts = rec_ts;
+			next_cpu = cpu;
+		}
+	}
+
+	return next_cpu;
+}
+
+static inline void fill_sorted_entries(struct kshark_data_stream *stream,
+	struct rec_list **rec_list, struct kshark_entry **sorted_entries, ssize_t total)
+{
+	enum rec_type type = REC_ENTRY;
+
+	for (int count = 0; count < total; count++) {
+		int next_cpu;
+
+		next_cpu = pick_next_cpu(rec_list, stream->n_cpus, type);
+
+		if (next_cpu >= 0) {
+			sorted_entries[count] = &rec_list[next_cpu]->entry;
+			rec_list[next_cpu] = rec_list[next_cpu]->next;
+		}
+	}
+}
+
+static void correct_couplebreak_cpus_inner(struct kshark_data_stream *stream,
+	struct kshark_entry **sorted_entries, ssize_t total)
+{
+	int couplebreak_swt_id = find_couplebreak_event_id_from_origin_name(stream, "sched/sched_waking");
+	int couplebreak_sst_id = find_couplebreak_event_id_from_origin_name(stream, "sched/sched_switch");
+
+	for (ssize_t i = 0 ; i < total ; i++) {
+		struct kshark_entry *curr_event = sorted_entries[i];
+		
+		if (curr_event->event_id != couplebreak_swt_id) {
+			// No need to correct the cpu of an event that is not sched_waking[target].
+			continue;
+		}
+
+		for (ssize_t j = 0 ; j < total ; j++) {
+			const struct kshark_entry *next_event = sorted_entries[j];
+
+			if (next_event->event_id == couplebreak_sst_id &&
+				next_event->pid == curr_event->pid)
+			{
+				curr_event->cpu = next_event->cpu;
+				break;
+			}
+		}
+	}
+}
+
+static int correct_couplebreak_cpus(struct kshark_data_stream *stream,
+	struct rec_list **rec_list, ssize_t total)
+{
+	struct rec_list **temp_list = calloc(total, sizeof(*temp_list));
+	if (!temp_list) {
+		goto fail;
+	}
+	// Copy the rec_list to a temporary list.
+	for (ssize_t i = 0; i < total; i++) {
+		temp_list[i] = rec_list[i];
+	}
+
+	// Create a sorted array of kshark_events from the rec_list.
+	struct kshark_entry **sorted_entries = calloc(total, sizeof(*sorted_entries));
+	if (!sorted_entries) {
+		free(temp_list);
+		goto fail;
+	}
+
+	fill_sorted_entries(stream, temp_list, sorted_entries, total);
+
+	correct_couplebreak_cpus_inner(stream, sorted_entries, total);
+
+	free(temp_list);
+	free(sorted_entries);
+
+	return 0;
+
+ fail:
+	fprintf(stderr, "Failed to allocate memory during data loading.\n");
+	return -ENOMEM;
+}
+
 static ssize_t get_records(struct kshark_context *kshark_ctx,
 			   struct kshark_data_stream *stream,
 			   struct rec_list ***rec_list,
@@ -645,6 +752,16 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 	}
 
 	*rec_list = cpu_list;
+
+	//NOTE: Changed here.
+	if (stream->couplebreak_on) {
+		// Reuse cpu_list to not allocate more memory.
+		int op_result = correct_couplebreak_cpus(stream, cpu_list, total);
+		if (op_result == -ENOMEM) {
+			return -ENOMEM;
+		}
+	}
+
 	return total;
 
  fail:
@@ -652,62 +769,6 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 	return -ENOMEM;
 }
 
-static int pick_next_cpu(struct rec_list **rec_list, int n_cpus,
-			 enum rec_type type)
-{
-	uint64_t ts = 0;
-	uint64_t rec_ts;
-	int next_cpu = -1;
-	int cpu;
-
-	for (cpu = 0; cpu < n_cpus; ++cpu) {
-		if (!rec_list[cpu])
-			continue;
-
-		switch (type) {
-		case REC_RECORD:
-			rec_ts = rec_list[cpu]->rec->ts;
-			break;
-		case REC_ENTRY:
-			rec_ts = rec_list[cpu]->entry.ts;
-			break;
-		default:
-			return -1;
-		}
-		if (!ts || rec_ts < ts) {
-			ts = rec_ts;
-			next_cpu = cpu;
-		}
-	}
-
-	return next_cpu;
-}
-
-//NOTE: Changed here.
-static void correct_couplebreak_cpus(struct kshark_data_stream *stream,
-	struct kshark_entry ***data_rows, ssize_t total)
-{
-	int couplebreak_swt_id = find_couplebreak_event_id_from_origin_name(stream, "sched/sched_waking");
-	int couplebreak_sst_id = find_couplebreak_event_id_from_origin_name(stream, "sched/sched_switch");
-	
-	for (ssize_t i = 0 ; i < total ; i++) {
-		struct kshark_entry *curr_event = (*data_rows)[i];
-		
-		if (curr_event->event_id != couplebreak_swt_id) {
-			continue; // No need to correct the cpu of an event that is not sched_waking[target].
-		}
-
-		for (ssize_t j = 0 ; j < total ; j++) {
-			const struct kshark_entry *next_event = (*data_rows)[j];
-
-			if (next_event->event_id == couplebreak_sst_id &&
-				next_event->pid == curr_event->pid) {
-				curr_event->cpu = next_event->cpu;
-				break;
-			}
-		}
-	}
-}
 
 /**
  * @brief Load the content of the trace data file asociated with a given
@@ -761,10 +822,6 @@ ssize_t tepdata_load_entries(struct kshark_data_stream *stream,
 	/* There should be no entries left in rec_list. */
 	free_rec_list(rec_list, stream->n_cpus, type);
 	*data_rows = rows;
-	//NOTE: Changed here.
-	if (stream->couplebreak_on) {
-		correct_couplebreak_cpus(stream, data_rows, total);
-	}
 
 	return total;
 
@@ -901,6 +958,7 @@ ssize_t kshark_load_tep_records(struct kshark_context *kshark_ctx, int sd,
 	/* There should be no records left in rec_list. */
 	free_rec_list(rec_list, stream->n_cpus, type);
 	*data_rows = rows;
+
 	return total;
 
  fail_free:
@@ -1412,7 +1470,7 @@ static char *tepdata_dump_entry(struct kshark_data_stream *stream,
 				char *specials = tepdata_dump_custom_entry(stream, entry, couplebreak_target_dump);
 				asprintf(&entry_str, "%s; %s", specials, entry_str);
 				free(specials);
-				goto skip_other_neg_evt_ids;
+				return entry_str;
 			}
 		}
 
@@ -1424,8 +1482,6 @@ static char *tepdata_dump_entry(struct kshark_data_stream *stream,
 		default:
 			return NULL;
 		}
-
-		skip_other_neg_evt_ids:
 	}
 
 	return entry_str;

@@ -470,8 +470,28 @@ There's a bit of a dilemma with no right or wrong answer happening in couplebrea
 Either I can keep the target's cpu as the same one from which the origin event
 was fired, or I could maybe somehow get the CPU.
 
+...
+
 It was solved by iterating through every sorted entry after getting
 them from the file and searching for a nearest sched_switch of the same
 task, which determined on which CPU the task would run right after.
 
 Easy to disable in code though.
+
+Next goals:
+
+- nap rectangles independence
+- nap rectangles interop with couplebreak
+- sched_switch interop with couplebreak
+- subgoal: more dynamic couplebreak events choice
+  - would necessitate the hardcoded modifications to be rewritten
+
+...
+
+Actually, since the correction would have to happen at two separate places,
+it was moved into the get_records function as a last iteration through
+a created, then destroyed sorted entries structure.
+
+It is a bit of a messy way, but it is the most straightforward to
+understand in code and it happens only once per load, so it's not terribly
+inefficent.
