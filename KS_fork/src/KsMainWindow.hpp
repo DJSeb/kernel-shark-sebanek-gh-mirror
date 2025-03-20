@@ -186,7 +186,7 @@ private:
 	QAction		_addOffcetAction;
 
 	/*NOTE: Changed here. */
-	QAction		_couplebreakerOn;
+	QAction		_couplebreakOn;
 
 	QWidgetAction	_colorAction;
 
@@ -313,7 +313,7 @@ private:
 	QString _getCacheDir();
 
 	/*NOTE: Changed here.*/
-	void _toggleCouplebreaker();
+	void _toggleCouplebreak();
 	using StreamCouplebreakSetting = std::pair<int, bool>;
 	void _updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_couplebreaks);
 

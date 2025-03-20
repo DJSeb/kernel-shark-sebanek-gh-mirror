@@ -972,16 +972,14 @@ KsEventsCheckBoxWidget::KsEventsCheckBoxWidget(kshark_data_stream *stream,
 : KsCheckBoxTreeWidget(stream->stream_id, "Events", parent)
 {
 	QVector<int> eventIds = KsUtils::getEventIdList(stream->stream_id);
-	//NOTE: Changed here.
-	int cbreak_correction = (stream->cbreak_on) ? 2 : 0;
 
 	_initTree();
 	if(!stream->n_events || eventIds.isEmpty())
 		return;
 
 	//NOTE: Changed here.
-	_id.resize(stream->n_events + cbreak_correction);
-	_cb.resize(stream->n_events + cbreak_correction);
+	_id.resize(stream->n_events + stream->n_couplebreak_evts);
+	_cb.resize(stream->n_events + stream->n_couplebreak_evts);
 
 	if (kshark_is_tep(stream))
 		_makeTepEventItems(stream, eventIds);
@@ -989,7 +987,7 @@ KsEventsCheckBoxWidget::KsEventsCheckBoxWidget(kshark_data_stream *stream,
 		_makeItems(stream, eventIds);
 	
 	//NOTE: Changed here.
-	if (stream->cbreak_on) {
+	if (stream->couplebreak_on) {
 		_addCouplebreakItems(stream);
 	}
 }
@@ -1000,7 +998,7 @@ void KsEventsCheckBoxWidget::_addCouplebreakItems(kshark_data_stream *stream) {
 	QTreeWidgetItem *evtItem, *sysItem;
 	QString evtName;
 	QString sysName = "couplebreak";
-	QVector<int> cbreakIds = KsUtils::getCoupleBreakerIdList(stream->stream_id);
+	QVector<int> couplebreakIds = KsUtils::getCoupleBreakerIdList(stream->stream_id);
 
 	sysItem = new QTreeWidgetItem;
 	sysItem->setText(0, sysName);
@@ -1008,14 +1006,14 @@ void KsEventsCheckBoxWidget::_addCouplebreakItems(kshark_data_stream *stream) {
 	_tree.addTopLevelItem(sysItem);
 
 	// Add the couplebreak events:
-	for (int i = 0; i < cbreakIds.size(); ++i) {
-		evtName = KsUtils::getEventName(stream->stream_id, cbreakIds[i]);
+	for (int i = 0; i < couplebreakIds.size(); ++i) {
+		evtName = KsUtils::getEventName(stream->stream_id, couplebreakIds[i]);
 		evtItem = new QTreeWidgetItem;
 		evtItem->setText(0, evtName);
 		evtItem->setCheckState(0, Qt::Checked);
 		evtItem->setFlags(evtItem->flags() | Qt::ItemIsUserCheckable);
 		sysItem->addChild(evtItem);
-		_id[stream->n_events + i] = cbreakIds[i];
+		_id[stream->n_events + i] = couplebreakIds[i];
 		_cb[stream->n_events + i] = evtItem;
 	}
 }
@@ -1424,7 +1422,7 @@ void KsEventFieldSelectWidget::_eventChanged(int)
 }
 
 //NOTE: Changed here.
-KsCouplebreakerDialog::KsCouplebreakerDialog(
+KsCouplebreakDialog::KsCouplebreakDialog(
 	kshark_context *kshark_ctx, QWidget *parent)
 	: QDialog(parent),
 	_main_layout{this},
@@ -1435,25 +1433,25 @@ KsCouplebreakerDialog::KsCouplebreakerDialog(
 {
 	// Static constants
 	static const QString EXPLANATION_TEXT = QString{
-		"Couplebreaker functionality has KernelShark split (break up) "
+		"Couplebreak functionality has KernelShark split (break up) "
 		"events which involve two processes (a couple). "
 		"Such events are, for example, the 'sched_switch' or 'sched_waking' "
 		"events. "
 		"By default (setting is OFF), KernelShark shows these events as a "
 		"single entry in the data table. "
 		"With the setting ON, KernelShark will generate "
-		"'couplebreaker/(event name)[target]' entries, positioned just after "
+		"'couplebreak/(event name)[target]' entries, positioned just after "
 		"the original ('origin') entry. "
 		"The setting is set per stream."
 		"\n\nThis feature is experimental and not quite tested through. "
 		"Plugins usually expect classical event ordering. "
 		"Please use with caution and report any issues (including "
 		"compatibility) you encounter."
-		"\n\nCouplebreaker settings:"
+		"\n\nCouplebreak settings:"
 	};
 
 	// Dialog setup
-	setWindowTitle("Couplebreaker Settings");
+	setWindowTitle("Couplebreak Settings");
 
 	// Member setups
 	_main_layout.setContentsMargins(5, 5, 5, 5);
@@ -1478,7 +1476,7 @@ KsCouplebreakerDialog::KsCouplebreakerDialog(
 		kshark_data_stream* stream = kshark_get_data_stream(kshark_ctx, sd);
 
 		// See if stream breaks couples
-		bool s_breaks_couples = stream->cbreak_on;
+		bool s_breaks_couples = stream->couplebreak_on;
 
 		// Make Qt widgets and layout
 		QHBoxLayout* stream_couplebreak_layout = new QHBoxLayout{};
@@ -1488,7 +1486,7 @@ KsCouplebreakerDialog::KsCouplebreakerDialog(
 		
 		
 		QLabel* stream_name = new QLabel("Stream #" + QString::number(sd));
-		QCheckBox* stream_couplebreak_cb = new QCheckBox("Couplebreaker ON");
+		QCheckBox* stream_couplebreak_cb = new QCheckBox("Couplebreak ON");
 
 		stream_couplebreak_cb->setChecked(s_breaks_couples);
 		
@@ -1514,7 +1512,7 @@ KsCouplebreakerDialog::KsCouplebreakerDialog(
 
 	// Setup endstage buttons
 	_apply_button_connection = connect(&_apply_button, &QPushButton::pressed,
-		this, 	&KsCouplebreakerDialog::_apply_action);
+		this, 	&KsCouplebreakDialog::_apply_action);
 	connect(&_apply_button, &QPushButton::pressed, this, &QWidget::close);
 	connect(&_close_button, &QPushButton::pressed, this, &QWidget::close);
 
@@ -1531,7 +1529,7 @@ KsCouplebreakerDialog::KsCouplebreakerDialog(
 	setLayout(&_main_layout);
 }
 
-void KsCouplebreakerDialog::_apply_action()
+void KsCouplebreakDialog::_apply_action()
 {
 	QVector<StreamCouplebreakSetting> settings;
 

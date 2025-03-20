@@ -116,12 +116,12 @@ QVector<int> getCoupleBreakerIdList(int sd)
 	if (!stream)
 		return {};
 
-	ids = kshark_get_cbreak_ids(stream);
+	ids = kshark_get_couplebreak_ids(stream);
 	if (!ids)
 		return {};
 
-	QVector<int> evts(stream->n_cbreak_evts);
-	for (int i = 0; i < stream->n_cbreak_evts; ++i)
+	QVector<int> evts(stream->n_couplebreak_evts);
+	for (int i = 0; i < stream->n_couplebreak_evts; ++i)
 		evts[i] = ids[i];
 	
 	free(ids);

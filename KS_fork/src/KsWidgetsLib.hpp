@@ -646,7 +646,7 @@ private:
 };
 
 //NOTE: Changed here.
-class KsCouplebreakerDialog: public QDialog {
+class KsCouplebreakDialog: public QDialog {
 	Q_OBJECT
 	using StreamCboxes = std::pair<int, QCheckBox *>;
 	using StreamCouplebreakSetting = std::pair<int, bool>;
@@ -681,8 +681,8 @@ private:
 	/// @brief Apply the changes to the streams.
 	void _apply_action();
 public:
-	KsCouplebreakerDialog() = delete;
-	explicit KsCouplebreakerDialog(kshark_context *kshark_ctx,
+	KsCouplebreakDialog() = delete;
+	explicit KsCouplebreakDialog(kshark_context *kshark_ctx,
 		QWidget *parent = nullptr);
 };
 

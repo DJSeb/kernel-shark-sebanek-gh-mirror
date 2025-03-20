@@ -63,7 +63,7 @@ KsMainWindow::KsMainWindow(QWidget *parent)
   _addPluginsAction("Add plugins", this),
   _captureAction("Record", this),
   _addOffcetAction("Add Time Offset", this),
-  _couplebreakerOn("Couplebreaker Settings", this), //NOTE: Changed here.
+  _couplebreakOn("Couplebreak Settings", this), //NOTE: Changed here.
   _colorAction(this),
   _colSlider(this),
   _colorPhaseSlider(Qt::Horizontal, this),
@@ -356,9 +356,9 @@ void KsMainWindow::_createActions()
 		this,			&KsMainWindow::_offset);
 
 	//NOTE: Changed here.
-	_couplebreakerOn.setStatusTip("Control KernelShark's couplebreaking");
-	connect(&_couplebreakerOn,	&QAction::triggered,
-		this,			&KsMainWindow::_toggleCouplebreaker);
+	_couplebreakOn.setStatusTip("Control KernelShark's couplebreaking");
+	connect(&_couplebreakOn,	&QAction::triggered,
+		this,			&KsMainWindow::_toggleCouplebreak);
 
 	_colorPhaseSlider.setMinimum(20);
 	_colorPhaseSlider.setMaximum(180);
@@ -512,7 +512,7 @@ void KsMainWindow::_createMenus()
 	tools->addAction(&_addPluginsAction);
 	tools->addAction(&_addOffcetAction);
 	//NOTE: Chamged here.
-	tools->addAction(&_couplebreakerOn);
+	tools->addAction(&_couplebreakOn);
 
 	/*
 	 * Enable the "Add Time Offset" menu only in the case of multiple
@@ -886,7 +886,7 @@ void KsMainWindow::_showEvents()
 	auto lamFilter = [=] (int sd, QVector<int> show) {
 		QVector<int> all = KsUtils::getEventIdList(sd);
 		//NOTE: Changed here.
-		if (stream->cbreak_on) {
+		if (stream->couplebreak_on) {
 			all.append(KsUtils::getCoupleBreakerIdList(sd));
 		}
 		_applyFilter(sd, all, show,
@@ -1671,9 +1671,9 @@ void KsMainWindow::_rootWarning()
 }
 
 // NOTE: Changed here.
-void KsMainWindow::_toggleCouplebreaker() {
+void KsMainWindow::_toggleCouplebreak() {
 	QVector<int> stream_ids;
-	KsCouplebreakerDialog *dialog;
+	KsCouplebreakDialog *dialog;
 	kshark_context *kshark_ctx(nullptr);
 
 	if (!kshark_instance(&kshark_ctx)) {
@@ -1688,8 +1688,8 @@ void KsMainWindow::_toggleCouplebreaker() {
 		return;
 	}
 		
-	dialog = new KsCouplebreakerDialog{kshark_ctx, this};
-	connect(dialog,		&KsCouplebreakerDialog::apply,
+	dialog = new KsCouplebreakDialog{kshark_ctx, this};
+	connect(dialog,		&KsCouplebreakDialog::apply,
 		this,		&KsMainWindow::_updateCouplebreaks);
 
 	dialog->show();
@@ -1707,7 +1707,7 @@ void KsMainWindow::_updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_
 	for (auto const &sc: stream_couplebreaks) {
 		kshark_data_stream *stream = kshark_get_data_stream(kshark_ctx, sc.first);
 		if (stream) {
-			stream->cbreak_on = sc.second;
+			stream->couplebreak_on = sc.second;
 		}
 
 		QVector<int> stream_plugins = _plugins.getActivePlugins(sc.first);
