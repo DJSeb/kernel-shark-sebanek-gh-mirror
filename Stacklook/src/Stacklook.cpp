@@ -104,7 +104,7 @@ static bool _check_function_general(const kshark_entry* entry,
     bool is_config_allowed = SlConfig::get_instance().is_event_allowed(entry);
 
     // Necessary Couplebreak integration
-    const bool stream_breaks_couples = kshark_get_stream_from_entry(entry)->break_couples;
+    const bool stream_breaks_couples = kshark_get_stream_from_entry(entry)->couplebreak_on;
     const kshark_entry* entry_before_stack = (stream_breaks_couples) ?
         entry->next : entry;
     

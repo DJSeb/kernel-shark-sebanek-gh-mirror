@@ -460,3 +460,18 @@ namely the state of couplebreaker and how many and which events have been made.
 Add another hour, in which event IDs and name strings were once again de-hardcoded.
 It is a little sad that there is more string search now (as we need dynamic searching
 of couplebreak-able events), but it shouldn't be that bad for a GUI application.
+
+## 2025-03-20
+
+Naming has been unified. Also, a helpful article on what sched events are has been
+[found](https://perfetto.dev/docs/data-sources/cpu-scheduling).
+
+There's a bit of a dilemma with no right or wrong answer happening in couplebreaker:
+Either I can keep the target's cpu as the same one from which the origin event
+was fired, or I could maybe somehow get the CPU.
+
+It was solved by iterating through every sorted entry after getting
+them from the file and searching for a nearest sched_switch of the same
+task, which determined on which CPU the task would run right after.
+
+Easy to disable in code though.
