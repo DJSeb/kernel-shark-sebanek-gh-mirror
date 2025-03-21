@@ -405,44 +405,27 @@ static void config_show([[maybe_unused]] KsMainWindow*) {
 
 // Functions defined in the C header
 
-/**
- * @brief Predicate function to check that the KernelShark entry is indeed kernel's
- * stack trace entry.
- * 
- * @param entry: entry whose event ID is checked.
- * 
- * @returns True if the entry is a kernel stack entry, false otherwise.
-*/
-bool is_kstack(const struct kshark_entry* entry) {
-    if (entry == nullptr) {
-        return false;
-    }
-    
-    plugin_stacklook_ctx* ctx = __get_context(entry->stream_id);
-
-    /** NOTE: This could be a bit more rigorous: check the event ID, check the task and maybe even the
-     * top of the stack for confirmation it is indeed a stacktrace of the kernel for the switch or wakeup
-     * event.
-     * 
-     * However, since the stacktrace is done immediately after every event when using trace-cmd's
-     * '-T' option, events are always sorted so that stacktraces appear right after their events,
-     * so this checking would be redundant.
-     * 
-     * Of course, if data are manipulated so that they aren't sorted by time, this approach is insufficent.
-    */
-
-    return entry->event_id == ctx->kstack_event_id;
-}
-
 //SL_TODO: documentation
 const struct kshark_entry* get_kstack_entry(const struct kshark_entry* kstack_owner) {
     const kshark_entry* kstack_entry = kstack_owner;
-    while (!(kstack_entry != nullptr &&
-        is_kstack(kstack_entry) &&
-        kstack_owner->pid == kstack_entry->pid))
-    {
+    plugin_stacklook_ctx* ctx = __get_context(kstack_owner->stream_id);
+    
+    if (kstack_entry == nullptr)
+        return nullptr;
+
+    bool is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
+    bool is_correct_task = (kstack_owner->pid == kstack_entry->pid);
+    
+    while (!(is_kstack && is_correct_task)) {
+        // Move onto next entry on the same CPU
+        // NOTE: kernelstack trace will be on the same CPU as the event
+        // directly after which it is made.
         kstack_entry = kstack_entry->next;
+        // Update conditions
+        is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
+        is_correct_task = (kstack_owner->pid == kstack_entry->pid);
     }
+
     return kstack_entry;
 }
 

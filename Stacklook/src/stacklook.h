@@ -85,7 +85,6 @@ struct ksplot_font* get_bold_font_ptr();
 
 // Global functions, defined in C++
 
-bool is_kstack(const struct kshark_entry* entry);
 const struct kshark_entry* get_kstack_entry(
     const struct kshark_entry* kstack_owner);
 void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
