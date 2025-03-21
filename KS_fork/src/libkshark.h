@@ -58,7 +58,10 @@ struct kshark_entry {
 	/** The PID of the task the record was generated. */
 	int32_t		pid;
 
-	/** The offset into the trace file, used to find the record. */
+	/** The offset into the trace file, used to find the record.
+	 * If couplebreak is enabled, the offset is a pointer to the origin
+	 * entry of the couple.
+	*/
 	int64_t		offset;
 
 	/**
@@ -151,6 +154,10 @@ typedef int (*stream_find_id_func) (struct kshark_data_stream *,
 
 /** A function type to be used by the method interface of the data stream. */
 typedef int *(*stream_get_ids_func) (struct kshark_data_stream *);
+
+//NOTE: Changed here.
+/** A function type to be used by the method interface of the data stream. */
+typedef int *(*stream_get_couplebreak_ids_func) (struct kshark_data_stream *);
 
 /** A function type to be used by the method interface of the data stream. */
 typedef int (*stream_get_names_func) (struct kshark_data_stream *,
@@ -271,6 +278,10 @@ struct kshark_generic_stream_interface {
 	/** Method used to load the data in matrix form. */
 	load_matrix_func	load_matrix;
 
+	//NOTE: Changed here.
+	/** Method used to retrieve an array of Ids of all couplebreak events. */
+	stream_get_couplebreak_ids_func 	get_couplebreak_ids; 
+
 	/** Generic data handle. */
 	void			*handle;
 };
@@ -361,6 +372,20 @@ struct kshark_data_stream {
 	 * stream.
 	 */
 	void				*interface;
+
+	//NOTE: Changed here.
+	/** Flag indicating whether or not stream breaks couples
+	 *  (events regarding two processes).
+	 */
+	bool couplebreak_on;
+
+	/** The number of couplebreak events. */
+	int n_couplebreak_evts;
+
+	/** Bitmask record of couplebreak events, which were created in this stream.
+	 *  Look into the documentation for a comprehensive list of which bits correspond to which events.
+	*/
+	int couplebreak_evts_flags;
 };
 
 static inline char *kshark_set_data_format(char *dest_format,
@@ -463,6 +488,8 @@ int kshark_get_pid(const struct kshark_entry *entry);
 int kshark_get_event_id(const struct kshark_entry *entry);
 
 int *kshark_get_all_event_ids(struct kshark_data_stream *stream);
+
+int *kshark_get_couplebreak_ids(struct kshark_data_stream *stream);
 
 int kshark_find_event_id(struct kshark_data_stream *stream,
 			 const char *event_name);

@@ -61,7 +61,7 @@ struct plugin_stacklook_ctx {
     /**
      * @brief Pointer to the sched_waking_event object.
     */
-    struct tep_event* tep_wakeup;
+    struct tep_event* tep_waking;
     
     /**
      * @brief Pointer to the sched_waking_pid_field format descriptor.
@@ -85,6 +85,8 @@ struct ksplot_font* get_bold_font_ptr();
 
 // Global functions, defined in C++
 
+const struct kshark_entry* get_kstack_entry(
+    const struct kshark_entry* kstack_owner);
 void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
                             int val, int draw_action);
 void* plugin_set_gui_ptr(void* gui_ptr);

@@ -62,7 +62,7 @@ Things not in specification aren't mandatory, but would be pretty useful.
 - [x] Stacklook
   - [x] Get scheduler event for when the task was about to go to sleep and the stacktracing event
   - [x] Add clickable shapes above each sleep event
-    - [ABANDONED] _(Not in specification) Add such clickable shapes into entry viewer_
+    - \[ABANDONED\] _(Not in specification) Add such clickable shapes into entry viewer_
       - NOTE: It is highly unlikely that this is easily doable as a plugin, unless a lot of KernelShark is rewritten.
   - [x] Show a dialogue/window with detailed stack information
   - [x] Display preview of the stack in the top info bar
@@ -86,7 +86,9 @@ Below are bachelor thesis part's appended requirements:
 - [ ] Events involving two processes shall be split into initiators and targets
   - E.g. sched_waking should be split into "awaker" and "awakened" events, one
     belonging to each respective process
-  - [ ] Try to keep the logic inside the plugin (minimizing KernelShark changes)
+  - At the very least sched_switch and sched_waking should be splitted.
+  - \[ABANDONED\] Try to keep the logic inside the plugin (minimizing KernelShark changes)
+    - NOTE: Not doable, insufficeint API, KernelShark source code changes necessary.
 - [ ] NUMA topology visualization in KernelShark (either as a plugin or KernelShark modification)
   - [ ] Parse data from Istopo (XML format)
   - [ ] Visualize said data on the screen
@@ -100,19 +102,27 @@ Below are bachelor thesis part's appended requirements:
     - [ ] Colorful differentiation of different groups
   - [ ] Configurable display method via some option in KShark's menu
 - [ ] Allow `sched_events` plugin compatibility
-      _ XOR choice
-      _ [ ] Either integrate Stacklook into sched*events plugin
-      * Would violate the holy Single Responsibility principle
-      _ Direct approach
-      _ Ensured success
-      _ [ ] Or figure out how to allow compatibility while keeping plugins separate
-      _ Less direct
-      \_ Keeps SRP \* Unknown probability of success
-      General SW goal:
+  - NOTE: XOR choice
+  - \[ABANDONED\] Either integrate Stacklook into sched_events plugin
+    - Would violate the holy Single Responsibility principle
+    - Direct approach
+    - Ensured success
+    - NOTE: Statement above is false.
+  - [ ] Or figure out how to allow compatibility while keeping plugins separate
+    - Less direct
+    - Keeps SRP
+    - Unknown probability of success
+    - Ultimately chosen due to KernelShark's insufficient API for creating new entries.
+
+General SW goal:
+
 - [ ] Debug the plugin even more, stabilise performance where necessary
 - [ ] Revise README and other non-code parts of repository to reflect project extensions
 - [ ] _("Optional")_ Create proper design document \* Would be quite good to include in technical documentation
       Non-software goal:
+
+Write survey paper:
+
 - [ ] Survey paper
   - [ ] Stack tracing (in Linux)
     - Mostly basics, some more info about KernelShark's stack tracer

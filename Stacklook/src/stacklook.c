@@ -113,11 +113,12 @@ KS_DEFINE_PLUGIN_CONTEXT(struct plugin_stacklook_ctx, _sl_free_ctx);
 
 /**
  * @brief Selects supported events from unsorted trace file data
- * during plugin loading.
+ * during plugin and data loading.
+ * 
+ * @note Effective during KShark's get_records function.
  * 
  * @param stream: KernelShark's data stream
- * @param rec: Tep record structure, used only with sched_waking events
- * to determine which process is being awakened by this event.
+ * @param rec: Tep record structure holding data collected by trace-cmd
  * @param entry: KernelShark entry to be processed
  * 
  * @note Supported events are: `sched/sched_switch`,
@@ -180,10 +181,10 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     }
 
     sl_ctx->tep = kshark_get_tep(stream);
-    bool wakeup_found = define_wakeup_event(sl_ctx->tep, &sl_ctx->tep_wakeup);
+    bool wakeup_found = define_wakeup_event(sl_ctx->tep, &sl_ctx->tep_waking);
 
     if (wakeup_found) {
-        sl_ctx->sched_waking_pid_field = tep_find_any_field(sl_ctx->tep_wakeup, "pid");
+        sl_ctx->sched_waking_pid_field = tep_find_any_field(sl_ctx->tep_waking, "pid");
     }
 #endif
 

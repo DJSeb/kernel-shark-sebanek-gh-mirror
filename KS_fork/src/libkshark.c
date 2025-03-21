@@ -171,6 +171,9 @@ static struct kshark_data_stream *kshark_stream_alloc()
 	}
 
 	stream->filter_is_applied = false;
+	//NOTE: Changed here.
+	stream->couplebreak_on = false;
+	
 	kshark_set_data_format(stream->data_format, KS_INVALID_DATA);
 	stream->name = strdup(KS_UNNAMED);
 
@@ -677,6 +680,21 @@ int *kshark_get_all_event_ids(struct kshark_data_stream *stream)
 	if (interface->type == KS_GENERIC_DATA_INTERFACE &&
 	    interface->get_all_event_ids)
 		return interface->get_all_event_ids(stream);
+
+	return NULL;
+}
+
+//NOTE: Changed here.
+int *kshark_get_couplebreak_ids(struct kshark_data_stream *stream) {
+	struct kshark_generic_stream_interface *interface;
+
+	if (!stream)
+		return NULL;
+
+	interface = stream->interface;
+	if (interface->type == KS_GENERIC_DATA_INTERFACE &&
+	    interface->get_couplebreak_ids)
+		return interface->get_couplebreak_ids(stream);
 
 	return NULL;
 }

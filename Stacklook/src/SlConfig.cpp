@@ -282,8 +282,8 @@ void SlConfigWindow::update_cfg() {
 #ifndef _NO_NAPS
     SlConfigWindow::cfg._draw_naps = _nap_rects_btn.isChecked();
 #endif
-    // Dynamically added member's need special handling 
-    static const int SUPPORTED_EVENTS_COUNT =
+    // Dynamically added members need special handling 
+    const int SUPPORTED_EVENTS_COUNT =
         static_cast<int>(SlConfigWindow::cfg.get_events_meta().size());
 
     for (int i = 0; i < SUPPORTED_EVENTS_COUNT; ++i) {
@@ -322,7 +322,7 @@ void SlConfigWindow::update_cfg() {
     const char* detailed_message = events_meta_change ?
         "Configuration was successfully altered!" :
         "Configuration alteration wasn't fully successful.\n"
-        "Changes to specific events weren't altered.\n"
+        "Changes to specific events weren't applied.\n"
         "Other configuration changes were successfully changed.";
         
     auto info_dialog = new QMessageBox(QMessageBox::Information,
@@ -493,7 +493,7 @@ void SlConfigWindow::load_cfg_values() {
                            &_btn_outline);
     
     // Setting of dynamically added members - events meta
-    static const int SUPPORTED_EVENTS_COUNT =
+    const int SUPPORTED_EVENTS_COUNT =
         static_cast<int>(SlConfigWindow::cfg.get_events_meta().size());
     const events_meta_t& cfg_evts_meta = cfg.get_events_meta();
     // For loop to get all the event-specific objects

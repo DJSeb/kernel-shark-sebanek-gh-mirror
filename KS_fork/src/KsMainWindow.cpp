@@ -63,6 +63,7 @@ KsMainWindow::KsMainWindow(QWidget *parent)
   _addPluginsAction("Add plugins", this),
   _captureAction("Record", this),
   _addOffcetAction("Add Time Offset", this),
+  _couplebreakOn("Couplebreak Settings", this), //NOTE: Changed here.
   _colorAction(this),
   _colSlider(this),
   _colorPhaseSlider(Qt::Horizontal, this),
@@ -354,6 +355,11 @@ void KsMainWindow::_createActions()
 	connect(&_addOffcetAction,	&QAction::triggered,
 		this,			&KsMainWindow::_offset);
 
+	//NOTE: Changed here.
+	_couplebreakOn.setStatusTip("Control KernelShark's couplebreaking");
+	connect(&_couplebreakOn,	&QAction::triggered,
+		this,			&KsMainWindow::_toggleCouplebreak);
+
 	_colorPhaseSlider.setMinimum(20);
 	_colorPhaseSlider.setMaximum(180);
 	_colorPhaseSlider.setValue(KsPlot::Color::rainbowFrequency() * 100);
@@ -505,6 +511,8 @@ void KsMainWindow::_createMenus()
 	tools->addAction(&_managePluginsAction);
 	tools->addAction(&_addPluginsAction);
 	tools->addAction(&_addOffcetAction);
+	//NOTE: Chamged here.
+	tools->addAction(&_couplebreakOn);
 
 	/*
 	 * Enable the "Add Time Offset" menu only in the case of multiple
@@ -820,7 +828,7 @@ void KsMainWindow::_applyFilter(int sd, QVector<int> all, QVector<int> show,
 		posFilter(sd, show);
 	} else {
 		/*
-		 * It is more efficiant to apply negative (do not show) filter.
+		 * It is more efficient to apply negative (do not show) filter.
 		 */
 		QVector<int> diff;
 
@@ -877,6 +885,10 @@ void KsMainWindow::_showEvents()
 
 	auto lamFilter = [=] (int sd, QVector<int> show) {
 		QVector<int> all = KsUtils::getEventIdList(sd);
+		//NOTE: Changed here.
+		if (stream->couplebreak_on) {
+			all.append(KsUtils::getCoupleBreakerIdList(sd));
+		}
 		_applyFilter(sd, all, show,
 			     LAMBDA_FILTER(_data.applyPosEventFilter),
 			     LAMBDA_FILTER(_data.applyNegEventFilter));
@@ -1656,4 +1668,54 @@ void KsMainWindow::_rootWarning()
 	connect(&cb, &QCheckBox::stateChanged, lamCbChec);
 	warn.setCheckBox(&cb);
 	warn.exec();
+}
+
+// NOTE: Changed here.
+void KsMainWindow::_toggleCouplebreak() {
+	QVector<int> stream_ids;
+	KsCouplebreakDialog *dialog;
+	kshark_context *kshark_ctx(nullptr);
+
+	if (!kshark_instance(&kshark_ctx)) {
+		return;
+	}
+		
+	if (kshark_ctx->n_streams == 0) {
+		QString err("Data has to be loaded first.");
+		QMessageBox msgBox;
+		msgBox.critical(nullptr, "Error", err);
+
+		return;
+	}
+		
+	dialog = new KsCouplebreakDialog{kshark_ctx, this};
+	connect(dialog,		&KsCouplebreakDialog::apply,
+		this,		&KsMainWindow::_updateCouplebreaks);
+
+	dialog->show();
+
+	_graph.update(&_data);
+}
+
+void KsMainWindow::_updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_couplebreaks) {
+	kshark_context *kshark_ctx(nullptr);
+
+	if (!kshark_instance(&kshark_ctx)) {
+		return;
+	}
+
+	for (auto const &sc: stream_couplebreaks) {
+		kshark_data_stream *stream = kshark_get_data_stream(kshark_ctx, sc.first);
+		if (stream) {
+			stream->couplebreak_on = sc.second;
+		}
+
+		QVector<int> stream_plugins = _plugins.getActivePlugins(sc.first);
+		QVector<int> stream_loaded_plugins = _plugins.getPluginsByStatus(sc.first, KSHARK_PLUGIN_LOADED);
+		for (auto const &loaded: stream_loaded_plugins) {
+			stream_plugins[loaded] = 1;
+		}
+		
+		_pluginUpdate(sc.first, stream_plugins);
+	}
 }

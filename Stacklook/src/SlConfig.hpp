@@ -82,7 +82,7 @@ public: // Class data members
 private: // Data members
     /// @brief Limit value of how many entries may be visible in a
     /// histogram for the plugin to take effect.
-    int32_t _histo_entries_limit{200};
+    int32_t _histo_entries_limit{500};
 
     ///
     /// @brief Default color of Stacklook buttons, white.
@@ -152,8 +152,8 @@ public: // Functions
  */
 class SlConfigWindow : public QWidget {
 private: // Class data members
-    /// @brief Reference to the configuration object. Such access along
-    /// this class being a friend of the config object's one allows
+    /// @brief Reference to the configuration object. Such access, along
+    /// this class being a friend of the config object's one, allows
     /// modification of inner fields.
     static SlConfig& cfg;
 private: // Qt data members

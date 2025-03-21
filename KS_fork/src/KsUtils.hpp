@@ -89,6 +89,9 @@ QVector<int> getPidList(int sd);
 
 QVector<int> getEventIdList(int sd);
 
+//NOTE: Changed here.
+QVector<int> getCoupleBreakerIdList(int sd);
+
 int getEventId(int sd, const QString &eventName);
 
 QString getEventName(int sd, int eventId);

@@ -102,11 +102,11 @@ static bool _check_function_general(const kshark_entry* entry,
                             || (ctx->swake_event_id == entry->event_id);
     
     bool is_config_allowed = SlConfig::get_instance().is_event_allowed(entry);
-
-    const kshark_entry* next_entry = entry->next;
+    
+    const kshark_entry* kstack_entry = get_kstack_entry(entry);
     // We hate segfaults in this house - so they are banned!
-    if (!next_entry) return false;
-    int entry_evt_id = kshark_get_event_id(next_entry);
+    if (!kstack_entry) return false;
+    int entry_evt_id = kshark_get_event_id(kstack_entry);
     bool has_next_kernelstack = (ctx->kstack_event_id == entry_evt_id);
 
     bool is_visible_event = entry->visible
@@ -403,15 +403,39 @@ static void config_show([[maybe_unused]] KsMainWindow*) {
     cfg_window->show();
 }
 
-// Functions used in C code
+// Functions defined in the C header
 
-/**
- * @brief Deinitializes the task colors colortable, making sure it'll
- * be reloaded on new trace file load.
-*/
-void deinit_task_colors() {
-    task_colors.clear();
-    loaded_colors = false;
+//SL_TODO: documentation
+const struct kshark_entry* get_kstack_entry(const struct kshark_entry* kstack_owner) {
+    const kshark_entry* kstack_entry = kstack_owner;
+    
+    if (kstack_entry == nullptr)
+        return nullptr;
+
+    plugin_stacklook_ctx* ctx = __get_context(kstack_owner->stream_id);
+    
+    if (ctx == nullptr)
+        return nullptr;
+
+    bool is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
+    bool is_correct_task = (kstack_owner->pid == kstack_entry->pid);
+    
+    // This loop will usually stop either after one or iterations.
+    // Unless some plugin aggressively reorders and changes innards of
+    // entries, this will be the case.
+    while (!(is_kstack && is_correct_task)) {
+        // Move onto next entry on the same CPU
+        // NOTE: kernelstack trace will be on the same CPU as the event
+        // directly after which it is made.
+        kstack_entry = kstack_entry->next;
+        if (kstack_entry == nullptr)
+            return nullptr;
+        // Update conditions
+        is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
+        is_correct_task = (kstack_owner->pid == kstack_entry->pid);
+    }
+
+    return kstack_entry;
 }
 
 /**
@@ -507,4 +531,13 @@ __hidden void* plugin_set_gui_ptr(void* gui_ptr) {
     main_w->addPluginMenu(menu, config_show);
 
     return cfg_window;
+}
+
+/**
+ * @brief Deinitializes the task colors colortable, making sure it'll
+ * be reloaded on new trace file load.
+*/
+void deinit_task_colors() {
+    task_colors.clear();
+    loaded_colors = false;
 }

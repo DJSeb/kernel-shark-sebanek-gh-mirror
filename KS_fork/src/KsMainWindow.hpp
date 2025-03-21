@@ -185,6 +185,9 @@ private:
 
 	QAction		_addOffcetAction;
 
+	/*NOTE: Changed here. */
+	QAction		_couplebreakOn;
+
 	QWidgetAction	_colorAction;
 
 	QWidget		_colSlider;
@@ -308,6 +311,11 @@ private:
 	void _filterSyncCBoxUpdate(kshark_context *kshark_ctx);
 
 	QString _getCacheDir();
+
+	/*NOTE: Changed here.*/
+	void _toggleCouplebreak();
+	using StreamCouplebreakSetting = std::pair<int, bool>;
+	void _updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_couplebreaks);
 
 private slots:
 	void _captureFinished(int, QProcess::ExitStatus);

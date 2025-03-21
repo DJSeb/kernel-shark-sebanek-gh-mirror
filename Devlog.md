@@ -48,6 +48,10 @@ documentation.
       supported by KShark or not at all
     - PRO - less rewrites of existing code
     - PRO - separated only into plugin's code, i.e. no SRP violation
+  - I: Implement the splitting of events and work from there - sched_events and stacklook
+    then shouldn't interfere with each other.
+    - PRO - this will have to happen anyway, might as well leverage the feature
+    - CON - will require at least some rewrites to make both plugins behave nicely
 
 - How to enable NUMA visualization support?
 
@@ -297,3 +301,197 @@ So, tomorrow should be the day these theories start being put to practice.
 Either this will be a change to KernelShark or a plugin upon which others can
 depend (in any case, sched_events will have to be altered, but in a hopefully
 minor way - other default plugins might not need to face such problems).
+
+## 2025-03-10
+
+Well, plugin way seems to not be it, as there is no way to inject events into
+an opened stream from a plugin's standpoint.
+
+## 2025-03-11 - 2025-03-12
+
+Not a lot of actual work, but work was spent on analyzing and trying to copy
+what `missed_events` custom entries do. Will test and build later though.
+
+## 2025-03-13
+
+Finally! Custom events are being successfully created after a sched_switch happens!
+They do break Stacklook, since it cannot find the stacktrace event for them yet (easy fix though).
+Similarly, sched_events change the split event's origin pid - but once they are modified too,
+the problem should be fixed.
+
+With this, we'll hit two birds with one stone - sched_events and stacklook compatibility
+and also the splitting of events.
+
+## 2025-03-14
+
+Sadly, not enough work has been done, but there is quite a bit of unfinished
+Qt-related GUI additions to dynamically control whether couplebreaking is allowed
+or not.
+
+## 2025-03-15
+
+More work on creating a Qt widget settings for couplebreaking.
+Mostly works, but it still has some bugs.
+
+Newly discovered would be:
+
+- Fault in stacklook: segmentation fault upon data reloads
+- Following error displays upon attempting to summon the settings menu
+  ```
+    QLayout: Attempting to add QLayout "" to KsWidgetsLib::KsCouplebreakerDialog "", which already has a layout
+  ```
+- Changes in data are applied only when the settings menu is opened again.
+  It should upate immediately after apply, but it seems something is missing.
+  Best solution would be to copy everything that \_pluginSelect does, but it seems
+  that was unsuccessful.
+
+...
+
+And apparently, last bug was fixed by simulating \_pluginSelect (mainly determining
+loaded plugins). Same solution also fixed the first bug, or at least it appears to.
+
+QLayout bug was also quickly fixed, turns out including a parent for a layout
+makes the layout the parent's layout, so it was just about deleting a list constructor line.
+
+Pretty successful today :)
+
+...
+
+Even managed to make stacklook (except nap rectangles) compatible with
+the couplebreaker feature.
+
+_Author's note: "I might get sick from such a long name, but hey, it_
+_perfectly encapsulates what the added feature does."_
+
+Next goals:
+
+- add sched_waking to couplebreaker
+  - subgoal: make couplebreaking generic for multiple possible
+    "couple"-events (user-supplied event names in settings,
+    generic splitting in KShark code)
+- make nap rectangles compatible with couplebreaker
+- split nap rectangles from stacklook into their own plugin
+- make sched_events compatible with couplebreaker
+- change KernelShark's CMake (e.g. add suffix '-modified' to version)
+
+After finishing this, move onto the NUMA-aware feature.
+
+## 2025-03-16
+
+Today, sched_waking events have been made breakable,
+couplebreaking in code was made a bit more generic when adding events.
+Not generic in dealing with these found events, but I don't think that's really
+an issue.
+
+Found a problem though - applying filters makes these events disappear and
+they are also not in the filter list, not very good.
+
+This also, very frighteningly, implies that there is more stuff to do
+if couplebreak events are to be found, filtered or otherwise worked on.
+
+Scary indeed.
+
+Next goals:
+
+- Modify kshark functions so that 'couplebreak/\*' events can be
+  found like any other event (at least by name) & filtered
+- Subgoal: more dynamic couplebreak events choice
+- nap rectangles indepenence
+- nap rectangles work with couplebreaking
+- sched_switch compatibility with cbreak
+- change KShark's CMake
+
+## 2025-03-18
+
+Nothing really happened (work-induced involuntary vacation for a few days),
+only an addition to KShark's CMake to add version descriptor suffix, marking
+this version as very much different.
+
+... Ok, after a little bit of frustration, there was an update to
+the interface functions of libkshark-tepdata.c, so that some of the
+searches could be done. It's hard-coded, not perfect, but it should get
+the job done with a reasonable amount of effort.
+
+They will all have a ripple effect, surely, there is also the matter
+of ease of use (currently the user MUST expect that there could be
+couplebreak enabled and MUST handle it themselves, not that great of a UX).
+
+Still, let's update next goals:
+
+- Optimize (usage-wise) couplebreak search modifications
+- nap rectangles independence
+- nap rectangles interop with couplebreak
+- sched_switch interop with couplebreak
+- subgoal: more dynamic couplebreak events choice
+  - would necessitate a more dynamic approach to the search modifications
+    too
+
+## 2025-03-19
+
+PHEW! Filtering events now interops with couplebreaker! A little bit of a
+cleanup happened to the interface functions in lib...-tepadata, seeing as
+returning more than is expected is just a bad look, especially for collections.
+However, though hardcoded now, with the Open-Close Principle's (because it's good
+to flex what we've studied) mindset, there was more of an interface extension,
+slight modifications that won't hurt during normal operations and C++-side changes
+to how the UI handles things - all to say that couplebreaker events can now
+be filtered in and out of the graph (and list).
+
+Next goals:
+
+- De-hardcode couplebreak filter & stream interface modifications, if deemed too
+  restrictive
+- nap rectangles independence
+- nap rectangles interop with couplebreak
+- sched_switch interop with couplebreak
+- subgoal: more dynamic couplebreak events choice
+  - would necessitate the hardcoded modifications to be rewritten
+
+Overall, productive enough for the 2 hours spent on this. It is time to move
+onto other goals now though, as de-harcodisation can wait.
+
+...
+
+Add an hour to that, which parametrised some hardcoded stuff that happened today,
+namely the state of couplebreaker and how many and which events have been made.
+
+...
+
+Add another hour, in which event IDs and name strings were once again de-hardcoded.
+It is a little sad that there is more string search now (as we need dynamic searching
+of couplebreak-able events), but it shouldn't be that bad for a GUI application.
+
+## 2025-03-20
+
+Naming has been unified. Also, a helpful article on what sched events are has been
+[found](https://perfetto.dev/docs/data-sources/cpu-scheduling).
+
+There's a bit of a dilemma with no right or wrong answer happening in couplebreaker:
+Either I can keep the target's cpu as the same one from which the origin event
+was fired, or I could maybe somehow get the CPU.
+
+...
+
+It was solved by iterating through every sorted entry after getting
+them from the file and searching for a nearest sched_switch of the same
+task, which determined on which CPU the task would run right after.
+
+Easy to disable in code though.
+
+Next goals:
+
+- nap rectangles independence
+- nap rectangles interop with couplebreak
+- sched_switch interop with couplebreak
+- subgoal: more dynamic couplebreak events choice
+  - would necessitate the hardcoded modifications to be rewritten
+
+...
+
+Actually, since the correction would have to happen at two separate places,
+it was moved into the get_records function as a last iteration through
+a created, then destroyed sorted entries structure.
+
+It is a bit of a messy way, but it is the most straightforward to
+understand in code and it happens only once per load, so it's not terribly
+inefficent.

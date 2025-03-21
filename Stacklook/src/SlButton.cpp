@@ -106,63 +106,6 @@ static const std::string _get_specific_info(const kshark_entry* entry) {
 }
 
 /**
- * @brief Predicate function to check that the KernelShark entry is indeed kernel's
- * stack trace entry.
- * 
- * @param entry: entry whose event ID is checked.
- * 
- * @returns True if the entry is a kernel stack entry, false otherwise.
-*/
-static bool _is_kstack(kshark_entry* entry) {
-    if (entry == nullptr) {
-        return false;
-    }
-    
-    plugin_stacklook_ctx* ctx = __get_context(entry->stream_id);
-
-    /** NOTE: This could be a bit more rigorous: check the event ID, check the task and maybe even the
-     * top of the stack for confirmation it is indeed a stacktrace of the kernel for the switch or wakeup
-     * event.
-     * 
-     * However, since the stacktrace is done immediately after every event when using trace-cmd's
-     * '-T' option, events are always sorted so that stacktraces appear right after their events,
-     * so this checking would be redundant.
-     * 
-     * Of course, if data are manipulated so that they aren't sorted by time, this approach is insufficent.
-    */
-
-    return entry->event_id == ctx->kstack_event_id;
-}
-
-/**
- * @brief Simple function that returns the C-string of the info field of a KernelShark entry
- * next to the one in the argument or a nullptr on failing to fulfill the predicate in arguments.
- * @note Requires the entry in the argument to have its next field
- * initialized, otherwise it'd access nullptr.
- * 
- * @param entry: entry whose next neighbour's info we wish to get.
- * @param predicate: function which checks a KernelShark entry and returns true or false.
- * 
- * @returns Textual form of next entry's Info field as a C-string.
-*/
-static const char* _get_info_of_next_event(kshark_entry* entry,
-                                           std::function<bool(kshark_entry*)> predicate) {
-    const char* retval = nullptr;
-
-    if (entry == nullptr) {
-        return retval;
-    }
-
-    kshark_entry* next_entry = entry->next;
-
-    if (predicate(next_entry)) {
-        retval = kshark_get_info(next_entry);
-    }
-
-    return retval;
-}
-
-/**
  * @brief Function which calculates (absolute value of) the area of a trigon using
  * the [shoelace formula](https://en.wikipedia.org/wiki/Shoelace_formula).
  * Order of points is irrelevant, as the formula works generally.
@@ -359,7 +302,11 @@ double SlTriangleButton::distance(int x, int y) const {
 void SlTriangleButton::_doubleClick() const {
     constexpr const char error_msg[] = "ERROR: No info field found!";                          
     const char* window_labeltext = kshark_get_task(_event_entry);
-    const char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _is_kstack);
+    
+    const kshark_entry* kstack_entry = get_kstack_entry(_event_entry);
+    
+    const char* kstack_string_ptr = (kstack_entry != nullptr) ?
+        kshark_get_info(kstack_entry) : nullptr;
     
     const char* window_text = (kstack_string_ptr != nullptr) ? 
         kstack_string_ptr : error_msg;
@@ -395,7 +342,10 @@ void SlTriangleButton::_draw(const KsPlot::Color&, float) const {
  * FOR MOUSE MOVE OVER PLOTOBJECT REACTIONS
 */
 void SlTriangleButton::_mouseHover() const {
-    const char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _is_kstack);
+    const kshark_entry* kstack_entry = get_kstack_entry(_event_entry);
+    
+    const char* kstack_string_ptr = (kstack_entry != nullptr) ?
+        kshark_get_info(kstack_entry) : nullptr;
     
     if (kstack_string_ptr != nullptr) {
         auto event_name = kshark_get_event_name(_event_entry);
