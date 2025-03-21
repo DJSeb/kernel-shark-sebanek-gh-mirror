@@ -408,19 +408,28 @@ static void config_show([[maybe_unused]] KsMainWindow*) {
 //SL_TODO: documentation
 const struct kshark_entry* get_kstack_entry(const struct kshark_entry* kstack_owner) {
     const kshark_entry* kstack_entry = kstack_owner;
-    plugin_stacklook_ctx* ctx = __get_context(kstack_owner->stream_id);
     
     if (kstack_entry == nullptr)
+        return nullptr;
+
+    plugin_stacklook_ctx* ctx = __get_context(kstack_owner->stream_id);
+    
+    if (ctx == nullptr)
         return nullptr;
 
     bool is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
     bool is_correct_task = (kstack_owner->pid == kstack_entry->pid);
     
+    // This loop will usually stop either after one or iterations.
+    // Unless some plugin aggressively reorders and changes innards of
+    // entries, this will be the case.
     while (!(is_kstack && is_correct_task)) {
         // Move onto next entry on the same CPU
         // NOTE: kernelstack trace will be on the same CPU as the event
         // directly after which it is made.
         kstack_entry = kstack_entry->next;
+        if (kstack_entry == nullptr)
+            return nullptr;
         // Update conditions
         is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
         is_correct_task = (kstack_owner->pid == kstack_entry->pid);
