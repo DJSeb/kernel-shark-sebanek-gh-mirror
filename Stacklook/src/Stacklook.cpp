@@ -103,7 +103,7 @@ static bool _check_function_general(const kshark_entry* entry,
     
     bool is_config_allowed = SlConfig::get_instance().is_event_allowed(entry);
     
-    const kshark_entry* kstack_entry = _get_kstack_entry(entry);
+    const kshark_entry* kstack_entry = get_kstack_entry(entry);
     // We hate segfaults in this house - so they are banned!
     if (!kstack_entry) return false;
     int entry_evt_id = kshark_get_event_id(kstack_entry);
@@ -435,10 +435,10 @@ bool is_kstack(const struct kshark_entry* entry) {
 }
 
 //SL_TODO: documentation
-const struct kshark_entry* get_kstack_entry(
-    const struct kshark_entry* kstack_owner) {
+const struct kshark_entry* get_kstack_entry(const struct kshark_entry* kstack_owner) {
     const kshark_entry* kstack_entry = kstack_owner;
-    while (!(is_kstack(kstack_entry) &&
+    while (!(kstack_entry != nullptr &&
+        is_kstack(kstack_entry) &&
         kstack_owner->pid == kstack_entry->pid))
     {
         kstack_entry = kstack_entry->next;

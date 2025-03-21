@@ -305,7 +305,8 @@ void SlTriangleButton::_doubleClick() const {
     
     const kshark_entry* kstack_entry = get_kstack_entry(_event_entry);
     
-    const char* kstack_string_ptr = kshark_get_info(kstack_entry);
+    const char* kstack_string_ptr = (kstack_entry != nullptr) ?
+        kshark_get_info(kstack_entry) : nullptr;
     
     const char* window_text = (kstack_string_ptr != nullptr) ? 
         kstack_string_ptr : error_msg;
@@ -343,7 +344,8 @@ void SlTriangleButton::_draw(const KsPlot::Color&, float) const {
 void SlTriangleButton::_mouseHover() const {
     const kshark_entry* kstack_entry = get_kstack_entry(_event_entry);
     
-    const char* kstack_string_ptr = kshark_get_info(kstack_entry);
+    const char* kstack_string_ptr = (kstack_entry != nullptr) ?
+        kshark_get_info(kstack_entry) : nullptr;
     
     if (kstack_string_ptr != nullptr) {
         auto event_name = kshark_get_event_name(_event_entry);
