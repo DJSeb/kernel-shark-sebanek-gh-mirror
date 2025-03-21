@@ -417,6 +417,11 @@ const struct kshark_entry* get_kstack_entry(const struct kshark_entry* kstack_ow
     if (ctx == nullptr)
         return nullptr;
 
+    // Ftrace/kernel_stack event ID was not found = event was not
+    // recorded, therefore search is pointless.
+    if (ctx->kstack_event_id < 0)
+        return nullptr;
+
     bool is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
     bool is_correct_task = (kstack_owner->pid == kstack_entry->pid);
     

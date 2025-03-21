@@ -495,3 +495,22 @@ a created, then destroyed sorted entries structure.
 It is a bit of a messy way, but it is the most straightforward to
 understand in code and it happens only once per load, so it's not terribly
 inefficent.
+
+## 2025-03-21
+
+A few improvements to existing functionalities were finalised in couplebreak's
+branch and the branch was merged into development, as other improvements will only
+be bug fixes, maybe slight readability improvements.
+
+Work has started on nap rectangles' own plugin, which should hopefully be just a
+lot of copying, renaming and CMake writing. At least we will be more SRP-friendly.
+
+There have also been slight corrections done in Stacklook, as some functions were
+needlessly complicated, others didn't need to exist at all. Nothing major though, as
+that wasn't the branch's goal - even so, these changes should have been done on
+development branch.
+
+...
+
+A quick mistake was fixed - if there are no ftrace/kernel_stack events, there is no
+point in searching for them, so any such searches will return a nullptr.
