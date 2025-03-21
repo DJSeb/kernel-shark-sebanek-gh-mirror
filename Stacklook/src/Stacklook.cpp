@@ -102,13 +102,8 @@ static bool _check_function_general(const kshark_entry* entry,
                             || (ctx->swake_event_id == entry->event_id);
     
     bool is_config_allowed = SlConfig::get_instance().is_event_allowed(entry);
-
-    // Necessary Couplebreak integration
-    const bool stream_breaks_couples = kshark_get_stream_from_entry(entry)->couplebreak_on;
-    const kshark_entry* entry_before_stack = (stream_breaks_couples) ?
-        entry->next : entry;
     
-    const kshark_entry* kstack_entry = entry_before_stack->next;
+    const kshark_entry* kstack_entry = _get_kstack_entry(entry);
     // We hate segfaults in this house - so they are banned!
     if (!kstack_entry) return false;
     int entry_evt_id = kshark_get_event_id(kstack_entry);
@@ -408,15 +403,47 @@ static void config_show([[maybe_unused]] KsMainWindow*) {
     cfg_window->show();
 }
 
-// Functions used in C code
+// Functions defined in the C header
 
 /**
- * @brief Deinitializes the task colors colortable, making sure it'll
- * be reloaded on new trace file load.
+ * @brief Predicate function to check that the KernelShark entry is indeed kernel's
+ * stack trace entry.
+ * 
+ * @param entry: entry whose event ID is checked.
+ * 
+ * @returns True if the entry is a kernel stack entry, false otherwise.
 */
-void deinit_task_colors() {
-    task_colors.clear();
-    loaded_colors = false;
+bool is_kstack(const struct kshark_entry* entry) {
+    if (entry == nullptr) {
+        return false;
+    }
+    
+    plugin_stacklook_ctx* ctx = __get_context(entry->stream_id);
+
+    /** NOTE: This could be a bit more rigorous: check the event ID, check the task and maybe even the
+     * top of the stack for confirmation it is indeed a stacktrace of the kernel for the switch or wakeup
+     * event.
+     * 
+     * However, since the stacktrace is done immediately after every event when using trace-cmd's
+     * '-T' option, events are always sorted so that stacktraces appear right after their events,
+     * so this checking would be redundant.
+     * 
+     * Of course, if data are manipulated so that they aren't sorted by time, this approach is insufficent.
+    */
+
+    return entry->event_id == ctx->kstack_event_id;
+}
+
+//SL_TODO: documentation
+const struct kshark_entry* get_kstack_entry(
+    const struct kshark_entry* kstack_owner) {
+    const kshark_entry* kstack_entry = kstack_owner;
+    while (!(is_kstack(kstack_entry) &&
+        kstack_owner->pid == kstack_entry->pid))
+    {
+        kstack_entry = kstack_entry->next;
+    }
+    return kstack_entry;
 }
 
 /**
@@ -512,4 +539,13 @@ __hidden void* plugin_set_gui_ptr(void* gui_ptr) {
     main_w->addPluginMenu(menu, config_show);
 
     return cfg_window;
+}
+
+/**
+ * @brief Deinitializes the task colors colortable, making sure it'll
+ * be reloaded on new trace file load.
+*/
+void deinit_task_colors() {
+    task_colors.clear();
+    loaded_colors = false;
 }

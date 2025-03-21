@@ -113,11 +113,12 @@ KS_DEFINE_PLUGIN_CONTEXT(struct plugin_stacklook_ctx, _sl_free_ctx);
 
 /**
  * @brief Selects supported events from unsorted trace file data
- * during plugin loading.
+ * during plugin and data loading.
+ * 
+ * @note Effective during KShark's get_records function.
  * 
  * @param stream: KernelShark's data stream
- * @param rec: Tep record structure, used only with sched_waking events
- * to determine which process is being awakened by this event.
+ * @param rec: Tep record structure holding data collected by trace-cmd
  * @param entry: KernelShark entry to be processed
  * 
  * @note Supported events are: `sched/sched_switch`,
