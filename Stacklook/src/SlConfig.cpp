@@ -28,7 +28,7 @@
  * 
  * @returns Const reference to the configuration object.
  */
-const SlConfig& SlConfig::get_instance() {
+SlConfig& SlConfig::get_instance() {
     static SlConfig instance;
     return instance;
 }

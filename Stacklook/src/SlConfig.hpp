@@ -121,7 +121,7 @@ private: // Data members
          {"sched/sched_waking", false}}};
 #endif
 public: // Functions
-    static const SlConfig& get_instance();
+    static SlConfig& get_instance();
     int32_t get_histo_limit() const;
 #ifndef _UNMODIFIED_KSHARK
     uint16_t get_stack_offset(event_name_t evt_name) const;
