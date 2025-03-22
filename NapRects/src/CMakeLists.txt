@@ -66,46 +66,36 @@ set(KS_SLIB_GUI "${_KS_SHARED_LIBS_DIR}/${KS_LIB_PREFIX}kshark-gui${KS_LIB_SUFFI
 ### KernelShark conventions
 set(KS_PLUGIN_PREFIX "plugin-")
 
-
-## Add definitions if using modifed KernelShark (preview support)
-if (_UNMODIFIED_KSHARK)
-  add_definitions(-D_UNMODIFIED_KSHARK)
-endif()
-
 # Plugin building
 ## Needed source files
 set(SOURCES
-    stacklook.h
-    SlButton.hpp
-    SlDetailedView.hpp
-    SlConfig.hpp
-    SlPrevState.hpp
-    stacklook.c
-    SlButton.cpp
-    SlDetailedView.cpp
-    Stacklook.cpp
-    SlConfig.cpp
-    SlPrevState.cpp
+    naps.h
+    NapConfig.hpp
+    NapRectangle.hpp
+    naps.c
+    Naps.cpp
+    NapConfig.cpp
+    NapRectangle.cpp
 )
 
 ## Creating the shared library
-add_library(stacklook SHARED ${SOURCES})
-set_target_properties(stacklook PROPERTIES
+add_library(naps SHARED ${SOURCES})
+set_target_properties(naps PROPERTIES
                       PREFIX ${KS_PLUGIN_PREFIX}
-                      SUFFIX ".so.${SL_VERSION}")
+                      SUFFIX ".so.${NAPS_VERSION}")
 
 ## Include KernelShark headers
-target_include_directories(stacklook PRIVATE ${_KS_INCLUDE_DIR})
+target_include_directories(naps PRIVATE ${_KS_INCLUDE_DIR})
 ## Below are included as system header files in KShark, hence SYSTEM here
-target_include_directories(stacklook SYSTEM PRIVATE ${QT6_ALL_INCLUDES})
+target_include_directories(naps SYSTEM PRIVATE ${QT6_ALL_INCLUDES})
 
 ## Link KernelShark's shared libraries
-target_link_libraries(stacklook PRIVATE
+target_link_libraries(naps PRIVATE
     ${KS_SLIB_CORE}  ${KS_SLIB_PLOT}  ${KS_SLIB_GUI}
 )
 
 
-set(SL_SYMLINK_NAME "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}stacklook.so")
-set(SL_SYMLINK_TARGET "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}stacklook.so.${SL_VERSION}")
-add_custom_target(stacklook_symlink ALL
-                  COMMAND ${CMAKE_COMMAND} -E create_symlink ${SL_SYMLINK_TARGET} ${SL_SYMLINK_NAME})
+set(NAPS_SYMLINK_NAME "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}naps.so")
+set(NAPS_SYMLINK_TARGET "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}naps.so.${NAPS_VERSION}")
+add_custom_target(naps_symlink ALL
+                  COMMAND ${CMAKE_COMMAND} -E create_symlink ${NAPS_SYMLINK_TARGET} ${NAPS_SYMLINK_NAME})

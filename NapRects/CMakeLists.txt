@@ -1,9 +1,9 @@
 # CMake config
 cmake_minimum_required(VERSION 3.1.2 FATAL_ERROR)
-project(stacklook)
+project(naps)
 
 # Plugin meta
-set(SL_VERSION "1.5.0")
+set(NAPS_VERSION "1.0.0")
 
 # KernelShark meta
 set(KS_VERSION "2.4.0-couplebreak")

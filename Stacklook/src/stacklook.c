@@ -141,11 +141,7 @@ static void _select_events(struct kshark_data_stream* stream,
         */
         kshark_data_container_append(sl_ctx_collected_events, entry, (int64_t)-1);
     } else if (entry->event_id == sched_wake_id) {
-#ifndef _NO_NAPS
-        waking_evt_tep_processing(sl_ctx, stream, rec, entry);
-#else
         kshark_data_container_append(sl_ctx_collected_events, entry, (int64_t)-1);
-#endif
     }
 }
 
@@ -171,22 +167,6 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
 		__close(stream->stream_id);
 		return 0;
 	}
-
-#ifndef _NO_NAPS
-    // This check isn't useful without naps.
-    // But it is necessary with them, otherwise the tep processing would fail.
-    if (!kshark_is_tep(stream)) {
-        __close(stream->stream_id);
-        return 0;
-    }
-
-    sl_ctx->tep = kshark_get_tep(stream);
-    bool wakeup_found = define_wakeup_event(sl_ctx->tep, &sl_ctx->tep_waking);
-
-    if (wakeup_found) {
-        sl_ctx->sched_waking_pid_field = tep_find_any_field(sl_ctx->tep_waking, "pid");
-    }
-#endif
 
     sl_ctx->collected_events = kshark_init_data_container();
 
@@ -228,8 +208,6 @@ int KSHARK_PLOT_PLUGIN_DEINITIALIZER(struct kshark_data_stream* stream) {
     }
 
     __close(stream->stream_id);
-
-    deinit_task_colors();
 
     return retval;
 }

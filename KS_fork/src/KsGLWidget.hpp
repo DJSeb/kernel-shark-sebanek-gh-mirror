@@ -179,6 +179,9 @@ public:
 
 	bool getPlotInfo(const QPoint &point, int *sd, int *cpu, int *pid);
 
+	// NOTE: Changed here.
+	const KsPlot::ColorTable& getPidColors() const { return _pidColors; }
+
 	/** CPUs and Tasks graphs (per data stream) to be plotted. */
 	QMap<int, KsPerStreamPlots>	_streamPlots;
 

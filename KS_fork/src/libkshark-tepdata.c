@@ -284,7 +284,6 @@ static void free_rec_list(struct rec_list **rec_list, int n_cpus,
 }
 
 //NOTE: Changed here.
-#define COUPLEBREAKER_EVENT_ID_SHIFT -100
 
 static int couplebreak_origin_id_to_flag(struct kshark_data_stream *stream, int event_id)
 {
