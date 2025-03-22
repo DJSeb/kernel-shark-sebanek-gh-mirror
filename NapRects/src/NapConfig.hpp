@@ -51,7 +51,7 @@ private: // Data members
     bool _draw_naps{true};
 
 public: // Functions
-    static const NapConfig& get_instance();
+    static NapConfig& get_instance();
     int32_t get_histo_limit() const;
     bool get_draw_naps() const;
 };
@@ -67,11 +67,6 @@ public: // Functions
  */
 class NapConfigWindow : public QWidget {
 // Non-Qt portion
-private: // Class data members
-    /// @brief Reference to the configuration object. Such access, along
-    /// this class being a friend of the config object's one, allows
-    /// modification of inner fields.
-    static NapConfig& cfg;
 public: // Functions
     NapConfigWindow();
     void load_cfg_values();

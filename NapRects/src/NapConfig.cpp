@@ -11,6 +11,7 @@
 
 // C++
 #include <limits>
+
 // KernelShark
 #include "libkshark.h"
 #include "KsPlotTools.hpp"
@@ -27,7 +28,7 @@
  * 
  * @returns Const reference to the configuration object.
  */
-const NapConfig& NapConfig::get_instance() {
+NapConfig& NapConfig::get_instance() {
     static NapConfig instance;
     return instance;
 }
@@ -86,7 +87,7 @@ NapConfigWindow::NapConfigWindow()
 */
 void NapConfigWindow::load_cfg_values() {
     // Easier coding
-    NapConfig& cfg = NapConfigWindow::cfg;
+    NapConfig& cfg = NapConfig::get_instance();
 
     _histo_limit.setValue(cfg._histo_entries_limit);
     _nap_rects_btn.setChecked(cfg._draw_naps);
@@ -97,8 +98,10 @@ void NapConfigWindow::load_cfg_values() {
  * from the configuration window.
 */
 void NapConfigWindow::update_cfg() {
-    NapConfigWindow::cfg._histo_entries_limit = _histo_limit.value();
-    NapConfigWindow::cfg._draw_naps = _nap_rects_btn.isChecked();
+    NapConfig& cfg = NapConfig::get_instance();
+
+    cfg._histo_entries_limit = _histo_limit.value();
+    cfg._draw_naps = _nap_rects_btn.isChecked();
 
     // Display a successful change dialog
     // We'll see if unique ptr is of any use here
@@ -114,6 +117,8 @@ void NapConfigWindow::update_cfg() {
  * Spinbox's limit values are also set.
  */
 void NapConfigWindow::setup_histo_section() {
+    NapConfig& cfg = NapConfig::get_instance();
+
     _histo_limit.setMinimum(0);
     _histo_limit.setMaximum(std::numeric_limits<int>::max());
     _histo_limit.setValue(cfg._histo_entries_limit);
@@ -129,6 +134,7 @@ void NapConfigWindow::setup_histo_section() {
  * display of nap rectangles.
  */
 void NapConfigWindow::setup_nap_rects() {
+    NapConfig& cfg = NapConfig::get_instance();
     _nap_rects_label.setText("Display nap rectangles: ");
     _nap_rects_btn.setChecked(cfg._draw_naps);
 
