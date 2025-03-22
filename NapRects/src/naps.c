@@ -1,7 +1,7 @@
 /** Copyright (C) 2025, David Jaromír Šebánek <djsebofficial@gmail.com> **/
 
 /**
- * @file    nap_rects.c
+ * @file    naps.c
  * @brief   For integration with KernelShark. Contains definitions
  *          upon plugin loading and deloading, as well as handlers
  *          (un)registriations.
@@ -18,7 +18,7 @@
 #include "libkshark-tepdata.h"
 
 // Plugin header
-#include "nap_rects.h"
+#include "src/naps.h"
 
 // Static variables
 
@@ -37,14 +37,6 @@ static char* font_file = NULL;
 ///
 /// @brief Path to the bold font file.
 static char* bold_font_path = NULL;
-
-///
-/// @brief Integer ID of the `sched/sched_switch` event.
-static int sched_switch_id;
-
-///
-/// @brief Integer ID of the `sched/sched_waking` event.
-static int waking_event_id;
 
 // Header file definitions
 
@@ -86,7 +78,7 @@ struct ksplot_font* get_font_ptr() {
  * 
  * @param sl_ctx: pointer to plugin's context to be freed
 */ 
-static void _nr_free_ctx(struct plugin_nap_rects_context* nr_ctx)
+static void _nr_free_ctx(struct plugin_naps_context* nr_ctx)
 {
 	if (!nr_ctx) {
 		return;
@@ -100,8 +92,47 @@ static void _nr_free_ctx(struct plugin_nap_rects_context* nr_ctx)
 /// @cond Doxygen_Suppress
 // KernelShark-provided magic that will define the most basic
 // plugin context functionality - init, freeing and getting context.
-KS_DEFINE_PLUGIN_CONTEXT(struct plugin_nap_rects_context , _nr_free_ctx);
+KS_DEFINE_PLUGIN_CONTEXT(struct plugin_naps_context , _nr_free_ctx);
 /// @endcond
+
+/**
+ * @brief Process sched_waking events as tep records during plugin loads,
+ * adds PID of who is being awoken into the sched_waking entry's auxiliary
+ * field - this pid will also become the owner of the event.
+ * Else, it adds in invalid -1 (which isn't a valid PID).
+ * 
+ * @param ctx: pointer to plugin context
+ * @param stream: pointer to the KernelShark stream with data
+ * @param rec: pointer to the tep record of the entry
+ * @param entry: pointer KernelShark event entry
+ * 
+ * @note This function should be called only if couplebreak is not enabled
+ * on a KernelShark stream, as it attempts to basically use 
+ * (in couplebreak terms) an origin entry as a target entry
+ * only for visualization purposes.
+ * @warning Incompatiblity - this function may make some plugins
+ * expecting certain values in entries to be incompatible with
+ * this plugin.
+*/
+static int waking_evt_tep_processing(struct plugin_naps_context* ctx, 
+   [[maybe_unused]] struct kshark_data_stream* stream,
+   void* rec, struct kshark_entry* entry)
+{
+   struct tep_record* record = (struct tep_record*)rec;
+   unsigned long long val; int ret;
+   struct kshark_data_container* collected_events = ctx->collected_events;
+
+   ret = tep_read_number_field(ctx->sched_waking_pid_field, record->data, &val);
+
+   if (ret == 0) {
+       entry->pid = (int32_t)val;
+       entry->visible &= ~KS_PLUGIN_UNTOUCHED_MASK;
+       kshark_data_container_append(collected_events, entry, val);
+   } else {
+       // Invalid
+       kshark_data_container_append(collected_events, entry, (int64_t)-1);
+   }
+}
 
 /**
  * @brief Selects supported events from unsorted trace file data
@@ -121,21 +152,23 @@ KS_DEFINE_PLUGIN_CONTEXT(struct plugin_nap_rects_context , _nr_free_ctx);
 static void _select_events(struct kshark_data_stream* stream,
     [[maybe_unused]] void* rec, struct kshark_entry* entry) {
 
-    struct plugin_nap_rects_context *nr_ctx = __get_context(stream->stream_id);
+    struct plugin_naps_context *nr_ctx = __get_context(stream->stream_id);
     if (!nr_ctx) return;
     struct kshark_data_container* nr_ctx_collected_events = nr_ctx->collected_events;
     if (!nr_ctx_collected_events) return;
 
-    if (entry->event_id == sched_switch_id) {
-        /**
-        * Add the event to the plugin's collected entries' container.
-        * 
-        * -1 is a nonsensical value, but necessary so that the container
-        * isn't considered empty.
-        */
+    /** -1 is a nonsensical value, but necessary so that the container
+     * isn't considered empty.
+    */
+    if (entry->event_id == nr_ctx->sswitch_event_id) {
         kshark_data_container_append(nr_ctx_collected_events, entry, (int64_t)-1);
-    } else if (entry->event_id == waking_event_id) {
-        waking_evt_tep_processing(nr_ctx, stream, rec, entry);
+    } else if (entry->event_id == nr_ctx->waking_event_id) {
+        if (stream->couplebreak_on) {
+            // Couplebreak target events do not need to be additionally processed.
+            kshark_data_container_append(nr_ctx_collected_events, entry, (int64_t)-1);
+        } else {
+            waking_evt_tep_processing(nr_ctx, stream, rec, entry);
+        }
     }
 }
 
@@ -155,7 +188,7 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     }
     if (!font_file || !bold_font_path) return 0;
     
-    struct plugin_nap_rects_context* nr_ctx = __init(stream->stream_id);
+    struct plugin_naps_context* nr_ctx = __init(stream->stream_id);
 
     if (!nr_ctx) {
 		__close(stream->stream_id);
@@ -176,18 +209,53 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
 
     nr_ctx->collected_events = kshark_init_data_container();
 
-    sched_switch_id = kshark_find_event_id(stream, "sched/sched_switch");
-    nr_ctx->sswitch_event_id = sched_switch_id;
+    nr_ctx->sswitch_event_id = kshark_find_event_id(stream, "sched/sched_switch");
 
-    waking_event_id = (!stream->couplebreak_on) ?
+    nr_ctx->waking_event_id = (!stream->couplebreak_on) ?
         kshark_find_event_id(stream, "sched/sched_waking") :
         kshark_find_event_id(stream, "couplebreak/sched_waking[target]");
 
-    nr_ctx->waking_event_id = waking_event_id;
-
-    kshark_register_event_handler(stream, sched_switch_id, _select_events);
-    kshark_register_event_handler(stream, waking_event_id, _select_events);
+    kshark_register_event_handler(stream, nr_ctx->sswitch_event_id, _select_events);
+    kshark_register_event_handler(stream, nr_ctx->waking_event_id, _select_events);
     kshark_register_draw_handler(stream, draw_nap_rectangles);
 
     return 1;
+}
+
+/**
+ * @brief Deinitializes the plugin's context and unregisters handlers of the
+ * plugin.
+ * 
+ * @param stream: KernelShark's data stream in which to deinitialize the
+ * plugin.
+ * 
+ * @returns `0` if any error happened. `1` if deinitialization was successful.
+*/
+int KSHARK_PLOT_PLUGIN_DEINITIALIZER(struct kshark_data_stream* stream) {
+    struct plugin_naps_context* nr_ctx = __get_context(stream->stream_id);
+
+    int retval = 0;
+
+    if (nr_ctx) {
+        kshark_unregister_event_handler(stream, nr_ctx->sswitch_event_id, _select_events);
+        kshark_unregister_event_handler(stream, nr_ctx->waking_event_id, _select_events);
+        kshark_unregister_draw_handler(stream, draw_nap_rectangles);
+        retval = 1;
+    }
+
+    __close(stream->stream_id);
+
+    return retval;
+}
+
+/**
+ * @brief Initializes menu for the plugin and gives the plugin pointer
+ * to KernelShark's main window.
+ * 
+ * @param gui_ptr: pointer to KernelShark's GUI, its main window.
+ * 
+ * @returns Pointer to KernelShark's main window.
+*/
+void* KSHARK_MENU_PLUGIN_INITIALIZER(void* gui_ptr) {
+	return plugin_set_gui_ptr(gui_ptr);
 }

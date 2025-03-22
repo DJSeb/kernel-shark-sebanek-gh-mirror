@@ -1,19 +1,19 @@
 /** Copyright (C) 2025, David Jaromír Šebánek <djsebofficial@gmail.com> **/
 
 /**
- * @file    nap_rects.h
+ * @file    naps.h
  * @brief   For plugin integration with KernelShark. Includes plugin context
  *          and a few global functions either used in C++ or in C parts of the
  *          plugin.
  * 
- * @note    Definitions in `NapRects.cpp` and `nap_rects.c`.
+ * @note    Definitions in `NapRects.cpp` and `naps.c`.
 */
 
-#ifndef _KS_PLUGIN_NAP_RECTS_H
-#define _KS_PLUGIN_NAP_RECTS_H
+#ifndef _KS_PLUGIN_NAPS_H
+#define _KS_PLUGIN_NAPS_H
 
-// trace-cmd
-#include <trace-cmd.h>
+// traceevent
+#include <traceevent/event-parse.h>
 
 // KernelShark
 #include "libkshark.h"
@@ -31,7 +31,7 @@ extern "C" {
  * @brief Context for the plugin, basically structured
  * globally shared data.
 */
-struct plugin_nap_rects_context {
+struct plugin_naps_context {
     // Event IDs
 
     /**
@@ -68,7 +68,7 @@ struct plugin_nap_rects_context {
 };
 
 // Some magic by KernelShark that makes it simpler to integrate the plugin.
-KS_DECLARE_PLUGIN_CONTEXT_METHODS(struct plugin_nap_rects_context)
+KS_DECLARE_PLUGIN_CONTEXT_METHODS(struct plugin_naps_context)
 
 // Global functions, defined in C
 
@@ -77,15 +77,12 @@ struct ksplot_font* get_bold_font_ptr();
 
 // Global functions, defined in C++
 
+const std::string get_switch_prev_state(const kshark_entry* entry);
 void draw_nap_rectangles(struct kshark_cpp_argv* argv_c, int sd,
     int val, int draw_action);
 void* plugin_set_gui_ptr(void* gui_ptr);
-void waking_evt_tep_processing(struct plugin_stacklook_ctx* ctx, 
-    struct kshark_data_stream* stream,
-    void* rec,
-    struct kshark_entry* entry);
 
 #ifdef __cplusplus
 }
 #endif // __cplusplus
-#endif // _KS_PLUGIN_NAP_RECTS_H
+#endif // _KS_PLUGIN_NAPS_H
