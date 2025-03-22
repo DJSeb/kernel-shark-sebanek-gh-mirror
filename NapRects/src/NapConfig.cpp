@@ -11,8 +11,6 @@
 
 // C++
 #include <limits>
-#include <memory>
-
 // KernelShark
 #include "libkshark.h"
 #include "KsPlotTools.hpp"
@@ -61,7 +59,7 @@ bool NapConfig::get_draw_naps() const
 */
 NapConfigWindow::NapConfigWindow()
     : QWidget(NapConfig::main_w_ptr),
-    _histo_label("Entries on histogram until Stacklook buttons appear: "),
+    _histo_label("Entries on histogram until nap rectangles appear: "),
     _histo_limit(this),
     _close_button("Close", this),
     _apply_button("Apply", this)
@@ -104,11 +102,10 @@ void NapConfigWindow::update_cfg() {
 
     // Display a successful change dialog
     // We'll see if unique ptr is of any use here
-    auto succ_dialog = std::unique_ptr<QMessageBox>(
-        new QMessageBox(QMessageBox::Information,
+    auto succ_dialog = new QMessageBox{QMessageBox::Information,
                 "Configuration change success",
                 "All configuration changes have been applied.",
-                QMessageBox::StandardButton::Ok, this));
+                QMessageBox::StandardButton::Ok, this};
     succ_dialog->show();
 }
 

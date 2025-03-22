@@ -20,7 +20,7 @@
 #include "KsPlotTools.hpp"
 
 // Plugin
-#include "src/naps.h"
+#include "naps.h"
  
 /**
  * @brief Represents a rectangle that is displayed in the "nap"
@@ -71,5 +71,7 @@ public:
     NapRectangle() = delete;
     ~NapRectangle();
 };
+
+const std::string get_switch_prev_state(const kshark_entry* entry);
 
 #endif // _NAP_RECTANGLE_HPP

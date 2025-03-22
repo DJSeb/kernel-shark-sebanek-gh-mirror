@@ -77,7 +77,6 @@ struct ksplot_font* get_bold_font_ptr();
 
 // Global functions, defined in C++
 
-const std::string get_switch_prev_state(const kshark_entry* entry);
 void draw_nap_rectangles(struct kshark_cpp_argv* argv_c, int sd,
     int val, int draw_action);
 void* plugin_set_gui_ptr(void* gui_ptr);

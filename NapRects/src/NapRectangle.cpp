@@ -6,7 +6,7 @@
 #include "libkshark.h"
 
 // Plugin headers
-#include "src/NapRectangle.hpp"
+#include "NapRectangle.hpp"
 
 // Static functions
 
@@ -62,7 +62,7 @@ void NapRectangle::_draw(const KsPlot::Color&, float) const {
  * @param outline_col: color of the outlines of the nap rectangle
  * @param text_col: color of the text to be displayed on the nap rectangle
 */
-explicit NapRectangle::NapRectangle(const kshark_entry* start,
+NapRectangle::NapRectangle(const kshark_entry* start,
     const kshark_entry* end,
     const KsPlot::Rectangle& rect,
     const KsPlot::Color& outline_col,
@@ -110,4 +110,23 @@ NapRectangle::~NapRectangle() {
     _start_entry = nullptr;
     _end_entry = nullptr;
     // Other objects are deleted by C++ like default behaviour.
+}
+
+// Global functions
+/**
+ * @brief Gets the abbreviated name of a prev_state from the info field of a
+ * KernelShark entry using the specific format of the entries in KernelShark.
+ * 
+ * @param entry: `sched/sched_switch` event entry whose prev_state we wish to get
+ *  
+ * @returns Const C++ string with only one member - the name abbreviation.
+ * 
+ * @note Returning the string is more useful as the value is used a lot
+ * in string concatenations.
+ */
+const std::string get_switch_prev_state(const kshark_entry* entry) {
+    auto info_as_str = std::string(kshark_get_info(entry));
+    std::size_t start = info_as_str.find(" ==>");
+    auto prev_state = info_as_str.substr(start - 1, 1);
+    return prev_state;
 }

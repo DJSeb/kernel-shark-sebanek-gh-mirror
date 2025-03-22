@@ -45,7 +45,7 @@ set(QT6_ALL_INCLUDES
 ### KernelShark files
 #### For customisability by the user
 if (NOT _KS_INCLUDE_DIR)
-  set(_KS_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../kernelshark/src")
+  set(_KS_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../KS_fork/src")
 endif()
 
 #### For customisability by the user
@@ -66,8 +66,6 @@ set(KS_SLIB_GUI "${_KS_SHARED_LIBS_DIR}/${KS_LIB_PREFIX}kshark-gui${KS_LIB_SUFFI
 ### KernelShark conventions
 set(KS_PLUGIN_PREFIX "plugin-")
 
-## For Qt moc handling
-#set(CMAKE_AUTOMOC ON)
 
 ## Add definitions if using modifed KernelShark (preview support)
 if (_UNMODIFIED_KSHARK)

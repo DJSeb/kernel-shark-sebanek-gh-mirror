@@ -12,7 +12,7 @@
 
 If using KernelShark build method:
 
-1. Ensure all source files (`.c`, `.cpp`, `.h`) of Stacklook are in the `src/plugins` subdirectory of your KernelShark project directory.
+1. Ensure all source files (`.c`, `.cpp`, `.h`) of Naps are in the `src/plugins` subdirectory of your KernelShark project directory.
 2. Ensure the `CMakeLists.txt` file in said subdirectory contains instructions for building the plugin (copy the style of other Qt-using GUI plugins).
 3. Build KernelShark (plugins are built automatically).
 4. Start KernelShark. Plugins built this way will be loaded automatically. If that for some reason failed, look for the SO

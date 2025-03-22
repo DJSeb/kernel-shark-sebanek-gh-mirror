@@ -127,4 +127,4 @@ private: // Qt functions
     void setup_layout();
 };
 
-#endif
+#endif // _NR_NAP_CONFIG_HPP

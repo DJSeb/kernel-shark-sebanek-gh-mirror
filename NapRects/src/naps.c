@@ -18,7 +18,7 @@
 #include "libkshark-tepdata.h"
 
 // Plugin header
-#include "src/naps.h"
+#include "naps.h"
 
 // Static variables
 
@@ -76,7 +76,7 @@ struct ksplot_font* get_font_ptr() {
 /**
  * @brief Frees structures of the context and invalidates other number fields.
  * 
- * @param sl_ctx: pointer to plugin's context to be freed
+ * @param nr_ctx: pointer to plugin's context to be freed
 */ 
 static void _nr_free_ctx(struct plugin_naps_context* nr_ctx)
 {
@@ -114,7 +114,7 @@ KS_DEFINE_PLUGIN_CONTEXT(struct plugin_naps_context , _nr_free_ctx);
  * expecting certain values in entries to be incompatible with
  * this plugin.
 */
-static int waking_evt_tep_processing(struct plugin_naps_context* ctx, 
+static void waking_evt_tep_processing(struct plugin_naps_context* ctx, 
    [[maybe_unused]] struct kshark_data_stream* stream,
    void* rec, struct kshark_entry* entry)
 {
