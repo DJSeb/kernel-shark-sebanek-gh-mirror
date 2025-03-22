@@ -212,9 +212,9 @@ static void _draw_nap_rectangles(KsCppArgV* argVCpp,
         kshark_entry* entry = data_container->data[i]->entry;
         int64_t d_field = data_container->data[i]->field;
 
-        bool is_wakeup = (entry->event_id == ctx->waking_event_id);
+        bool is_waking = (entry->event_id == ctx->waking_event_id);
         bool correct_waking_pid = (d_field == val);
-        return _nap_rect_check_function_general(entry) && is_wakeup && correct_waking_pid;
+        return _nap_rect_check_function_general(entry) && is_waking && correct_waking_pid;
     };
 
     // Noteworthy thing here is that KernelShark will automatically

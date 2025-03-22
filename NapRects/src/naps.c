@@ -156,7 +156,7 @@ static void _select_events(struct kshark_data_stream* stream,
     if (!nr_ctx) return;
     struct kshark_data_container* nr_ctx_collected_events = nr_ctx->collected_events;
     if (!nr_ctx_collected_events) return;
-
+   
     /** -1 is a nonsensical value, but necessary so that the container
      * isn't considered empty.
     */
@@ -165,7 +165,7 @@ static void _select_events(struct kshark_data_stream* stream,
     } else if (entry->event_id == nr_ctx->waking_event_id) {
         if (stream->couplebreak_on) {
             // Couplebreak target events do not need to be additionally processed.
-            kshark_data_container_append(nr_ctx_collected_events, entry, (int64_t)-1);
+            kshark_data_container_append(nr_ctx_collected_events, entry, entry->pid);
         } else {
             waking_evt_tep_processing(nr_ctx, stream, rec, entry);
         }
@@ -211,9 +211,14 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
 
     nr_ctx->sswitch_event_id = kshark_find_event_id(stream, "sched/sched_switch");
 
-    nr_ctx->waking_event_id = (!stream->couplebreak_on) ?
-        kshark_find_event_id(stream, "sched/sched_waking") :
-        kshark_find_event_id(stream, "couplebreak/sched_waking[target]");
+    int swaking_id = kshark_find_event_id(stream, "sched/sched_waking");
+    // This is one way to achieve compatibility with couplebreak.
+    // Other would be a kind of "call_once_per_stream_load" assign
+    // of couplebreak event IDs.
+    // IDs will not work immediately, since couplebreak needs to have stream
+    // loaded first, since these IDs are created dynamically.
+    nr_ctx->waking_event_id = (stream->couplebreak_on) ?
+        COUPLEBREAKER_EVENT_ID_SHIFT - swaking_id : swaking_id;
 
     kshark_register_event_handler(stream, nr_ctx->sswitch_event_id, _select_events);
     kshark_register_event_handler(stream, nr_ctx->waking_event_id, _select_events);
