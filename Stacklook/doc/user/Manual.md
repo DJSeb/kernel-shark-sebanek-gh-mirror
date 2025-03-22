@@ -173,7 +173,6 @@ In **stacklook.h**:
       on the plot
     * `plugin_set_gui_ptr` - gets a pointer to KernelShark's
       main window during plugin load
-    * `deinit_task_colors` - deinitializes inner task color table used by triangle buttons
     - Last five are defined in C++, first one in C. This is
       due to the necessities of using all of them in C code,
       but them needing to work with C++ structures.

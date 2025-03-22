@@ -15,11 +15,6 @@
 // C
 #include <stdbool.h>
 
-#ifndef _NO_NAPS
-// trace-cmd
-#include <trace-cmd.h>
-#endif
-
 // KernelShark
 #include "libkshark.h"
 #include "libkshark-plugin.h"
@@ -50,25 +45,6 @@ struct plugin_stacklook_ctx {
     */
     int swake_event_id;
 
-#ifndef _NO_NAPS
-    // Tep processing
-    
-    /**
-     * @brief Page event used to parse the page.
-    */
-    struct tep_handle* tep;
-
-    /**
-     * @brief Pointer to the sched_waking_event object.
-    */
-    struct tep_event* tep_waking;
-    
-    /**
-     * @brief Pointer to the sched_waking_pid_field format descriptor.
-    */
-    struct tep_format_field* sched_waking_pid_field;
-#endif
-
     /** 
      * @brief Collected switch or wakeup events.
     */
@@ -90,13 +66,6 @@ const struct kshark_entry* get_kstack_entry(
 void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
                             int val, int draw_action);
 void* plugin_set_gui_ptr(void* gui_ptr);
-void deinit_task_colors();
-#ifndef _NO_NAPS
-void waking_evt_tep_processing(struct plugin_stacklook_ctx* ctx, 
-                               struct kshark_data_stream* stream,
-                               void* rec,
-                               struct kshark_entry* entry);
-#endif
 
 #ifdef __cplusplus
 }

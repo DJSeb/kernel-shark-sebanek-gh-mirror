@@ -176,15 +176,6 @@ _(Default)_ If using this plugin's build method:
 1. Create a `build` directory in the `Stacklook` folder and go into it.
 2. Start CMake and use the provided `CMakeLists.txt` in the `Stacklook` directory (i.e. `cmake ..`).
    - If using **unmodified KernelShark**, specify so via `-D_UNMODIFIED_KSHARK=1` to build a binary without unnecessary code.
-   - If you wish to disable **visualization of prev_states** after a sched/sched_switch event up until the next sched/sched_waking event via nap rectangles in the plot, use `-D_NO_NAPS=1`.
-     - _Nap_ is just a quick name for the time between a sched_switch and sched_waking, when the process doesn't do anything noteworthy.
-     - These need the _trace-cmd_ header files and libraries to work, so:
-       - If **trace-cmd header files** aren't in `/usr/include`,
-         specify so via `-D_TRACECMD_INCLUDE_DIR=[PATH]`, where
-         `[PATH]` is replaced by the path to the header files.
-       - If **trace-cmd shared libraries** aren't in `/usr/lib64`,
-         specify so via `-D_TRACECMD_LIBS_DIR=[PATH]`, where
-         `[PATH]` is replaced by the path to the shared libraries.
    - By default, the **build type** will be `RelWithDebInfo` - to change this, e.g. to `Release`, use the option `-DCMAKE_BUILD_TYPE=Release`.
    - If **Qt6 files** aren't in `/usr/include/qt6`, use the option `-D_QT6_INCLUDE_DIR=[PATH]`, where `[PATH]` is replaced by the path to the Qt6 files.
      - Build instructions still expect that the specified directory has same inner structure as the default case (i.e. it contains `QtCore`, `QtWidgets`, etc.).
@@ -200,7 +191,7 @@ If using KernelShark build method:
 
 1. Ensure all source files (`.c`, `.cpp`, `.h`) of Stacklook are in the `src/plugins` subdirectory of your KernelShark project directory.
 2. Ensure the `CMakeLists.txt` file in said subdirectory contains instructions for building the plugin (copy the style of other Qt-using GUI plugins).
-   - You may need to modify them a bit further regarding options `_NO_NAPS` and `_UNMODIFIED_KSHARK`.
+   - You may need to modify them a bit further regarding the option `_UNMODIFIED_KSHARK`.
 3. Build KernelShark (plugins are built automatically).
 4. Start KernelShark (plugins built this way will be loaded automatically).
 

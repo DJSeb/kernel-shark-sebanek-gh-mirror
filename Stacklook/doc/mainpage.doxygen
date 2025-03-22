@@ -54,25 +54,6 @@
  * their own processes, rather they are objects belonging to KernelShark,
  * specifically Stacklook.
  *
- * @subsection naps Visualizing naps
- * 
- * Firstly, what are 'naps'? **Nap** in this plugin is "a space between
- * a sched_switch event and a sched_waking event of the same task in
- * the plot when event entries are sorted by their timestamps".
- * 
- * The plugin will show a rectangle with upper and lower horizontal lines
- * highlighted and a text with the full name of the prev_state field of
- * a sched_switch event; this rectangle is placed between a sched_switch
- * event of a task and its closest next sched_waking. The rectangle's
- * filling color is also based on the prev_state field. Text will NOT be
- * displayed if the rectangle isn't wide enough.
- * 
- * The nap rectangles cannot be interacted with, only viewed.
- *
- * This feature can be omitted during building by specifying `_NO_NAPS`
- * variable to CMake. Plugin compiled this way will not provide this feature
- * at all, not even in the configuration.
- *
  * @subsection config Configuration 
  * 
  * The plugin adds a dialog window for tweaking certain aspects of the plugin.

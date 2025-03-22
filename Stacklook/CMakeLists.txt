@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 3.1.2 FATAL_ERROR)
 project(stacklook)
 
 # Plugin meta
-set(SL_VERSION "1.4.4")
+set(SL_VERSION "1.5.0")
 
 # KernelShark meta
-set(KS_VERSION "2.3.2")
+set(KS_VERSION "2.4.0-couplebreak")
 
 # Ensure a default build type
 ## For customisability by the user

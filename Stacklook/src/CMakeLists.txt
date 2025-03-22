@@ -90,12 +90,6 @@ set(SOURCES
     SlPrevState.cpp
 )
 
-if (_NO_NAPS)
-  add_definitions(-D_NO_NAPS)
-else()
-  list(APPEND SOURCES SlNapRectangle.hpp SlWakingTepProcessing.cpp)
-endif()
-
 ## Creating the shared library
 add_library(stacklook SHARED ${SOURCES})
 set_target_properties(stacklook PROPERTIES
@@ -112,32 +106,6 @@ target_link_libraries(stacklook PRIVATE
     ${KS_SLIB_CORE}  ${KS_SLIB_PLOT}  ${KS_SLIB_GUI}
 )
 
-
-if (NOT _NO_NAPS)
-  ## Customized installs may differ in paths
-  if (NOT _TRACECMD_INCLUDE_DIR)
-    set(_TRACECMD_INCLUDE_DIR "/usr/include")
-  endif()
-
-  ## Include trace-cmd headers
-  target_include_directories(stacklook PRIVATE
-        "${_TRACECMD_INCLUDE_DIR}/trace-cmd"
-        "${_TRACECMD_INCLUDE_DIR}/traceevent"
-        "${_TRACECMD_INCLUDE_DIR}/libtracefs"
-    )
-
-  ## Customized installs may differ in paths
-  if (NOT _TRACECMD_LIBS_DIR)
-    set(_TRACECMD_LIBS_DIR "/usr/lib64")
-  endif()
-
-  ## Link trace-cmd shared libraries
-  target_link_libraries(stacklook PRIVATE
-        "${_TRACECMD_LIBS_DIR}/libtracecmd.so"
-        "${_TRACECMD_LIBS_DIR}/libtraceevent.so"
-        "${_TRACECMD_LIBS_DIR}/libtracefs.so"
-    )
-endif()
 
 set(SL_SYMLINK_NAME "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}stacklook.so")
 set(SL_SYMLINK_TARGET "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}stacklook.so.${SL_VERSION}")
