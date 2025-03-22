@@ -19,6 +19,9 @@
 extern "C" {
 #endif
 
+//NOTE: Changed here.
+#define COUPLEBREAKER_EVENT_ID_SHIFT -100
+
 /** Unique identifier of the TEP tracing data format. */
 #define TEP_DATA_FORMAT_IDENTIFIER	"tep data"
 
