@@ -85,6 +85,7 @@ static void secondPass(plugin_sched_context *plugin_ctx)
 				 * sched_switch event and leave a sign that you
 				 * edited this entry.
 				 */
+				//COUPLEBREAK TODO: Check if this needs to be changed for couplebreak.
 				e->pid = cSS->data[i]->entry->pid;
 				e->visible &= ~KS_PLUGIN_UNTOUCHED_MASK;
 				break;
@@ -115,6 +116,7 @@ __hidden void plugin_draw(kshark_cpp_argv *argv_c,
 
 	KsCppArgV *argvCpp = KS_ARGV_TO_CPP(argv_c);
 
+	//COUPLEBREAK TODO: Couplebreak interop here.
 	if (!plugin_ctx->second_pass_done) {
 		/* The second pass is not done yet. */
 		secondPass(plugin_ctx);
@@ -134,6 +136,7 @@ __hidden void plugin_draw(kshark_cpp_argv *argv_c,
 
 	IsApplicableFunc checkEntryPid = [=] (kshark_data_container *d,
 					      ssize_t i) {
+		//COUPLEBREAK TODO: Check if couplebreak would change anything here
 		return d->data[i]->entry->pid == pid;
 	};
 

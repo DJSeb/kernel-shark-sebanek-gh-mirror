@@ -125,6 +125,13 @@ static void plugin_sched_swith_action(struct kshark_data_stream *stream,
 			plugin_sched_set_prev_state(&ks_field, prev_state_val);
 
 		kshark_data_container_append(plugin_ctx->ss_data, entry, ks_field);
+		//COUPLEBREAK TODO: Change this (couplebreak interop).
+		// Might be a little troublesome, since sched_events doesn't expect to
+		// change CPUs (which couplebreak does, if the task runs elsewhere eventually).
+		// Question is if that is even a problem (i.e. does sched_events do anything
+		// when the task goes onto a different CPU?). Since sched_events only draws on
+		// task plots (but it does take effect globally, so dependent plugins might
+		// be affected), it might be ignorable?
 		entry->pid = pid;
 	}
 }
