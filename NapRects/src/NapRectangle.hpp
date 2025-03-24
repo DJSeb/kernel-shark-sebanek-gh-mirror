@@ -5,7 +5,7 @@
  * @brief   Declarations & definitions of plugin's rawable nap rectangle class.
  * 
  * @note    Nap := space in the histogram between a sched_switch and
- *          the closest next sched_waking events.
+ *          the closest next sched_waking event of the same pid.
 */
 
 #ifndef _NR_NAP_RECTANGLE_HPP
