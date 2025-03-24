@@ -514,3 +514,49 @@ development branch.
 
 A quick mistake was fixed - if there are no ftrace/kernel_stack events, there is no
 point in searching for them, so any such searches will return a nullptr.
+
+## 2025-03-22
+
+Successfully copied nap rectangles code into its own plugin, with new build instructions
+its own directory and only missing its documentation. Pretty good!
+
+A little update to couplebreaking, now the shift numerical macro is accessible
+from the header file, making getting a couplebreak ID simpler (one thing couplebreak
+is plagued by is that it cannot give you an ID of the event until the stream is
+loaded, since the events are created "on-demand" during load and their IDs are
+just negative origin entry's event IDs and shifted by said macro).
+
+Also added an access function to KernelShark, which helps with getting task colors, so
+no need for hacks or needlessly duplicated color tables in code now. This change
+and the removal of nap rectangles was also shown in Stacklook's code, along with
+deleting a few unnecessary functions or making them static.
+
+Remaining goals until NUMA:
+
+- sched_switch interop with couplebreak
+- naps plugin documentation (that's only partway done, mostly copied comments
+  from Stacklook's time with that code)
+
+Subgoal for dynamic events will most likely be dropped, it isn't really needed
+to successfully complete the project, but it can be a good extra improvement.
+
+README.wip.md was updated to reflect current progress.
+
+## 2025-03-23
+
+Compatibility fix for Stacklook (in the wrong branch, oopsie) to allow
+consistent, but also correctly pid-checked kstack entry detection.
+
+...
+
+As work would have it, nothing much was done today, but a quick examination of
+sched_events plugin did at least marked points of interest when it comes to
+couplebreak interoperability.
+
+## 2025-03-24
+
+Sched_switch with couplebreak almost works, but it seems to take issue with
+switch-to-switch boxes. Though it apparently was just an issue of setting the
+wrong pid in the C code.
+
+It would seem all works now :D
