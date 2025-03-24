@@ -116,7 +116,11 @@ static void plugin_sched_swith_action(struct kshark_data_stream *stream,
 				    record->data, &next_pid_val);
 	pid = next_pid_val;
 	if (ret == 0 && pid >= 0) {
-		plugin_sched_set_pid(&ks_field, entry->pid);
+		//NOTE: Changed here (2025-03-24)
+		int64_t relevant_pid = (stream->couplebreak_on) ?
+			((struct kshark_entry*)entry->offset)->pid :
+			entry->pid;
+		plugin_sched_set_pid(&ks_field, relevant_pid);
 
 		ret = tep_read_number_field(plugin_ctx->sched_switch_prev_state_field,
 					    record->data, &prev_state_val);
@@ -125,14 +129,15 @@ static void plugin_sched_swith_action(struct kshark_data_stream *stream,
 			plugin_sched_set_prev_state(&ks_field, prev_state_val);
 
 		kshark_data_container_append(plugin_ctx->ss_data, entry, ks_field);
-		//COUPLEBREAK TODO: Change this (couplebreak interop).
+		//NOTE: Changed here (2025-03-23)
 		// Might be a little troublesome, since sched_events doesn't expect to
 		// change CPUs (which couplebreak does, if the task runs elsewhere eventually).
 		// Question is if that is even a problem (i.e. does sched_events do anything
 		// when the task goes onto a different CPU?). Since sched_events only draws on
 		// task plots (but it does take effect globally, so dependent plugins might
 		// be affected), it might be ignorable?
-		entry->pid = pid;
+		if (!stream->couplebreak_on)
+			entry->pid = pid;
 	}
 }
 
@@ -165,10 +170,16 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream *stream)
 		__close(stream->stream_id);
 		return 0;
 	}
+	//NOTE: Changed here (2025-03-23)
+	int relevant_sswitch_event_id = plugin_ctx->sched_switch_event->id;
 
-	kshark_register_event_handler(stream,
-				      plugin_ctx->sched_switch_event->id,
-				      plugin_sched_swith_action);
+	if (stream->couplebreak_on) {
+		relevant_sswitch_event_id = // Change search to couplebreak switch target events
+			COUPLEBREAKER_EVENT_ID_SHIFT - relevant_sswitch_event_id;
+	}
+
+	kshark_register_event_handler(stream, relevant_sswitch_event_id,
+		plugin_sched_swith_action);
 
 	if (plugin_ctx->sched_waking_event) {
 		kshark_register_event_handler(stream,
