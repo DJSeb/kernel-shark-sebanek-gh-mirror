@@ -254,7 +254,10 @@ const struct kshark_entry* get_kstack_entry(const struct kshark_entry* kstack_ow
         return nullptr;
 
     bool is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
-    bool is_correct_task = (kstack_owner->pid == kstack_entry->pid);
+    bool is_correct_task = (kstack_owner->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
+        kstack_owner->pid == kstack_entry->pid :
+        // "Emergency check" if some plugins messed around with the entry before
+        kshark_get_pid(kstack_owner) == kstack_entry->pid;
     
     // This loop will usually stop either after one or iterations.
     // Unless some plugin aggressively reorders and changes innards of
@@ -268,7 +271,9 @@ const struct kshark_entry* get_kstack_entry(const struct kshark_entry* kstack_ow
             return nullptr;
         // Update conditions
         is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
-        is_correct_task = (kstack_owner->pid == kstack_entry->pid);
+        is_correct_task = (kstack_owner->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
+            kstack_owner->pid == kstack_entry->pid :
+            kshark_get_pid(kstack_owner) == kstack_entry->pid;
     }
 
     return kstack_entry;
@@ -315,7 +320,7 @@ void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
             kshark_entry* entry = data_c->data[t]->entry;
             if (!entry) return false;
-            bool correct_pid = (entry->pid == val);
+            bool correct_pid = entry->pid == val;
             return _check_function_general(entry, ctx) && correct_pid;
         };
         

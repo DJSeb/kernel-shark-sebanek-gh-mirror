@@ -132,15 +132,11 @@ static void _select_events(struct kshark_data_stream* stream,
     struct kshark_data_container* sl_ctx_collected_events = sl_ctx->collected_events;
     if (!sl_ctx_collected_events) return;
 
-    if (entry->event_id == sched_switch_id) {
-        /**
-         * Add the event to the plugin's collected entries' container.
-         * 
-         * -1 is a nonsensical value, but necessary so that the container
-         * isn't considered empty.
-        */
-        kshark_data_container_append(sl_ctx_collected_events, entry, (int64_t)-1);
-    } else if (entry->event_id == sched_wake_id) {
+    const bool is_supported_event = entry->event_id == sched_switch_id ||
+        entry->event_id == sched_wake_id;
+
+    if (is_supported_event) {
+        // -1 is nonsensical, but ensures the container isn't empty
         kshark_data_container_append(sl_ctx_collected_events, entry, (int64_t)-1);
     }
 }
