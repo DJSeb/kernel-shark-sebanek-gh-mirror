@@ -1,2 +1,4 @@
 build
 .vscode
+doc/technical/**
+doc/docs_build.log
