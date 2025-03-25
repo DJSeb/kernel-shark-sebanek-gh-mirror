@@ -6,7 +6,7 @@
  *          and a few global functions either used in C++ or in C parts of the
  *          plugin.
  * 
- * @note    Definitions in `NapRects.cpp` and `naps.c`.
+ * @note    Definitions in `Naps.cpp` and `naps.c`.
 */
 
 #ifndef _KS_PLUGIN_NAPS_H
@@ -32,42 +32,44 @@ extern "C" {
  * globally shared data.
 */
 struct plugin_naps_context {
-    // Event IDs
-
-    /**
-     * @brief Numerical id of sched_switch event.
-    */
-   int sswitch_event_id;
-   
-   /**
-    * @brief Numerical id of sched_waking event.
-   */
-   int waking_event_id;
-
-    // Tep processing
-    
-    /**
-     * @brief Page handle used to parse the trace event data.
-    */
-   struct tep_handle* tep;
-
-   /**
-    * @brief Pointer to the sched_waking_event object.
-   */
-   struct tep_event* tep_waking;
-   
-   /**
-    * @brief Pointer to the sched_waking_pid_field format descriptor.
-   */
-   struct tep_format_field* sched_waking_pid_field;
+    // Plugin-relevant events collection
 
     /** 
      * @brief Collected switch or wakeup events.
     */
-   struct kshark_data_container* collected_events;
+    struct kshark_data_container* collected_events;
+    
+    // Event IDs
+
+    /**
+     * @brief Numerical id of `sched/sched_switch` event.
+    */
+    int sswitch_event_id;
+
+    /**
+    * @brief Numerical id of `sched/sched_waking` event.
+    */
+    int waking_event_id;
+
+    // Tep processing (effective only when couplebreak is OFF in a stream.)
+
+    /**
+     * @brief Page handle used to parse the trace event data.
+    */
+    struct tep_handle* tep;
+
+    /**
+    * @brief Pointer to the sched_waking_event object.
+    */
+    struct tep_event* tep_waking;
+
+    /**
+    * @brief Pointer to the sched_waking_pid_field format descriptor.
+    */
+    struct tep_format_field* sched_waking_pid_field;
 };
 
-// Some magic by KernelShark that makes it simpler to integrate the plugin.
+// Macro'd declarations by KernelShark which it simpler to integrate the plugin.
 KS_DECLARE_PLUGIN_CONTEXT_METHODS(struct plugin_naps_context)
 
 // Global functions, defined in C

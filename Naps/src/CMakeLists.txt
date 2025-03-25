@@ -94,7 +94,7 @@ target_link_libraries(naps PRIVATE
     ${KS_SLIB_CORE}  ${KS_SLIB_PLOT}  ${KS_SLIB_GUI}
 )
 
-
+## Create a symlink to the library for easy access
 set(NAPS_SYMLINK_NAME "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}naps.so")
 set(NAPS_SYMLINK_TARGET "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}naps.so.${NAPS_VERSION}")
 add_custom_target(naps_symlink ALL

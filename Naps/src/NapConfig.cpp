@@ -1,9 +1,9 @@
-/** Copyright (C) 2024, David Jaromír Šebánek <djsebofficial@gmail.com> **/
+/** Copyright (C) 2025, David Jaromír Šebánek <djsebofficial@gmail.com> **/
 
 /**
  * @file    NapConfig.cpp
  * @brief   This file has definitions of the config window class
- *          for the plugin as well as the config object.
+ *          for the plugin as well as the config singleton object.
 */
 
 // C
@@ -26,6 +26,11 @@
  * Utilizes Meyers singleton creation (static local variable), which
  * also ensures the same address when taking a pointer.
  * 
+ * @note Meyers singleton is not quite destruction-safe, as it's
+ * destroyed during atexit() call (destructor calling it after it
+ * was destroyed would be problematic). But this plugin doesn't
+ * have this issue, so no need to worry about that.
+ * 
  * @returns Const reference to the configuration object.
  */
 NapConfig& NapConfig::get_instance() {
@@ -34,7 +39,7 @@ NapConfig& NapConfig::get_instance() {
 }
 
 /**
- * @brief Gets the currently set limit of entries in the histogram.
+ * @brief Gets the current limit of entries in the histogram.
  * 
  * @returns Limit of entries in the histogram.
  */
@@ -42,8 +47,7 @@ int32_t NapConfig::get_histo_limit() const
 { return _histo_entries_limit; }
 
 /**
- * @brief Gets a boolean flag whether to draw rectangles for 'naps', i.e.
- * durations between sched_switch and sched_waking.
+ * @brief Gets a boolean flag whether to draw rectangles for naps.
  * 
  * @returns True if we should draw naps, false otherwise.
  */
@@ -51,12 +55,14 @@ bool NapConfig::get_draw_naps() const
 { return _draw_naps; }
 
 // Window
-// Static functions
 
 // Member functons
 
 /**
  * @brief Constructor for the configuration window.
+ * 
+ * @note Due to its nature and setup functions, this function
+ * is also dependent on the configuration 'NapConfig' singleton.
 */
 NapConfigWindow::NapConfigWindow()
     : QWidget(NapConfig::main_w_ptr),
@@ -83,10 +89,14 @@ NapConfigWindow::NapConfigWindow()
 
 /**
  * @brief Loads current configuration values into the configuration
- * window's control elements and inner values.
+ * window's control elements and other Qt objects.
+ * 
+* @note Function is obviously dependent on the configuration
+ * 'NapConfig' singleton.
 */
 void NapConfigWindow::load_cfg_values() {
     // Easier coding
+    // Configuration access here
     NapConfig& cfg = NapConfig::get_instance();
 
     _histo_limit.setValue(cfg._histo_entries_limit);
@@ -96,8 +106,12 @@ void NapConfigWindow::load_cfg_values() {
 /**
  * @brief Update the configuration object's values with the values
  * from the configuration window.
+ * 
+ * @note Function is obviously dependent on the configuration
+ * 'NapConfig' singleton.
 */
 void NapConfigWindow::update_cfg() {
+    // Configuration access here
     NapConfig& cfg = NapConfig::get_instance();
 
     cfg._histo_entries_limit = _histo_limit.value();
@@ -115,8 +129,12 @@ void NapConfigWindow::update_cfg() {
 /**
  * @brief Sets up spinbox and explanation label.
  * Spinbox's limit values are also set.
+ * 
+ * @note Function is also dependent on the configuration
+ * 'NapConfig' singleton.
  */
 void NapConfigWindow::setup_histo_section() {
+    // Configuration access here
     NapConfig& cfg = NapConfig::get_instance();
 
     _histo_limit.setMinimum(0);
@@ -132,9 +150,14 @@ void NapConfigWindow::setup_histo_section() {
 /**
  * @brief Sets up explanation label and check box for controlling
  * display of nap rectangles.
+ * 
+ * @note Function is also dependent on the configuration
+ * 'NapConfig' singleton.
  */
 void NapConfigWindow::setup_nap_rects() {
+    // Configuration access here
     NapConfig& cfg = NapConfig::get_instance();
+
     _nap_rects_label.setText("Display nap rectangles: ");
     _nap_rects_btn.setChecked(cfg._draw_naps);
 

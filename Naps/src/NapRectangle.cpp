@@ -1,3 +1,15 @@
+/** Copyright (C) 2025, David Jaromír Šebánek <djsebofficial@gmail.com> **/
+
+/**
+ * @file    NapRectangle.cpp
+ * @brief   Definitions of plugin's drawable nap rectangle class and global
+ *          functions.
+ * 
+ * @note    Nap := space in the histogram between a sched_switch and
+ *          the closest next sched_waking or couplebreak/sched_waking[target]
+ *          event in the task plot.
+*/
+
 // C++
 #include <map>
 #include <string>
@@ -14,15 +26,15 @@
  * @brief Map of abbreviations of prev_states to their full names.
  */
 static const std::map<char, const char*> LETTER_TO_NAME {{
-    {'S', "sleeping"},
     {'D', "uninterruptible (disk) sleep"},
-    {'R', "running"},
     {'I', "idle"},
+    {'P', "parked"},
+    {'R', "running"},
+    {'S', "sleeping"},
     {'T', "stopped"},
     {'t', "tracing stop"},
     {'X', "dead"},
-    {'Z', "zombie"},
-    {'P', "parked"}
+    {'Z', "zombie"}
 }};
 
 // Member functions
@@ -32,15 +44,21 @@ static const std::map<char, const char*> LETTER_TO_NAME {{
  * In order of drawing: the rectangle, the outlines & if wide enough to display
  * text, the text box.
  * 
- * @note Despite the signature, the other parameters are ignored.
+ * @note Despite the signature, the other parameters are ignored and are included
+ * only to satisfy the inherited function.
 */
 void NapRectangle::_draw(const KsPlot::Color&, float) const {
-    // Don't draw into other plots basically.
+    // Don't draw into other plots, i.e. check that the rectangle
+    // won't be angled up or down. This check might be redundant
+    // as the entries collected should be on the same task plot,
+    // therefore such situation won't occur, but better safe than
+    // sorry.
     if (_rect.pointY(0) == _rect.pointY(3)) {
         _rect.draw();
         _outline_up.draw();
         _outline_down.draw();
         
+        // Make sure the text fits in the rectangle and draw it if so.
         int nap_rect_width = (_rect.pointX(3) - _rect.pointX(0));
         int minimal_width = _raw_text.size() * FONT_SIZE;
         if (nap_rect_width > minimal_width) {
@@ -50,17 +68,15 @@ void NapRectangle::_draw(const KsPlot::Color&, float) const {
 }
 
 /**
- * @brief Constructor of the nap_rectangle. Constructs the text box
- * and outlines from the data in arguments.
+ * @brief Constructor of the nap rectangle.
  * 
- * @param start: pointer to the event entry from which to start the
- * nap rectangle
- * @param end: pointer to the event entry at which to end the nap
- * rectangle
+ * @param start: Pointer to the event entry from which to start the
+ * nap
+ * @param end: Pointer to the event entry at which to end the nap
  * @param rect: KernelShark rectangle to display as basis for the
  * nap rectangle
- * @param outline_col: color of the outlines of the nap rectangle
- * @param text_col: color of the text to be displayed on the nap rectangle
+ * @param outline_col: Color of the outlines of the nap rectangle
+ * @param text_col: Color of the text to be displayed on the nap rectangle
 */
 NapRectangle::NapRectangle(const kshark_entry* start,
     const kshark_entry* end,
@@ -85,18 +101,21 @@ NapRectangle::NapRectangle(const kshark_entry* start,
     // Text
     char start_ps = get_switch_prev_state(start)[0];
     std::string raw_text{LETTER_TO_NAME.at(start_ps)};
-    // Capitalize to be more readable (and cooler)
+    // Capitalize to be more readable (and slightly cooler)
     for(auto& character : raw_text) {
         character = std::toupper(character);
     }
     _raw_text = raw_text;
 
-    int base_x_1 = _rect.pointX(0);
-    int base_x_2 = _rect.pointX(3);
-    int base_y = _rect.pointY(1);
-    int actual_x = base_x_1 // Start of the rectangle
-                + ((base_x_2 - base_x_1) / 2) // End of the rectangle
-                - (_raw_text.size() * FONT_SIZE / 3); // Center the text
+    const int base_x_1 = _rect.pointX(0);
+    const int base_x_2 = _rect.pointX(3);
+    const int base_y = _rect.pointY(1);
+
+    const int rectangle_end = ((base_x_2 - base_x_1) / 2);
+    // This is a rough estimate for centering, but it works.
+    const int text_centering = (_raw_text.size() * FONT_SIZE / 3);
+    
+    const int actual_x = base_x_1 + rectangle_end - text_centering;
     // Move the text a little up
     KsPlot::Point final_point{actual_x, base_y - 1};
 
@@ -105,6 +124,10 @@ NapRectangle::NapRectangle(const kshark_entry* start,
                             text_col, final_point);
 }
 
+/**
+ * @brief Destructor of the nap rectangle. It behaves just like the default
+ * destructor, but it also explicitly nulls its observer pointers.
+ */
 NapRectangle::~NapRectangle() {
     // KernelShark deletes the entries itself, we just have observers.
     _start_entry = nullptr;
@@ -113,15 +136,18 @@ NapRectangle::~NapRectangle() {
 }
 
 // Global functions
+
 /**
  * @brief Gets the abbreviated name of a prev_state from the info field of a
- * KernelShark entry using the specific format of the entries in KernelShark.
+ * KernelShark entry, leveraging the specific format of information strings
+ * of entries in KernelShark.
  * 
  * @param entry: `sched/sched_switch` event entry whose prev_state we wish to get
  *  
- * @returns Const C++ string with only one member - the name abbreviation.
+ * @returns Const C++ string with only one character - the prev_state
+ * name abbreviation.
  * 
- * @note Returning the string is more useful as the value is used a lot
+ * @note Returning the string is more useful as the value is used
  * in string concatenations.
  */
 const std::string get_switch_prev_state(const kshark_entry* entry) {

@@ -29,10 +29,10 @@ class NapConfigWindow;
 /**
  * @brief Singleton class for the config object of the plugin.
  * Holds the histogram limit until nap rectangles activate and
- * whether to draw nap rectangles or not flag.
+ * a boolean deciding whether to draw nap rectangles or not.
  * 
- * Uses sane defaults and is NOT persistent, i.e. settings won't be preserved
- * across different KernelShark sessions.
+ * It's preinitialised to some sane defaults and is NOT persistent,
+ * i.e. settings won't be preserved across different KernelShark sessions.
 */
 class NapConfig {
 // Necessary for the config window to manipulate values in the config object.
@@ -47,29 +47,38 @@ private: // Data members
     int32_t _histo_entries_limit{500};
 
     /// @brief Whether to draw rectangles with text between sched_switches
-    /// and sched_wakings or not.
+    /// and `sched/sched_waking` events or `couplebreak/sched_waking[target]`
+    /// events or not.
     bool _draw_naps{true};
-
 public: // Functions
     static NapConfig& get_instance();
     int32_t get_histo_limit() const;
     bool get_draw_naps() const;
+private: // Constructor
+    /// @brief Default constructor, hidden to enforce singleton pattern.
+    NapConfig() = default;
 };
 
 /**
- * @brief Widget class for modifying the configuration via GUI.
- * It is a fixed size dialog window that allows modification
+ * @brief QtWidget's child class for modifying configuration via GUI.
+ * It is a fixed max height dialog window that allows modification
  * of all that is in the config object by applying changes via
- * the Apply button. Changes won't be saved unless this is done. 
+ * the Apply button. Changes won't be saved unless this is done and
+ * selected changes can be discarded by closing the window.
  * 
- * Changes applied during configuration take effect AFTER this window is
- * closed.
+ * @note Changes applied during configuration take effect AFTER
+ * this window is closed.
+ * 
+ * @note This class is unsurprisingly heavily dependent on the
+ * configuration 'NapConfig' singleton.
  */
 class NapConfigWindow : public QWidget {
 // Non-Qt portion
 public: // Functions
     NapConfigWindow();
     void load_cfg_values();
+private:
+    void update_cfg();
 // Qt portion
 private: // Qt data members
     ///
@@ -114,8 +123,7 @@ public: // Qt data members
     /// @brief Button applies changes to the
     /// configuration object and shows an info dialog.
     QPushButton     _apply_button;
-private: // Qt functions
-    void update_cfg();
+private: // "Only Qt"-relevant functions
     void setup_histo_section();
     void setup_nap_rects();
     void setup_endstage();

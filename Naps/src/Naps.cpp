@@ -2,10 +2,11 @@
 
 /**
  * @file    Naps.cpp
- * @brief   
+ * @brief   This file contains functions which serving as a bridge between
+ *          the plugin's C++ part and C part. Most of them are static, but
+ *          a few functions defined in `naps.h` are also defined here, all
+ *          to access C++ part's code.
 */
-
-// C
 
 // C++
 #include <map>
@@ -32,15 +33,15 @@ using prev_state_colors_t = std::map<char, KsPlot::Color>;
  * @brief Constant map of assigned colors to prev_state abbreviations.
 */
 static const prev_state_colors_t PREV_STATE_TO_COLOR {
-    {'S', {0, 0, 255}}, // Blue
     {'D', {255, 0, 0}}, // Red
-    {'R', {0, 255, 0}}, // Green
     {'I', {255, 255, 0}}, // Yellow
+    {'P', {255, 165, 0}}, // Orange
+    {'R', {0, 255, 0}}, // Green
+    {'S', {0, 0, 255}}, // Blue
     {'T', {0, 255, 255}}, // Cyan
     {'t', {139, 69, 19}}, // Brown
     {'X', {255, 0, 255}}, // Magenta
-    {'Z', {128, 0, 128}}, // Purple
-    {'P', {255, 165, 0}} // Orange
+    {'Z', {128, 0, 128}} // Purple
 };
 
 // Static variables
@@ -54,19 +55,36 @@ static NapConfigWindow* cfg_window;
 /**
  * @brief Loads values into the configuration window from
  * the configuration object and shows the window afterwards.
+ * 
+ * @note Function depends on the file-global variable `cfg_window`.
 */
 static void config_show([[maybe_unused]] KsMainWindow*) {
     cfg_window->load_cfg_values();
     cfg_window->show();
 }
 
-static const KsPlot::Color _get_color(int pid) {
-    static const KsPlot::Color DEFAULT_COLOR {
-        (uint8_t)256, (uint8_t)256, (uint8_t)256};
+/**
+ * @brief Gets the color of the task used by KernelShark for that task.
+ * Used during nap rectangle creation to figure out the outline of the rectangle.alignas
+ * Such outlines are the only color signal to the user to which task the nap belongs.
+ * Slightly useful if the user accidentally scrolls to another task, the color can
+ * help recognize this situation.
+ * 
+ * @param pid Process ID of the task, whose color we wish to get
+ * @return KernelShark's Color object holding a copy of the task's color
+ * 
+ * @note  Function also depends on the configuration `NapConfig` singleton.
+ */
+static const KsPlot::Color _get_task_color(int pid) {
+    // Fail-safe color, all white (makes the rectangle seem
+    // thinner, which is a small signal that the task color wasn't found).
+    static const KsPlot::Color DEFAULT_COLOR
+        { (uint8_t)256, (uint8_t)256, (uint8_t)256};
     
     KsPlot::Color result_color = DEFAULT_COLOR;
+    // Configuration access here.
     KsTraceGraph* graph = NapConfig::main_w_ptr->graphPtr();
-
+    // A journey to get the color of the task.
     const KsPlot::ColorTable& pid_color_table = graph->glPtr()->getPidColors();
     bool pid_color_exists = static_cast<bool>(pid_color_table.count(pid));
 
@@ -81,7 +99,7 @@ static const KsPlot::Color _get_color(int pid) {
  * @brief Returns either black if the background color's intensity is too great,
  * otherwise returns white. Limit to intensity is `128.0`.
  * 
- * @param bg_color_intensity: computed intensity from an RGB color.
+ * @param bg_color_intensity: Computed intensity from an RGB color
  * 
  * @returns Black on high intensity, white otheriwse.
 */
@@ -97,7 +115,7 @@ static KsPlot::Color _black_or_white_text(float bg_color_intensity) {
  * @brief Gets the color intensity using the formula
  * `(red * 0.299) + (green * 0.587) + (blue * 0.114)`.
  * 
- * @param c: RGB color value whose components will be checked.
+ * @param c: RGB color value whose components will be checked
  * 
  * @returns Color intensity as floating-point value.
 */
@@ -110,12 +128,14 @@ static float _get_color_intensity(const KsPlot::Color& c) {
 
 /**
  * @brief General function for checking whether to show a nap rectangle
- * in the plot.
+ * in the plot, based on if an entry exists, is visible in the graph
+ * and if graph itself is visible. 
  * 
- * @param entry: pointer to an event entry which could be a part of the
- * nap rectangle 
+ * @param entry: Pointer to an event entry which could be a part of the
+ * nap rectangle
  * 
- * @returns True if entry is visible (and pointer wasn't null).
+ * @returns True if entry is visible in a visible graph
+ * (and entry's pointer wasn't null).
  */
 static bool _nap_rect_check_function_general(const kshark_entry* entry) {
     if (!entry) return false;
@@ -127,23 +147,31 @@ static bool _nap_rect_check_function_general(const kshark_entry* entry) {
 }
 
 /**
- * @brief Creates a nap rectangle to be displayed on the plot.
+ * @brief Creates a nap rectangle to be displayed on the plot via
+ * KernelShark's plot objects API.
  * 
- * @param graph KernelShark graphs
+ * @param graph KernelShark graph
  * @param bin KernelShark bins
- * @param data: container of two entries between which to draw the nap
+ * @param data: Container of two entries between which to draw the nap
  * rectangle
  * 
  * @returns Pointer to the heap-created nap rectangle.
+ * 
+ * @note  Function also depends on the file-global variable
+ * `PREV_STATE_TO_COLOR`.
  */
 static NapRectangle* _make_nap_rect(std::vector<const KsPlot::Graph*> graph,
     std::vector<int> bin,
     std::vector<kshark_data_field_int64*> data,
     KsPlot::Color, float)
 {
-    // Positioning
+    // Positioning constants, relevant only here, hence defined here
     constexpr int HEIGHT = 12;
     constexpr int HEIGHT_OFFSET = 15;
+    // Looking into KernelShark's source doesn't immediately reveal
+    // why the graph is passed in a vector, but this is how it is
+    // done in makeLatencyBox function in `KsPlugins.hpp`, which
+    // works seemingly well, hence same approach was chosen here.
     KsPlot::Point start_base_point = graph[0]->bin(bin[0])._val;
     KsPlot::Point end_base_point = graph[0]->bin(bin[1])._val;
 
@@ -163,6 +191,7 @@ static NapRectangle* _make_nap_rect(std::vector<const KsPlot::Graph*> graph,
     // Create the rectangle and color it
     KsPlot::Rectangle rect;
     rect.setFill(true);
+    // Access to global variable here.
     rect._color = PREV_STATE_TO_COLOR.at(get_switch_prev_state(switch_entry)[0]);
 
     rect.setPoint(0, point_0);
@@ -171,7 +200,7 @@ static NapRectangle* _make_nap_rect(std::vector<const KsPlot::Graph*> graph,
     rect.setPoint(3, point_3);
 
     // Prepare outline color
-    const KsPlot::Color outline_col = _get_color(switch_entry->pid);
+    const KsPlot::Color outline_col = _get_task_color(switch_entry->pid);
     
     // Prepare text color
     float bg_intensity = _get_color_intensity(rect._color);
@@ -184,13 +213,18 @@ static NapRectangle* _make_nap_rect(std::vector<const KsPlot::Graph*> graph,
 }
 
 /**
- * @brief Initializes check functions for selecting nap rectangle
- * entries and draws nap rectangles via interval plotting.
+ * @brief The actual drawing function of the plugin. It initializes check
+ * functions for selecting naps-relevant entries and draws naps via
+ * KernelShark's interval plotting API.
  * 
- * @param argVCpp: the C++ arguments of the drawing function of the plugin
- * @param plugin_data: input location for the container of the event's data
- * @param ctx: pointer to the plugin's context
- * @param val: process or CPU ID value
+ * @note Naps-relevant entries are: `sched/sched_switch`
+ * `sched/sched_waking` OR `couplebreak/sched_waking[target]`. These are
+ * chosen between in the C part based on a stream's setting of couplebreak.
+ * 
+ * @param argVCpp: The C++ arguments of the drawing function of the plugin
+ * @param plugin_data: Input location for the container of the event's data
+ * @param ctx: Pointer to the plugin's context
+ * @param val: Process or CPU ID value
  */
 static void _draw_nap_rectangles(KsCppArgV* argVCpp,
     kshark_data_container* plugin_data,
@@ -208,9 +242,9 @@ static void _draw_nap_rectangles(KsCppArgV* argVCpp,
         return _nap_rect_check_function_general(entry) && is_switch && correct_pid;
     };
 
-    nap_rect_check_func_waking = [=] (kshark_data_container* data_container, ssize_t i) {
-        kshark_entry* entry = data_container->data[i]->entry;
-        int64_t d_field = data_container->data[i]->field;
+    nap_rect_check_func_waking = [=] (kshark_data_container* data_c, ssize_t i) {
+        kshark_entry* entry = data_c->data[i]->entry;
+        int64_t d_field = data_c->data[i]->field;
 
         bool is_waking = (entry->event_id == ctx->waking_event_id);
         bool correct_waking_pid = (d_field == val);
@@ -228,6 +262,21 @@ static void _draw_nap_rectangles(KsCppArgV* argVCpp,
 
 // Functions defined in C header
 
+/**
+ * @brief Callback function called by KernelShark to draw naps as rectangles,
+ * if conditions for drawing are met. This function is actually just a wrapper
+ * for its C++ implementation `_draw_nap_rectangles`, this one mostly just
+ * checks pre-conditions and then calls the C++ function. 
+ * 
+ * @param argv_c Arguments for the plugin's drawing function (e.g. visible
+ * bins in the histogram)
+ * @param sd Stream identifier number
+ * @param val Process ID or CPU ID value (depends on `draw_action` argument)
+ * @param draw_action Action to be performed (e.g. drawing task plots or CPU
+ * plots)
+ * 
+ * @note Function also depends on the configuration `NapConfig` singleton.
+ */
 void draw_nap_rectangles(struct kshark_cpp_argv* argv_c, int sd,
     int val, int draw_action)
 {
@@ -235,7 +284,7 @@ void draw_nap_rectangles(struct kshark_cpp_argv* argv_c, int sd,
     plugin_naps_context* ctx = __get_context(sd);
     kshark_data_container* plugin_data;
 
-    // Config data
+    // Get config data
     const NapConfig& config = NapConfig::get_instance();
     const int32_t HISTO_ENTRIES_LIMIT = config.get_histo_limit();
 
@@ -260,7 +309,7 @@ void draw_nap_rectangles(struct kshark_cpp_argv* argv_c, int sd,
 }
 
 /**
- * @brief Give the plugin a pointer to KernalShark's main window to allow
+ * @brief Give the plugin a pointer to KernelShark's main window to allow
  * GUI manipulation and menu creation.
  * 
  * This is where plugin menu is made and initialized first. It's lifetime
@@ -268,12 +317,19 @@ void draw_nap_rectangles(struct kshark_cpp_argv* argv_c, int sd,
  * 
  * @param gui_ptr: Pointer to the main KernelShark window.
  * 
- * @returns Pointer to the configuration menu instance.
+ * @returns Pointer to the configuration menu window instance. Returned
+ * window pointer is a void pointer (to interoperate with C, who doesn't
+ * know these types).
+ * 
+ * @note Function also depends on the configuration `NapConfig` singleton
+ * & on the file-global variable `cfg_window`.
 */
 __hidden void* plugin_set_gui_ptr(void* gui_ptr) {
     KsMainWindow* main_w = static_cast<KsMainWindow*>(gui_ptr);
+    // Configuration access here.
     NapConfig::main_w_ptr = main_w;
 
+    // File-global variable access here.
     if (cfg_window == nullptr) {
         cfg_window = new NapConfigWindow();
     }

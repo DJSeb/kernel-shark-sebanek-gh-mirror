@@ -2,10 +2,12 @@
 
 /**
  * @file    NapRectangle.hpp
- * @brief   Declarations & definitions of plugin's rawable nap rectangle class.
+ * @brief   Declarations & definitions of plugin's drawable nap rectangle class.
  * 
  * @note    Nap := space in the histogram between a sched_switch and
- *          the closest next sched_waking event of the same pid.
+ *          the closest next sched_waking or couplebreak/sched_waking[target]
+ *          event in the task plot.
+ * @note    Definitions in `NapRectangle.cpp`.
 */
 
 #ifndef _NR_NAP_RECTANGLE_HPP
@@ -23,18 +25,25 @@
 #include "naps.h"
  
 /**
- * @brief Represents a rectangle that is displayed in the "nap"
- * of a task - the sched_switch and its closest next sched_waking.
+ * @brief Represents a rectangle that visualises the "nap"
+ * of a task - the space between a sched_switch and its
+ * closest next sched/sched_waking or
+ * couplebreak/sched_waking[target].
  * 
  * It cannot be interacted with, only drawn and looked at.
  * 
- * It will show a rectangle
- * with a background (in plugin, this background is assigned a color based
- * on the prev_state of the sched_switch event the nap rectangle uses),
- * upper and lower higlights of the outline (in plugin, their color is
- * the color of the task assigned to it by KernelShark) and text with
- * the full name of the prev_state of the sched_switch event of the nap
- * rectangle.
+ * It will show:
+ * 
+ * - a rectangle with a background (this background is assigned a
+ * color based on the prev_state of the sched_switch event the nap
+ * rectangle uses)
+ * 
+ * - upper and lower higlights of the outline (their color is the
+ * color of the task assigned to it by KernelShark)
+ * 
+ * - text with the full name of the prev_state of the sched_switch
+ * event of the nap rectangle, but only if if there is enough space
+ * to write that text so that it doesn't overflow its boundaries.
  */
 class NapRectangle: public KsPlot::PlotObject {
 private:
@@ -53,7 +62,7 @@ private:
     ///
     /// @brief Lower line for the outline highlight.
     KsPlot::Line _outline_down;
-    /// @brief KernelShark plot objects for display of prev_state
+    /// @brief KernelShark plot objects for displaying prev_state
     /// information of the sched_switch on the nap rectangle.
     KsPlot::TextBox _text;
     /// @brief Full name of a prev_state the sched_switch of the nap

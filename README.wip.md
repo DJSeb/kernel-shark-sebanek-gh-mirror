@@ -1,6 +1,11 @@
-# Stacklook
+# TODO: !!!CHANGE THIS, MOST OF THIS SHOULD BE MOVED, SOME OF THIS CAN STAY!!!
+
+<!-- TODO: Move stuff below -->
+
+<!--# Stacklook
 
 _Plugin for visualizing stacktraces in KernelShark._
+-->
 
 ### Author
 
@@ -10,6 +15,9 @@ David Jaromír Šebánek
 
 Jan Kára RNDr.
 
+<!--TODO: Move paragraph below. -->
+
+<!--
 ## (WIP) Repository layout
 
 You are in **root**.
@@ -23,16 +31,21 @@ You are in **root**.
   - File `CHANGELOG.md` <= Brief change summaries to the program, starting from the first version that basically worked
   - File `ProjectSpecification.md` <= Outlines how the project should look like
   - Other files include: `LICENSE`, `.gitignore`, `.gitmodules`, `README.md` _(you are reading this \:D)_.
+-->
 
 ## Project status
 
-At version **1.4.3**.
+<!--TODO: Move line below -->
+
+<!--At version **1.4.3**.-->
 
 Semester project part is finished.
 
 Bachelor thesis project part WIP.
 
 ### NPRG045 general tasks
+
+(Stacklook plugin and small changes to KernelShark.)
 
 - [x] Brief project description
 - [x] Specification
@@ -46,13 +59,21 @@ Bachelor thesis project part WIP.
 - [x] Brief project descrption
 - [x] Specification
 - [ ] Basic working version
+  - [x] Split events involving two processes
+  - [ ] NUMA topology visualisation
+  - [ ] sched_events interoperability with created plugin(s)
 - [ ] Final version
 
 \* The most important things work.
 
-### Changelog
+<!--TODO: Move stuff below. -->
+
+<!--### Changelog
 
 [Here.](./CHANGELOG.md)
+-->
+
+<!--TODO: Revise this.-->
 
 ### Roadmap
 
@@ -83,10 +104,10 @@ Things not in specification aren't mandatory, but would be pretty useful.
 
 Below are bachelor thesis part's appended requirements:
 
-- [ ] Events involving two processes shall be split into initiators and targets
+- [x] Events involving two processes shall be split into initiators and targets
   - E.g. sched_waking should be split into "awaker" and "awakened" events, one
     belonging to each respective process
-  - At the very least sched_switch and sched_waking should be splitted.
+  - [x] At the very least sched_switch and sched_waking should be splitted.
   - \[ABANDONED\] Try to keep the logic inside the plugin (minimizing KernelShark changes)
     - NOTE: Not doable, insufficeint API, KernelShark source code changes necessary.
 - [ ] NUMA topology visualization in KernelShark (either as a plugin or KernelShark modification)
@@ -101,14 +122,14 @@ Below are bachelor thesis part's appended requirements:
         that will be implemented as basis
     - [ ] Colorful differentiation of different groups
   - [ ] Configurable display method via some option in KShark's menu
-- [ ] Allow `sched_events` plugin compatibility
+- [x] Allow `sched_events` plugin compatibility
   - NOTE: XOR choice
   - \[ABANDONED\] Either integrate Stacklook into sched_events plugin
     - Would violate the holy Single Responsibility principle
     - Direct approach
     - Ensured success
     - NOTE: Statement above is false.
-  - [ ] Or figure out how to allow compatibility while keeping plugins separate
+  - [x] Or figure out how to allow compatibility while keeping plugins separate
     - Less direct
     - Keeps SRP
     - Unknown probability of success
@@ -119,9 +140,9 @@ General SW goal:
 - [ ] Debug the plugin even more, stabilise performance where necessary
 - [ ] Revise README and other non-code parts of repository to reflect project extensions
 - [ ] _("Optional")_ Create proper design document \* Would be quite good to include in technical documentation
-      Non-software goal:
 
-Write survey paper:
+
+Non-software goal - write survey paper:
 
 - [ ] Survey paper
   - [ ] Stack tracing (in Linux)
@@ -142,6 +163,8 @@ Write survey paper:
     - [ ] Purpose & limits
     - [ ] Results of implementation
 
+<!--TODO: Revise and move below-->
+<!--
 ## (WIP) Requirements
 
 Modified KernelShark (preview functionality is unusable otherwise).
@@ -199,6 +222,7 @@ If using KernelShark build method:
 
 Do note that the instructions won't remove previous versions. For that, just use `rm` in the directory
 where the SO files are to clean what you need.
+-->
 
 ## (WIP) Contributions & acknowledgments
 
