@@ -14,11 +14,11 @@
  * itself.
  * 
  * @subsection config Configuration
- * The configuration is a C++ class which holds three main configuration variables of the plugin.
+ * The configuration is a C++ class which holds two main configuration variables of the plugin.
  * 
- * 1. If naps are supposed to be visualised (on/off button).
- * 2. At which level of entries visible will naps be visualised.
- * 3. Static pointer to the main window of KernelShark, used for quick access to that window.
+ * 1. At which level of entries visible will naps be visualised.
+ * 2. Static pointer to the main window of KernelShark, used for quick access to that window. This variable is never
+ * changed, only initialized.
  * 
  * The object of this class can be only one an is globally accessible - both characteristics made true
  * by use of the (Meyers) Singleton design pattern. Because of this, every part of the plugin can access
@@ -68,8 +68,8 @@
  * defined in Naps.cpp, where C++ is free to use its types and objects, while the C part can use the function pointer as
  * an argument.
  * 
- * There are also few static variables (like a pointer to the main window, previous state to color mapping or previous
- * state abbreviation to full name mapping), but they are used sparingly and only when it is ensured they can be static.
- * There are also a few constexpr constants, but only in functions that need them and just writing a number looks too
- * arbitrary.
+ * There is also a small amount of static variables (like a pointer to the main window, previous state to color mapping or
+ * previous state abbreviation to full name mapping), but they are used sparingly and only when it is ensured they can be
+ * static. There are also a few constexpr constants, but only in functions that need them and just writing a number looks
+ * too arbitrary.
  */
