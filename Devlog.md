@@ -596,7 +596,7 @@ available with the colors. However, opening KernelShark without loading any
 user plugins (default ones do not qualify) and then attempting to import a
 session resulted in a segmentation fault, where the plugin couldn't access
 the color table, even though the KsGLWidget was already giving the reference
-and calling plugin's shape-making function. The cause of this is unknown.
+and calling its `_makePluginShapes` function. The cause of this is unknown.
 Leading theory was that the KsGLWidget object was not yet constructed, but
 with the shape-making function being called and the program returning a
 reference, just one which cannot be accessed, it seems the problem was
@@ -606,4 +606,6 @@ rectangles' outline colors were set to the color of the prev_state, as is
 the case with its filling color. Only when the user wishes to use experimental
 feature can it begin using task colors. This approach is sure to work,
 especially since plugin configurations do not persist. Stacklook will have it
-more difficult, but the same approach might work there as well.
+more difficult, but the same approach might work there as well. Maybe the
+cause was instead a reference to a dead object. Either way, without
+bigger KernelShark rewrites, this issue goes into very low priority.
