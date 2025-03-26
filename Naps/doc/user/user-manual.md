@@ -1,9 +1,5 @@
-<!-- Answer these:
+<!-- TODO: Images -->
 
-- How do I use it?
-- Bugs & Glitches
-
--->
 # Intro
 
 This document serves as a simple to grasp manual for the "naps" KernelShark plugin.
@@ -26,21 +22,49 @@ Ticked checkbox means the plugin is enabled, empty checkbox means the plugin is 
 ## Configuration
 
 If the plugin is enabled, additional button will appear in `Tools` menu with the label `Naps Configuration`.
-Clicking on it will show a window dialog, which will house configuraton options for the plugin. The only configuration
-optionsavailable for this plugin is the maximum amount of entries visible on the graph before the plugin is allowed
-to work. This configuration option can help if there are either not enough visible plugin shapes for a current zoom
-level or if there are too many and program memory is is too great.
+Clicking on it will show a window dialog, which will house configuraton options for the plugin. One of the two
+configuration options available for this plugin is the maximum amount of entries visible on the graph before the
+plugin is allowed to work. This configuration option can help if there are either not enough visible plugin shapes
+for a current zoom level or if there are too many and program memory is is too great.
+
+The other configuration option is whether to color the nap rectangle's top and bottom outlines the same color as
+KernelShark uses for the task. This can be turned on and off via a simple checkbox.
 
 Clicking on `Apply` button will confirm changes made to the configuration and close the window, showing a pop-up if
 the the operation was successful. Clicking on the `Close` button or the X button in the window header will close the
 window without applying any changes. Changes made to a window that hasn't applied them to the configuration will be
 lost and upon reopening, the window will again show what's in the currently applied configuration.
 
+Regarding KernelShark's sessions, the configuration is NOT persistent and options included before will have to be
+adjusted again upon a new session or trace file load.
+
 ## In the graph
+
+To view naps in a graph of a trace, let KernelShark show you task plots. The plugin will automatically draw
+rectangles between switch and waking events, coloring them according to the previous state of the task that will
+then switch to another task. Top and bottom outlines of the rectangles are colored using the same color, or, if
+turned on in the configuration, using the task's own color. If the rectangle is wide enough, then the full name
+of the previous state of the task will be displayed as well.
+
+The rectangles will be visible as long as the zoom level allows two entries belonging to the same nap to also be
+visible & as long as there aren't too many entries visible on the graph (this can be adjusted in the configuration).
+
+The rectangles cannot be interacted with in any capacity.
 
 # Bugs & glitches
 
-There is only one crashng bug known right now - starting KernelShark without installing the plugin beforehand
-and then loading a session, where this plugin was active, will result in a segmentation fault.
+No known bugs, but there were plenty of unexpected surprises during plugin testing - if more were discovered,
+contact the author via e-mail `djsebofficial@gmail.com`.
 
-The solution to this is to install/load the plugin before loading said session.
+# Recommendations
+
+It is recommended by the author to turn on couplebreak in KernelShark to allow greater compatiblity with other
+plugins, especially sched_events.
+
+It is recommended to not set the histogram limit in the configuration too high as to not make the plugin use
+too much memory with many nap rectangles being present.
+
+While KernelShark's sessions work, they are a little buggy. This plugin attempts its best to not get in the way of
+their inner logic, but a warning should be issued that if the plugin isn't loaded beforehand, there might be
+unexpected behaviours, e.g. loading a session when the plugin was active won't add the plugin's menu to the
+`Tools` menu.

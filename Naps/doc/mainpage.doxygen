@@ -48,6 +48,11 @@
  *
  * - Plugin may be built to work with unmodified KernelShark, but compatibility with other plugins, especially
  * sched_events, will be sacrificed.
+ * 
+ * - Plugin offers an experimental coloring version, which will change the top and bottom outline of nap rectangles,
+ * to be of the same color as the task owning said rectangle. This option has to be turned on in the configuration
+ * upon each plugin load, as it is not persistent. It couldn't be hardwired into the code due to issues with session
+ * loads.
  *
  * @section acknow Acknowledgments
  *

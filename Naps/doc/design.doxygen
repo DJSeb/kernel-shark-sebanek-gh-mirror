@@ -14,10 +14,12 @@
  * itself.
  * 
  * @subsection config Configuration
- * The configuration is a C++ class which holds two main configuration variables of the plugin.
+ * The configuration is a C++ class which holds three main configuration variables of the plugin.
  * 
  * 1. At which level of entries visible will naps be visualised.
- * 2. Static pointer to the main window of KernelShark, used for quick access to that window. This variable is never
+ * 2. Whether to use experimental coloring of nap rectangle's outlines to be of the same color as a task is in a
+ * KernelShark graph.
+ * 3. Static pointer to the main window of KernelShark, used for quick access to that window. This variable is never
  * changed, only initialized.
  * 
  * The object of this class can be only one an is globally accessible - both characteristics made true
@@ -36,7 +38,7 @@
  * This approach improves constructor's readability and allows for easy modification of only one stage of construction.
  * 
  * @subsection nap_rectangles Nap Rectangles
- * The nap rectangles are the main visualisation of the plugin. They are drawn above the relevant entries in the graph.
+ * The nap rectangles are the main visualisation of the plugin. They are drawn between the relevant entries in the graph.
  * They are only a simple collection of shapes and text, which cannot be interacted with. Their only somewhat complicated
  * function is the constructor and the private overriden _draw function, however that one only really determines the
  * order in which to draw the nap rectangles' components. The constructor mainly deals with positioning of its elements,
