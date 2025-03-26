@@ -1,4 +1,4 @@
-Purpose of this is simply to jot down progress (self-motivation)
+Prrpose of this is simply to jot down progress (self-motivation)
 and keep track of noticed issues and possibly great ideas (tracker),
 as well as quetions arisen during development (design decisions & encountered challenges).
 
@@ -569,3 +569,41 @@ for revision and start work on NUMA topology.
 
 _Author's note: Documentation is always so taxing on the mind, I feel my soul
 leaving my body._
+
+## 2025-03-26
+
+While finishing naps' user manual was supposed to be the main course of work,
+it instead devolved into session integration of both naps and stacklook, while
+also making couplebreak persistent via a session. The latter went rather well,
+the former posed more issues than expected. Not only that, a possibly
+concurrency-related issue also popped up twice, but it was impossible to
+replicate. No matter, if it is really serious it will pop up again. Otherwise,
+it's a KernelShark bug not to be fixed in this project.
+
+Integrating stacklook and naps into KernelShark's sessions was quite the agony.
+Default plugins don't share these issues and it may be partly due to some hidden
+problem. First problem was double freeing in both plugins if a session was
+loaded from the GUI while the plugins themselves were also loaded. Exiting
+KernelShark then popped up a double-free error each time, GDB revealing that
+the plugin attempted to free an invalid stream with a negative ID. This was
+easily fixed by checking if a stream ID is non-negative.
+
+The other problem still kind of persists. While creating naps, an idea
+blossomed into a feature, where KernelShark allows sharng of its inner color
+table made for task colors. The feature is a simple const color table
+reference getter. This works almost every time, as the widget is always
+available with the colors. However, opening KernelShark without loading any
+user plugins (default ones do not qualify) and then attempting to import a
+session resulted in a segmentation fault, where the plugin couldn't access
+the color table, even though the KsGLWidget was already giving the reference
+and calling plugin's shape-making function. The cause of this is unknown.
+Leading theory was that the KsGLWidget object was not yet constructed, but
+with the shape-making function being called and the program returning a
+reference, just one which cannot be accessed, it seems the problem was
+somewhere else, but it is unknown where. Naps (and in the future stacklook)
+evaded issues by always starting in non-experimental mode, where its
+rectangles' outline colors were set to the color of the prev_state, as is
+the case with its filling color. Only when the user wishes to use experimental
+feature can it begin using task colors. This approach is sure to work,
+especially since plugin configurations do not persist. Stacklook will have it
+more difficult, but the same approach might work there as well.
