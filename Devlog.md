@@ -609,3 +609,7 @@ especially since plugin configurations do not persist. Stacklook will have it
 more difficult, but the same approach might work there as well. Maybe the
 cause was instead a reference to a dead object. Either way, without
 bigger KernelShark rewrites, this issue goes into very low priority.
+
+...
+
+But at least images are now in the user manual.
