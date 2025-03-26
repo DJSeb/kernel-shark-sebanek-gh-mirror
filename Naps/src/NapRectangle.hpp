@@ -77,10 +77,11 @@ public:
         const KsPlot::Color& outline_col,
         const KsPlot::Color& text_col);
 
+    // No use for an empty constructor
     NapRectangle() = delete;
     ~NapRectangle();
 };
 
-const std::string get_switch_prev_state(const kshark_entry* entry);
+char get_switch_prev_state(const kshark_entry* entry);
 
 #endif // _NAP_RECTANGLE_HPP

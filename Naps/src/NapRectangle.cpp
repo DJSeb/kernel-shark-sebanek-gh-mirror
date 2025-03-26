@@ -19,13 +19,14 @@
 
 // Plugin headers
 #include "NapRectangle.hpp"
+#include "NapConfig.hpp"
 
 // Static functions
 
 /**
  * @brief Map of abbreviations of prev_states to their full names.
  */
-static const std::map<char, const char*> LETTER_TO_NAME {{
+static const std::map<const char, const char*> LETTER_TO_NAME {{
     {'D', "uninterruptible (disk) sleep"},
     {'I', "idle"},
     {'P', "parked"},
@@ -99,7 +100,7 @@ NapRectangle::NapRectangle(const kshark_entry* start,
     _outline_down.setB(lower_point_b.x, lower_point_b.y);
 
     // Text
-    char start_ps = get_switch_prev_state(start)[0];
+    const char start_ps = get_switch_prev_state(start);
     std::string raw_text{LETTER_TO_NAME.at(start_ps)};
     // Capitalize to be more readable (and slightly cooler)
     for(auto& character : raw_text) {
@@ -116,8 +117,8 @@ NapRectangle::NapRectangle(const kshark_entry* start,
     const int text_centering = (_raw_text.size() * FONT_SIZE / 3);
     
     const int actual_x = base_x_1 + rectangle_end - text_centering;
-    // Move the text a little up
-    KsPlot::Point final_point{actual_x, base_y - 1};
+    // Move the text down a little bit
+    KsPlot::Point final_point{actual_x, base_y + 1};
 
 
     _text = KsPlot::TextBox(get_bold_font_ptr(), _raw_text,
@@ -144,15 +145,11 @@ NapRectangle::~NapRectangle() {
  * 
  * @param entry: `sched/sched_switch` event entry whose prev_state we wish to get
  *  
- * @returns Const C++ string with only one character - the prev_state
- * name abbreviation.
- * 
- * @note Returning the string is more useful as the value is used
- * in string concatenations.
+ * @returns Char representing the abbreviated previous state of the task.
  */
-const std::string get_switch_prev_state(const kshark_entry* entry) {
+char get_switch_prev_state(const kshark_entry* entry) {
     auto info_as_str = std::string(kshark_get_info(entry));
     std::size_t start = info_as_str.find(" ==>");
-    auto prev_state = info_as_str.substr(start - 1, 1);
+    char prev_state = info_as_str.substr(start - 1, 1)[0];
     return prev_state;
 }

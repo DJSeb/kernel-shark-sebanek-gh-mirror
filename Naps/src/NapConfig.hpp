@@ -44,7 +44,7 @@ public: // Class data members
 private: // Data members
     /// @brief Limit value of how many entries may be visible in a
     /// histogram for the plugin to take effect.
-    int32_t _histo_entries_limit{500};
+    int32_t _histo_entries_limit{10000};
 public: // Functions
     static NapConfig& get_instance();
     int32_t get_histo_limit() const;
@@ -59,9 +59,6 @@ private: // Constructor
  * of all that is in the config object by applying changes via
  * the Apply button. Changes won't be saved unless this is done and
  * selected changes can be discarded by closing the window.
- * 
- * @note Changes applied during configuration take effect AFTER
- * this window is closed.
  * 
  * @note This class is unsurprisingly heavily dependent on the
  * configuration 'NapConfig' singleton.

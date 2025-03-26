@@ -26,7 +26,7 @@
 /**
  * @brief Type to be used by the PREV_STATE_TO_COLOR constant.
 */
-using prev_state_colors_t = std::map<char, KsPlot::Color>;
+using prev_state_colors_t = std::map<const char, KsPlot::Color>;
 
 // Constants
 /**
@@ -86,7 +86,9 @@ static const KsPlot::Color _get_task_color(int pid) {
     KsTraceGraph* graph = NapConfig::main_w_ptr->graphPtr();
     // A journey to get the color of the task.
     const KsPlot::ColorTable& pid_color_table = graph->glPtr()->getPidColors();
-    bool pid_color_exists = static_cast<bool>(pid_color_table.count(pid));
+    bool pid_color_exists = static_cast<bool>(
+        pid_color_table
+        .count(pid));
 
     if (pid_color_exists) {
         result_color = pid_color_table.at(pid);
@@ -166,8 +168,8 @@ static NapRectangle* _make_nap_rect(std::vector<const KsPlot::Graph*> graph,
     KsPlot::Color, float)
 {
     // Positioning constants, relevant only here, hence defined here
-    constexpr int HEIGHT = 12;
-    constexpr int HEIGHT_OFFSET = 15;
+    constexpr int HEIGHT = 8;
+    constexpr int HEIGHT_OFFSET = -10;
     // Looking into KernelShark's source doesn't immediately reveal
     // why the graph is passed in a vector, but this is how it is
     // done in makeLatencyBox function in `KsPlugins.hpp`, which
@@ -175,13 +177,20 @@ static NapRectangle* _make_nap_rect(std::vector<const KsPlot::Graph*> graph,
     KsPlot::Point start_base_point = graph[0]->bin(bin[0])._val;
     KsPlot::Point end_base_point = graph[0]->bin(bin[1])._val;
 
-    auto point_0 = KsPlot::Point{start_base_point.x(),
+    /* Rectangle:
+        0----------3
+        |          |
+        |          |
+        1----------2
+    */
+
+    auto point_0 = KsPlot::Point{start_base_point.x() + 1,
         start_base_point.y() - HEIGHT_OFFSET - HEIGHT};
-    auto point_1 = KsPlot::Point{start_base_point.x(),
+    auto point_1 = KsPlot::Point{start_base_point.x() + 1,
         start_base_point.y() - HEIGHT_OFFSET};
-    auto point_3 = KsPlot::Point{end_base_point.x(),
+    auto point_3 = KsPlot::Point{end_base_point.x() - 1,
         end_base_point.y() - HEIGHT_OFFSET - HEIGHT};
-    auto point_2 = KsPlot::Point{end_base_point.x(),
+    auto point_2 = KsPlot::Point{end_base_point.x() - 1,
         end_base_point.y() - HEIGHT_OFFSET};
 
     // Put relevant entries into variables
@@ -192,7 +201,7 @@ static NapRectangle* _make_nap_rect(std::vector<const KsPlot::Graph*> graph,
     KsPlot::Rectangle rect;
     rect.setFill(true);
     // Access to global variable here.
-    rect._color = PREV_STATE_TO_COLOR.at(get_switch_prev_state(switch_entry)[0]);
+    rect._color = PREV_STATE_TO_COLOR.at(get_switch_prev_state(switch_entry));
 
     rect.setPoint(0, point_0);
     rect.setPoint(1, point_1);

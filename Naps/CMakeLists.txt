@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.1.2 FATAL_ERROR)
 project(naps)
 
 # Plugin meta
-set(NAPS_VERSION "1.1.0")
+set(NAPS_VERSION "1.2.0")
 
 # KernelShark meta
 set(KS_VERSION "2.4.0-couplebreak")
@@ -13,6 +13,14 @@ set(KS_VERSION "2.4.0-couplebreak")
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif ()
+
+# Detect if the user will be building without a modified KernelShark source
+if (_UNMODIFIED_KSHARK)
+  message("[INFO] Detected unmodified KernelShark source build argument.\n \
+           The plugin will omit mouse hover and couplebreak features.")
+else()
+  message("[INFO] Modified KernelShark source version of software will be built.")
+endif()
 
 # Build the plugin itself
 add_subdirectory("./src")

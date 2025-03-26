@@ -276,7 +276,8 @@ int KSHARK_PLOT_PLUGIN_DEINITIALIZER(struct kshark_data_stream* stream) {
         retval = 1;
     }
 
-    __close(stream->stream_id);
+    if (stream->stream_id >= 0)
+        __close(stream->stream_id);
 
     return retval;
 }

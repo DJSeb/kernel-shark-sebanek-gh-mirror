@@ -25,7 +25,7 @@ extern "C" {
 
 ///
 /// @brief Chosen font size for plugin's font.
-#define FONT_SIZE 8
+#define FONT_SIZE 7
 
 /**
  * @brief Context for the plugin, basically structured

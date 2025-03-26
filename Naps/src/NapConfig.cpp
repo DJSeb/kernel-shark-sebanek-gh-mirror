@@ -147,7 +147,7 @@ void NapConfigWindow::setup_endstage() {
     connect(&_close_button,	&QPushButton::pressed,
             this, &QWidget::close);
     connect(&_apply_button, &QPushButton::pressed,
-            this, [this]() { this->update_cfg(); });
+            this, [this]() { this->update_cfg(); this->close(); });
 }
 
 /**
