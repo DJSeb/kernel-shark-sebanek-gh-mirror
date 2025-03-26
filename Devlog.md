@@ -560,3 +560,12 @@ switch-to-switch boxes. Though it apparently was just an issue of setting the
 wrong pid in the C code.
 
 It would seem all works now :D
+
+## 2025-03-25
+
+Started documentaton work on the naps plugin. Then Stacklook documentation
+revision will follow. Afterwards, couplebreak documentation. Then, turn in
+for revision and start work on NUMA topology.
+
+_Author's note: Documentation is always so taxing on the mind, I feel my soul
+leaving my body._
