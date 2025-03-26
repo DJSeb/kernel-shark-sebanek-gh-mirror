@@ -46,6 +46,14 @@ NapConfig& NapConfig::get_instance() {
 int32_t NapConfig::get_histo_limit() const
 { return _histo_entries_limit; }
 
+/**
+ * @brief Gets whether to use experimental outline coloring for nap rectangles.
+ * 
+ * @return Whether to use experimental outline coloring for nap rectangles. 
+ */
+bool NapConfig::get_exp_coloring() const
+{ return _experimental_coloring; }
+
 // Window
 
 // Member functons
@@ -60,6 +68,8 @@ NapConfigWindow::NapConfigWindow()
     : QWidget(NapConfig::main_w_ptr),
     _histo_label("Entries on histogram until nap rectangles appear: "),
     _histo_limit(this),
+    _exp_col_label("Use experimental coloring: "),
+    _exp_col_btn(this),
     _close_button("Close", this),
     _apply_button("Apply", this)
 {
@@ -70,6 +80,7 @@ NapConfigWindow::NapConfigWindow()
     setMaximumHeight(300);
 
     setup_histo_section();
+    setup_experimental_coloring();
     
     // Connect endstage buttons to actions
     setup_endstage();
@@ -91,6 +102,7 @@ void NapConfigWindow::load_cfg_values() {
     NapConfig& cfg = NapConfig::get_instance();
 
     _histo_limit.setValue(cfg._histo_entries_limit);
+    _exp_col_btn.setChecked(cfg._experimental_coloring);
 }
 
 /**
@@ -105,6 +117,7 @@ void NapConfigWindow::update_cfg() {
     NapConfig& cfg = NapConfig::get_instance();
 
     cfg._histo_entries_limit = _histo_limit.value();
+    cfg._experimental_coloring = _exp_col_btn.isChecked();
 
     // Display a successful change dialog
     // We'll see if unique ptr is of any use here
@@ -137,6 +150,23 @@ void NapConfigWindow::setup_histo_section() {
 }
 
 /**
+ * @brief Sets up the experimental coloring checkbox.
+ * 
+ * @note Function is also dependent on the configuration
+ * 'NapConfig' singleton.
+ */
+void NapConfigWindow::setup_experimental_coloring() {
+    // Configuration access here
+    NapConfig& cfg = NapConfig::get_instance();
+
+    _exp_col_btn.setChecked(cfg._experimental_coloring);
+
+    _exp_col_layout.addWidget(&_exp_col_label);
+    _exp_col_layout.addStretch();
+    _exp_col_layout.addWidget(&_exp_col_btn);
+}
+
+/**
  * @brief Sets up the Apply and Close buttons by putting
  * them into a layout and assigning actions on pressing them.
  */
@@ -159,6 +189,8 @@ void NapConfigWindow::setup_layout() {
 
     // Add all control elements
     _layout.addLayout(&_histo_layout);
+    _layout.addStretch();
+    _layout.addLayout(&_exp_col_layout);
     _layout.addStretch();
     _layout.addLayout(&_endstage_btns_layout);
 

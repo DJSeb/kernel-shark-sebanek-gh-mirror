@@ -45,9 +45,13 @@ private: // Data members
     /// @brief Limit value of how many entries may be visible in a
     /// histogram for the plugin to take effect.
     int32_t _histo_entries_limit{10000};
+
+    /// @brief Whether to use experimental outline coloring for nap rectangles.
+    bool _experimental_coloring{false};
 public: // Functions
     static NapConfig& get_instance();
     int32_t get_histo_limit() const;
+    bool get_exp_coloring() const;
 private: // Constructor
     /// @brief Default constructor, hidden to enforce singleton pattern.
     NapConfig() = default;
@@ -93,6 +97,19 @@ private: // Qt data members
     /// before nap rectangles show up.
     QSpinBox        _histo_limit;
 
+    // Experimental coloring
+
+    /// @brief Layout used for the button and explanation of
+    /// what it does.
+    QHBoxLayout     _exp_col_layout;
+
+    ///
+    /// @brief Explanation of what the checkbox next to it does.
+    QLabel          _exp_col_label;
+
+    /// @brief Toggles whether to show nap rectangles or not.
+    QCheckBox       _exp_col_btn;
+
 public: // Qt data members
     ///
     /// @brief Close button for the widget.
@@ -104,6 +121,7 @@ public: // Qt data members
 private: // "Only Qt"-relevant functions
     void setup_histo_section();
     void setup_endstage();
+    void setup_experimental_coloring();
     void setup_layout();
 };
 

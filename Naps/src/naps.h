@@ -38,7 +38,7 @@ struct plugin_naps_context {
      * @brief Collected switch or wakeup events.
     */
     struct kshark_data_container* collected_events;
-    
+
     // Event IDs
 
     /**

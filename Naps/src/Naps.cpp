@@ -44,10 +44,11 @@ static const prev_state_colors_t PREV_STATE_TO_COLOR {
     {'Z', {128, 0, 128}} // Purple
 };
 
+
 // Static variables
 /**
  * @brief Static pointer to the configuration window.
-*/
+ */
 static NapConfigWindow* cfg_window;
 
 // Static functions
@@ -86,9 +87,7 @@ static const KsPlot::Color _get_task_color(int pid) {
     KsTraceGraph* graph = NapConfig::main_w_ptr->graphPtr();
     // A journey to get the color of the task.
     const KsPlot::ColorTable& pid_color_table = graph->glPtr()->getPidColors();
-    bool pid_color_exists = static_cast<bool>(
-        pid_color_table
-        .count(pid));
+    bool pid_color_exists = static_cast<bool>(pid_color_table.count(pid));
 
     if (pid_color_exists) {
         result_color = pid_color_table.at(pid);
@@ -160,7 +159,7 @@ static bool _nap_rect_check_function_general(const kshark_entry* entry) {
  * @returns Pointer to the heap-created nap rectangle.
  * 
  * @note  Function also depends on the file-global variable
- * `PREV_STATE_TO_COLOR`.
+ * `PREV_STATE_TO_COLOR` and the configuration `NapConfig` singleton.
  */
 static NapRectangle* _make_nap_rect(std::vector<const KsPlot::Graph*> graph,
     std::vector<int> bin,
@@ -209,8 +208,13 @@ static NapRectangle* _make_nap_rect(std::vector<const KsPlot::Graph*> graph,
     rect.setPoint(3, point_3);
 
     // Prepare outline color
-    const KsPlot::Color outline_col = _get_task_color(switch_entry->pid);
+    KsPlot::Color outline_col = rect._color;
     
+    // Configuration access here.
+    if(NapConfig::get_instance().get_exp_coloring()) {
+        outline_col = _get_task_color(switch_entry->pid);
+    }
+
     // Prepare text color
     float bg_intensity = _get_color_intensity(rect._color);
     const KsPlot::Color text_color = _black_or_white_text(bg_intensity);
