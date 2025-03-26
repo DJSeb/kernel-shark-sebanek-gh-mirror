@@ -29,7 +29,7 @@ class NapConfigWindow;
 /**
  * @brief Singleton class for the config object of the plugin.
  * Holds the histogram limit until nap rectangles activate and
- * a boolean deciding whether to draw nap rectangles or not.
+ * a pointer to the main window of KernelShark for GUI manipulation.
  * 
  * It's preinitialised to some sane defaults and is NOT persistent,
  * i.e. settings won't be preserved across different KernelShark sessions.
@@ -45,15 +45,9 @@ private: // Data members
     /// @brief Limit value of how many entries may be visible in a
     /// histogram for the plugin to take effect.
     int32_t _histo_entries_limit{500};
-
-    /// @brief Whether to draw rectangles with text between sched_switches
-    /// and `sched/sched_waking` events or `couplebreak/sched_waking[target]`
-    /// events or not.
-    bool _draw_naps{true};
 public: // Functions
     static NapConfig& get_instance();
     int32_t get_histo_limit() const;
-    bool get_draw_naps() const;
 private: // Constructor
     /// @brief Default constructor, hidden to enforce singleton pattern.
     NapConfig() = default;
@@ -102,19 +96,6 @@ private: // Qt data members
     /// before nap rectangles show up.
     QSpinBox        _histo_limit;
 
-    // Nap rectangles
-
-    /// @brief Layout used for the button and explanation of
-    /// what it does.
-    QHBoxLayout     _nap_rects_layout;
-
-    ///
-    /// @brief Explanation of what the checkbox next to it does.
-    QLabel          _nap_rects_label;
-
-    /// @brief Toggles whether to show nap rectangles or not.
-    QCheckBox       _nap_rects_btn;
-
 public: // Qt data members
     ///
     /// @brief Close button for the widget.
@@ -125,7 +106,6 @@ public: // Qt data members
     QPushButton     _apply_button;
 private: // "Only Qt"-relevant functions
     void setup_histo_section();
-    void setup_nap_rects();
     void setup_endstage();
     void setup_layout();
 };

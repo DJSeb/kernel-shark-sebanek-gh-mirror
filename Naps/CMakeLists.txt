@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.1.2 FATAL_ERROR)
 project(naps)
 
 # Plugin meta
-set(NAPS_VERSION "1.0.0")
+set(NAPS_VERSION "1.1.0")
 
 # KernelShark meta
 set(KS_VERSION "2.4.0-couplebreak")

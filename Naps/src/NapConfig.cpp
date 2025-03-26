@@ -46,14 +46,6 @@ NapConfig& NapConfig::get_instance() {
 int32_t NapConfig::get_histo_limit() const
 { return _histo_entries_limit; }
 
-/**
- * @brief Gets a boolean flag whether to draw rectangles for naps.
- * 
- * @returns True if we should draw naps, false otherwise.
- */
-bool NapConfig::get_draw_naps() const
-{ return _draw_naps; }
-
 // Window
 
 // Member functons
@@ -78,7 +70,6 @@ NapConfigWindow::NapConfigWindow()
     setMaximumHeight(300);
 
     setup_histo_section();
-    setup_nap_rects();
     
     // Connect endstage buttons to actions
     setup_endstage();
@@ -100,7 +91,6 @@ void NapConfigWindow::load_cfg_values() {
     NapConfig& cfg = NapConfig::get_instance();
 
     _histo_limit.setValue(cfg._histo_entries_limit);
-    _nap_rects_btn.setChecked(cfg._draw_naps);
 }
 
 /**
@@ -115,7 +105,6 @@ void NapConfigWindow::update_cfg() {
     NapConfig& cfg = NapConfig::get_instance();
 
     cfg._histo_entries_limit = _histo_limit.value();
-    cfg._draw_naps = _nap_rects_btn.isChecked();
 
     // Display a successful change dialog
     // We'll see if unique ptr is of any use here
@@ -148,25 +137,6 @@ void NapConfigWindow::setup_histo_section() {
 }
 
 /**
- * @brief Sets up explanation label and check box for controlling
- * display of nap rectangles.
- * 
- * @note Function is also dependent on the configuration
- * 'NapConfig' singleton.
- */
-void NapConfigWindow::setup_nap_rects() {
-    // Configuration access here
-    NapConfig& cfg = NapConfig::get_instance();
-
-    _nap_rects_label.setText("Display nap rectangles: ");
-    _nap_rects_btn.setChecked(cfg._draw_naps);
-
-    _nap_rects_layout.addWidget(&_nap_rects_label);
-    _nap_rects_layout.addStretch();
-    _nap_rects_layout.addWidget(&_nap_rects_btn);
-}
-
-/**
  * @brief Sets up the Apply and Close buttons by putting
  * them into a layout and assigning actions on pressing them.
  */
@@ -189,7 +159,8 @@ void NapConfigWindow::setup_layout() {
 
     // Add all control elements
     _layout.addLayout(&_histo_layout);
-    _layout.addLayout(&_nap_rects_layout);
+    _layout.addStretch();
+    _layout.addLayout(&_endstage_btns_layout);
 
     // Set the layout of the dialog
 	setLayout(&_layout);

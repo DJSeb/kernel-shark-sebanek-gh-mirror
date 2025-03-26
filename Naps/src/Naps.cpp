@@ -288,14 +288,12 @@ void draw_nap_rectangles(struct kshark_cpp_argv* argv_c, int sd,
     const NapConfig& config = NapConfig::get_instance();
     const int32_t HISTO_ENTRIES_LIMIT = config.get_histo_limit();
 
-    // Don't draw if not drawing tasks or if the user
-    // doesn't want to draw nap rectangles or 
+    // Don't draw if not drawing tasks or
     // if there are too many bins to draw.
     bool is_task_draw = (draw_action == KSHARK_TASK_DRAW);
-    bool draw_naps = config.get_draw_naps();
     bool is_too_many_bins = (argVCpp->_histo->tot_count > HISTO_ENTRIES_LIMIT);
     
-    if (!is_task_draw || !draw_naps || is_too_many_bins) {
+    if (!is_task_draw || is_too_many_bins) {
         return;
     }
 
