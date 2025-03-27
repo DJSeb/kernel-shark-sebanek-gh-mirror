@@ -76,6 +76,7 @@ static bool _check_function_general(const kshark_entry* entry,
            && is_visible_event && is_visible_graph;
 }
 
+#ifndef _UNMODIFIED_KSHARK
 /**
  * @brief Returns either a default color or one present in the
  * color table of the main window's GL Widget based on Process ID of a task.
@@ -100,6 +101,7 @@ static KsPlot::Color _get_task_color(int32_t task_pid, KsPlot::Color default_col
 
     return triangle_color;
 }
+#endif
 
 /**
  * @brief Returns either black if the background color's intensity is too great,
@@ -188,13 +190,14 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
     inner_triangle.setPoint(1, b);
     inner_triangle.setPoint(2, c);
 
+    inner_triangle._color = cfg.get_default_btn_col();
+#ifndef _UNMODIFIED_KSHARK
     // Colors are a bit wonky with sched_switch events. Using the function
     // makes it consistent across the board.
     if (cfg.get_use_task_colors()) {
         inner_triangle._color = _get_task_color(kshark_get_pid(event_entry), col);
-    } else {
-        inner_triangle._color = cfg.get_default_btn_col();
     }
+#endif
 
     // Inner triangle
     auto back_triangle = KsPlot::Triangle(inner_triangle);
@@ -259,8 +262,8 @@ static void config_show([[maybe_unused]] KsMainWindow*) {
  * entries in the container in the argument.
  * 
  * @param dct Data container of Stacklook-relevant entries
- * @return true if any kernel stack entry was found 
- * @return false if no kernel stack entry was found
+ * @return True if any kernel stack entry was found, false
+ * otherwise.
  */
 static bool search_for_kstacks(const kshark_data_container* dct) {
     if (dct == nullptr || dct->size == 0)
@@ -362,13 +365,15 @@ void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
     }
 
     plugin_data = ctx->collected_events;
-    // Couldn't get the context container (any reason)
     if (!plugin_data) {
+        // Couldn't get the context container (any reason)
         return;
     }
 
     // Search for kernelstack events once per stream on load.
     if (!ctx->searched_for_kstacks) {
+        // Update context variable to indicate whether any
+        // kernel stack entry exists.
         ctx->kstacks_exist = search_for_kstacks(plugin_data);
         ctx->searched_for_kstacks = true;
     }

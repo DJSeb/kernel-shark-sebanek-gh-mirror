@@ -41,6 +41,7 @@ SlConfig& SlConfig::get_instance() {
 int32_t SlConfig::get_histo_limit() const
 { return _histo_entries_limit; }
 
+#ifndef _UNMODIFIED_KSHARK
 /**
  * @brief Gets whether the task colors are used for Stacklook
  * buttons.
@@ -50,7 +51,6 @@ int32_t SlConfig::get_histo_limit() const
 bool SlConfig::get_use_task_colors() const
 { return _use_task_colors; }
 
-#ifndef _UNMODIFIED_KSHARK
 /**
  * @brief Get offset from the top of the kernel stack used
  * when displaying preview of the kernel stack.
@@ -149,7 +149,7 @@ static void _change_label_bg_color(QLabel* to_change,
 
 /**
  * @brief Sets up the layout for a button to change a color and a
- * preview of the color gotten from the colro dialog displayed by
+ * preview of the color gotten from the color dialog displayed by
  * pushing the button.
  * 
  * @param parent: owner of the Qt objects
@@ -214,8 +214,10 @@ SlConfigWindow::SlConfigWindow()
     _btn_outline_preview(this),
     _histo_label("Entries on histogram until Stacklook buttons appear: "),
     _histo_limit(this),
+#ifndef _UNMODIFIED_KSHARK
     _task_col_label("Use task colors for Stacklook buttons: "),
     _task_col_btn(this),
+#endif
     _close_button("Close", this),
     _apply_button("Apply", this)
 {
@@ -226,9 +228,9 @@ SlConfigWindow::SlConfigWindow()
     setMaximumHeight(300);
 
     setup_histo_section();
-
+#ifndef _UNMODIFIED_KSHARK
     setup_use_task_coloring();
-
+#endif
     // Configuration access here
     const SlConfig& cfg = SlConfig::get_instance();
 
@@ -279,7 +281,9 @@ void SlConfigWindow::update_cfg() {
 
     cfg._histo_entries_limit = _histo_limit.value();
 
+#ifndef _UNMODIFIED_KSHARK
     cfg._use_task_colors = _task_col_btn.isChecked();
+#endif
 
     // Dynamically added members need special handling 
     const int SUPPORTED_EVENTS_COUNT = static_cast<int>(cfg.get_events_meta().size());
@@ -350,6 +354,7 @@ void SlConfigWindow::setup_histo_section() {
     _histo_layout.addWidget(&_histo_limit);
 }
 
+#ifndef _UNMODIFIED_KSHARK
 /**
  * @brief Sets up the layout, checkbox and explanation label for the
  * task coloring configuration.
@@ -365,6 +370,7 @@ void SlConfigWindow::setup_use_task_coloring() {
     _task_col_layout.addStretch();
     _task_col_layout.addWidget(&_task_col_btn);
 }
+#endif
 
 /**
  * @brief Setup control elements for events meta. These control
@@ -449,7 +455,9 @@ void SlConfigWindow::setup_layout() {
     _layout.addLayout(&_histo_layout);
     _layout.addWidget(_get_hline(this));
     _layout.addStretch();
+#ifndef _UNMODIFIED_KSHARK
     _layout.addLayout(&_task_col_layout);
+#endif
     _layout.addLayout(&_def_btn_col_ctl_layout);
     _layout.addLayout(&_btn_outline_ctl_layout);
     _layout.addWidget(_get_hline(this));
@@ -500,8 +508,11 @@ void SlConfigWindow::load_cfg_values() {
                            &_def_btn_col);
     _change_label_bg_color(&_btn_outline_preview,
                            &_btn_outline);
+
+#ifndef _UNMODIFIED_KSHARK
     _task_col_btn.setChecked(cfg._use_task_colors);
-    
+#endif
+
     // Setting of dynamically added members - events meta
     const int SUPPORTED_EVENTS_COUNT = static_cast<int>(cfg.get_events_meta().size());
     const events_meta_t& cfg_evts_meta = cfg.get_events_meta();

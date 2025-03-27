@@ -65,9 +65,11 @@ class SlConfigWindow;
  * @brief Singleton class for the config object of the plugin.
  * Holds values of: histogram limit until Stacklook buttons activate,
  * default color of Stacklook buttons, color of Stacklook buttons' outline,
- * meta information about supported events - whether it's allowed to show
- * Stacklook buttons for them and how much offset from the top of the kernel
- * stack will the preview take into account when being displayed.
+ * if task colors should be used for buttons or not (modified KernelShark
+ * feature only), and meta information about supported events - whether it's
+ * allowed to show Stacklook buttons for them and how much offset from the
+ * top of the kernel stack will the preview take into account when being
+ * displayed.
  * 
  * Uses sane defaults and is NOT persistent, i.e. settings won't be preserved
  * across different KernelShark sessions.
@@ -85,10 +87,6 @@ private: // Data members
     int32_t _histo_entries_limit{10000};
 
     ///
-    /// @brief Whether to use task colors for buttons or not.
-    bool _use_task_colors{false};
-
-    ///
     /// @brief Default color of Stacklook buttons, white.
     KsPlot::Color _default_btn_col{0xFF, 0xFF, 0xFF};
 
@@ -97,6 +95,10 @@ private: // Data members
     KsPlot::Color _button_outline_col{0, 0, 0};
 
 #ifndef _UNMODIFIED_KSHARK
+    ///
+    /// @brief Whether to use task colors for buttons or not.
+    bool _use_task_colors{false};
+
     /**
      * @brief Map of event names keyed by their names with values:
      * 
@@ -127,8 +129,8 @@ private: // Data members
 public: // Functions
     static SlConfig& get_instance();
     int32_t get_histo_limit() const;
-    bool get_use_task_colors() const;
 #ifndef _UNMODIFIED_KSHARK
+    bool get_use_task_colors() const;
     uint16_t get_stack_offset(event_name_t evt_name) const;
 #endif    
     const KsPlot::Color get_default_btn_col() const; 
@@ -205,7 +207,7 @@ private: // Qt data members
     /// @brief Spinbox used to change the limit of entries visible
     /// before Stacklook buttons show up.
     QSpinBox        _histo_limit;
-
+#ifndef _UNMODIFIED_KSHARK
     // Task-like coloring
 
     /// @brief Layout used for the button and explanation of
@@ -218,7 +220,7 @@ private: // Qt data members
 
     /// @brief Toggles whether to use task colors for buttons or not.
     QCheckBox       _task_col_btn;
-
+#endif
     // Events meta
 
     /// @brief Layout used for the section of the config window
@@ -235,7 +237,9 @@ public: // Qt data members
 private: // Qt functions
     void update_cfg();
     void setup_histo_section();
+#ifndef _UNMODIFIED_KSHARK
     void setup_use_task_coloring();
+#endif
     void setup_events_meta_widget();
     void setup_layout();
     void setup_endstage();
