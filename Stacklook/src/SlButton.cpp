@@ -91,7 +91,7 @@ static const std::string _get_specific_info(const kshark_entry* entry) {
     plugin_stacklook_ctx* ctx = __get_context(entry->stream_id);
     const std::map<int32_t, const std::string> SPECIFIC_INFO_MAP{{
         { ctx->sswitch_event_id, "Task was in state " },
-        { ctx->swake_event_id,   "Task has woken up." }
+        { ctx->swaking_event_id, "Task has woken up." }
     }};
 
     const int32_t entry_event_id = kshark_get_event_id(entry);
@@ -308,10 +308,8 @@ void SlTriangleButton::_doubleClick() const {
     constexpr const char error_msg[] = "ERROR: No info field found!";                          
     const char* window_labeltext = kshark_get_task(_event_entry);
     
-    const kshark_entry* kstack_entry = get_kstack_entry(_event_entry);
-    
-    const char* kstack_string_ptr = (kstack_entry != nullptr) ?
-        kshark_get_info(kstack_entry) : nullptr;
+    const char* kstack_string_ptr = (_kstack_entry != nullptr) ?
+        kshark_get_info(_kstack_entry) : nullptr;
     
     const char* window_text = (kstack_string_ptr != nullptr) ? 
         kstack_string_ptr : error_msg;
@@ -348,11 +346,9 @@ void SlTriangleButton::_draw(const KsPlot::Color&, float) const {
  * 
  * @note It is dependent on the configuration 'SlConfig' singleton.
 */
-void SlTriangleButton::_mouseHover() const {
-    const kshark_entry* kstack_entry = get_kstack_entry(_event_entry);
-    
-    const char* kstack_string_ptr = (kstack_entry != nullptr) ?
-        kshark_get_info(kstack_entry) : nullptr;
+void SlTriangleButton::_mouseHover() const {    
+    const char* kstack_string_ptr = (_kstack_entry != nullptr) ?
+        kshark_get_info(_kstack_entry) : nullptr;
     
     if (kstack_string_ptr != nullptr) {
         auto event_name = kshark_get_event_name(_event_entry);

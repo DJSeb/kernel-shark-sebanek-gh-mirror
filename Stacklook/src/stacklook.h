@@ -41,9 +41,23 @@ struct plugin_stacklook_ctx {
     */
     int kstack_event_id;
     /**
-     * @brief Numerical id of sched_waking event.
+     * @brief Flag indicating presence of kernel_stack
+     * entries in the trace. Set upon first drawing attempt,
+     * as the selected events aren't fully loaded until then.
+     * 
+     * By default false.
+     */
+    bool kstacks_exist;
+    /**
+     * @brief Flag indicating whether the plugin has already
+     * searched for kernel stacks in the trace.
+     */
+    bool searched_for_kstacks;
+    /**
+     * @brief Numerical id of sched/sched_waking or
+     * couplebreak/sched_waking[target] event.
     */
-    int swake_event_id;
+    int swaking_event_id;
 
     /** 
      * @brief Collected switch or wakeup events.

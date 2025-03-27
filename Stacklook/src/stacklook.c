@@ -102,7 +102,7 @@ static void _sl_free_ctx(struct plugin_stacklook_ctx* sl_ctx)
 
     sl_ctx->sswitch_event_id = -1;
     sl_ctx->kstack_event_id = -1;
-    sl_ctx->swake_event_id = -1;
+    sl_ctx->swaking_event_id = -1;
 }
 
 /// @cond Doxygen_Suppress
@@ -137,6 +137,8 @@ static void _select_events(struct kshark_data_stream* stream,
 
     if (is_supported_event) {
         // -1 is nonsensical, but ensures the container isn't empty
+        // It will be later replaced by a pointer to the kernel stack entry
+        // if it is found.
         kshark_data_container_append(sl_ctx_collected_events, entry, (int64_t)-1);
     }
 }
@@ -157,23 +159,32 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     }
     if (!font_file || !bold_font_path) return 0;
     
+    kstack_id = kshark_find_event_id(stream, "ftrace/kernel_stack");
+    if (kstack_id < 0) { //This isn't totally reliable though.
+        printf("No ftrace/kernel_stack entries found, returning...\n");
+        return 0;
+    }
+
     struct plugin_stacklook_ctx* sl_ctx = __init(stream->stream_id);
 
-    if (!sl_ctx) {
+    if (!sl_ctx) { // Guard against faulty context double free (sessions)
 		__close(stream->stream_id);
 		return 0;
 	}
 
     sl_ctx->collected_events = kshark_init_data_container();
 
+    sl_ctx->kstacks_exist = false;
+    sl_ctx->searched_for_kstacks = false;
+    // Do not be fooled, the kstack events might not be real, but their
+    // event ID might be present in the trace file.
+    sl_ctx->kstack_event_id = kstack_id;
+
     sched_switch_id = kshark_find_event_id(stream, "sched/sched_switch");
     sl_ctx->sswitch_event_id = sched_switch_id;
 
-    kstack_id = kshark_find_event_id(stream, "ftrace/kernel_stack");
-    sl_ctx->kstack_event_id = kstack_id;
+    sl_ctx->swaking_event_id = kshark_find_event_id(stream, "sched/sched_waking");
 
-    sched_wake_id = kshark_find_event_id(stream, "sched/sched_waking");
-    sl_ctx->swake_event_id = sched_wake_id;
 
     kshark_register_event_handler(stream, sched_switch_id, _select_events);
     kshark_register_event_handler(stream, sched_wake_id, _select_events);

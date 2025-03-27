@@ -613,3 +613,20 @@ bigger KernelShark rewrites, this issue goes into very low priority.
 ...
 
 But at least images are now in the user manual.
+
+## 2025-03-27
+
+A much better PDF user manual for Naps was made.
+
+Stacklook got its button coloring changed as well. It also helps
+a little with readability, so that's nice.
+
+But there is a performance issue apparently, seems that thousands of
+entries will make KernelShark freeze with Stacklook on. Which
+is a little funny.
+
+...
+
+Performance issue was fixed and Stacklook was improved to rely
+less on runtime searches - kstack entries are now found once per
+stream load, improving performance anyway.

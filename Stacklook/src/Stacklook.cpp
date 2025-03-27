@@ -46,6 +46,8 @@ static SlConfigWindow* cfg_window;
  * in the plot.
  * 
  * @param entry: KernelShark entry whose properties must be checked
+ * @param kstack_entry: KernelShark entry containing the correct kernel stack
+ * of the event in `entry`.
  * @param ctx: Stacklook plugin context
  * 
  * @returns True if the entry fulfills all of function's requirements,
@@ -54,26 +56,23 @@ static SlConfigWindow* cfg_window;
  * @note It is dependent on the configuration 'SlConfig' singleton.
 */
 static bool _check_function_general(const kshark_entry* entry,
+                                    const kshark_entry* kstack_entry,
                                     const plugin_stacklook_ctx* ctx) {
-    if (!entry) return false;
+    if (!entry || !kstack_entry)
+        return false;
+    
     bool correct_event_id = (ctx->sswitch_event_id == entry->event_id)
-                            || (ctx->swake_event_id == entry->event_id);
+                            || (ctx->swaking_event_id == entry->event_id);
     
     // Configuration access here.
     bool is_config_allowed = SlConfig::get_instance().is_event_allowed(entry);
-    
-    const kshark_entry* kstack_entry = get_kstack_entry(entry);
-    // Guard oneself against a nullptr reference.
-    if (!kstack_entry) return false;
-    int entry_evt_id = kshark_get_event_id(kstack_entry);
-    bool has_next_kernelstack = (ctx->kstack_event_id == entry_evt_id);
 
     bool is_visible_event = entry->visible
                             & kshark_filter_masks::KS_EVENT_VIEW_FILTER_MASK;
     bool is_visible_graph = entry->visible
                             & kshark_filter_masks::KS_GRAPH_VIEW_FILTER_MASK;
     
-    return correct_event_id && is_config_allowed && has_next_kernelstack
+    return correct_event_id && is_config_allowed
            && is_visible_event && is_visible_graph;
 }
 
@@ -157,6 +156,7 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
     const SlConfig& cfg = SlConfig::get_instance();
 
     kshark_entry* event_entry = data[0]->entry;
+    const kshark_entry* kstack_entry = (const kshark_entry*)(data[0]->field);
 
     // Base point
     KsPlot::Point base_point = graph[0]->bin(bin[0])._val;
@@ -195,6 +195,7 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
     } else {
         inner_triangle._color = cfg.get_default_btn_col();
     }
+
     // Inner triangle
     auto back_triangle = KsPlot::Triangle(inner_triangle);
     // Configuration access here.
@@ -213,7 +214,7 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
     auto text = KsPlot::TextBox(get_font_ptr(), STACK_BUTTON_TEXT, text_color,
                                 KsPlot::Point{text_x, text_y});
 
-    auto sl_button = new SlTriangleButton(event_entry, back_triangle,
+    auto sl_button = new SlTriangleButton(event_entry, kstack_entry, back_triangle,
                                           inner_triangle, text);
 
     return sl_button;
@@ -252,6 +253,35 @@ static void config_show([[maybe_unused]] KsMainWindow*) {
     cfg_window->show();
 }
 
+/**
+ * @brief To be called only once per stream load. Stores kernel
+ * stack entry pointers to the field of Stacklook-relevant
+ * entries in the container in the argument.
+ * 
+ * @param dct Data container of Stacklook-relevant entries
+ * @return true if any kernel stack entry was found 
+ * @return false if no kernel stack entry was found
+ */
+static bool search_for_kstacks(const kshark_data_container* dct) {
+    if (dct == nullptr || dct->size == 0)
+        return false;
+    
+    bool found_at_least_one = false;
+
+    for (ssize_t i = 0; i < dct->size; ++i) {
+        kshark_data_field_int64* sl_relevant = dct->data[i];
+        const kshark_entry* kstack_entry = get_kstack_entry(sl_relevant->entry);
+        if (kstack_entry != nullptr) {
+            sl_relevant->field = (int64_t)(kstack_entry);
+            found_at_least_one = true;
+        }
+    }
+
+    return found_at_least_one;
+}
+
+// #########################################################################
+
 // Functions defined in the C header
 
 /**
@@ -272,11 +302,6 @@ const struct kshark_entry* get_kstack_entry(const struct kshark_entry* kstack_ow
     plugin_stacklook_ctx* ctx = __get_context(kstack_owner->stream_id);
     
     if (ctx == nullptr)
-        return nullptr;
-
-    // Ftrace/kernel_stack event ID was not found = event was not
-    // recorded, therefore search is pointless.
-    if (ctx->kstack_event_id < 0)
         return nullptr;
 
     bool is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
@@ -331,7 +356,7 @@ void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
         return;
     }
     
-    // Don't draw with too many bins (configurable zoom-in indicator)
+    // Don't draw with too many bins (configurable zoom-in indicator).
     if (argVCpp->_histo->tot_count > HISTO_ENTRIES_LIMIT) {
         return;
     }
@@ -342,22 +367,38 @@ void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
         return;
     }
 
+    // Search for kernelstack events once per stream on load.
+    if (!ctx->searched_for_kstacks) {
+        ctx->kstacks_exist = search_for_kstacks(plugin_data);
+        ctx->searched_for_kstacks = true;
+    }
+
+    if (!ctx->kstacks_exist) {
+        // No reason to draw anything, if no kernelstacks are present in
+        // the trace.
+        return;
+    }
+
     IsApplicableFunc check_func;
     
     if (draw_action == KSHARK_TASK_DRAW) {
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
             kshark_entry* entry = data_c->data[t]->entry;
+            const kshark_entry* kstack_ptr = 
+                (kshark_entry*)(data_c->data[t]->field);
             if (!entry) return false;
             bool correct_pid = entry->pid == val;
-            return _check_function_general(entry, ctx) && correct_pid;
+            return _check_function_general(entry, kstack_ptr, ctx) && correct_pid;
         };
         
     } else if (draw_action == KSHARK_CPU_DRAW) {
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
             kshark_entry* entry = data_c->data[t]->entry;
+            const kshark_entry* kstack_ptr = 
+                (kshark_entry*)(data_c->data[t]->field);
             if (!entry) return false;
             bool correct_cpu = (data_c->data[t]->entry->cpu == val);
-            return _check_function_general(entry, ctx) && correct_cpu;
+            return _check_function_general(entry, kstack_ptr, ctx) && correct_cpu;
         };
     }
 
