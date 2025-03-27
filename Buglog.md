@@ -1,5 +1,3 @@
-<!-- I could use something more robust, but this will do. -->
-
 These should be interchangeable with GitLab issues and their comments.
 
 If any bug occurs, note it here and its environment + behaviour.
@@ -7,28 +5,9 @@ If a bug has been solved, mark it and provide explanation (or a commit ID where 
 
 # Open bugs
 
-1. Triangle buttons are drawn in the opposite order they're accessible, i.e.
-   overlapping buttons don't visually represent the logical overlap order.
-
-- Status: ON HOLD
-- Cause: Incorrect rendering ordering
-- Possible solution(s):
-  1. Change how KernelShark is rendering plot objects
-  2. Change how plot objects are being added (in plugin or in kshark)
-  3. Change what the cursor is hovering over to objects added first (if possible)
-  - Final solution should be applied after others are compared
-- Environment: WSL-openSUSE-Tumbleweed
-
-2. Adding the plugin again will have the program do a double free on exit.
-
-- Status: OPEN
-- Cause: No protection from double plugin load
-- Possible solution: Introduce a guard check before attempting to load the plugin.
-- Environment: WSL-openSUSE-Tumbleweed
-
 # Closed bugs
 
-1. Switching between trace files results in a segmentation fault
+1. Switching between trace files results in a segmentation fault.
 
 - Status: CLOSED
 - Cause: Most likely a double free in clean_opened_views.
@@ -40,10 +19,32 @@ If a bug has been solved, mark it and provide explanation (or a commit ID where 
 - Environment: WSL-openSUSE-Tumbleweed
 
 2. Switching between trace files results in Stacklook's triangle buttons
-   losing the ability to assign color to trace files
+   losing the ability to assign color to trace files.
 
 - Status: CLOSED
-- Cause: Most likely staticness of a variable and lack of change
-  after trace file switch.
+- Cause: Most likely staticness of a variable and lack of change after trace file switch.
 - Solution: Function that restarts color table after tracefile load.
+- Environment: WSL-openSUSE-Tumbleweed
+
+1. Adding the plugin again will have the program do a double free on exit.
+
+- Status: CLOSED
+- Cause: No protection from double plugin deload
+- Solution: Introduce a guard check before attempting to deload the plugin.
+- Environment: WSL-openSUSE-Tumbleweed
+
+4. Triangle buttons are drawn in the opposite order they're accessible, i.e.
+   clicking on/hovering over a button will select the button drawn UNDER the one
+   clicked at.
+
+- Status: ON HOLD
+- Cause: Incorrect rendering ordering
+- Possible solution(s):
+  1. Change how KernelShark is rendering plot objects
+    - Rejected: way too much work for this scope, but probably the only real solution.
+    - Attempted solution to reverse the drawn forwards list each time introduced more issues than wanted.
+  2. Change how plot objects are being added (in plugin or in kshark)
+    - Rejected: goes against the API
+  3. Change what the cursor is hovering over to objects added first (if possible)
+    - Rejected: Same reason as point 1
 - Environment: WSL-openSUSE-Tumbleweed

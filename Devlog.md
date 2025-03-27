@@ -1,4 +1,4 @@
-Prrpose of this is simply to jot down progress (self-motivation)
+Purpose of this is simply to jot down progress (self-motivation)
 and keep track of noticed issues and possibly great ideas (tracker),
 as well as quetions arisen during development (design decisions & encountered challenges).
 
@@ -16,9 +16,14 @@ Parts may be published later on in documentation.
 If any performance is deemed suspiciously low, note it here.
 If a concern is either solved or dismissed, write an explanation.
 
-- Explore optimizations to mouse hover detection
-  - Note: Worth to meddle with KernelShark's insides,
-    since that will be inevitable now anyway
+1. Stacklook performed too badly when loading a trace without kernel stack.
+  - **Solution**: check if the trace includes kernel stack trace events +
+    perform a on-load search of kernel stack entries, so that further searches are unnecessary.
+
+2. Explore optimizations to mouse hover detection
+  - Note: Worth to meddle with KernelShark's insides, since that will be inevitable now anyway
+  - **Solution**: Ignored, KernelShark behaves perfectly well with many entries and mouse hover over
+    plot objects implemented as is.
 
 ## QnInA - Questions & Ideas & Answers
 
@@ -28,8 +33,11 @@ This is noted mostly as a journal to not attempt some approaches again and as de
 documentation.
 
 - How to achieve better cohesion and less coupling between `Stacklook` and `sched_events`?
-
-  - I: Implement a "record changes history" to easily find out original values before modification
+  - **A**: Implement the splitting of events and work from there - sched_events and stacklook
+    then shouldn't interfere with each other.
+    - PRO - this will have to happen anyway, might as well leverage the feature
+    - CON - will require at least some rewrites to make both plugins behave nicely
+  - \[REJECTED\] I: Implement a "record changes history" to easily find out original values before modification
     - PRO - easily finds any historical change
     - PRO - a pretty lightweight and future-proof solution
     - CON - changes all of KernelShark's plugins behaviour, i.e. breaking change
@@ -41,34 +49,26 @@ documentation.
         Linked list would only prove useful if it was impossible to read original data
         for an intended functionality.
     - Verdict: An option for sure.
-  - I: Find out if it is possible to load original data and use them even after KernelShark
+  - \[REJECTED\] I: Find out if it is possible to load original data and use them even after KernelShark
     let other plugins do their work.
     - CON - might need to store copies of a whole file, i.e. memory-unfriendly
     - CON - semester project showed that this is most probably tedious work and either not directly
       supported by KShark or not at all
     - PRO - less rewrites of existing code
     - PRO - separated only into plugin's code, i.e. no SRP violation
-  - I: Implement the splitting of events and work from there - sched_events and stacklook
-    then shouldn't interfere with each other.
-    - PRO - this will have to happen anyway, might as well leverage the feature
-    - CON - will require at least some rewrites to make both plugins behave nicely
 
 - How to enable NUMA visualization support?
-
-  - A: Simply put, KernelShark's source code will be dissected and the visualization abilities
+  - **A**: Simply put, KernelShark's source code will be dissected and the visualization abilities
     written by hand.
     - Reason: KernelShark does not directly support reordering of CPUs in the graph, hence that
       ability will need to be implemented. KernelShark also doesn't support different visualization
-      options, so that will also be written.
+      options, so that will also be added.
 
 - How to split events from trace-cmd to target and initiator where applicable?
-  - I: Try to intercept the incoming stream of files and add target's (initiators are the ones that are
+  - **A**: Try to intercept the incoming stream of files and add target's (initiators are the ones that are
     collected by default) 'fake' event.
-    - PRO: Most straightforward, most likely will be the answer.
-    - Will have to parse through trace-cmd's raw output or change parsed data when a splittable event
-      is detected or do a second pass after data are in KernelShark's memory.
-    - Verdict: Plausible solution, most likely the answer.
-  - I: Don't add any events, but create a special filter through which normal events go through without a
+    - Reason: Most straightforward, perfect place for implementation, simple integration with existing modules.
+  - \[REJECTED\] I: Don't add any events, but create a special filter through which normal events go through without a
     hitch, but splittable events are drawn as if they were in the data.
     - PRO: Less memory used by KernelShark holding real events.
     - PRO: Consistency with trace-cmd output.
