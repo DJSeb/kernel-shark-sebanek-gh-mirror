@@ -83,6 +83,7 @@ For API documentation, please refer to the `doc/technical` directory.
 - The idea of this plugin was suggested by **Jan Kára RNDr.**, who also serves as project's **supervisor**.
 - **Yordan Karadzhov** - maintains KernelShark, inspiration in already written plugins was of immense help
 - ChatGPT deserves the "greatest evolution of the rubber ducky" award - not very helpful, but great to just unload bad ideas onto
+- **Markdown PDF** - VS Code extension, allowed me to export the manual with pictures easily
 - **Doxygen Awesome CSS** - [beautiful CSS theme](https://jothepro.github.io/doxygen-awesome-css/index.html)
   that makes Doxygen documentation look visually pleasing
 

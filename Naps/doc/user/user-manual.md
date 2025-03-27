@@ -9,8 +9,10 @@ Figure 1.
 
 ## Prerequisites
 
-- CMake of version at least 3.1.2
-- KernelShark an its dependencies
+- CMake of version at least *3.1.2*
+- KernelShark and its dependencies
+  - version *2.4.0-couplebreak* and higher for custom KernelShark
+  - version *2.3.2* for unmodified KernelShark
 
 ## Compatibility
 
@@ -21,6 +23,8 @@ custom versions improve compatibility with other plugins.
 With couplebreak on, the plugin is fully compatible with every default KernelShark plugin. With couplebreak off,
 *sched_events* plugin is incompatible. In general, if any plugin changes event's PID data during data stream loading,
 this plugin will be incompatible with it.
+
+No other dependencies are necessary, except the standard libraries of C and C++.
 
 ## Build and install only this plugin
 
@@ -71,7 +75,9 @@ Ticked checkbox means the plugin is enabled, empty checkbox means the plugin is 
 
 ## Configuration
 
-If the plugin is enabled, additional button will appear in `Tools` menu with the label `Naps Configuration` (figure 3).
+Plugin configuration can be done at any time, even before any trace file is loaded.
+
+Additional button will appear in `Tools` menu with the label `Naps Configuration` (figure 3).
 Clicking on it will show a window dialog (figure 4), which will house configuraton options for the plugin. One of the
 two configuration options available for this plugin is the maximum amount of entries visible on the graph before the
 plugin is allowed to work. This configuration option can help if there are either not enough visible plugin shapes
