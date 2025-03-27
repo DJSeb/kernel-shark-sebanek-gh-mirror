@@ -126,7 +126,7 @@ static constexpr double _trigon_area(const ksplot_point a,
                 (c.x * (a.y - b.y))) / 2.0);
 }
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
 /**
  * @brief Cuts off the address and the arrow of the textual stack item.
  * If the item is too long, it is truncated to its 44 starting characters
@@ -336,7 +336,7 @@ void SlTriangleButton::_draw(const KsPlot::Color&, float) const {
     _add_sched_switch_prev_state_text(_event_entry, _text, text_position);
 }
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
 /**
  * @brief Action on mouse moving over the plugin's plot object event.
  * Shows the task name of the stack trace and three top items in the stack.

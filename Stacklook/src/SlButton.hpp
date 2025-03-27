@@ -78,7 +78,7 @@ private: // Functions
     void _doubleClick() const override;
     void _draw(const KsPlot::Color&, float) const override;
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
     /// WARN:
     /// WILL NOT WORK WITHOUT MODIFIED KERNELSHARK WITH SUPPORT
     /// FOR MOUSE MOVE OVER PLOTOBJECT REACTIONS

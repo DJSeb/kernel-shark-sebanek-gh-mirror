@@ -35,7 +35,7 @@ using allowed_t = bool;
  */
 using event_name_t = std::string;
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
 /**
  * @brief From which depth in the kernel stack (top being 0)
  * the preview should start.
@@ -94,7 +94,7 @@ private: // Data members
     /// Used when the buttons couldn't get the color of their task.
     KsPlot::Color _button_outline_col{0, 0, 0};
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Task colors, stack offset
     ///
     /// @brief Whether to use task colors for buttons or not.
     bool _use_task_colors{false};
@@ -129,7 +129,7 @@ private: // Data members
 public: // Functions
     static SlConfig& get_instance();
     int32_t get_histo_limit() const;
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Task colors, stack offset
     bool get_use_task_colors() const;
     uint16_t get_stack_offset(event_name_t evt_name) const;
 #endif    
@@ -207,7 +207,7 @@ private: // Qt data members
     /// @brief Spinbox used to change the limit of entries visible
     /// before Stacklook buttons show up.
     QSpinBox        _histo_limit;
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Task colors
     // Task-like coloring
 
     /// @brief Layout used for the button and explanation of
@@ -237,7 +237,7 @@ public: // Qt data members
 private: // Qt functions
     void update_cfg();
     void setup_histo_section();
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Task colors
     void setup_use_task_coloring();
 #endif
     void setup_events_meta_widget();

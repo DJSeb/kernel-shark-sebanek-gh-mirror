@@ -41,7 +41,7 @@ SlConfig& SlConfig::get_instance() {
 int32_t SlConfig::get_histo_limit() const
 { return _histo_entries_limit; }
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Task colors, stack offset
 /**
  * @brief Gets whether the task colors are used for Stacklook
  * buttons.
@@ -105,7 +105,7 @@ bool SlConfig::is_event_allowed(const kshark_entry* entry) const {
     const std::string evt_name{kshark_get_event_name(entry)};
     return (_events_meta.count(evt_name) == 0) ?
         false
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
         : _events_meta.at(evt_name).first;
 #else
         : _events_meta.at(evt_name);
@@ -214,7 +214,7 @@ SlConfigWindow::SlConfigWindow()
     _btn_outline_preview(this),
     _histo_label("Entries on histogram until Stacklook buttons appear: "),
     _histo_limit(this),
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Task colors
     _task_col_label("Use task colors for Stacklook buttons: "),
     _task_col_btn(this),
 #endif
@@ -228,7 +228,7 @@ SlConfigWindow::SlConfigWindow()
     setMaximumHeight(300);
 
     setup_histo_section();
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Task colors
     setup_use_task_coloring();
 #endif
     // Configuration access here
@@ -281,7 +281,7 @@ void SlConfigWindow::update_cfg() {
 
     cfg._histo_entries_limit = _histo_limit.value();
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Task colors
     cfg._use_task_colors = _task_col_btn.isChecked();
 #endif
 
@@ -292,18 +292,18 @@ void SlConfigWindow::update_cfg() {
         auto index_str = std::to_string(i);
         auto event_name = this->findChild<QLabel*>("evt_name_" + index_str);
         auto event_allowed = this->findChild<QCheckBox*>("evt_allowed_" + index_str);
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
         auto event_depth = this->findChild<QSpinBox*>("evt_depth_" + index_str);
 #endif
         // On successful finds, change values in the configuration object
         if (event_name != nullptr
             && event_allowed != nullptr
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
             && event_depth != nullptr
 #endif
         ) {
             std::string event_name_str = event_name->text().toStdString();
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
             event_meta_t& event_meta = cfg._events_meta.at(event_name_str);
             event_meta.first = event_allowed->isChecked();
             event_meta.second = (uint16_t)event_depth->value();
@@ -354,7 +354,7 @@ void SlConfigWindow::setup_histo_section() {
     _histo_layout.addWidget(&_histo_limit);
 }
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Task colors
 /**
  * @brief Sets up the layout, checkbox and explanation label for the
  * task coloring configuration.
@@ -394,7 +394,7 @@ void SlConfigWindow::setup_events_meta_widget() {
     header_row->addWidget(header_evt_name);
     header_row->addStretch();
     header_row->addWidget(header_evt_allowed);
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
     QLabel* header_evt_depth = new QLabel{this};
     header_evt_depth->setText("Preview stack offset");
 
@@ -417,7 +417,7 @@ void SlConfigWindow::setup_events_meta_widget() {
         // Necessary for finding these later
         evt_name->setObjectName("evt_name_" + std::to_string(i));
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
         evt_allowed->setChecked(it->second.first);
 #else
         evt_allowed->setChecked(it->second);
@@ -428,7 +428,7 @@ void SlConfigWindow::setup_events_meta_widget() {
         row->addStretch();
         row->addWidget(evt_allowed);
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
         QSpinBox* evt_depth = new QSpinBox{this};
         
         evt_depth->setValue(it->second.second);
@@ -455,7 +455,7 @@ void SlConfigWindow::setup_layout() {
     _layout.addLayout(&_histo_layout);
     _layout.addWidget(_get_hline(this));
     _layout.addStretch();
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Task colors
     _layout.addLayout(&_task_col_layout);
 #endif
     _layout.addLayout(&_def_btn_col_ctl_layout);
@@ -509,7 +509,7 @@ void SlConfigWindow::load_cfg_values() {
     _change_label_bg_color(&_btn_outline_preview,
                            &_btn_outline);
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Task colors
     _task_col_btn.setChecked(cfg._use_task_colors);
 #endif
 
@@ -521,18 +521,18 @@ void SlConfigWindow::load_cfg_values() {
         auto index_str = std::to_string(i);
         auto event_name = this->findChild<QLabel*>("evt_name_" + index_str);
         auto event_allowed = this->findChild<QCheckBox*>("evt_allowed_" + index_str);
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
         auto event_depth = this->findChild<QSpinBox*>("evt_depth_" + index_str);
 #endif
         // If all went well, events meta elements were found and can be changed
         if (event_name != nullptr
             && event_allowed != nullptr
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
             && event_depth != nullptr
 #endif
         ) {
             std::string event_name_str = event_name->text().toStdString();
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
             const event_meta_t& specific_evt_meta = cfg_evts_meta.at(event_name_str);
             
             const allowed_t is_allowed = specific_evt_meta.first;
