@@ -16,7 +16,8 @@ sched_events plugin, which only visualises switch-to-switch or waking-to-switch 
   otherwise couplebreak's generated target event will.
 - Plugin will color the nap rectangles using information from previous state of the task and its PID. PID-color is 
   determined internally by KernelShark, Plugin only accesses it and uses it for the rectangle's outlines, if the task
-  coloring option was checked in Plugin's configuration. Color from the previous state is used to fill the shape's insides. It is chosen via to a state-to-color mapping as follows:
+  coloring option was checked in Plugin's configuration (only for custom KernelShark). Color from the previous state 
+  is used to fill the shape's insides. It is chosen via to a state-to-color mapping as follows:
   - Uninterruptible disk sleep -> red
   - Idle -> Yellow
   - Parked -> Orange
@@ -62,6 +63,7 @@ sched_events plugin, which only visualises switch-to-switch or waking-to-switch 
     - **source files of the plugin**
   - *CMakeLists.txt* (Main build file)
   - *README.md* (what you're reading currently)
+  - *LICENSE*
 
 # Usage & documentation
 
