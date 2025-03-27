@@ -82,7 +82,7 @@ public: // Class data members
 private: // Data members
     /// @brief Limit value of how many entries may be visible in a
     /// histogram for the plugin to take effect.
-    int32_t _histo_entries_limit{500};
+    int32_t _histo_entries_limit{10000};
 
     ///
     /// @brief Whether to use task colors for buttons or not.

@@ -24,6 +24,8 @@
 #include "SlPrevState.hpp"
 
 // Usings
+///
+/// @brief Simpler to type alias for the top 3 stack items array.
 using top_3_stack_t = std::array<QString, 3>;
 
 // Static functions
@@ -230,15 +232,18 @@ static top_3_stack_t _get_top_three_from_start(std::size_t str_pos,
  * 
  * @param stacktrace: C-string of the stack trace to be processed
  * @param evt_name: for determining stack offset of an entry
- * @param out_array: output C++ 3-member array, top traces are eventually stored there
+ * 
  * @return `top_3_stack_t` Array of the top three stack items after a user-set
  * amount of items was skipped.
  * If the offset is too high, the array will contain three dashes (i.e. "no
  * stack items were found").
+
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
 static top_3_stack_t _get_top_three_stack_items(const char* stacktrace,
-                                                         const std::string& evt_name) {
+                                                const std::string& evt_name) {
     std::string trace_str{stacktrace};
+    // Configuration access here
     const int16_t stack_offset = SlConfig::get_instance().get_stack_offset(evt_name);    
     
     std::size_t str_pos = _get_stack_start_pos(stack_offset, trace_str);
@@ -338,8 +343,10 @@ void SlTriangleButton::_draw(const KsPlot::Color&, float) const {
  * @brief Action on mouse moving over the plugin's plot object event.
  * Shows the task name of the stack trace and three top items in the stack.
  *
- * @warning WILL NOT WORK WITHOUT MODIFIED KERNELSHARK WITH SUPPORT
- * FOR MOUSE MOVE OVER PLOTOBJECT REACTIONS
+ * @warning Will not work without modified KernelShark, as hover
+ * plot object's functionalities are missing in such a version.
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
 void SlTriangleButton::_mouseHover() const {
     const kshark_entry* kstack_entry = get_kstack_entry(_event_entry);
@@ -352,7 +359,7 @@ void SlTriangleButton::_mouseHover() const {
         top_3_stack_t top_three_items = _get_top_three_stack_items(kstack_string_ptr,
             event_name); 
         const char* last_item = (top_three_items[2] == "-") ? "(End of stack)" : "..."; 
-
+        // Configuration access here
         SlConfig::main_w_ptr->graphPtr()->setPreviewLabels(
             kshark_get_task(_event_entry),
             top_three_items[0],
@@ -361,6 +368,7 @@ void SlTriangleButton::_mouseHover() const {
             last_item
         );
     } else {
+        // Configuration access here
         SlConfig::main_w_ptr->graphPtr()->setPreviewLabels(
             kshark_get_task(_event_entry),
             "NO KERNEL STACK ENTRY FOUND"

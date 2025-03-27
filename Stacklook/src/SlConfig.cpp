@@ -41,6 +41,15 @@ SlConfig& SlConfig::get_instance() {
 int32_t SlConfig::get_histo_limit() const
 { return _histo_entries_limit; }
 
+/**
+ * @brief Gets whether the task colors are used for Stacklook
+ * buttons.
+ * 
+ * @return Boolean representing current configuration value. 
+ */
+bool SlConfig::get_use_task_colors() const
+{ return _use_task_colors; }
+
 #ifndef _UNMODIFIED_KSHARK
 /**
  * @brief Get offset from the top of the kernel stack used
@@ -194,15 +203,19 @@ static void _setup_colorchange(QWidget* parent,
 
 /**
  * @brief Constructor for the configuration window.
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
  */
 SlConfigWindow::SlConfigWindow()
-    : QWidget(SlConfig::main_w_ptr),
+    : QWidget(SlConfig::main_w_ptr), // Configuration access here
     _def_btn_col_btn("Choose default button color", this),
     _def_btn_col_preview(this),
     _btn_outline_btn("Choose button outline color", this),
     _btn_outline_preview(this),
     _histo_label("Entries on histogram until Stacklook buttons appear: "),
     _histo_limit(this),
+    _task_col_label("Use task colors for Stacklook buttons: "),
+    _task_col_btn(this),
     _close_button("Close", this),
     _apply_button("Apply", this)
 {
@@ -214,14 +227,14 @@ SlConfigWindow::SlConfigWindow()
 
     setup_histo_section();
 
+    setup_use_task_coloring();
+
     // Configuration access here
     const SlConfig& cfg = SlConfig::get_instance();
 
     // Setup colors
-    const KsPlot::Color curr_def_btn_col =
-        cfg._default_btn_col;
-    const KsPlot::Color curr_btn_outline =
-        cfg._button_outline_col;
+    const KsPlot::Color curr_def_btn_col = cfg._default_btn_col;
+    const KsPlot::Color curr_btn_outline = cfg._button_outline_col;
     
     _setup_colorchange(this, curr_def_btn_col,
                        &_def_btn_col, &_def_btn_col_btn,
@@ -245,6 +258,8 @@ SlConfigWindow::SlConfigWindow()
 /**
  * @brief Update the configuration object's values with the values
  * from the configuration window.
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
  */
 void SlConfigWindow::update_cfg() {
     // If changing the events meta was a success
@@ -253,6 +268,7 @@ void SlConfigWindow::update_cfg() {
     // For BOTH color changes
     int r, g, b;
     
+    // Configuration access here
     SlConfig& cfg = SlConfig::get_instance();
 
     _def_btn_col.getRgb(&r, &g, &b);
@@ -263,9 +279,10 @@ void SlConfigWindow::update_cfg() {
 
     cfg._histo_entries_limit = _histo_limit.value();
 
+    cfg._use_task_colors = _task_col_btn.isChecked();
+
     // Dynamically added members need special handling 
-    const int SUPPORTED_EVENTS_COUNT =
-        static_cast<int>(cfg.get_events_meta().size());
+    const int SUPPORTED_EVENTS_COUNT = static_cast<int>(cfg.get_events_meta().size());
 
     for (int i = 0; i < SUPPORTED_EVENTS_COUNT; ++i) {
         auto index_str = std::to_string(i);
@@ -316,16 +333,37 @@ void SlConfigWindow::update_cfg() {
  * @brief Sets up spinbox and explanation label.
  * Spinbox's limit values are also set. Also creates
  * aesthetic spacing. 
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
  */
 void SlConfigWindow::setup_histo_section() {
+    // Configuration access here
+    const SlConfig& cfg = SlConfig::get_instance();
+
     _histo_limit.setMinimum(0);
     _histo_limit.setMaximum(std::numeric_limits<int>::max());
     _histo_limit.setValue(cfg._histo_entries_limit);
 
     _histo_label.setFixedHeight(32);
     _histo_layout.addWidget(&_histo_label);
-    _histo_layout.addSpacing(100);
+    _histo_layout.addStretch();
     _histo_layout.addWidget(&_histo_limit);
+}
+
+/**
+ * @brief Sets up the layout, checkbox and explanation label for the
+ * task coloring configuration.
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
+ */
+void SlConfigWindow::setup_use_task_coloring() {
+    // Configuration access here
+    const SlConfig& cfg = SlConfig::get_instance();
+
+    _task_col_btn.setChecked(cfg._use_task_colors);
+    _task_col_layout.addWidget(&_task_col_label);
+    _task_col_layout.addStretch();
+    _task_col_layout.addWidget(&_task_col_btn);
 }
 
 /**
@@ -333,6 +371,8 @@ void SlConfigWindow::setup_histo_section() {
  * elements are added dynamically and require special handling,
  * e.g. setting object names to find them afterwards when getting their
  * values.
+ * 
+* @note It is dependent on the configuration 'SlConfig' singleton.
  */
 void SlConfigWindow::setup_events_meta_widget() {
     // Configuration access here
@@ -346,13 +386,13 @@ void SlConfigWindow::setup_events_meta_widget() {
     header_evt_allowed->setText("Allowed");
 
     header_row->addWidget(header_evt_name);
-    header_row->addSpacing(50);
+    header_row->addStretch();
     header_row->addWidget(header_evt_allowed);
 #ifndef _UNMODIFIED_KSHARK
     QLabel* header_evt_depth = new QLabel{this};
     header_evt_depth->setText("Preview stack offset");
 
-    header_row->addSpacing(20);
+    header_row->addStretch();
     header_row->addWidget(header_evt_depth);
 #endif
     _events_meta_layout.addLayout(header_row);
@@ -379,7 +419,7 @@ void SlConfigWindow::setup_events_meta_widget() {
         evt_allowed->setObjectName("evt_allowed_" + std::to_string(i));
 
         row->addWidget(evt_name);
-        row->addSpacing(50);
+        row->addStretch();
         row->addWidget(evt_allowed);
 
 #ifndef _UNMODIFIED_KSHARK
@@ -389,7 +429,7 @@ void SlConfigWindow::setup_events_meta_widget() {
         evt_depth->setObjectName("evt_depth_" + std::to_string(i));
         evt_depth->setMinimum(0);
 
-        row->addSpacing(20);
+        row->addStretch();
         row->addWidget(evt_depth);
 #endif
 
@@ -407,13 +447,16 @@ void SlConfigWindow::setup_layout() {
 
     // Add all control elements
     _layout.addLayout(&_histo_layout);
-
     _layout.addWidget(_get_hline(this));
+    _layout.addStretch();
+    _layout.addLayout(&_task_col_layout);
     _layout.addLayout(&_def_btn_col_ctl_layout);
     _layout.addLayout(&_btn_outline_ctl_layout);
     _layout.addWidget(_get_hline(this));
+    _layout.addStretch();
     _layout.addLayout(&_events_meta_layout);
     _layout.addWidget(_get_hline(this));
+    _layout.addStretch();
     _layout.addLayout(&_endstage_btns_layout);
 
     // Set the layout of the dialog
@@ -431,16 +474,18 @@ void SlConfigWindow::setup_endstage() {
     connect(&_close_button,	&QPushButton::pressed,
             this, &QWidget::close);
     connect(&_apply_button, &QPushButton::pressed,
-            this, [this]() { this->update_cfg(); });
+            this, [this]() { this->update_cfg(); this->close(); });
 }
 
 /**
  * @brief Loads current configuration values into the configuration
  * window's control elements and inner values.
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
  */
 void SlConfigWindow::load_cfg_values() {
     // Configuration access here
-    SlConfig& cfg = SlConfig::get_instance();
+    const SlConfig& cfg = SlConfig::get_instance();
 
     // Setting of always-present members
     _histo_limit.setValue(cfg._histo_entries_limit);
@@ -455,10 +500,10 @@ void SlConfigWindow::load_cfg_values() {
                            &_def_btn_col);
     _change_label_bg_color(&_btn_outline_preview,
                            &_btn_outline);
+    _task_col_btn.setChecked(cfg._use_task_colors);
     
     // Setting of dynamically added members - events meta
-    const int SUPPORTED_EVENTS_COUNT =
-        static_cast<int>(cfg.get_events_meta().size());
+    const int SUPPORTED_EVENTS_COUNT = static_cast<int>(cfg.get_events_meta().size());
     const events_meta_t& cfg_evts_meta = cfg.get_events_meta();
     // For loop to get all the event-specific objects
     for (int i = 0; i < SUPPORTED_EVENTS_COUNT; ++i) {

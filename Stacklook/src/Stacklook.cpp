@@ -50,6 +50,8 @@ static SlConfigWindow* cfg_window;
  * 
  * @returns True if the entry fulfills all of function's requirements,
  *          false otherwise.
+ *
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
 static bool _check_function_general(const kshark_entry* entry,
                                     const plugin_stacklook_ctx* ctx) {
@@ -57,10 +59,11 @@ static bool _check_function_general(const kshark_entry* entry,
     bool correct_event_id = (ctx->sswitch_event_id == entry->event_id)
                             || (ctx->swake_event_id == entry->event_id);
     
+    // Configuration access here.
     bool is_config_allowed = SlConfig::get_instance().is_event_allowed(entry);
     
     const kshark_entry* kstack_entry = get_kstack_entry(entry);
-    // We hate segfaults in this house - so they are banned!
+    // Guard oneself against a nullptr reference.
     if (!kstack_entry) return false;
     int entry_evt_id = kshark_get_event_id(kstack_entry);
     bool has_next_kernelstack = (ctx->kstack_event_id == entry_evt_id);
@@ -84,8 +87,11 @@ static bool _check_function_general(const kshark_entry* entry,
  * 
  * @returns Default color or one present in the main window's GL Widget
  * color table.
+ *
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
-static KsPlot::Color _get_color(int32_t task_pid, KsPlot::Color default_color) {
+static KsPlot::Color _get_task_color(int32_t task_pid, KsPlot::Color default_color) {
+    // Configuration access here.
     const KsPlot::ColorTable& task_colors =
         SlConfig::get_instance().main_w_ptr->graphPtr()->glPtr()->getPidColors();
     bool task_color_exists = static_cast<bool>(task_colors.count(task_pid));
@@ -136,6 +142,8 @@ static float _get_color_intensity(const KsPlot::Color& c) {
  * @param col: default color of the Stacklook button's insides
  * 
  * @returns Pointer to the created button.
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
 static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph,
                                          std::vector<int> bin,
@@ -144,6 +152,9 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
     // Constants
     constexpr int32_t BUTTON_TEXT_OFFSET = 14;
     const std::string STACK_BUTTON_TEXT = "STACK";
+
+    // Configuration access here.
+    const SlConfig& cfg = SlConfig::get_instance();
 
     kshark_entry* event_entry = data[0]->entry;
 
@@ -179,11 +190,15 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
 
     // Colors are a bit wonky with sched_switch events. Using the function
     // makes it consistent across the board.
-    inner_triangle._color = _get_color(kshark_get_pid(event_entry), col);
-
+    if (cfg.get_use_task_colors()) {
+        inner_triangle._color = _get_task_color(kshark_get_pid(event_entry), col);
+    } else {
+        inner_triangle._color = cfg.get_default_btn_col();
+    }
     // Inner triangle
     auto back_triangle = KsPlot::Triangle(inner_triangle);
-    back_triangle._color = SlConfig::get_instance().get_button_outline_col();
+    // Configuration access here.
+    back_triangle._color = cfg.get_button_outline_col();
     back_triangle.setFill(false);
 
     // Text coords
@@ -211,6 +226,8 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
  * @param dc: Input location for the container of the event's data
  * @param check_func: Check function used to select events from data container
  * @param make_button: Function which specifies what will be drawn and how
+ *
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
 static void _draw_stacklook_buttons(KsCppArgV* argv, 
                                     kshark_data_container* dc,
@@ -220,6 +237,7 @@ static void _draw_stacklook_buttons(KsCppArgV* argv,
     // The default color of buttons will hopefully be overriden when
     // the button's entry's task PID is found.
     
+    // Configuration access here.
     eventFieldPlotMin(argv, dc, check_func, make_button,
                       SlConfig::get_instance().get_default_btn_col(),
                       -1);
@@ -236,7 +254,15 @@ static void config_show([[maybe_unused]] KsMainWindow*) {
 
 // Functions defined in the C header
 
-//SL_TODO: documentation
+/**
+ * @brief Finds the `ftrace/kernel_stack` event entry if it was
+ * recorded in the trace and is directly after the event entry on
+ * the same CPU and belongs to the same task.
+ * 
+ * @param kstack_owner Entry, whose kernel stack trace we want to find.
+ * @return Pointer to the `ftrace/kernel_stack` event entry if it was
+ * found, nullptr otherwise (or if there was an error in data access).
+ */
 const struct kshark_entry* get_kstack_entry(const struct kshark_entry* kstack_owner) {
     const kshark_entry* kstack_entry = kstack_owner;
     
@@ -286,6 +312,8 @@ const struct kshark_entry* get_kstack_entry(const struct kshark_entry* kstack_ow
  * @param sd: data stream identifier
  * @param val: process or CPU ID value
  * @param draw_action: draw action identifier
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
 void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
                             int val, int draw_action) {
@@ -293,7 +321,7 @@ void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
     plugin_stacklook_ctx* ctx = __get_context(sd);
     kshark_data_container* plugin_data;
 
-    // Config data
+    // Configuration access here.
     const SlConfig& config = SlConfig::get_instance();
     const int32_t HISTO_ENTRIES_LIMIT = config.get_histo_limit();
     
@@ -346,9 +374,12 @@ void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
  * @param gui_ptr: Pointer to the main KernelShark window.
  * 
  * @returns Pointer to the configuration menu instance.
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
 __hidden void* plugin_set_gui_ptr(void* gui_ptr) {
     KsMainWindow* main_w = static_cast<KsMainWindow*>(gui_ptr);
+    // Configuration access here.
     SlConfig::main_w_ptr = main_w;
 
     if (cfg_window == nullptr) {
