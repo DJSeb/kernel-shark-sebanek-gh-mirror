@@ -2,9 +2,56 @@
 
 This document serves as a simple to grasp manual for the "naps" KernelShark plugin.
 
-Seek information on how to build and install the software in the project's [README](../../README.md).
-
 ![Fig. 1](../images/NapsWorking.png)
+Figure 1.
+
+# "How do I build and install this plugin?"
+
+## Prerequisites
+
+- CMake of version at least 3.1.2
+- KernelShark an its dependencies
+
+## Compatibility
+
+Plugin is compatible with KernelShark's **custom** version *2.4.0-couplebreak* and higher.
+Unmodified KernelShark usage is achievable through a build argument, but **discouraged**, as the
+custom versions improve compatibility with other plugins.
+
+With couplebreak on, the plugin is fully compatible with every default KernelShark plugin. With couplebreak off,
+*sched_events* plugin is incompatible. In general, if any plugin changes event's PID data during data stream loading,
+this plugin will be incompatible with it.
+
+## Build and install only this plugin
+
+1. Set your working directory in terminal as the build directory (best created in the project's root directory (see [README](../../README.md)), if not already present).
+2. Run `cmake ..` command.
+   - If using an unmodified KernelShark copy, add `-D_UNMODIFIED_KSHARK` to the command.
+   - If **Doxygen documentation** is desired, include `-D_DOXYGEN_DOC=1` in the command.
+   - If **trace-cmd header files** aren't in `/usr/include`, specify so via `-D_TRACECMD_INCLUDE_DIR=[PATH]`, where
+    `[PATH]` is replaced by the path to the header files.
+   - If **trace-cmd shared libraries** aren't in `/usr/lib64`, specify so via `-D_TRACECMD_LIBS_DIR=[PATH]`, where
+    `[PATH]` is replaced by the path to the shared libraries.
+   - By default, the **build type** will be `RelWithDebInfo` - to change this, e.g. to `Release`, use the option `-DCMAKE_BUILD_TYPE=Release`.
+   - If **Qt6 files** aren't in `/usr/include/qt6`, use the option `-D_QT6_INCLUDE_DIR=[PATH]`, where `[PATH]` is replaced by the path to the Qt6 files.
+     - Build instructions still expect that the specified directory has same inner structure as the default case (i.e. it contains `QtCore`, `QtWidgets`, etc.).
+   - If **KernelShark source files** aren't in the relative path `../KS_fork/src` from this directory, use
+     the option `-D_KS_INCLUDE_DIR=[PATH]`, where `[PATH]` is replaced by the path to KernelShark source files.
+   - If **KernelShark's shared libraries** (`.so` files) aren't in `/usr/local/lib64`, use the option `-D_KS_SHARED_LIBS_DIR=[PATH]`, where `[PATH]` is replaced by the path to KernelShark shared libraries.
+3. Run `make` while still in the `build` directory.
+   - If only a part of building is necessary, select a target of your choice.
+   - Just running `make` builds: **the plugin** (target `naps`), **symlink** to the plugin SO (target `naps_symlink`) and, if specified, the **Doxygen documentation** (target `docs`).
+4. (**Installation**) Plug in the plugin into KernelShark - either via KernelShark's GUI or when starting it via the CLI with the `-p` 
+   option and location of the symlink or the SO itself.
+
+Instructions will remove the binary upon running `make clean`, but won't remove the symlink.
+
+## Building KernelShark from source and this plugin with it
+
+1. Ensure all source files (`.c`, `.cpp`, `.h`) of Naps are in the `src/plugins` subdirectory of your KernelShark project directory.
+2. Ensure the `CMakeLists.txt` file in said subdirectory contains instructions for building the plugin (copy the style of other Qt-using GUI plugins).
+3. Build KernelShark (plugins are built automatically).
+4. (**Installation**) Start KernelShark. Plugins built this way will be loaded automatically. If that for some reason failed, look for the SO as for any other default-built KernelShark plugin, again in GUI or via the CLI.
 
 # "How do I enable/disable naps?"
 
@@ -16,6 +63,7 @@ find the symlink, but searching for the actual shared object file is possible to
 follows standard KernelShark plugin loading behaviour.
 
 ![Fig. 2](../images/NapsManagePlottingPlugins.png)
+Figure 2.
 
 Ticked checkbox means the plugin is enabled, empty checkbox means the plugin is disabled.
 
@@ -30,16 +78,20 @@ plugin is allowed to work. This configuration option can help if there are eithe
 for a current zoom level or if there are too many and program memory is is too great.
 
 ![Fig. 3](../images/NapsConfigButton.png)
+Figure 3.
 
 ![Fig. 4](../images/NapsConfigWindow.png)
+Figure 4.
 
-The other configuration option is whether to color the nap rectangle's top and bottom outlines the same color as
-KernelShark uses for the task (figure 5). Otherwise, the same color as the one used for the filling will be used 
-(figure 6). This can be toggled via a simple checkbox.
+The second configuration option is toggled via the labeled checkbox visible in (figure 4). The option is whether to
+color the nap rectangle's top and bottom outlines the same color as KernelShark uses for the task (figure 5).
+Otherwise, the same color as the one used for the filling will be used (figure 6).
 
 ![Fig. 5](../images/NapsDefaultColors.png)
+Figure 5.
 
 ![Fig. 6](../images/NapsTaskLikeColors.png)
+Figure 6.
 
 Clicking on `Apply` button will confirm changes made to the configuration and close the window, showing a pop-up 
 (figure 7) if the the operation was successful. Clicking on the `Close` button or the X button in the window header will close the window without applying any changes. Changes made to a window that hasn't applied them to the 
@@ -47,11 +99,14 @@ configuration will be lost and upon reopening, the window will again show what's
 configuration.
 
 ![Fig. 7](../images/NapsConfigSuccess.png)
+Figure 7.
 
-Regarding KernelShark's sessions, the configuration is NOT persistent and options included before will have to be
+In regards to KernelShark's sessions, the configuration is NOT persistent and options included before will have to be
 adjusted again upon a new session or trace file load.
 
 ## In the graph
+
+Visualised nap has already been shown in figures 3 and 4, this section talks about these visualisations more.
 
 To view naps in a graph of a trace, let KernelShark show you task plots. The plugin will automatically draw
 rectangles between switch and waking events, coloring them according to the previous state of the task that will
@@ -60,9 +115,10 @@ turned on in the configuration, using the task's own color. If the rectangle is 
 of the previous state of the task will be displayed as well (figure 8).
 
 ![Fig. 8](../images/NapsDifferentWidths.png)
+Figure 8.
 
 The rectangles will be visible as long as the zoom level allows two entries belonging to the same nap to also be
-visible & as long as there aren't too many entries visible on the graph (this can be adjusted in the configuration).
+visible and as long as there aren't too many entries visible on the graph (this can be adjusted in the configuration).
 
 The rectangles cannot be interacted with in any capacity.
 
@@ -73,7 +129,9 @@ contact the author via e-mail `djsebofficial@gmail.com`.
 
 # Recommendations
 
-It is recommended by the author to turn on couplebreak in KernelShark to allow greater compatiblity with other
+A few recommendations of usage by the author for the smoothest user experience.
+
+It is recommended to turn on couplebreak in KernelShark to allow greater compatiblity with other
 plugins, especially sched_events.
 
 It is recommended to not set the histogram limit in the configuration too high as to not make the plugin use

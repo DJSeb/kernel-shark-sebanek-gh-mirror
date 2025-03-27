@@ -38,6 +38,7 @@ loads.
     - technical
     - user
       - *user-manual.md*
+      - *user-manual.odt*
       - *user-manual.pdf*
     - images
       - images used in both user and technical documentations
@@ -51,60 +52,20 @@ loads.
   - *CMakeLists.txt* (Main build file)
   - *README.md* (what you're reading currently)
 
-# Building & installing
-
-## Compatibility
-
-Plugin should is compatible with KernelShark's **custom** version *2.4.0-couplebreak* and higher.
-Unmodified KernelShark usage is achievable through a build argument, but **discouraged**, as the
-custom versions improve compatibility with other plugins.
-
-With couplebreak on, the plugin is fully compatible with every default KernelShark plugin. With couplebreak off,
-sched_events plugin is incompatible. In general, if any plugin changes event's PID data during data stream loading,
-this plugin will be incompatible with it.
-
-## Build and install only this plugin
-
-1. Change directory to the build directory (best created in the root directory, if not already present).
-2. Run `cmake ..` command.
-   - If using an unmodified KernelShark copy, add `-D_UNMODIFIED_KSHARK` to the command.
-   - If **Doxygen documentation** is desired, include `-D_DOXYGEN_DOC=1` in the command.
-   - If **trace-cmd header files** aren't in `/usr/include`, specify so via `-D_TRACECMD_INCLUDE_DIR=[PATH]`, where
-    `[PATH]` is replaced by the path to the header files.
-   - If **trace-cmd shared libraries** aren't in `/usr/lib64`, specify so via `-D_TRACECMD_LIBS_DIR=[PATH]`, where
-    `[PATH]` is replaced by the path to the shared libraries.
-   - By default, the **build type** will be `RelWithDebInfo` - to change this, e.g. to `Release`, use the option `-DCMAKE_BUILD_TYPE=Release`.
-   - If **Qt6 files** aren't in `/usr/include/qt6`, use the option `-D_QT6_INCLUDE_DIR=[PATH]`, where `[PATH]` is replaced by the path to the Qt6 files.
-     - Build instructions still expect that the specified directory has same inner structure as the default case (i.e. it contains `QtCore`, `QtWidgets`, etc.).
-   - If **KernelShark source files** aren't in the relative path `../KS_fork/src` from this directory, use
-     the option `-D_KS_INCLUDE_DIR=[PATH]`, where `[PATH]` is replaced by the path to KernelShark source files.
-   - If **KernelShark's shared libraries** (.so files) aren't in `/usr/local/lib64`, use the option `-D_KS_SHARED_LIBS_DIR=[PATH]`, where `[PATH]` is replaced by the path to KernelShark shared libraries.
-3. Run `make` while still in the `build` directory.
-   - If only a part of building is necessary, select a target of your choice.
-   - Just running `make` builds: **the plugin** (target `naps`), **symlink** to the plugin SO (target `naps_symlink`) and, if specified, the **Doxygen documentation** (target `docs`).
-4. Plug in the plugin into KernelShark - either via KernelShark's GUI or when starting it via the CLI with the `-p` 
-   option and location of the symlink or the SO itself.
-
-Instructions will remove the binary on `make clean`, but won't remove the symlink.
-
-## Building KernelShark from source and this plugin with it
-
-1. Ensure all source files (`.c`, `.cpp`, `.h`) of Naps are in the `src/plugins` subdirectory of your KernelShark project directory.
-2. Ensure the `CMakeLists.txt` file in said subdirectory contains instructions for building the plugin (copy the style of other Qt-using GUI plugins).
-3. Build KernelShark (plugins are built automatically).
-4. Start KernelShark. Plugins built this way will be loaded automatically. If that for some reason failed, look for the SO as for any other default-built KernelShark plugin, again in GUI or via the CLI.
-
 # Usage & documentation
+
+For user documentation refer to the [user manual](./doc/user/user-manual.md).
 
 Code is heavily commented, up to every private function. For detailed understanding of how Plugin works,
 refer to the source files in `src` directory.
+
+Technical documentation has to be generated via Doxygen and the included
+Doxyfile.
 
 For a design document, please refer to the `doc/technical` directory, as this is included in the technical documentation,
 or read it unprocessed in file `doc/design.doxygen`.
 
 For API documentation, please refer to the `doc/technical` directory.
-
-For user documentation refer to the [user manual](./doc/user/user-manual.md).
 
 # Acknowledgments
 
