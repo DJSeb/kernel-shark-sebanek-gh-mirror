@@ -85,6 +85,10 @@ private: // Data members
     int32_t _histo_entries_limit{500};
 
     ///
+    /// @brief Whether to use task colors for buttons or not.
+    bool _use_task_colors{false};
+
+    ///
     /// @brief Default color of Stacklook buttons, white.
     KsPlot::Color _default_btn_col{0xFF, 0xFF, 0xFF};
 
@@ -123,6 +127,7 @@ private: // Data members
 public: // Functions
     static SlConfig& get_instance();
     int32_t get_histo_limit() const;
+    bool get_use_task_colors() const;
 #ifndef _UNMODIFIED_KSHARK
     uint16_t get_stack_offset(event_name_t evt_name) const;
 #endif    
@@ -136,17 +141,9 @@ public: // Functions
  * @brief Widget class for modifying the configuration via GUI.
  * It is a fixed size dialog window that allows modification
  * of all that is in the config object by applying changes via
- * the Apply button. Changes won't be saved unless this is done. 
- * 
- * Changes applied during configuration take effect AFTER this window is
- * closed.
+ * the Apply button. Changes won't be saved unless this is done.
  */
 class SlConfigWindow : public QWidget {
-private: // Class data members
-    /// @brief Reference to the configuration object. Such access, along
-    /// this class being a friend of the config object's one, allows
-    /// modification of inner fields.
-    static SlConfig& cfg;
 private: // Qt data members
     ///
     /// @brief Layout for the widget's control elements.
@@ -209,6 +206,19 @@ private: // Qt data members
     /// before Stacklook buttons show up.
     QSpinBox        _histo_limit;
 
+    // Task-like coloring
+
+    /// @brief Layout used for the button and explanation of
+    /// what it does.
+    QHBoxLayout     _task_col_layout;
+
+    ///
+    /// @brief Explanation of what the checkbox next to it does.
+    QLabel          _task_col_label;
+
+    /// @brief Toggles whether to use task colors for buttons or not.
+    QCheckBox       _task_col_btn;
+
     // Events meta
 
     /// @brief Layout used for the section of the config window
@@ -225,6 +235,7 @@ public: // Qt data members
 private: // Qt functions
     void update_cfg();
     void setup_histo_section();
+    void setup_use_task_coloring();
     void setup_events_meta_widget();
     void setup_layout();
     void setup_endstage();

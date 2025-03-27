@@ -193,13 +193,6 @@ static void _setup_colorchange(QWidget* parent,
 // Class functions
 
 /**
- * @brief Setup the class variable to modify the configuration object.
- */
-SlConfig& SlConfigWindow::cfg{
-    const_cast<SlConfig&>(SlConfig::get_instance())
-};
-
-/**
  * @brief Constructor for the configuration window.
  */
 SlConfigWindow::SlConfigWindow()
@@ -221,11 +214,14 @@ SlConfigWindow::SlConfigWindow()
 
     setup_histo_section();
 
+    // Configuration access here
+    const SlConfig& cfg = SlConfig::get_instance();
+
     // Setup colors
     const KsPlot::Color curr_def_btn_col =
-        SlConfigWindow::cfg._default_btn_col;
+        cfg._default_btn_col;
     const KsPlot::Color curr_btn_outline =
-        SlConfigWindow::cfg._button_outline_col;
+        cfg._button_outline_col;
     
     _setup_colorchange(this, curr_def_btn_col,
                        &_def_btn_col, &_def_btn_col_btn,
@@ -257,19 +253,19 @@ void SlConfigWindow::update_cfg() {
     // For BOTH color changes
     int r, g, b;
     
+    SlConfig& cfg = SlConfig::get_instance();
+
     _def_btn_col.getRgb(&r, &g, &b);
-    SlConfigWindow::cfg._default_btn_col =
-        {(uint8_t)r, (uint8_t)g, (uint8_t)b};
+    cfg._default_btn_col = {(uint8_t)r, (uint8_t)g, (uint8_t)b};
 
     _btn_outline.getRgb(&r, &g, &b);
-    SlConfigWindow::cfg._button_outline_col = 
-        {(uint8_t)r, (uint8_t)g, (uint8_t)b};
+    cfg._button_outline_col = {(uint8_t)r, (uint8_t)g, (uint8_t)b};
 
-    SlConfigWindow::cfg._histo_entries_limit = _histo_limit.value();
+    cfg._histo_entries_limit = _histo_limit.value();
 
     // Dynamically added members need special handling 
     const int SUPPORTED_EVENTS_COUNT =
-        static_cast<int>(SlConfigWindow::cfg.get_events_meta().size());
+        static_cast<int>(cfg.get_events_meta().size());
 
     for (int i = 0; i < SUPPORTED_EVENTS_COUNT; ++i) {
         auto index_str = std::to_string(i);
@@ -287,11 +283,11 @@ void SlConfigWindow::update_cfg() {
         ) {
             std::string event_name_str = event_name->text().toStdString();
 #ifndef _UNMODIFIED_KSHARK
-            event_meta_t& event_meta = SlConfigWindow::cfg._events_meta.at(event_name_str);
+            event_meta_t& event_meta = cfg._events_meta.at(event_name_str);
             event_meta.first = event_allowed->isChecked();
             event_meta.second = (uint16_t)event_depth->value();
 #else
-            allowed_t& is_allowed = SlConfigWindow::cfg._events_meta.at(event_name_str);
+            allowed_t& is_allowed = cfg._events_meta.at(event_name_str);
             is_allowed = event_allowed->isChecked();
             
 #endif
@@ -339,6 +335,9 @@ void SlConfigWindow::setup_histo_section() {
  * values.
  */
 void SlConfigWindow::setup_events_meta_widget() {
+    // Configuration access here
+    const SlConfig& cfg = SlConfig::get_instance();
+    
     // Create a header row, so that the user knows what is what
     QHBoxLayout* header_row = new QHBoxLayout{nullptr};
     QLabel* header_evt_name = new QLabel{this};
@@ -359,7 +358,7 @@ void SlConfigWindow::setup_events_meta_widget() {
     _events_meta_layout.addLayout(header_row);
 
     // Create controls for the events meta
-    const events_meta_t& evts_meta = SlConfigWindow::cfg.get_events_meta();
+    const events_meta_t& evts_meta = cfg.get_events_meta();
     // Supported entry index to differentiate object names
     int i = 0;
     
@@ -440,8 +439,8 @@ void SlConfigWindow::setup_endstage() {
  * window's control elements and inner values.
  */
 void SlConfigWindow::load_cfg_values() {
-    // Easier coding
-    SlConfig& cfg = SlConfigWindow::cfg;
+    // Configuration access here
+    SlConfig& cfg = SlConfig::get_instance();
 
     // Setting of always-present members
     _histo_limit.setValue(cfg._histo_entries_limit);
@@ -459,7 +458,7 @@ void SlConfigWindow::load_cfg_values() {
     
     // Setting of dynamically added members - events meta
     const int SUPPORTED_EVENTS_COUNT =
-        static_cast<int>(SlConfigWindow::cfg.get_events_meta().size());
+        static_cast<int>(cfg.get_events_meta().size());
     const events_meta_t& cfg_evts_meta = cfg.get_events_meta();
     // For loop to get all the event-specific objects
     for (int i = 0; i < SUPPORTED_EVENTS_COUNT; ++i) {
