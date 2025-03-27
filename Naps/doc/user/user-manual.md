@@ -41,7 +41,7 @@ KernelShark uses for the task (figure 5). Otherwise, the same color as the one u
 
 ![Fig. 5](../images/NapsDefaultColors.png)
 
-![Fig. 6](../images/NapsExperimentalColors.png)
+![Fig. 6](../images/NapsTaskLikeColors.png)
 
 Clicking on `Apply` button will confirm changes made to the configuration and close the window, showing a pop-up 
 (figure 7) if the the operation was successful. Clicking on the `Close` button or the X button in the window header will close the window without applying any changes. Changes made to a window that hasn't applied them to the 
