@@ -138,6 +138,10 @@ visible and as long as there aren't too many entries visible on the graph (this 
 
 The rectangles cannot be interacted with in any capacity.
 
+## Using naps as a library
+
+See technical documentation, as this is not intended usage of the plugin and such usage explanations will be omitted.
+
 # Bugs & glitches
 
 No known bugs, but there were plenty of unexpected surprises during plugin testing - if more were discovered,
