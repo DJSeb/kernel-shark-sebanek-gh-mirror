@@ -233,7 +233,7 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
 #ifndef _UNMODIFIED_KSHARK
     int swaking_id = kshark_find_event_id(stream, "sched/sched_waking");
     // This is one way to achieve compatibility with couplebreak.
-    // Other would be a kind of "call_once_per_stream_load" assign
+    // Other would be a kind of "call once per stream load" assign
     // of couplebreak event IDs.
     // IDs will not work immediately, since couplebreak needs to have stream
     // loaded first, since these IDs are created dynamically.
