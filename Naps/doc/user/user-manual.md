@@ -1,5 +1,3 @@
-<!-- TODO: Images -->
-
 # Intro
 
 This document serves as a simple to grasp manual for the "naps" KernelShark plugin.
