@@ -160,6 +160,11 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
     kshark_entry* event_entry = data[0]->entry;
     const kshark_entry* kstack_entry = (const kshark_entry*)(data[0]->field);
 
+    int entry_pid = (event_entry->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
+        event_entry->pid :
+        // "Emergency get" if some plugins messed around with the entry before
+        kshark_get_pid(event_entry);
+
     // Base point
     KsPlot::Point base_point = graph[0]->bin(bin[0])._val;
 
@@ -195,7 +200,7 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
     // Colors are a bit wonky with sched_switch events. Using the function
     // makes it consistent across the board.
     if (cfg.get_use_task_colors()) {
-        inner_triangle._color = _get_task_color(kshark_get_pid(event_entry), col);
+        inner_triangle._color = _get_task_color(entry_pid, col);
     }
 #endif
 
@@ -307,11 +312,12 @@ const struct kshark_entry* get_kstack_entry(const struct kshark_entry* kstack_ow
     if (ctx == nullptr)
         return nullptr;
 
+    int relevant_owner_pid = (kstack_owner->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
+        kstack_owner->pid :
+        // "Emergency get" if some plugins messed around with the entry before
+        kshark_get_pid(kstack_owner);
     bool is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
-    bool is_correct_task = (kstack_owner->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
-        kstack_owner->pid == kstack_entry->pid :
-        // "Emergency check" if some plugins messed around with the entry before
-        kshark_get_pid(kstack_owner) == kstack_entry->pid;
+    bool is_correct_task = (relevant_owner_pid == kstack_entry->pid);
     
     // This loop will usually stop either after one or iterations.
     // Unless some plugin aggressively reorders and changes innards of
@@ -325,9 +331,7 @@ const struct kshark_entry* get_kstack_entry(const struct kshark_entry* kstack_ow
             return nullptr;
         // Update conditions
         is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
-        is_correct_task = (kstack_owner->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
-            kstack_owner->pid == kstack_entry->pid :
-            kshark_get_pid(kstack_owner) == kstack_entry->pid;
+        is_correct_task = (relevant_owner_pid == kstack_entry->pid);
     }
 
     return kstack_entry;
@@ -389,20 +393,20 @@ void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
     if (draw_action == KSHARK_TASK_DRAW) {
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
             kshark_entry* entry = data_c->data[t]->entry;
-            const kshark_entry* kstack_ptr = 
-                (kshark_entry*)(data_c->data[t]->field);
-            if (!entry) return false;
-            bool correct_pid = entry->pid == val;
+            const kshark_entry* kstack_ptr = (kshark_entry*)(data_c->data[t]->field);
+            if (!entry)
+                return false;
+            bool correct_pid = (entry->pid == val);
             return _check_function_general(entry, kstack_ptr, ctx) && correct_pid;
         };
         
     } else if (draw_action == KSHARK_CPU_DRAW) {
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
             kshark_entry* entry = data_c->data[t]->entry;
-            const kshark_entry* kstack_ptr = 
-                (kshark_entry*)(data_c->data[t]->field);
-            if (!entry) return false;
-            bool correct_cpu = (data_c->data[t]->entry->cpu == val);
+            const kshark_entry* kstack_ptr = (kshark_entry*)(data_c->data[t]->field);
+            if (!entry)
+                return false;
+            bool correct_cpu = (entry->cpu == val);
             return _check_function_general(entry, kstack_ptr, ctx) && correct_cpu;
         };
     }
