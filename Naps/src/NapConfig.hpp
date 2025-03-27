@@ -45,13 +45,16 @@ private: // Data members
     /// @brief Limit value of how many entries may be visible in a
     /// histogram for the plugin to take effect.
     int32_t _histo_entries_limit{10000};
-
+#ifndef _UNMODIFIED_KSHARK // Task coloring
     /// @brief Whether to use task-like outline coloring for nap rectangles.
     bool _use_task_coloring{false};
+#endif
 public: // Functions
     static NapConfig& get_instance();
     int32_t get_histo_limit() const;
+#ifndef _UNMODIFIED_KSHARK // Task coloring
     bool get_use_task_coloring() const;
+#endif
 private: // Constructor
     /// @brief Default constructor, hidden to enforce singleton pattern.
     NapConfig() = default;
@@ -97,6 +100,7 @@ private: // Qt data members
     /// before nap rectangles show up.
     QSpinBox        _histo_limit;
 
+#ifndef _UNMODIFIED_KSHARK // Task coloring
     // Task coloring
 
     /// @brief Layout used for the button and explanation of
@@ -109,6 +113,7 @@ private: // Qt data members
 
     /// @brief Toggles whether to use task coloring for outlines or not.
     QCheckBox       _task_col_btn;
+#endif
 
 public: // Qt data members
     ///
@@ -121,7 +126,9 @@ public: // Qt data members
 private: // "Only Qt"-relevant functions
     void setup_histo_section();
     void setup_endstage();
+#ifndef _UNMODIFIED_KSHARK // Task coloring
     void setup_tasklike_coloring();
+#endif
     void setup_layout();
 };
 

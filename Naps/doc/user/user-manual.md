@@ -20,9 +20,12 @@ Plugin is compatible with KernelShark's **custom** version *2.4.0-couplebreak* a
 Unmodified KernelShark usage is achievable through a build argument, but **discouraged**, as the
 custom versions improve compatibility with other plugins.
 
-With couplebreak on, the plugin is fully compatible with every default KernelShark plugin. With couplebreak off,
-*sched_events* plugin is incompatible. In general, if any plugin changes event's PID data during data stream loading,
-this plugin will be incompatible with it.
+With couplebreak on (this necessitates modified KernelShark), the plugin is fully compatible with every default 
+KernelShark plugin. With couplebreak off, *sched_events* plugin is incompatible. In general, if any plugin changes 
+event's PID data during data stream loading, this plugin will be incompatible with it.
+
+If using unmodified KernelShark, couplebreak cannot be turned on and nap rectangles will not have the option to
+have their outlines be the same color as the owner task of a sched/sched_switch event.
 
 No other dependencies are necessary, except the standard libraries of C and C++.
 

@@ -210,10 +210,12 @@ static NapRectangle* _make_nap_rect(std::vector<const KsPlot::Graph*> graph,
     // Prepare outline color
     KsPlot::Color outline_col = rect._color;
     
+#ifndef _UNMODIFIED_KSHARK // Task coloring
     // Configuration access here.
     if(NapConfig::get_instance().get_use_task_coloring()) {
         outline_col = _get_task_color(switch_entry->pid);
     }
+#endif
 
     // Prepare text color
     float bg_intensity = _get_color_intensity(rect._color);
