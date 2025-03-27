@@ -17,7 +17,7 @@
  * The configuration is a C++ class which holds three main configuration variables of the plugin.
  * 
  * 1. At which level of entries visible will naps be visualised.
- * 2. Whether to use experimental coloring of nap rectangle's outlines to be of the same color as a task is in a
+ * 2. Whether to use task coloring of nap rectangle's outlines to be of the same color as a task is in a
  * KernelShark graph.
  * 3. Static pointer to the main window of KernelShark, used for quick access to that window. This variable is never
  * changed, only initialized.

@@ -211,7 +211,7 @@ static NapRectangle* _make_nap_rect(std::vector<const KsPlot::Graph*> graph,
     KsPlot::Color outline_col = rect._color;
     
     // Configuration access here.
-    if(NapConfig::get_instance().get_exp_coloring()) {
+    if(NapConfig::get_instance().get_use_task_coloring()) {
         outline_col = _get_task_color(switch_entry->pid);
     }
 
