@@ -31,25 +31,32 @@ No other dependencies are necessary, except the standard libraries of C and C++.
 
 ## Build and install only this plugin
 
-1. Set your working directory in terminal as the build directory (best created in the project's root directory (see [README](../../README.md)), if not already present).
-2. Run `cmake ..` command.
+1. Set your working directory in terminal as the build directory (best created in the project's root directory (see 
+   [README](../../README.md)), if not already present).
+2. Run `cmake ..` command (if the main `CMakeLists.txt` file isn't in the parent folder, provide cmake with its
+   valid location).
    - If using an unmodified KernelShark copy, add `-D_UNMODIFIED_KSHARK` to the command.
    - If **Doxygen documentation** is desired, include `-D_DOXYGEN_DOC=1` in the command.
    - If **trace-cmd header files** aren't in `/usr/include`, specify so via `-D_TRACECMD_INCLUDE_DIR=[PATH]`, where
     `[PATH]` is replaced by the path to the header files.
    - If **trace-cmd shared libraries** aren't in `/usr/lib64`, specify so via `-D_TRACECMD_LIBS_DIR=[PATH]`, where
     `[PATH]` is replaced by the path to the shared libraries.
-   - By default, the **build type** will be `RelWithDebInfo` - to change this, e.g. to `Release`, use the option `-DCMAKE_BUILD_TYPE=Release`.
-   - If **Qt6 files** aren't in `/usr/include/qt6`, use the option `-D_QT6_INCLUDE_DIR=[PATH]`, where `[PATH]` is replaced by the path to the Qt6 files.
-     - Build instructions still expect that the specified directory has same inner structure as the default case (i.e. it contains `QtCore`, `QtWidgets`, etc.).
+   - By default, the **build type** will be `RelWithDebInfo` - to change this, e.g. to `Release`, use the option 
+     `-DCMAKE_BUILD_TYPE=Release`.
+   - If **Qt6 files** aren't in `/usr/include/qt6`, use the option `-D_QT6_INCLUDE_DIR=[PATH]`, where `[PATH]` is 
+     replaced by the path to the Qt6 files.
+     - Build instructions still expect that the specified directory has same inner structure as the default case (i.e. 
+       it contains `QtCore`, `QtWidgets`, etc.).
    - If **KernelShark source files** aren't in the relative path `../KS_fork/src` from this directory, use
      the option `-D_KS_INCLUDE_DIR=[PATH]`, where `[PATH]` is replaced by the path to KernelShark source files.
-   - If **KernelShark's shared libraries** (`.so` files) aren't in `/usr/local/lib64`, use the option `-D_KS_SHARED_LIBS_DIR=[PATH]`, where `[PATH]` is replaced by the path to KernelShark shared libraries.
+   - If **KernelShark's shared libraries** (`.so` files) aren't in `/usr/local/lib64`, use the option
+     `-D_KS_SHARED_LIBS_DIR=[PATH]`, where `[PATH]` is replaced by the path to KernelShark shared libraries.
 3. Run `make` while still in the `build` directory.
    - If only a part of building is necessary, select a target of your choice.
-   - Just running `make` builds: **the plugin** (target `naps`), **symlink** to the plugin SO (target `naps_symlink`) and, if specified, the **Doxygen documentation** (target `docs`).
-4. (**Installation**) Plug in the plugin into KernelShark - either via KernelShark's GUI or when starting it via the CLI with the `-p` 
-   option and location of the symlink or the SO itself.
+   - Just running `make` builds: **the plugin** (target `naps`), **symlink** to the plugin SO (target `naps_symlink`) 
+     and, if specified, the **Doxygen documentation** (target `docs`).
+4. (**Installation**) Plug in the plugin into KernelShark - either via KernelShark's GUI or when starting it via the 
+   CLI with the `-p` option and location of the symlink or the SO itself.
 
 Instructions will remove the binary upon running `make clean`, but won't remove the symlink.
 
