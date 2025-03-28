@@ -21,7 +21,6 @@ if (_UNMODIFIED_KSHARK)
   message("[INFO] Detected unmodified KernelShark source build argument.\n \
           The plugin will omit mouse hover and task color features.")
   add_definitions(-D_UNMODIFIED_KSHARK)
-  set(PLUGIN_NAME "${PLUGIN_NAME}_unmod")
 else()
   message("[INFO] Modified KernelShark source version of software will be built.")
 endif()

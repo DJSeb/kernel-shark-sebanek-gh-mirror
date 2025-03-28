@@ -78,21 +78,12 @@ set(SOURCES
     NapRectangle.cpp
 )
 
-## Create dummy file to force rebuilds upon different target names
-add_custom_target("rebuild_dummy_${PLUGIN_NAME}" ALL
-    COMMAND ${CMAKE_COMMAND} -E touch "${CMAKE_BINARY_DIR}/rebuild_dummy_${PLUGIN_NAME}"
-    BYPRODUCTS "${CMAKE_BINARY_DIR}/rebuild_dummy_${PLUGIN_NAME}"
-)
-
 ## Creating the shared library
 add_library(${PLUGIN_NAME} SHARED ${SOURCES})
 set_target_properties(${PLUGIN_NAME} PROPERTIES
                       OUTPUT_NAME ${PLUGIN_NAME}
                       PREFIX ${KS_PLUGIN_PREFIX}
                       SUFFIX ".so.${NAPS_VERSION}")
-
-## Add dummy file dependency
-add_dependencies(${PLUGIN_NAME} "rebuild_dummy_${PLUGIN_NAME}")
 
 ## Include KernelShark headers
 target_include_directories(${PLUGIN_NAME} PRIVATE ${_KS_INCLUDE_DIR})
@@ -110,9 +101,4 @@ set(NAPS_SYMLINK_TARGET "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}${PLUGIN_NAME}.s
 add_custom_target("${PLUGIN_NAME}_symlink" ALL
                   COMMAND ${CMAKE_COMMAND} -E create_symlink ${NAPS_SYMLINK_TARGET} ${NAPS_SYMLINK_NAME}
                   BYPRODUCTS "${FINAL_OUTPUT_DIR}/${NAPS_SYMLINK_NAME}"
-)
-
-# Create clean target to remove the binary directory
-add_custom_target(clean-bin-dir
-    COMMAND ${CMAKE_COMMAND} -E rm -r "${FINAL_OUTPUT_DIR}"
 )
