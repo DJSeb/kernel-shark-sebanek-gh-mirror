@@ -110,7 +110,8 @@ Figure 5.
 Figure 6.
 
 Clicking on `Apply` button will confirm changes made to the configuration and close the window, showing a pop-up 
-(figure 7) if the the operation was successful. Clicking on the `Close` button or the X button in the window header will close the window without applying any changes. Changes made to a window that hasn't applied them to the 
+(figure 7) if the the operation was successful. Clicking on the `Close` button or the X button in the window header
+will close the window without applying any changes. Changes made to a window that hasn't applied them to the 
 configuration will be lost and upon reopening, the window will again show what's in the currently applied 
 configuration.
 
