@@ -4,12 +4,13 @@ build_modif_kshark.sh
 show_tech_docs.sh
 
 Stacklook/build
+Stacklook/unmodif_build
 Stacklook/doc/technical/html
 Stacklook/doc/docs_build.log
+Stacklook/doc/doxygen-awesome-css
 
 TalkPluginExample
 
 .vscode
 settings.json
 tasks.json
-Stacklook/doc/doxygen-awesome-css
