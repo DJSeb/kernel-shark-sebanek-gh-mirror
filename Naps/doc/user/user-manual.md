@@ -58,7 +58,8 @@ No other dependencies are necessary, except the standard libraries of C and C++.
 4. (**Installation**) Plug in the plugin into KernelShark - either via KernelShark's GUI or when starting it via the 
    CLI with the `-p` option and location of the symlink or the SO itself.
 
-Instructions will remove the binary upon running `make clean`, but won't remove the symlink.
+Use `make clean-bin-dir` to remove the directory containing binaries and symlinks. Using plain `make clean` will
+only remove most recently (re)built target and its symlink.
 
 ## Building KernelShark from source and this plugin with it
 
