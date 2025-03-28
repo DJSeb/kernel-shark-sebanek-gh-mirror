@@ -9,9 +9,6 @@
 // C
 #include <stdint.h>
 
-// C++
-#include <limits>
-
 // KernelShark
 #include "KsPlotTools.hpp"
 #include "libkshark.h"
@@ -60,7 +57,7 @@ bool SlConfig::get_use_task_colors() const
  * @returns Offset from the top of the kernel stack used
  * when displaying preview of the kernel stack.
  */
-uint16_t SlConfig::get_stack_offset(event_name_t evt_name) const {
+depth_t SlConfig::get_stack_offset(event_name_t evt_name) const {
     return (_events_meta.count(evt_name) == 0) ?
         0 : _events_meta.at(evt_name).second;
 }
@@ -182,7 +179,7 @@ static void _setup_colorchange(QWidget* parent,
     preview->setLineWidth(2);
 
     layout->addWidget(push_btn);
-    layout->addSpacing(100);
+    layout->addStretch();
     layout->addWidget(preview);
 
     parent->connect(
@@ -306,7 +303,7 @@ void SlConfigWindow::update_cfg() {
 #ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
             event_meta_t& event_meta = cfg._events_meta.at(event_name_str);
             event_meta.first = event_allowed->isChecked();
-            event_meta.second = (uint16_t)event_depth->value();
+            event_meta.second = (depth_t)event_depth->value();
 #else
             allowed_t& is_allowed = cfg._events_meta.at(event_name_str);
             is_allowed = event_allowed->isChecked();
@@ -345,7 +342,7 @@ void SlConfigWindow::setup_histo_section() {
     const SlConfig& cfg = SlConfig::get_instance();
 
     _histo_limit.setMinimum(0);
-    _histo_limit.setMaximum(std::numeric_limits<int>::max());
+    _histo_limit.setMaximum(1'000'000'000);
     _histo_limit.setValue(cfg._histo_entries_limit);
 
     _histo_label.setFixedHeight(32);
@@ -434,6 +431,7 @@ void SlConfigWindow::setup_events_meta_widget() {
         evt_depth->setValue(it->second.second);
         evt_depth->setObjectName("evt_depth_" + std::to_string(i));
         evt_depth->setMinimum(0);
+        evt_depth->setMaximum(100'000'000);
 
         row->addStretch();
         row->addWidget(evt_depth);

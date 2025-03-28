@@ -40,7 +40,7 @@ using event_name_t = std::string;
  * @brief From which depth in the kernel stack (top being 0)
  * the preview should start.
  */
-using depth_t = uint16_t;
+using depth_t = uint32_t;
 
 /**
  * @brief Object holding meta information about events in Stacklook's
@@ -131,7 +131,7 @@ public: // Functions
     int32_t get_histo_limit() const;
 #ifndef _UNMODIFIED_KSHARK // Task colors, stack offset
     bool get_use_task_colors() const;
-    uint16_t get_stack_offset(event_name_t evt_name) const;
+    depth_t get_stack_offset(event_name_t evt_name) const;
 #endif    
     const KsPlot::Color get_default_btn_col() const; 
     const KsPlot::Color get_button_outline_col() const;
