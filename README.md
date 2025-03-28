@@ -32,11 +32,9 @@ See each directory for more details about that part of the project.
 
 ## Projects' status
 
-Semester project part is finished.
-
-Bachelor thesis project part WIP.
-
 ### Semester project (NPRG045) general tasks
+
+Semester project part is finished.
 
 (Stacklook plugin and small changes to KernelShark.)
 
@@ -48,6 +46,10 @@ Bachelor thesis project part WIP.
 \* The most important things work.
 
 ### Bachelor thesis project general tasks
+
+Bachelor thesis project part WIP.
+
+(Stacklook revision, Naps plugin, Couplebreak, NUMA Topology Views.)
 
 - [x] Brief project descrption
 - [x] Specification
@@ -63,6 +65,8 @@ Bachelor thesis project part WIP.
 
 Things not in specification aren't mandatory, but would be pretty useful.
 
+**Semester project part:**
+*Functionalities:*
 - [x] KernelShark Record adjustment for stacktracing
 - [x] Stacklook
   - [x] Get scheduler event for when the task was about to go to sleep and the stacktracing event
@@ -81,14 +85,11 @@ Things not in specification aren't mandatory, but would be pretty useful.
   - [x] _(Not in specification, but requested)_ Visualization of prev_states after a sched/sched_switch
   - [x] _(Implied)_ Make it work for CPU and task plots
 
-- [ ] Create example trace files for demonstration
-  - [ ] Write a program that will do something with the kernel stack to see it with Stacklook.
-  - [ ] Create a trace file without kernel stack entries to show off inacting Stacklook.
-  - [ ] Create/get a trace file to show off NUMA topology views
-    - \[NOTE\] This might be just a matter of implementation of said feature and previous trace files might be reused.
+*Demonstration:*
+- [x] Create example trace files for demonstration
 
-Below are bachelor thesis part's appended requirements:
-
+**Below are bachelor thesis part's appended requirements:**
+*Functionalities:*
 - [x] Events involving two processes shall be split into initiators and targets
   - E.g. `sched/sched_waking` should be split into "awaker" and "awakened" events, one belonging to each respective
     process
@@ -119,14 +120,27 @@ Below are bachelor thesis part's appended requirements:
     - Unknown probability of success (very high)
     - Ultimately chosen due to KernelShark's insufficient API for creating new entries.
 
-General SW goal:
+*Demonstration:*
+- [ ] Create example trace files for demonstration
+  - [ ] Write a program that will do something with the kernel stack to see it with Stacklook.
+  - [ ] Create a trace file without kernel stack entries to show off inacting Stacklook.
+  - [ ] Create/get a trace file to show off NUMA topology views
+    - \[NOTE\] This might be just a matter of implementation of said feature and previous trace files might be reused.
 
-- [ ] Debug the plugin even more, stabilise performance where necessary
-- [ ] Revise README and other non-code parts of repository to reflect project extensions
-- [ ] _("Optional")_ Create proper design document \* Would be quite good to include in technical documentation
+*General SW goal:*
+- [x] Debug the plugins even more, stabilise performance where necessary
+- [ ] Debug created extensions for KernelShark
+  - [x] Record kstack
+  - [x] Get PID color
+  - [x] Preview labels changeable
+  - [x] Mouse hover plot objects
+  - [x] Couplebreak
+  - [ ] NUMA Topology Views
+- [x] Revise README and other non-code parts of repository to reflect project extensions
+- [ ] _("Optional")_ Create proper design documents
+  - Would be quite good to include in technical documentation
 
-Non-software goal - write survey paper:
-
+*Non-software goal - write survey paper:*
 - [ ] Survey paper
   - [ ] Stack tracing (in Linux)
     - Mostly basics, some more info about KernelShark's stack tracer

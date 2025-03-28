@@ -17,13 +17,15 @@ If any performance is deemed suspiciously low, note it here.
 If a concern is either solved or dismissed, write an explanation.
 
 1. Stacklook performed too badly when loading a trace without kernel stack.
-  - **Solution**: check if the trace includes kernel stack trace events +
-    perform a on-load search of kernel stack entries, so that further searches are unnecessary.
+
+- **Solution**: check if the trace includes kernel stack trace events +
+  perform a on-load search of kernel stack entries, so that further searches are unnecessary.
 
 2. Explore optimizations to mouse hover detection
-  - Note: Worth to meddle with KernelShark's insides, since that will be inevitable now anyway
-  - **Solution**: Ignored, KernelShark behaves perfectly well with many entries and mouse hover over
-    plot objects implemented as is.
+
+- Note: Worth to meddle with KernelShark's insides, since that will be inevitable now anyway
+- **Solution**: Ignored, KernelShark behaves perfectly well with many entries and mouse hover over
+  plot objects implemented as is.
 
 ## QnInA - Questions & Ideas & Answers
 
@@ -33,6 +35,7 @@ This is noted mostly as a journal to not attempt some approaches again and as de
 documentation.
 
 - How to achieve better cohesion and less coupling between `Stacklook` and `sched_events`?
+
   - **A**: Implement the splitting of events and work from there - sched_events and stacklook
     then shouldn't interfere with each other.
     - PRO - this will have to happen anyway, might as well leverage the feature
@@ -58,6 +61,7 @@ documentation.
     - PRO - separated only into plugin's code, i.e. no SRP violation
 
 - How to enable NUMA visualization support?
+
   - **A**: Simply put, KernelShark's source code will be dissected and the visualization abilities
     written by hand.
     - Reason: KernelShark does not directly support reordering of CPUs in the graph, hence that
@@ -630,3 +634,36 @@ is a little funny.
 Performance issue was fixed and Stacklook was improved to rely
 less on runtime searches - kstack entries are now found once per
 stream load, improving performance anyway.
+
+...
+
+A lot of documentation work on Stacklook and Naps done.
+
+## 2025-03-28
+
+Documentation saga continues. User documentation is taking a very long time to look
+as good as possible. Some CMake changes were tried out, but late errors showed they
+were more error prone than not.
+
+...
+
+Stacklook user manual finished for markdown. Now to just carry this over into the PDF
+version.
+
+...
+
+Now also the PDF version is done. The only things that need finishing are:
+
+Next goals:
+
+- document Get PID Colors
+- document Record kstack
+- document Mouse hover plot objects
+- document Preview labels changeable
+- document Couplebreak
+- revise Naps' design document
+- write Stacklook's design document
+
+More future goal is to make NUMA Topology Views (implementaton & documentation).
+
+Then "just" write the survey paper.
