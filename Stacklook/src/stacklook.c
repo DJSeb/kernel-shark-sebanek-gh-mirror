@@ -184,6 +184,7 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     sl_ctx->sswitch_event_id = sched_switch_id;
 
     sl_ctx->swaking_event_id = kshark_find_event_id(stream, "sched/sched_waking");
+    sched_wake_id = sl_ctx->swaking_event_id;
 
 
     kshark_register_event_handler(stream, sched_switch_id, _select_events);
