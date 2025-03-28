@@ -17,10 +17,12 @@ explained below.
 It is composed of four main directories, each representing a portion of the thesis project.
 - **Stacklook** - plugin for visualising stack traces via a more GUI-centric way
 - **Naps** - plugin for visualising timeslices between a task's switch and next waking
-- **KS_fork** - modified copy of KernelShark's source code with multiple additions
-  - *couplebreak* functionality is a new ability of KernelShark to split some events (chosen in code) into two
-  - *NUMA topology views* functionality gives KernelShark the ability to show CPU plots with respect to the NUMA
+- **KS_fork** - modified copy of KernelShark's source code with multiple additions, what many parts across different
+  documentations will call "custom KernelShark"
+  - *Couplebreak* functionality is a new ability of KernelShark to split some events (chosen in code) into two
+  - *NUMA Topology Views* functionality gives KernelShark the ability to show CPU plots with respect to the NUMA
     topology given by the user to the program
+  - *Other smaller additions to KernelShark's abilities*
 - **SurveyPaper** - directory containing the survey paper **in Czech** about the plugins & enhancements above, along
   with `ExamplePrograms` directory in which traces of simple programs showcasing above's abilities may be found.
 

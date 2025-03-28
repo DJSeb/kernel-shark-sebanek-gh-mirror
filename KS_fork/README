@@ -1,15 +1,16 @@
 # Modifications
 
-Please navigate to [Modifications](./Modifications) directory and read reasons and
+Please navigate to [Modifications](./Modifications) directory and read reasons, usage and
 changes there. They should be divided into:
 
-- **Record-kstack** - "Record" functionality enhanced with allowing the user to just tick a
+- **Record Kstack** - "Record" functionality enhanced with allowing the user to just tick a
   single checkbox to also record kernel stack traces after each event.
-- **Mouse-hover-plot-objects** - added feature to bring more reactivity to the user (and options for a
+- **Mouse Hover Plot Objects** - added feature to bring more reactivity to the user (and options for a
   plugin developer)
-- **Preview-labels-changeable** - added function to be utilised by plugins, allows one to change the preview label in
+- **Preview Labels Changeable** - added function to be utilised by plugins, allows one to change the preview label in
   the main window
 - **Couplebreak** - splitting events belonging to two processes (=: couple)
+- **Get PID Colors** - function which allows access to KernelShark's color table of tasks
 - **NUMA Topology Views** - viewing CPU plots with respect to NUMA topology
 
 # KernelShark official README
