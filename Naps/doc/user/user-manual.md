@@ -99,7 +99,8 @@ Additional button will appear in `Tools` menu with the label `Naps Configuration
 Clicking on it will show a window dialog (figure 4), which will house configuraton options for the plugin. One of the
 two configuration options available for this plugin is the maximum amount of entries visible on the graph before the
 plugin is allowed to work. This configuration option can help if there are either not enough visible plugin shapes
-for a current zoom level or if there are too many and program memory is is too great.
+for a current zoom level or if there are too many and program memory is is too great. By default, the value is set to 
+10000 (ten thousand).
 
 ![Fig. 3](../images/NapsConfigButton.png)
 Figure 3.
@@ -109,7 +110,7 @@ Figure 4.
 
 The second configuration option is toggled via the labeled checkbox visible in (figure 4). The option is whether to
 color the nap rectangle's top and bottom outlines the same color as KernelShark uses for the task (figure 5).
-Otherwise, the same color as the one used for the filling will be used (figure 6).
+Otherwise, the same color as the one used for the filling will be used (figure 6). By default, this option is off.
 
 ![Fig. 5](../images/NapsDefaultColors.png)
 Figure 5.
