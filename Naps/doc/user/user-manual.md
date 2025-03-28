@@ -36,6 +36,8 @@ No other dependencies are necessary, except the standard libraries of C and C++.
 2. Run `cmake ..` command (if the main `CMakeLists.txt` file isn't in the parent folder, provide cmake with its
    valid location).
    - If using an unmodified KernelShark copy, add `-D_UNMODIFIED_KSHARK=1` to the command.
+     - If this was on, binaries, symlinks and their corresponding target names will gain `_unmod` suffix in their
+       output names
    - If **Doxygen documentation** is desired, include `-D_DOXYGEN_DOC=1` in the command.
    - If **trace-cmd header files** aren't in `/usr/include`, specify so via `-D_TRACECMD_INCLUDE_DIR=[PATH]`, where
     `[PATH]` is replaced by the path to the header files.
@@ -53,9 +55,9 @@ No other dependencies are necessary, except the standard libraries of C and C++.
      `-D_KS_SHARED_LIBS_DIR=[PATH]`, where `[PATH]` is replaced by the path to KernelShark shared libraries.
 3. Run `make` while still in the `build` directory.
    - If only a part of building is necessary, select a target of your choice.
-   - Just running `make` builds: **the plugin** (target `naps`), **symlink** to the plugin SO (target `naps_symlink`) 
-     and, if specified, the **Doxygen documentation** (target `docs`).
-4. (**Installation**) Plug in the plugin into KernelShark - either via KernelShark's GUI or when starting it via the 
+   - Just running `make` builds: **the plugin** (target `naps`/`naps_unmod`), **symlink** to the plugin SO (target 
+     `naps_symlink`/`naps_unmod_symlink`) and, if specified, the **Doxygen documentation** (target `docs`).
+1. (**Installation**) Plug in the plugin into KernelShark - either via KernelShark's GUI or when starting it via the 
    CLI with the `-p` option and location of the symlink or the SO itself.
 
 Use `make clean-bin-dir` to remove the directory containing binaries and symlinks. Using plain `make clean` will
