@@ -1,6 +1,6 @@
 # Intro
 
-This document serves as a simple to grasp manual for the "naps" KernelShark plugin.
+This document serves as a simple to grasp manual for the "Stacklook" KernelShark plugin.
 
 ![Fig. 1](../images/SlWorking.png)
 Figure 1.
