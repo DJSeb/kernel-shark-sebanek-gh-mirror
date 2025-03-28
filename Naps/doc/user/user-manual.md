@@ -35,7 +35,7 @@ No other dependencies are necessary, except the standard libraries of C and C++.
    [README](../../README.md)), if not already present).
 2. Run `cmake ..` command (if the main `CMakeLists.txt` file isn't in the parent folder, provide cmake with its
    valid location).
-   - If using an unmodified KernelShark copy, add `-D_UNMODIFIED_KSHARK` to the command.
+   - If using an unmodified KernelShark copy, add `-D_UNMODIFIED_KSHARK=1` to the command.
    - If **Doxygen documentation** is desired, include `-D_DOXYGEN_DOC=1` in the command.
    - If **trace-cmd header files** aren't in `/usr/include`, specify so via `-D_TRACECMD_INCLUDE_DIR=[PATH]`, where
     `[PATH]` is replaced by the path to the header files.
