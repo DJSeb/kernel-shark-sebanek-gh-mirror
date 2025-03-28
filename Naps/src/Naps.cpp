@@ -64,6 +64,7 @@ static void config_show([[maybe_unused]] KsMainWindow*) {
     cfg_window->show();
 }
 
+#ifndef _UNMODIFIED_KSHARK // Task coloring
 /**
  * @brief Gets the color of the task used by KernelShark for that task.
  * Used during nap rectangle creation to figure out the outline of the rectangle.alignas
@@ -95,6 +96,7 @@ static const KsPlot::Color _get_task_color(int pid) {
 
     return result_color;
 }
+#endif
 
 /**
  * @brief Returns either black if the background color's intensity is too great,

@@ -124,7 +124,9 @@ void NapConfigWindow::update_cfg() {
     NapConfig& cfg = NapConfig::get_instance();
 
     cfg._histo_entries_limit = _histo_limit.value();
+#ifndef _UNMODIFIED_KSHARK // Task coloring
     cfg._use_task_coloring = _task_col_btn.isChecked();
+#endif
 
     // Display a successful change dialog
     // We'll see if unique ptr is of any use here
