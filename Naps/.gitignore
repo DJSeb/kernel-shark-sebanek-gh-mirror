@@ -1,4 +1,6 @@
+build_both.sh
 build
+unmodif_build
 .vscode
 doc/technical/**
 doc/docs_build.log
