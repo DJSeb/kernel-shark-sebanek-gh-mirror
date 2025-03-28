@@ -160,11 +160,6 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
     kshark_entry* event_entry = data[0]->entry;
     const kshark_entry* kstack_entry = (const kshark_entry*)(data[0]->field);
 
-    int entry_pid = (event_entry->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
-        event_entry->pid :
-        // "Emergency get" if some plugins messed around with the entry before
-        kshark_get_pid(event_entry);
-
     // Base point
     KsPlot::Point base_point = graph[0]->bin(bin[0])._val;
 
@@ -195,11 +190,16 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
     inner_triangle.setPoint(1, b);
     inner_triangle.setPoint(2, c);
 
-    inner_triangle._color = cfg.get_default_btn_col();
+    inner_triangle._color = col;
 #ifndef _UNMODIFIED_KSHARK // Task colors
     // Colors are a bit wonky with sched_switch events. Using the function
     // makes it consistent across the board.
     if (cfg.get_use_task_colors()) {
+        int entry_pid = (event_entry->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
+            event_entry->pid :
+            // "Emergency get" if some plugins messed around with the entry before
+            kshark_get_pid(event_entry);
+
         inner_triangle._color = _get_task_color(entry_pid, col);
     }
 #endif

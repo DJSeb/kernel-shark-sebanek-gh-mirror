@@ -3,9 +3,11 @@ cmake_minimum_required(VERSION 3.1.2 FATAL_ERROR)
 project(stacklook)
 
 # Plugin meta
+set(PLUGIN_NAME "stacklook")
 set(SL_VERSION "2.2.1")
 
 # KernelShark meta
+
 set(KS_VERSION "2.4.0-couplebreak")
 
 # Ensure a default build type
@@ -13,6 +15,16 @@ set(KS_VERSION "2.4.0-couplebreak")
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif ()
+
+## Detect if the user will be building without a modified KernelShark source
+if (_UNMODIFIED_KSHARK)
+  message("[INFO] Detected unmodified KernelShark source build argument.\n \
+          The plugin will omit mouse hover and task color features.")
+  add_definitions(-D_UNMODIFIED_KSHARK)
+  set(PLUGIN_NAME "${PLUGIN_NAME}_unmod")
+else()
+  message("[INFO] Modified KernelShark source version of software will be built.")
+endif()
 
 # Build the plugin itself
 add_subdirectory("./src")

@@ -66,12 +66,6 @@ set(KS_SLIB_GUI "${_KS_SHARED_LIBS_DIR}/${KS_LIB_PREFIX}kshark-gui${KS_LIB_SUFFI
 ### KernelShark conventions
 set(KS_PLUGIN_PREFIX "plugin-")
 
-
-## Add definitions if using modifed KernelShark (preview support)
-if (_UNMODIFIED_KSHARK)
-  add_definitions(-D_UNMODIFIED_KSHARK)
-endif()
-
 # Plugin building
 ## Needed source files
 set(SOURCES
@@ -104,8 +98,7 @@ target_link_libraries(stacklook PRIVATE
     ${KS_SLIB_CORE}  ${KS_SLIB_PLOT}  ${KS_SLIB_GUI}
 )
 
-
-set(SL_SYMLINK_NAME "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}stacklook.so")
-set(SL_SYMLINK_TARGET "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}stacklook.so.${SL_VERSION}")
+set(SL_SYMLINK_NAME "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}${PLUGIN_NAME}.so")
+set(SL_SYMLINK_TARGET "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}${PLUGIN_NAME}.so.${SL_VERSION}")
 add_custom_target(stacklook_symlink ALL
                   COMMAND ${CMAKE_COMMAND} -E create_symlink ${SL_SYMLINK_TARGET} ${SL_SYMLINK_NAME})

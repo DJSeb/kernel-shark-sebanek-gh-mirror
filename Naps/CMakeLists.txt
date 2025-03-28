@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.1.2 FATAL_ERROR)
 project(naps)
 
 # Plugin meta
+set(PLUGIN_NAME "naps")
 set(NAPS_VERSION "1.2.0")
 
 # KernelShark meta
@@ -17,7 +18,9 @@ endif ()
 # Detect if the user will be building without a modified KernelShark source
 if (_UNMODIFIED_KSHARK)
   message("[INFO] Detected unmodified KernelShark source build argument.\n \
-           The plugin will omit mouse hover and couplebreak features.")
+           The plugin will omit task colors and couplebreak features.")
+  add_definitions(-D_UNMODIFIED_KSHARK)
+  set(PLUGIN_NAME "${PLUGIN_NAME}_unmod")
 else()
   message("[INFO] Modified KernelShark source version of software will be built.")
 endif()
