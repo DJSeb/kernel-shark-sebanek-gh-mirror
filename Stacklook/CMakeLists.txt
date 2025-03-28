@@ -4,7 +4,7 @@ project(stacklook)
 
 # Plugin meta
 set(PLUGIN_NAME "stacklook")
-set(SL_VERSION "2.2.1")
+set(SL_VERSION "2.2.3")
 
 # KernelShark meta
 
