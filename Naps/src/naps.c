@@ -238,7 +238,7 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     // IDs will not work immediately, since couplebreak needs to have stream
     // loaded first, since these IDs are created dynamically.
     nr_ctx->waking_event_id = (stream->couplebreak_on) ?
-        COUPLEBREAKER_EVENT_ID_SHIFT - swaking_id : swaking_id;
+        COUPLEBREAK_EVENT_ID_SHIFT - swaking_id : swaking_id;
 #else
     nr_ctx->waking_event_id = kshark_find_event_id(stream, "sched/sched_waking");
 #endif

@@ -19,8 +19,19 @@
 extern "C" {
 #endif
 
-//NOTE: Changed here.
-#define COUPLEBREAKER_EVENT_ID_SHIFT -10000
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief The event ID shift for couplebreak events.
+ * 
+ * Couplebreak's event IDs need to be negative (KernelShark
+ * already does this with missing events). To achieve this, the origin
+ * event's ID is subtracted from COUPLEBREAK_EVENT_ID_SHIFT, making
+ * the origin event's ID easily identifiable from the target event's ID
+ * (that being a couplebreak event) and vice verse, all thanks to this
+ * shift.
+ */
+const static int COUPLEBREAK_EVENT_ID_SHIFT = -10000;
+// END of change
 
 /** Unique identifier of the TEP tracing data format. */
 #define TEP_DATA_FORMAT_IDENTIFIER	"tep data"

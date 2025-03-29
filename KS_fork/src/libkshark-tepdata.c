@@ -321,13 +321,13 @@ static int flag_to_couplebreak_id(struct kshark_data_stream *stream, int flag_po
 		default: // Represents a fault.
 			return -1;
 	}
-	return COUPLEBREAKER_EVENT_ID_SHIFT - return_evt_id;
+	return COUPLEBREAK_EVENT_ID_SHIFT - return_evt_id;
 }
 
 static int find_couplebreak_event_id_from_origin_name(struct kshark_data_stream *stream,
 	const char *origin_evt_name)
 {
-	return COUPLEBREAKER_EVENT_ID_SHIFT - kshark_find_event_id(stream, origin_evt_name);
+	return COUPLEBREAK_EVENT_ID_SHIFT - kshark_find_event_id(stream, origin_evt_name);
 }
 
 static bool is_couplebreak_event(struct kshark_data_stream *stream, int event_id)
@@ -388,7 +388,7 @@ static struct kshark_entry* create_sched_switch_target(struct kshark_data_stream
 	entry->ts = record->ts;
 
 	/* All custom entries must have negative event Identifiers. */
-	entry->event_id = COUPLEBREAKER_EVENT_ID_SHIFT - origin_entry->event_id;
+	entry->event_id = COUPLEBREAK_EVENT_ID_SHIFT - origin_entry->event_id;
 
 	entry->visible = 0xFF;
 
@@ -425,7 +425,7 @@ static struct kshark_entry *create_sched_waking_target(
 	entry->ts = record->ts;
 
 	/* All custom entries must have negative event Identifiers. */
-	entry->event_id = COUPLEBREAKER_EVENT_ID_SHIFT - origin_entry->event_id;
+	entry->event_id = COUPLEBREAK_EVENT_ID_SHIFT - origin_entry->event_id;
 
 	entry->visible = 0xFF;
 
