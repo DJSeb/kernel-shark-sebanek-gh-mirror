@@ -584,8 +584,10 @@ private:
 
 	void _makeTepEventItems(kshark_data_stream *stream, QVector<int> eventIds);
 
-	//NOTE: Changed here.
-	void _addCouplebreakItems(kshark_data_stream *stream);
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+
+	void _addCouplebreakItems(const kshark_data_stream *stream);
+	// END of change
 };
 
 /**
@@ -645,10 +647,19 @@ private:
 	QLabel		_streamLabel, _eventLabel, _fieldLabel;
 };
 
-//NOTE: Changed here.
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Configuration window for couplebreak.
+ * 
+ */
 class KsCouplebreakDialog: public QDialog {
 	Q_OBJECT
+	
+	/// @brief Simpler name to refer to a stream (by its Id) per checkbox
+	/// (by a pointer to it) pair. 
 	using StreamCboxes = std::pair<int, QCheckBox *>;
+	/// @brief Simpler type name for representing a stream (by its Id) and
+	/// its couplebreak setting (by its on/off state boolean).
 	using StreamCouplebreakSetting = std::pair<int, bool>;
 private: // Qt objects
 	/// @brief Layout containing other layouts (top-down ordering of other layouts).
@@ -674,17 +685,23 @@ private: // Qt objects
 signals:
 	/// @brief Signal emitted when the "Apply" button is pressed.
 	void apply(QVector<StreamCouplebreakSetting> settings);
-private: // Non-GUI relevant objects
+private: // Non-GUI objects
 	/// @brief Vector of pairs of stream id and couplebreaking flag.
 	QVector<StreamCboxes> _couplebreak_settings;
 private:
-	/// @brief Apply the changes to the streams.
+	// Reaction to a clicked apply button
 	void _apply_action();
+	void _setup_explanation();
+	void _setup_endstage();
+	void _setup_streams_scroll_area(kshark_context *kshark_ctx);
+	void _setup_layout();
 public:
+	// Don't allow default constructor, it would contain invalid values.
 	KsCouplebreakDialog() = delete;
 	explicit KsCouplebreakDialog(kshark_context *kshark_ctx,
 		QWidget *parent = nullptr);
 };
+// END of change
 
 }; // KsWidgetsLib
 

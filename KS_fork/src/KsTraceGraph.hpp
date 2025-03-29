@@ -78,12 +78,14 @@ public:
 
 	bool eventFilter(QObject* obj, QEvent* evt) override;
 
-	/** NOTE: Changed here **/
+	//NOTE: Changed here. (PREVIEW LABELS CHANGEABLE) (2024-07-26)
+	
 	void setPreviewLabels(const QString& label1 = "",
 						  const QString& label2 = "",
 						  const QString& label3 = "",
 						  const QString& label4 = "",
 						  const QString& label5 = "");
+	// END of change
 
 signals:
 	/**

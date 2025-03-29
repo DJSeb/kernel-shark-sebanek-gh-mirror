@@ -63,7 +63,9 @@ KsMainWindow::KsMainWindow(QWidget *parent)
   _addPluginsAction("Add plugins", this),
   _captureAction("Record", this),
   _addOffcetAction("Add Time Offset", this),
-  _couplebreakOn("Couplebreak Settings", this), //NOTE: Changed here.
+  //NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+  _couplebreakAction("Couplebreak Settings", this),
+  // END of change
   _colorAction(this),
   _colSlider(this),
   _colorPhaseSlider(Qt::Horizontal, this),
@@ -355,10 +357,11 @@ void KsMainWindow::_createActions()
 	connect(&_addOffcetAction,	&QAction::triggered,
 		this,			&KsMainWindow::_offset);
 
-	//NOTE: Changed here.
-	_couplebreakOn.setStatusTip("Control KernelShark's couplebreaking");
-	connect(&_couplebreakOn,	&QAction::triggered,
-		this,			&KsMainWindow::_toggleCouplebreak);
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+	_couplebreakAction.setStatusTip("Control KernelShark's couplebreaking");
+	connect(&_couplebreakAction, &QAction::triggered, // Actor + action on actor
+		this, &KsMainWindow::_showCouplebreakConfig); // Reactor + action on reactor
+	// END of change
 
 	_colorPhaseSlider.setMinimum(20);
 	_colorPhaseSlider.setMaximum(180);
@@ -508,11 +511,12 @@ void KsMainWindow::_createMenus()
 	tools->addAction(&_fullScreenModeAction);
 	tools->addSeparator();
 	tools->addAction(&_captureAction);
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+	tools->addAction(&_couplebreakAction);
+	// END of change
 	tools->addAction(&_managePluginsAction);
 	tools->addAction(&_addPluginsAction);
 	tools->addAction(&_addOffcetAction);
-	//NOTE: Chamged here.
-	tools->addAction(&_couplebreakOn);
 
 	/*
 	 * Enable the "Add Time Offset" menu only in the case of multiple
@@ -885,10 +889,12 @@ void KsMainWindow::_showEvents()
 
 	auto lamFilter = [=] (int sd, QVector<int> show) {
 		QVector<int> all = KsUtils::getEventIdList(sd);
-		//NOTE: Changed here.
+		//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 		if (stream->couplebreak_on) {
+			// We want to also filter the couplebreak events, if they exist.
 			all.append(KsUtils::getCoupleBreakerIdList(sd));
 		}
+		// END of change
 		_applyFilter(sd, all, show,
 			     LAMBDA_FILTER(_data.applyPosEventFilter),
 			     LAMBDA_FILTER(_data.applyNegEventFilter));
@@ -1670,16 +1676,23 @@ void KsMainWindow::_rootWarning()
 	warn.exec();
 }
 
-// NOTE: Changed here.
-void KsMainWindow::_toggleCouplebreak() {
-	QVector<int> stream_ids;
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Function will show the couplebreak configuration
+ * dialog, but only if some KernelShark session is found and
+ * there is at least one stream loaded. After showing the dialog,
+ * KernelShark graph in the main window is updated.
+ * 
+ */
+void KsMainWindow::_showCouplebreakConfig() {
 	KsCouplebreakDialog *dialog;
 	kshark_context *kshark_ctx(nullptr);
 
 	if (!kshark_instance(&kshark_ctx)) {
 		return;
 	}
-		
+	
+	// Same check as for most other stream-reliant functions.
 	if (kshark_ctx->n_streams == 0) {
 		QString err("Data has to be loaded first.");
 		QMessageBox msgBox;
@@ -1687,16 +1700,26 @@ void KsMainWindow::_toggleCouplebreak() {
 
 		return;
 	}
-		
+	
 	dialog = new KsCouplebreakDialog{kshark_ctx, this};
-	connect(dialog,		&KsCouplebreakDialog::apply,
-		this,		&KsMainWindow::_updateCouplebreaks);
+	connect(dialog, &KsCouplebreakDialog::apply, // Actor + action on actor
+		this, &KsMainWindow::_updateCouplebreaks); // Reactor + action on reactor
 
 	dialog->show();
-
+	// Update the graph with the new data, there were new entries created
 	_graph.update(&_data);
 }
+// END of change
 
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Function will toggle couplebreak on or off for each stream, both
+ * given in the argument. During this plugins for each stream are updated
+ * to reflect the new data.
+ * 
+ * @param stream_couplebreaks A vector of pairs, each pair containing a stream ID and
+ * a boolean value indicating whether the couplebreak is on or off.
+ */
 void KsMainWindow::_updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_couplebreaks) {
 	kshark_context *kshark_ctx(nullptr);
 
@@ -1710,8 +1733,16 @@ void KsMainWindow::_updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_
 			stream->couplebreak_on = sc.second;
 		}
 
+		// This might seem a little out of place - why are plugins here?
+		// The reason is that couplebreak changes data, which means plugins not updated
+		// would be using out of date data, possibly so out of date that their inner state
+		// would get confused by couplebreak and the plugin would cease its function.
+		// Hence, we check all active plugins and update them, forcing them to check new data.
+		// This behaviour is a mimicry of what happens when plugins are selected in the GUI
+		// via "Manage Plotting plugins".
 		QVector<int> stream_plugins = _plugins.getActivePlugins(sc.first);
-		QVector<int> stream_loaded_plugins = _plugins.getPluginsByStatus(sc.first, KSHARK_PLUGIN_LOADED);
+		QVector<int> stream_loaded_plugins = 
+			_plugins.getPluginsByStatus(sc.first, KSHARK_PLUGIN_LOADED);
 		for (auto const &loaded: stream_loaded_plugins) {
 			stream_plugins[loaded] = 1;
 		}
@@ -1719,3 +1750,4 @@ void KsMainWindow::_updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_
 		_pluginUpdate(sc.first, stream_plugins);
 	}
 }
+// END of change

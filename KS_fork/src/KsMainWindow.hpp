@@ -185,8 +185,9 @@ private:
 
 	QAction		_addOffcetAction;
 
-	/*NOTE: Changed here. */
-	QAction		_couplebreakOn;
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+	QAction		_couplebreakAction;
+	// END of change
 
 	QWidgetAction	_colorAction;
 
@@ -312,10 +313,16 @@ private:
 
 	QString _getCacheDir();
 
-	/*NOTE: Changed here.*/
-	void _toggleCouplebreak();
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+
+	void _showCouplebreakConfig();
+
+	/// @brief Simpler type name for representing a stream (by its Id) and
+	/// its couplebreak setting (by its on/off state boolean).
 	using StreamCouplebreakSetting = std::pair<int, bool>;
+
 	void _updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_couplebreaks);
+	// END of change
 
 private slots:
 	void _captureFinished(int, QProcess::ExitStatus);

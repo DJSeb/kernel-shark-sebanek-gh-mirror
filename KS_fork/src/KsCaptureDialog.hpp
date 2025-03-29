@@ -83,10 +83,10 @@ private:
 
 	QPushButton	_outputBrowseButton;
 
-	/**NOTE: Changed here
-	 * Check box to indicate tracing the stack for every event.
-	 */
+	//NOTE: Changed here. (RECORD KSTACK) (2024-05-31)
+	//Check box to indicate tracing of the kernel stack after every event.
 	QCheckBox _stackCheckBox;
+	// END of change
 
 	QString		_lastFilePath;
 

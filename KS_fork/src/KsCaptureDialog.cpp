@@ -77,7 +77,9 @@ KsCaptureControl::KsCaptureControl(QWidget *parent)
   _importSettingsButton("Import Settings", this),
   _exportSettingsButton("Export Settings", this),
   _outputBrowseButton("Browse", this),
-  _stackCheckBox("Enable stacktracing", this), //NOTE: Changed here
+  //NOTE: Changed here. (RECORD KSTACK) (2024) (2024-05-31)
+  _stackCheckBox("Enable kernel stack tracing", this),
+  // END of change
   _commandCheckBox("Display output", this),
   _captureButton("Capture", &_controlToolBar),
   _applyButton("Apply", &_controlToolBar),
@@ -160,10 +162,11 @@ KsCaptureControl::KsCaptureControl(QWidget *parent)
 	_commandCheckBox.adjustSize();
 	_execLayout.addWidget(&_commandCheckBox, row++, 2);
 
-	//NOTE: Changed here
+	//NOTE: Changed here. (RECORD KSTACK) (2024) (2024-05-31)
 	_stackCheckBox.setCheckState(Qt::Unchecked);
 	_stackCheckBox.adjustSize();
 	_execLayout.addWidget(&_stackCheckBox, row++, 1);
+	// END of change
 
 	_topLayout.addLayout(&_execLayout);
 
@@ -206,10 +209,12 @@ QStringList KsCaptureControl::getArgs()
 	if (_pluginsComboBox.currentText() != "nop")
 		argv << "-p" << _pluginsComboBox.currentText();
 
-	//NOTE: Changed here
+	//NOTE: Changed here. (RECORD KSTACK) (2024) (2024-05-31)
+	// Supplies argument -T to trace-cmd to enable stack tracing after each event.
 	if (_stackCheckBox.isChecked())
 		argv << "-T";
-	
+	// END of change
+
 	if (_eventsWidget.all())
 		argv << "-e" << "all";
 	else

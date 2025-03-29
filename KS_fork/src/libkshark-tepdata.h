@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-29)
 /**
  * @brief The event ID shift for couplebreak events.
  * 
@@ -30,7 +30,7 @@ extern "C" {
  * (that being a couplebreak event) and vice verse, all thanks to this
  * shift.
  */
-const static int COUPLEBREAK_EVENT_ID_SHIFT = -10000;
+#define COUPLEBREAK_EVENT_ID_SHIFT -10000
 // END of change
 
 /** Unique identifier of the TEP tracing data format. */

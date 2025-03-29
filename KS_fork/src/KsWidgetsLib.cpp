@@ -977,35 +977,47 @@ KsEventsCheckBoxWidget::KsEventsCheckBoxWidget(kshark_data_stream *stream,
 	if(!stream->n_events || eventIds.isEmpty())
 		return;
 
-	//NOTE: Changed here.
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+	// Resize the event ID and checkbox vectors to fit in couplebreak events.
 	_id.resize(stream->n_events + stream->n_couplebreak_evts);
 	_cb.resize(stream->n_events + stream->n_couplebreak_evts);
+	// END of change
 
 	if (kshark_is_tep(stream))
 		_makeTepEventItems(stream, eventIds);
 	else
 		_makeItems(stream, eventIds);
 	
-	//NOTE: Changed here.
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 	if (stream->couplebreak_on) {
 		_addCouplebreakItems(stream);
 	}
+	// END of change
 }
 
-//NOTE: Changed here.
-void KsEventsCheckBoxWidget::_addCouplebreakItems(kshark_data_stream *stream) {
-	// Add couplebreak items:
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Add couplebreak checkbox subtree to the checkbox tree.
+ * Creates a new checkable category (couplebreak) and adds couplebreak
+ * events (detected in the stream) into it, creating the new
+ * subtree.
+ * 
+ * @param stream Input location for a Data stream pointer.
+ */
+void KsEventsCheckBoxWidget::_addCouplebreakItems(const kshark_data_stream *stream) {
+	// Setup the variables necessary for the subtree.
 	QTreeWidgetItem *evtItem, *sysItem;
 	QString evtName;
 	QString sysName = "couplebreak";
 	QVector<int> couplebreakIds = KsUtils::getCoupleBreakerIdList(stream->stream_id);
 
+	// Setup the category checkbox (subtree root).
 	sysItem = new QTreeWidgetItem;
 	sysItem->setText(0, sysName);
 	sysItem->setCheckState(0, Qt::Checked);
 	_tree.addTopLevelItem(sysItem);
 
-	// Add the couplebreak events:
+	// Add couplebreak events (subtree items).
 	for (int i = 0; i < couplebreakIds.size(); ++i) {
 		evtName = KsUtils::getEventName(stream->stream_id, couplebreakIds[i]);
 		evtItem = new QTreeWidgetItem;
@@ -1013,10 +1025,13 @@ void KsEventsCheckBoxWidget::_addCouplebreakItems(kshark_data_stream *stream) {
 		evtItem->setCheckState(0, Qt::Checked);
 		evtItem->setFlags(evtItem->flags() | Qt::ItemIsUserCheckable);
 		sysItem->addChild(evtItem);
+		// Due to how these vectors are filled, we can expect to be
+		// able to add couplebreak events at their ends.
 		_id[stream->n_events + i] = couplebreakIds[i];
 		_cb[stream->n_events + i] = evtItem;
 	}
 }
+// END of change
 
 void KsEventsCheckBoxWidget::_makeItems(kshark_data_stream *stream,
 					QVector<int> eventIds)
@@ -1421,105 +1436,114 @@ void KsEventFieldSelectWidget::_eventChanged(int)
 	_fieldComboBox.addItems(fieldsList);
 }
 
-//NOTE: Changed here.
-KsCouplebreakDialog::KsCouplebreakDialog(
-	kshark_context *kshark_ctx, QWidget *parent)
-	: QDialog(parent),
-	_main_layout{this},
-	_explanation{this},
-	_scroll_area{this},
-	_close_button{"Close", this},
-    _apply_button{"Apply", this}
-{
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-29)
+/**
+ * @brief Set up the couplebreak explanation text for the dialog.
+ * 
+ */
+void KsCouplebreakDialog::_setup_explanation() {
 	// Static constants
 	static const QString EXPLANATION_TEXT = QString{
 		"Couplebreak functionality has KernelShark split (break up) "
 		"events which involve two processes (a couple). "
-		"Such events are, for example, the 'sched_switch' or 'sched_waking' "
-		"events. "
+		"Such events currently are the \"sched/sched_switch\" and "
+		"\"sched/sched_waking\" events. "
 		"By default (setting is OFF), KernelShark shows these events as a "
 		"single entry in the data table. "
 		"With the setting ON, KernelShark will generate "
-		"'couplebreak/(event name)[target]' entries, positioned just after "
-		"the original ('origin') entry. "
+		"\"couplebreak/(event name)[target]\" entries, positioned just after "
+		"the original (\"origin\") entry. "
 		"The setting is set per stream."
-		"\n\nThis feature is experimental and not quite tested through. "
+		"\n\nThis feature is experimental and not fully tested through. "
 		"Plugins usually expect classical event ordering. "
-		"Please use with caution and report any issues (including "
-		"compatibility) you encounter."
+		"Please use with caution and report any issues you encounter."
 		"\n\nCouplebreak settings:"
 	};
 
-	// Dialog setup
-	setWindowTitle("Couplebreak Settings");
-
-	// Member setups
-	_main_layout.setContentsMargins(5, 5, 5, 5);
-	_scroll_area.setWidgetResizable(true);
+	// Set the explanation text and make it word-wrapping.
 	_explanation.setText(EXPLANATION_TEXT);
 	_explanation.setWordWrap(true);
+}
 
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-29)
+/**
+ * @brief Sets up "Apply" and "Close" buttons for the dialog.
+ * 
+ */
+void KsCouplebreakDialog::_setup_endstage() {
+	// Setup visuals and do not use auto defaults.
 	int buttonWidth = STRING_WIDTH("--Close--");
 	_apply_button.setFixedWidth(buttonWidth);
 	_apply_button.setAutoDefault(false);
 	_close_button.setFixedWidth(buttonWidth);
 	_close_button.setAutoDefault(false);
+	
+	// Connect the buttons to actions, store apply button's connection
+	// for manipulation on signal emission.
+	_apply_button_connection = connect(
+		&_apply_button, &QPushButton::pressed, // Actor + action
+		this, &KsCouplebreakDialog::_apply_action); // Reactor + reaction
+	connect(&_apply_button, &QPushButton::pressed, this, &QWidget::close);
+	connect(&_close_button, &QPushButton::pressed, this, &QWidget::close);
 
-	// Scroll area setup
+	// Add the buttons to their layout.
+	_endstage_btns_layout.addWidget(&_apply_button);
+	_endstage_btns_layout.addWidget(&_close_button);
+}
+// END of change
+
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-29)
+/**
+ * @brief Sets up the scroll area with streams and their couplebreak settings.
+ * 
+ * @param kshark_ctx KernelShark context to get all streams.
+ */
+void KsCouplebreakDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx) {
+	// Allow the scroll area to be resized.
+	_scroll_area.setWidgetResizable(true);
+
+	// Create a container widget for all streams (aesthetics).
 	QWidget *list_container = new QWidget{&_scroll_area};
     QVBoxLayout *list_layout = new QVBoxLayout{list_container};
 
 	// Setup stream couplebreak settings and checkboxes
 	QVector<int> stream_ids = KsUtils::getStreamIdList(kshark_ctx);
 	for (auto const &sd: stream_ids) {
-		// Get the stream object
 		kshark_data_stream* stream = kshark_get_data_stream(kshark_ctx, sd);
 
-		// See if stream breaks couples
 		bool s_breaks_couples = stream->couplebreak_on;
 
-		// Make Qt widgets and layout
-		QHBoxLayout* stream_couplebreak_layout = new QHBoxLayout{};
-		
-		//NOTE: Changed here - delete this
-		stream_couplebreak_layout->setObjectName("stream_couplebreak_layout #" + QString::number(sd));
-		
-		
+		// Make Qt widget elements and layout
 		QLabel* stream_name = new QLabel("Stream #" + QString::number(sd));
 		QCheckBox* stream_couplebreak_cb = new QCheckBox("Couplebreak ON");
+		QHBoxLayout* stream_couplebreak_layout = new QHBoxLayout{};		
 
+		// Set the checkbox to be checked if the stream breaks couples
 		stream_couplebreak_cb->setChecked(s_breaks_couples);
 		
-		// Add couplebreak setting to inner vector
+		// Add couplebreak settings to inner vector
 		_couplebreak_settings.append(StreamCboxes{sd, stream_couplebreak_cb});
 		
-		// Add the name of the stream
 		stream_couplebreak_layout->addWidget(stream_name);
-		
-		// Pacing the checkbox to the right
 		stream_couplebreak_layout->addStretch();
-		
-		// Lastly, add the checkbox to the layout
 		stream_couplebreak_layout->addWidget(stream_couplebreak_cb);
 
-		// Add the layout to the list layout
 		list_layout->addLayout(stream_couplebreak_layout);
 	}
 
 	// Create bonds for scroll area
 	list_container->setLayout(list_layout);
 	_scroll_area.setWidget(list_container);
+}
 
-	// Setup endstage buttons
-	_apply_button_connection = connect(&_apply_button, &QPushButton::pressed,
-		this, 	&KsCouplebreakDialog::_apply_action);
-	connect(&_apply_button, &QPushButton::pressed, this, &QWidget::close);
-	connect(&_close_button, &QPushButton::pressed, this, &QWidget::close);
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-29)
+/**
+ * @brief Set up the main layout of the dialog.
+ * 
+ */
+void KsCouplebreakDialog::_setup_layout() {
+	_main_layout.setContentsMargins(5, 5, 5, 5);
 
-	_endstage_btns_layout.addWidget(&_apply_button);
-	_endstage_btns_layout.addWidget(&_close_button);
-
-	// Create bonds for the whole dialog
 	_main_layout.addWidget(&_explanation);
 	_main_layout.addStretch();
 	_main_layout.addWidget(&_scroll_area);
@@ -1529,6 +1553,40 @@ KsCouplebreakDialog::KsCouplebreakDialog(
 	setLayout(&_main_layout);
 }
 
+// END of change
+
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Construct a new couplebreak configuration dialog.
+ * 
+ * @param kshark_ctx KernelShark context.
+ * @param parent Parent widget.
+ */
+KsCouplebreakDialog::KsCouplebreakDialog(kshark_context *kshark_ctx,
+	QWidget *parent)
+	: QDialog(parent),
+	_main_layout{this},
+	_explanation{this},
+	_scroll_area{this},
+	_close_button{"Close", this},
+    _apply_button{"Apply", this}
+{
+	// Dialog setup
+	setWindowTitle("Couplebreak Settings");
+
+    _setup_explanation();
+	_setup_streams_scroll_area(kshark_ctx);
+	_setup_endstage();
+	_setup_layout();	
+}
+// END of change
+
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Emit a signal to Qt and create stream + couplebreak state
+ * pairs vector to use in apply action.
+ * 
+ */
 void KsCouplebreakDialog::_apply_action()
 {
 	QVector<StreamCouplebreakSetting> settings;
@@ -1545,5 +1603,6 @@ void KsCouplebreakDialog::_apply_action()
 
 	emit apply(settings);
 }
+// END of change
 
 }; // KsWidgetsLib

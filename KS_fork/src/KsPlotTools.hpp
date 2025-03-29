@@ -112,13 +112,16 @@ public:
 			_doubleClick();
 	}
 
+	//NOTE: Changed here. (MOUSE HOVER PLOT OBJECTS) (2024-07-26)
 	/**
-	 * NOTE: Changed here
-	*/
+	 * @brief Generic action to be executed when the objects is hovered over
+	 * by the mouse cursor.
+	 */
 	void mouseHover() const {
 		if (_visible)
 			_mouseHover();
 	}
+	// END of change
 
 	virtual double distance(int x, int y) const;
 
@@ -136,10 +139,14 @@ private:
 
 	virtual void _doubleClick() const {}
 
+	//NOTE: Changed here. (MOUSE HOVER PLOT OBJECTS) (2024-07-26)
 	/**
-	 * NOTE: Changed here
-	*/
+	 * @brief Child class can override this function to implement
+	 * a custom action when the object is hovered over by the mouse
+	 * cursor.
+	 */
 	virtual void _mouseHover() const {}
+	// END of change
 };
 
 /** List of graphical element. */

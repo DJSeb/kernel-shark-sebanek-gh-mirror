@@ -155,9 +155,10 @@ typedef int (*stream_find_id_func) (struct kshark_data_stream *,
 /** A function type to be used by the method interface of the data stream. */
 typedef int *(*stream_get_ids_func) (struct kshark_data_stream *);
 
-//NOTE: Changed here.
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 /** A function type to be used by the method interface of the data stream. */
 typedef int *(*stream_get_couplebreak_ids_func) (struct kshark_data_stream *);
+// END of change
 
 /** A function type to be used by the method interface of the data stream. */
 typedef int (*stream_get_names_func) (struct kshark_data_stream *,
@@ -278,9 +279,13 @@ struct kshark_generic_stream_interface {
 	/** Method used to load the data in matrix form. */
 	load_matrix_func	load_matrix;
 
-	//NOTE: Changed here.
-	/** Method used to retrieve an array of Ids of all couplebreak events. */
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+	/** 
+	 * @brief Method used to retrieve an array of Ids of all couplebreak events
+	 * present in the stream.
+	 */
 	stream_get_couplebreak_ids_func 	get_couplebreak_ids; 
+	// END of change
 
 	/** Generic data handle. */
 	void			*handle;
@@ -373,19 +378,26 @@ struct kshark_data_stream {
 	 */
 	void				*interface;
 
-	//NOTE: Changed here.
-	/** Flag indicating whether or not stream breaks couples
-	 *  (events regarding two processes).
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+	/** 
+	 * @brief Flag indicating whether or not stream breaks couples
+	 * (events regarding two processes).
 	 */
 	bool couplebreak_on;
 
-	/** The number of couplebreak events. */
+	/** 
+	 * @brief The number of couplebreak event types present in this data stream.
+	 * This value is incremented every time a new couplebreak event type is created on
+	 * data load.
+	 */
 	int n_couplebreak_evts;
 
-	/** Bitmask record of couplebreak events, which were created in this stream.
-	 *  Look into the documentation for a comprehensive list of which bits correspond to which events.
+	/** 
+	 * @brief Bitmask record of couplebreak event types which were created in this stream.
+	 * Look into the documentation for a comprehensive list of which bits correspond to which events.
 	*/
 	int couplebreak_evts_flags;
+	// END of change
 };
 
 static inline char *kshark_set_data_format(char *dest_format,
