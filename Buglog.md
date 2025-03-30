@@ -5,18 +5,7 @@ If a bug has been solved, mark it and provide explanation (or a commit ID where 
 
 # Open bugs
 
-1. Opening KernelShark without preloading Stacklook in any way and then importing
-   session where Stacklook was loaded will result in a segmentation fault upon button
-   hover.
-
-   - Status: OPEN
-   - Cause: Who knows, same as number 6 is in Closed bugs probably.
-     - Common thread seems to be access to the graph and the function's operating on said graph.
-       Which is bad because...??? The graph exists, there shouldn't be issues.
-   - Solution: ??? Just preload the plugin, because this bug eludes me to no end.
-   - Environment: WSL-openSUSE-Tumbleweed
-
-# Closed bugs
+# Resolved/Ignored bugs
 
 1. Switching between trace files results in a segmentation fault.
 
@@ -78,4 +67,16 @@ If a bug has been solved, mark it and provide explanation (or a commit ID where 
      most likely be a default behaviour and an optional usage of the task color table (this was the approach chosen
      for Naps and Stacklook). Codewise, the issue must be somewhere in the `importSession` function's calls, but fixing
      this is beyond the scope of the project.
+   - Environment: WSL-openSUSE-Tumbleweed
+  
+ 7. Opening KernelShark without preloading Stacklook in any way and then importing
+    session where Stacklook was loaded will result in a segmentation fault upon button
+    hover.
+
+   - Status: IGNORED
+   - Cause: Apparently KernelShark doesn't actually load the plugin, at least not fully.
+      This becomes very obvious once no configuration menu is available and program crashes when it would usually
+      work just fine.
+   - Solution: Preload Stacklook. Real solution would be fixing this maybe-bug in KernelShark code, but that is
+     beyonf the scope of this project (like bug 6).
    - Environment: WSL-openSUSE-Tumbleweed

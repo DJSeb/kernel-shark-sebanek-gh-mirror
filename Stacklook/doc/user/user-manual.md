@@ -49,6 +49,8 @@ No other dependencies are necessary, except maybe the standard libraries of C an
      `docs`).
 4. (**Installation**) Plug in the plugin into KernelShark - either via KernelShark's GUI or when starting it via the 
    CLI with the `-p` option and location of the symlink or the SO itself.
+   - **IMPORTANT**: Always install/load the plugin before loading a session where said plugin was active! Failure to do
+     so will result in KernelShark not completely loading configuration menus or may even crash the whole program.
 
 Use `make clean` to remove built binaries.
 

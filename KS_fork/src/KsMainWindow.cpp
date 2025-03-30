@@ -1448,7 +1448,7 @@ void KsMainWindow::loadSession(const QString &fileName)
 	_view.reset();
 	_graph.reset();
 	_data.clear();
-
+	
 	_session.loadUserPlugins(kshark_ctx, &_plugins);
 	pb.setValue(20);
 
