@@ -318,6 +318,9 @@ static int couplebreak_origin_id_to_flag_pos(struct kshark_data_stream *stream,
 
 	int sched_switch_id = kshark_find_event_id(stream, "sched/sched_switch");
 	int sched_waking_id = kshark_find_event_id(stream, "sched/sched_waking");
+	/*
+		int sst
+	*/
 
 	if (event_id == sched_switch_id)
 		return COUPLEBREAK_SSWITCH_FPOS;
@@ -352,10 +355,10 @@ static int flag_pos_to_couplebreak_id(struct kshark_data_stream *stream, int fla
 	switch (flag_pos) {
 		case COUPLEBREAK_SSWITCH_FPOS:
 			return_evt_id = kshark_find_event_id(stream, "sched/sched_switch");
-			break;
+			break; // return COUPLEBREAK_SST_ID;
 		case COUPLEBREAK_SWAKING_FPOS:
 			return_evt_id = kshark_find_event_id(stream, "sched/sched_waking");
-			break;
+			break; // return COUPLEBREAK_SWT_ID;
 		default: // Represents a fault.
 			return -1;
 	}
@@ -455,12 +458,14 @@ static char *get_couplebreak_event_name(struct kshark_data_stream *stream, int e
  * @param origin_entry Origin entry of the couplebreak event.
  */
 static void record_new_couplebreak_event_type(struct kshark_data_stream *stream,
-	const struct kshark_entry *origin_entry) {
+	const struct kshark_entry *origin_entry) { // arg to int16_t
 	// Change once per stream load: if such an event type was not yet found
 	// increase the amount of encountered couplebreak events an set the flag
 	// for this event type.
 	int16_t origin_event_id = (origin_entry->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
 		origin_entry->event_id : kshark_get_event_id(origin_entry);
+	// COUPLEBREAK_SST_ID;
+	// COUPLEBREAK_SWT_ID;
 
 	const int flag_pos = couplebreak_origin_id_to_flag_pos(stream, origin_event_id);
 	if (!(stream->couplebreak_evts_flags & (1 << flag_pos))) {
@@ -529,13 +534,14 @@ static struct kshark_entry* create_sched_switch_target(struct kshark_data_stream
 	int16_t origin_event_id = (origin_entry->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
 		origin_entry->event_id : kshark_get_event_id(origin_entry);
 	entry->event_id = COUPLEBREAK_EVENT_ID_SHIFT - origin_event_id;
+	// COUPLEBREAK_SST_ID;
 
 	entry->visible = 0xFF;
 
 	/* Make the owner pid the pid of the task to be switched to. */
 	entry->pid = get_next_pid(stream, record);
 
-	record_new_couplebreak_event_type(stream, origin_entry);
+	record_new_couplebreak_event_type(stream, origin_entry); // COUPLEBREAK_SST_ID;
 
 	return entry;
 }
@@ -577,6 +583,7 @@ static struct kshark_entry *create_sched_waking_target(struct kshark_data_stream
 	int16_t origin_event_id = (origin_entry->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
 		origin_entry->event_id : kshark_get_event_id(origin_entry);
 	entry->event_id = COUPLEBREAK_EVENT_ID_SHIFT - origin_event_id;
+	// COUPLEBREAK_SWT_ID;
 
 	entry->visible = 0xFF;
 
@@ -601,7 +608,7 @@ static struct kshark_entry *create_sched_waking_target(struct kshark_data_stream
 	// But target CPU is the best estimation at this point in time.
 	entry->cpu = (tcpu_succs == 0) ? (int16_t)waked_cpu_val : record->cpu;
 
-	record_new_couplebreak_event_type(stream, origin_entry);
+	record_new_couplebreak_event_type(stream, origin_entry); // COUPLEBREAK_SWT_ID;
 
 	return entry;
 }
