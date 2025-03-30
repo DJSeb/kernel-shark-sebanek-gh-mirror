@@ -283,39 +283,77 @@ static void free_rec_list(struct rec_list **rec_list, int n_cpus,
 	free(rec_list);
 }
 
-//NOTE: Changed here.
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-29)
+// Possible (EXTENSION)
+/* Below are the constants used to index bits/flags in the
+ * couplebreak_evts_flags bitmask of streams.
+ * This provides a single point of change when working with
+ * the bitmask.
+*/
+///@brief Bitmask flag position for the couplebreak/sched_switch[target] event.
+#define COUPLEBREAK_SSWITCH_FPOS 0
+///@brief Bitmask flag position for the couplebreak/sched_waking[target] event.
+#define COUPLEBREAK_SWAKING_FPOS 1
+// END of change
 
-static int couplebreak_origin_id_to_flag(struct kshark_data_stream *stream, int event_id)
-{
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+// Possible (EXTENSION)
+/**
+ * @brief Function serves as a mapping between the event Id of an
+ * origin event (e.g. "sched/sched_switch") and a flag position
+ * of a couplebreak event (e.g. "couplebreak/sched_switch[target]").
+ * 
+ * @param stream Input location for a Data stream pointer.
+ * @param event_id The event Id of the origin event.
+ * @return Position of the flag in the couplebreak_evts_flags bitmask or
+ * -1 if the event Id is invalid (mapping doesn't exist).
+ */
+static int couplebreak_origin_id_to_flag_pos(struct kshark_data_stream *stream,
+	int event_id) {
 	/*
 	|0|0|0|0|0|0|0|0| ... |0|0|0|0|0|0|0|0| <- 32 bits
-	Each bit is a flag. The position of the flag corresponds to the event id,
+	Each bit is a flag. The position of the flag corresponds to the event Id,
 	all according to the switch table below.
 	*/
+
 	int sched_switch_id = kshark_find_event_id(stream, "sched/sched_switch");
 	int sched_waking_id = kshark_find_event_id(stream, "sched/sched_waking");
 
 	if (event_id == sched_switch_id)
-		return 0;
+		return COUPLEBREAK_SSWITCH_FPOS;
 	else if (event_id == sched_waking_id)
-		return 1;
+		return COUPLEBREAK_SWAKING_FPOS;
 	else
 		return -1;
 }
+// END of change
 
-static int flag_to_couplebreak_id(struct kshark_data_stream *stream, int flag_pos)
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+// Possible (EXTENSION)
+/**
+ * @brief Function serves as a mapping between the flag position
+ * of a couplebreak event (e.g. "couplebreak/sched_switch[target]")
+ * and its event Id.
+ * 
+ * @param stream Input location for a Data stream pointer.
+ * @param flag_pos The position of the flag in the couplebreak_evts_flags bitmask.
+ * @return Event Id of the couplebreak event or -1 if the flag position
+ * is invalid (mapping doesn't exist).
+ */
+static int flag_pos_to_couplebreak_id(struct kshark_data_stream *stream, int flag_pos)
 {
     /*
 	|0|0|0|0|0|0|0|0| ... |0|0|0|0|0|0|0|0| <- 32 bits
-	Each bit is a flag. The position of the flag corresponds to the event id,
+	Each bit is a flag. The position of the flag corresponds to the event Id,
 	all according to the switch table below.
 	*/
+
 	int return_evt_id = -1;
 	switch (flag_pos) {
-		case 0:
+		case COUPLEBREAK_SSWITCH_FPOS:
 			return_evt_id = kshark_find_event_id(stream, "sched/sched_switch");
 			break;
-		case 1:
+		case COUPLEBREAK_SWAKING_FPOS:
 			return_evt_id = kshark_find_event_id(stream, "sched/sched_waking");
 			break;
 		default: // Represents a fault.
@@ -323,13 +361,48 @@ static int flag_to_couplebreak_id(struct kshark_data_stream *stream, int flag_po
 	}
 	return COUPLEBREAK_EVENT_ID_SHIFT - return_evt_id;
 }
+// END of change
 
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+// Possible (EXTENSION) Alternatively, a refactoring of couplebreak could
+// do away with always searching for a couplebreak Id and instead have the stream
+// keep a list of Ids of couplebreak events active in it.
+/**
+ * @brief Function finds the event Id of from an origin event's name and
+ * if all goes well, returns the event Id of the couplebreak event.
+ * 
+ * @param stream Input location for a Data stream pointer.
+ * @param origin_evt_name The name of the origin event.
+ * @return Event Id of the couplebreak event or -1 if the stream is invalid
+ * or origin event's name is invalid for a given stream.
+ */
 static int find_couplebreak_event_id_from_origin_name(struct kshark_data_stream *stream,
 	const char *origin_evt_name)
 {
-	return COUPLEBREAK_EVENT_ID_SHIFT - kshark_find_event_id(stream, origin_evt_name);
+	if (!stream || !origin_evt_name)
+		return -1;
+	
+	int origin_event_id = kshark_find_event_id(stream, origin_evt_name);
+	int result = -1;
+	
+	if (origin_event_id >= 0)
+		result = COUPLEBREAK_EVENT_ID_SHIFT - origin_event_id;
+	
+	return result;
 }
+// END of change
 
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+// Possible (EXTENSION)
+/**
+ * @brief Checks if the event Id is a couplebreak event. This check
+ * always checks with the original event Ids from the trace and might
+ * read from the trace stream (therefore be a little bit slow).
+ * 
+ * @param stream Input location for a Data stream pointer.
+ * @param event_id The event Id to check.
+ * @return True if the event Id is a couplebreak event, false otherwise.
+ */
 static bool is_couplebreak_event(struct kshark_data_stream *stream, int event_id)
 {
 	const int couplebreak_switch_id = find_couplebreak_event_id_from_origin_name(stream, "sched/sched_switch");
@@ -340,7 +413,17 @@ static bool is_couplebreak_event(struct kshark_data_stream *stream, int event_id
 
 	return (is_couplebreak_sst || is_couplebreak_swt);
 }
+// END of change
 
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+// Possible (EXTENSION)
+/**
+ * @brief Get the couplebreak event name as a string.
+ * 
+ * @param stream Input location for a Data stream pointer.
+ * @param event_id The event Id of a couplebreak event.
+ * @return Name of a couplebreak event or NULL if the event Id is invalid.
+ */
 static char *get_couplebreak_event_name(struct kshark_data_stream *stream, int event_id)
 {
 	const int couplebreak_sst_id = find_couplebreak_event_id_from_origin_name(stream, "sched/sched_switch");
@@ -360,17 +443,70 @@ static char *get_couplebreak_event_name(struct kshark_data_stream *stream, int e
 
 	return buffer;
 }
+// END of change
 
-// Copy of missed_events_action, basically
-static struct kshark_entry* create_sched_switch_target(struct kshark_data_stream *stream,
-	struct rec_list *temp_rec, struct tep_record *record,
-	struct kshark_entry *origin_entry)
-{
-	const int flag_pos = couplebreak_origin_id_to_flag(stream, origin_entry->event_id);
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-29)
+/**
+ * @brief Record a new couplebreak event type, if it was not yet
+ * encountered in the stream. If it was, increase the amount of
+ * encountered couplebreak events and set the flag for this event type.
+ * 
+ * @param stream Stream to record the encounter in.
+ * @param origin_entry Origin entry of the couplebreak event.
+ */
+static void record_new_couplebreak_event_type(struct kshark_data_stream *stream,
+	const struct kshark_entry *origin_entry) {
+	// Change once per stream load: if such an event type was not yet found
+	// increase the amount of encountered couplebreak events an set the flag
+	// for this event type.
+	int16_t origin_event_id = (origin_entry->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
+		origin_entry->event_id : kshark_get_event_id(origin_entry);
+
+	const int flag_pos = couplebreak_origin_id_to_flag_pos(stream, origin_event_id);
 	if (!(stream->couplebreak_evts_flags & (1 << flag_pos))) {
 		stream->n_couplebreak_evts++;
 		stream->couplebreak_evts_flags |= (1 << flag_pos);
 	}
+} 
+// END of change
+
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Type definition for custom entry creation functions, utilised by
+ * couplebreak.
+ * 
+ * @param stream Data stream pointer to which events belong.
+ * @param temp_rec Temporary record list node.
+ * @param record Trace event processing record with values from the trace.
+ * @param origin_entry Origin entry for the custom entry.
+ * @return Pointer to a newly created custom entry.
+ */
+typedef struct kshark_entry* (*custom_entry_creation_func)(
+	struct kshark_data_stream *stream,
+	struct rec_list *temp_rec,
+	struct tep_record *record,
+	struct kshark_entry *origin_entry);
+// END of change
+
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+// Copy of missed_events_action, basically
+// Possible (EXTENSION) - more functions if more events get couplebreak support.
+/**
+ * @brief Makes a new "couplebreak/sched_switch[target]" entry with data from
+ * the tracing record and the origin entry. The entry is taken from the 
+ * temporary record list and its values are adjusted to become a couplebreak
+ * entry.
+ * 
+ * @param stream Data stream pointer to which events belong.
+ * @param temp_rec Temporary record list node.
+ * @param record Trace event processing record with values from the trace.
+ * @param origin_entry Origin entry for the target entry.
+ * @return Pointer to a newly created "couplebreak/sched_switch[target]" entry.
+ */
+static struct kshark_entry* create_sched_switch_target(struct kshark_data_stream *stream,
+	struct rec_list *temp_rec, struct tep_record *record,
+	struct kshark_entry *origin_entry)
+{
 
 	struct kshark_entry *entry = &temp_rec->entry;
 	/*
@@ -388,33 +524,44 @@ static struct kshark_entry* create_sched_switch_target(struct kshark_data_stream
 	entry->ts = record->ts;
 
 	/* All custom entries must have negative event Identifiers. */
-	entry->event_id = COUPLEBREAK_EVENT_ID_SHIFT - origin_entry->event_id;
+	// Origin event's Id is the one recorded, to achieve consistency even if some plugins
+	// change this field (which is very rare).
+	int16_t origin_event_id = (origin_entry->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
+		origin_entry->event_id : kshark_get_event_id(origin_entry);
+	entry->event_id = COUPLEBREAK_EVENT_ID_SHIFT - origin_event_id;
 
 	entry->visible = 0xFF;
 
 	/* Make the owner pid the pid of the task to be switched to. */
 	entry->pid = get_next_pid(stream, record);
 
+	record_new_couplebreak_event_type(stream, origin_entry);
+
 	return entry;
 }
+// END of change
 
-/* Unsure if there should be a single couplebreak event id,
-   but I think it makes more sense if they're all different (i.e. different events).
-*/
-static struct kshark_entry *create_sched_waking_target(
-	[[maybe_unused]] struct kshark_data_stream *stream,
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Makes a new "couplebreak/sched_waking[target]" entry with data from
+ * the tracing record and the origin entry. The entry is taken from the 
+ * temporary record list and its values are adjusted to become a couplebreak
+ * entry.
+ * 
+ * @param stream Data stream pointer to which events belong.
+ * @param temp_rec Temporary record list node.
+ * @param record Trace event processing record with values from the trace.
+ * @param origin_entry Origin entry for the target entry.
+ * @return Pointer to a newly created "couplebreak/sched_waking[target]" entry.
+ */
+static struct kshark_entry *create_sched_waking_target(struct kshark_data_stream *stream,
 	struct rec_list *temp_rec, struct tep_record *record,
 	struct kshark_entry *origin_entry)
 {
-	const int flag_pos = couplebreak_origin_id_to_flag(stream, origin_entry->event_id);
-	if (!(stream->couplebreak_evts_flags & (1 << flag_pos))) {
-		stream->n_couplebreak_evts++;
-		stream->couplebreak_evts_flags |= (1 << flag_pos);
-	}
-
 	struct kshark_entry *entry = &temp_rec->entry;
 	/*
-	 * Let's store the origin entry into the now useless offset field.
+	 * Let's store the origin entry in the now useless offset
+	 * (target events are made up - not in the file).
 	*/
 	entry->offset = (int64_t)origin_entry;
 
@@ -425,13 +572,16 @@ static struct kshark_entry *create_sched_waking_target(
 	entry->ts = record->ts;
 
 	/* All custom entries must have negative event Identifiers. */
-	entry->event_id = COUPLEBREAK_EVENT_ID_SHIFT - origin_entry->event_id;
+	// Origin event's Id is the one recorded, to achieve consistency even if some plugins
+	// change this field (which is very rare).
+	int16_t origin_event_id = (origin_entry->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
+		origin_entry->event_id : kshark_get_event_id(origin_entry);
+	entry->event_id = COUPLEBREAK_EVENT_ID_SHIFT - origin_event_id;
 
 	entry->visible = 0xFF;
 
 	/* Make the owner pid the pid of the task to be woken up. */
-	// The approach below is used in plugins, so it is true and tested, though I'm unsure if
-	// it's the best one.
+	// The approach below is used in plugins, so it is true and tested.
 	
 	struct tep_event *sched_waking_event = NULL;
 	define_wakeup_event(kshark_get_tep(stream), &sched_waking_event);
@@ -439,26 +589,44 @@ static struct kshark_entry *create_sched_waking_target(
 	unsigned long long waked_pid_val;
 	struct tep_format_field *sched_waking_pid_field = tep_find_any_field(sched_waking_event, "pid");
 	int pid_succs = tep_read_number_field(sched_waking_pid_field, record->data, &waked_pid_val);
+	// Set the target entry's PID to either the woken up task or, if that failed, to the
+	// PID of the origin entry. 
 	entry->pid = (pid_succs == 0) ? (int32_t)waked_pid_val : origin_entry->pid;
 
 	unsigned long long waked_cpu_val;
 	struct tep_format_field *sched_waking_target_cpu_field = tep_find_any_field(sched_waking_event, "target_cpu");
 	int tcpu_succs = tep_read_number_field(sched_waking_target_cpu_field, record->data, &waked_cpu_val);
-	// NOTE: This field should hopefully change to the actual CPU on which the task will run.
+	// This field should hopefully change to the actual CPU on which the task will run after
+	// all events have been loaded (and can be easily accessed by time).
 	// But target CPU is the best estimation at this point in time.
 	entry->cpu = (tcpu_succs == 0) ? (int16_t)waked_cpu_val : record->cpu;
+
+	record_new_couplebreak_event_type(stream, origin_entry);
 
 	return entry;
 }
 
-//NOTE: Changed here.
-typedef struct kshark_entry* (*target_creation_func)(
-	struct kshark_data_stream *stream,
-	struct rec_list *temp_rec,
-	struct tep_record *record,
-	struct kshark_entry *origin_entry);
-
-static int create_target_entry(struct kshark_context *kshark_ctx,
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Create a custom entry with a KernelShark context, data stream,
+ * trace record, related entry, temporary record list node and the one after it,
+ * advanced event filter, count of current entries in the stream and a function
+ * to create the custom entry.
+ * 
+ * @param kshark_ctx KernelShark context
+ * @param stream Data stream pointer to which events belong.
+ * @param rec Trace event processing record with values from the trace.
+ * @param entry KernelShark entry from which to create the custom entry.
+ * @param temp_next Next record after `temp_rec`.
+ * @param temp_rec Temporary record list node.
+ * @param adv_filter Advanced event filter.
+ * @param count Count of current entries in the stream.
+ * @param create_custom_func Function to create the custom entry.
+ * @return 0 on successful creation of the custom entry, otherwise 1.
+ * @note The function is currently used only to create custom entries for
+ * couplebreak events.
+ */
+static int create_custom_entry(struct kshark_context *kshark_ctx,
 							   struct kshark_data_stream *stream,
 							   struct tep_record *rec,
 							   struct kshark_entry *entry,
@@ -466,7 +634,7 @@ static int create_target_entry(struct kshark_context *kshark_ctx,
 							   struct rec_list * *temp_rec, // Need to update actual value
 							   struct tep_event_filter *adv_filter,
 							   ssize_t *count,
-							   target_creation_func create_target_func)
+							   custom_entry_creation_func create_custom_func)
 {
 	const int FAIL = 1;
 
@@ -482,7 +650,7 @@ static int create_target_entry(struct kshark_context *kshark_ctx,
 	* Insert a custom target entry just
 	* after sched_switch record.
 	*/
-	struct kshark_entry *target_entry = create_target_func(stream,
+	struct kshark_entry *target_entry = create_custom_func(stream,
 		*temp_rec, rec, entry);
 
 	/* Apply time calibration. */
@@ -503,8 +671,12 @@ static int create_target_entry(struct kshark_context *kshark_ctx,
 
 	return 0;
 }
+// END of change
 
-//NOTE: Changed here (just moved, is an original function).
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+// Change is just that this static function was moved, it is
+// originally a part of KernelShark, but there was a need to see it sooner
+// during compilation.
 static int pick_next_cpu(struct rec_list **rec_list, int n_cpus,
 	enum rec_type type)
 {
@@ -535,7 +707,22 @@ static int pick_next_cpu(struct rec_list **rec_list, int n_cpus,
 
 	return next_cpu;
 }
+// END of change
 
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Fills the sorted_entries array with the entries from the rec_list.
+ * Uses a technique same as the one used later to load the data in the record
+ * list after getting all records, that is pick entries with the help of
+ * `pick_next_cpu` function to output an array of entries sorted by time.
+ * 
+ * @param stream Data stream pointer to which events belong.
+ * @param rec_list List of all events to sort - this linked list will have its
+ * nodes adjusted to advance iteration (i.e. function mutates this argument).
+ * @param sorted_entries Output array of pointers to kshark_entry objects,
+ * which will be filled with the entries from the rec_list and sorted by time.
+ * @param total Total number of entries to be sorted.
+ */
 static inline void fill_sorted_entries(struct kshark_data_stream *stream,
 	struct rec_list **rec_list, struct kshark_entry **sorted_entries, ssize_t total)
 {
@@ -553,6 +740,18 @@ static inline void fill_sorted_entries(struct kshark_data_stream *stream,
 	}
 }
 
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-29)
+/**
+ * @brief Correct CPUs of "couplebreak/sched_waking[target]" entries
+ * to reflect where the task will run after being awoken and switched.
+ * 
+ * @param stream Data stream pointer to which events belong.
+ * @param sorted_entries Output array of pointers to kshark_entry objects,
+ * which will be filled with the entries from the rec_list and sorted by time. 
+ * @param total Total number of entries to be possibly corrected.
+ * 
+ * @note This might mess the plots a little bit as it will look like the target CPU was working.
+ */
 static void correct_couplebreak_cpus_inner(struct kshark_data_stream *stream,
 	struct kshark_entry **sorted_entries, ssize_t total)
 {
@@ -561,18 +760,35 @@ static void correct_couplebreak_cpus_inner(struct kshark_data_stream *stream,
 
 	for (ssize_t i = 0 ; i < total ; i++) {
 		struct kshark_entry *curr_event = sorted_entries[i];
+		bool curr_event_untouched = (curr_event->visible & KS_PLUGIN_UNTOUCHED_MASK);
+
+		int16_t curr_event_id = curr_event_untouched ?
+			curr_event->event_id : kshark_get_event_id(curr_event);
 		
-		if (curr_event->event_id != couplebreak_swt_id) {
+		if (curr_event_id != couplebreak_swt_id) {
 			// No need to correct the cpu of an event that is not sched_waking[target].
 			continue;
 		}
 
-		for (ssize_t j = 0 ; j < total ; j++) {
-			const struct kshark_entry *next_event = sorted_entries[j];
+		int32_t curr_event_pid = curr_event_untouched ?
+			curr_event->pid : kshark_get_pid(curr_event);
 
-			if (next_event->event_id == couplebreak_sst_id &&
-				next_event->pid == curr_event->pid)
-			{
+		// Search in the rest of the array for a switch target of this task onto some CPU
+		// an adjust that field if necessary.
+		for (ssize_t j = i ; j < total ; j++) {
+			const struct kshark_entry *next_event = sorted_entries[j];
+			bool next_event_untouched = (next_event->visible & KS_PLUGIN_UNTOUCHED_MASK);
+
+			// One can never be too careful with possible entry field changes.
+			int16_t next_event_id = next_event_untouched ?
+				next_event->event_id : kshark_get_event_id(next_event);
+			
+			int32_t next_event_pid = next_event_untouched ?
+				next_event->pid : kshark_get_pid(next_event);
+
+			if (next_event_id == couplebreak_sst_id && // Correct event
+				next_event_pid == curr_event_pid) { // Of the same task
+				
 				curr_event->cpu = next_event->cpu;
 				break;
 			}
@@ -580,6 +796,23 @@ static void correct_couplebreak_cpus_inner(struct kshark_data_stream *stream,
 	}
 }
 
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+// Possible (EXTENSION) - this function and all that it entails could be refactored to a plugin,
+// where this correction is also possible. There was no strong reason to split couplebreak
+// and how it should work from its main working environment though, hence this implementation.
+/**
+ * @brief Correct CPUs of "couplebreak/sched_waking[target]" entries
+ * to reflect where the task will run after being awoken and switched. This
+ * function prepares a copy of the record list, sorts that copy by time into an
+ * array and calls the function that does the correction.
+ * 
+ * @param stream Data stream pointer to which events belong.
+ * @param rec_list List of all events to sort - this linked list will be copied,
+ * so that this one's nodes aren't changed for any possible future use.
+ * @param total Total number of entries to be possibly corrected.
+ * @return Return code of the function, 0 on success, -ENOMEM on
+ * memory allocation fail.
+ */
 static int correct_couplebreak_cpus(struct kshark_data_stream *stream,
 	struct rec_list **rec_list, ssize_t total)
 {
@@ -603,13 +836,20 @@ static int correct_couplebreak_cpus(struct kshark_data_stream *stream,
 
 	correct_couplebreak_cpus_inner(stream, sorted_entries, total);
 
+	// While it may look a little reckless to just allocate memory like this,
+	// the sorted_entries' space will actually be needed later in the load functions
+	// which called the get_records function - so this space won't be really wasted.
+	// This does pose a possible (EXTENSION), where if couplebreak is enabled, the
+	// sorted_entries array could be used later instead of freed, to skip the double
+	// time sorting this currently creates.
 	free(temp_list);
 	free(sorted_entries);
 
 	return 0;
 
  fail:
-	fprintf(stderr, "Failed to allocate memory during data loading.\n");
+	fprintf(stderr,
+		"Failed to allocate memory during couplebreak's CPU corrections.\n");
 	return -ENOMEM;
 }
 
@@ -627,10 +867,11 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 	ssize_t count, total = 0;
 	int pid, next_pid, cpu;
 
-	//NOTE: Changed here.
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 	// Resets couplebreak state on each load of a stream.
 	stream->couplebreak_evts_flags = 0;
 	stream->n_couplebreak_evts = 0;
+	// END of change
 
 	input = kshark_get_tep_input(stream);
 	if (!input)
@@ -663,7 +904,12 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 			case REC_ENTRY: {
 				struct kshark_entry *entry;
 
+				/*NOTE: Changed here. ("COUPLEBREAK"). Just a note where
+				  to put events if we want to add more and have them appear
+				  before the event which triggers this addition.
+				*/
 				// Insert events BEFORE
+				// END of change
 
 				if (rec->missed_events) {
 					/*
@@ -695,12 +941,13 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 					if (next_pid >= 0)
 						register_command(stream, rec, next_pid);
 					
-					//NOTE: Changed here.
+					//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 					if (stream->couplebreak_on) {
-						int retcode = create_target_entry(kshark_ctx, stream, rec, entry,
+						int retcode = create_custom_entry(kshark_ctx, stream, rec, entry,
 							&temp_next, &temp_rec, adv_filter, &count, create_sched_switch_target);
 						if (retcode == 1) goto fail;
 					}
+					// END of change
 				}
 
 				entry->stream_id = stream->stream_id;
@@ -721,18 +968,26 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 				    tep_filter_match(adv_filter, rec) != FILTER_MATCH)
 					unset_event_filter_flag(kshark_ctx, entry);
 				
-				// NOTE: Changed here
-				// Insert AFTER
+				/*NOTE: Changed here. ("COUPLEBREAK"). Just a note where
+				  to put events if we want to add more and have them appear
+				  after the event which triggers this addition.
+				*/
+				// Insert events AFTER
+				// END of change
+				
+				//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 				// Could be change to a search in a collection of allowed events to be split in a stream
 				const int sch_waking_id = kshark_find_event_id(stream, "sched/sched_waking");
-				if (entry->event_id == (int16_t)sch_waking_id) {
-					// Sched_waking only for now
+				int16_t origin_event_id = (entry->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
+					entry->event_id : kshark_get_event_id(entry);
+				if (origin_event_id == (int16_t)sch_waking_id) {
 					if (stream->couplebreak_on) {
-						int retcode = create_target_entry(kshark_ctx, stream, rec, entry,
+						int retcode = create_custom_entry(kshark_ctx, stream, rec, entry,
 							&temp_next, &temp_rec, adv_filter, &count, create_sched_waking_target);
 						if (retcode == 1) goto fail;
 					}
 				}
+				// END of change
 
 				tracecmd_free_record(rec);
 				break;
@@ -755,14 +1010,16 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 
 	*rec_list = cpu_list;
 
-	//NOTE: Changed here.
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 	if (stream->couplebreak_on) {
-		// Reuse cpu_list to not allocate more memory.
-		int op_result = correct_couplebreak_cpus(stream, cpu_list, total);
+		// Use the newest data to correct the cpu of the couplebreak events.
+		// The rec_list is not changed.
+		int op_result = correct_couplebreak_cpus(stream, *rec_list, total);
 		if (op_result == -ENOMEM) {
 			return -ENOMEM;
 		}
 	}
+	// END of change
 
 	return total;
 
@@ -977,17 +1234,21 @@ static int tepdata_get_event_id(struct kshark_data_stream *stream,
 	int event_id = KS_EMPTY_BIN;
 	struct tep_record *record;
 
-	//NOTE: Changed here.
-	if (stream->couplebreak_on) {
-		bool is_couplebreak_evt = is_couplebreak_event(stream, entry->event_id);
-		if (is_couplebreak_evt) {
-			return entry->event_id;
-		}
-	}
-
 	if (entry->visible & KS_PLUGIN_UNTOUCHED_MASK) {
 		event_id = entry->event_id;
 	} else {
+		//NOTE: Changed here. (COUPLEBREAK) (2025-03-29)
+		if (stream->couplebreak_on && entry->event_id < COUPLEBREAK_EVENT_ID_SHIFT){
+			// Since couplebreak events cannot tap into the trace event processing
+			// handler (their offset field hosts something else), we check if an
+			// event is a couplebreak one and if so, just return the event Id.
+			// WARNING: This is also implies that NO PLUGIN can change the event Id of a
+			// couplebreak event, otherwise this breaks.
+			if (is_couplebreak_event(stream, entry->event_id))
+				return entry->event_id;
+		}
+		// END of change
+
 		/*
 		 * The entry has been touched by a plugin callback function.
 		 * Because of this we do not trust the value of
@@ -1046,10 +1307,15 @@ static char *tepdata_get_event_name(struct kshark_data_stream *stream,
 	if (event_id == -EFAULT)
 		return NULL;
 
-	//NOTE: Changed here.
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+	// Couplebreak events have special names composed of their origin,
+	// so a special function is used to get their name.
+	// This if is also placed before missing events, to avoid
+	// confusion of a couplebreak event with a missed event.
 	if (is_couplebreak_event(stream, event_id)) {
 		return get_couplebreak_event_name(stream, event_id);
 	}
+	// END of change
 
 	if (event_id < 0) {
 		switch (event_id) {
@@ -1083,18 +1349,18 @@ static int tepdata_get_pid(struct kshark_data_stream *stream,
 	struct tep_record *record;
 	int pid = KS_EMPTY_BIN;
 
- 	//NOTE: Changed here.
-	if (stream->couplebreak_on) {
-		bool is_couplebreak_evt = is_couplebreak_event(stream, entry->event_id);
-
-		if (is_couplebreak_evt) {
-			return entry->pid;
-		}
-	}
-
 	if (entry->visible & KS_PLUGIN_UNTOUCHED_MASK) {
 		pid = entry->pid;
 	} else {
+		//NOTE: Changed here. !!!!!! (COUPLEBREAK) (2025-03-21)
+		if (stream->couplebreak_on && entry->event_id < COUPLEBREAK_EVENT_ID_SHIFT) {
+			// Couplebreak events have no fallback for a changed PID, which is why
+			// such changes are not allowed.
+			if (is_couplebreak_event(stream, entry->event_id))
+				return entry->pid;
+		}
+		// END of change
+
 		/*
 		 * The entry has been touched by a plugin callback function.
 		 * Because of this we do not trust the value of "entry->pid".
@@ -1140,18 +1406,23 @@ static char *tepdata_get_latency(struct kshark_data_stream *stream,
 	struct tep_record *record;
 	char *buffer;
 
-	//NOTE: Changed here.
+	if (!init_thread_seq())
+		return NULL;
+
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+	// Couplebreak events happened at the same time as their
+	// origin events, so the latency can be taken from the origin events.
+	// This is placed before a missed event check to avoid confusion.
 	const struct kshark_entry *entry = input_entry;
 	if (stream->couplebreak_on) {
-		bool is_couplebreak_evt = is_couplebreak_event(stream, entry->event_id);
-
-		if (is_couplebreak_evt) {
+		if (is_couplebreak_event(stream, entry->event_id)) {
 			entry = (const struct kshark_entry*)input_entry->offset;
 		}
 	}
+	// END of change
 
 	/* Check if this is a "Missed event" (event_id < 0). */
-	if (!init_thread_seq() || entry->event_id < 0)
+	if (entry->event_id < 0)
 		return NULL;
 
 	/*
@@ -1218,15 +1489,16 @@ static char *tepdata_get_info(struct kshark_data_stream *stream,
 	int event_id;
 
 	if (entry->event_id < 0) {
-		//NOTE: Changed here.
+		//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+		// Couplebreak events being just slightly altered origin events
+		// means one can access the origin event's info for them.
 		if (stream->couplebreak_on) {
-			bool is_couplebreak_evt = is_couplebreak_event(stream, entry->event_id);
-
-			if (is_couplebreak_evt) {
+			if (is_couplebreak_event(stream, entry->event_id)) {
 				const struct kshark_entry *origin_entry = (struct kshark_entry *)entry->offset;
 				return tepdata_get_info(stream, origin_entry);
 			}
 		}
+		// END of change
 
 		switch (entry->event_id) {
 		case KS_EVENT_OVERFLOW:
@@ -1289,24 +1561,25 @@ static int tepdata_get_field_names(struct kshark_data_stream *stream,
 	int i= 0, nr_fields;
 	char **buffer;
 
-	//NOTE: Changed here.
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 	/*
 		Couplebreak target events are basically just a copy of origin entry, but
-		they don't have the same pid, timestamp and especially not the same offset field
-		value, which is completely changed to store the origin entry's address.
+		they don't have the same values, like pid, timestamp, maybe even CPU, but
+		especially not the same offset field value, which is completely changed to
+		store the origin entry's address.
 
 		Hence, accomodations are done, by asking for the origin entry's fields instead, as they
-		are the same, but it wouldn't be a fruitful search for the library, if the made-up
-		couplebreak entries were used instead.
+		are the same (couplebreak event is a slightly altered twin for the origin event).
+		It would be a fruitless search for the program, if the made-up
+		couplebreak entries were used instead, as they do not exist in the trace file.
 	*/
 	const struct kshark_entry *entry = input_entry;
 	if (stream->couplebreak_on) {
-		bool is_couplebreak_evt = is_couplebreak_event(stream, entry->event_id);
-
-		if (is_couplebreak_evt) {
+		if (is_couplebreak_event(stream, entry->event_id)) {
 			entry = (const struct kshark_entry*)input_entry->offset;
 		}
 	}
+	// END of change
 
 	*fields_str = NULL;
 	event = tep_find_event(kshark_get_tep(stream), entry->event_id);
@@ -1381,7 +1654,16 @@ static char* tepdata_dump_custom_entry(struct kshark_data_stream *stream,
 	return NULL;
 }
 
-//NOTE: Changed here.
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Dump information of a couplebreak event into a CSV string delimited by
+ * semicolons. The contents are information special to couplebreak events.
+ * 
+ * @param stream Data stream pointer to which an entry belongs
+ * @param entry A KernelShark entry to be dumped.
+ * @param get_info Whether to get special event info or just the event name.
+ * @return Origin task's name an origin task's pid or name of the event.
+ */
 static char *couplebreak_target_dump(struct kshark_data_stream *stream,
 			    const struct kshark_entry *entry,
 			    bool get_info)
@@ -1396,13 +1678,16 @@ static char *couplebreak_target_dump(struct kshark_data_stream *stream,
 			og_task, entry->offset);
 		free(og_task);
 	} else {
-		size = asprintf(&buffer, "sched_switch[target]");
+		char* event_name = tepdata_get_event_name(stream, entry);
+		size = asprintf(&buffer, "%s", event_name);
+		free(event_name);
 	}
 
 	if (size > 0)
 		return buffer;
 	return NULL;
 }
+// END of change
 
 /**
  * @brief Dump into a string the content of one entry. The function allocates
@@ -1428,8 +1713,7 @@ static char *tepdata_dump_entry(struct kshark_data_stream *stream,
 	interface = stream->interface;
 	if (!interface)
 		return NULL;
-	// NOTE: Changed here.
-	// Sched_switch target events still house most of the origin entry's data and can be treated as a normal event
+	
 	if (entry->event_id >= 0) {
 		if (kshark_get_tep(stream)) {
 			task = interface->get_task(stream, entry);
@@ -1465,16 +1749,27 @@ static char *tepdata_dump_entry(struct kshark_data_stream *stream,
 		if (n < 1)
 			return NULL;
 	} else {
-		if (stream->couplebreak_on) { //NOTE: Changed here.
-			bool is_couplebreak_evt = is_couplebreak_event(stream, entry->event_id);
-	
-			if (is_couplebreak_evt) {
+		//NOTE: Changed here. (COUPLEBREAK) (2025-03-29)
+		// Because couplebreak events' Ids are dynamically created, they cannot be
+		// used in a switch statement as a case. Instead, the event_id is checked here
+		// and only if couplebreak is on.
+		if (stream->couplebreak_on) {
+			// The entry dump will contain the same things as a normal entry, but with additional
+			// information specific to couplebreak events.
+			if (is_couplebreak_event(stream, entry->event_id)) {
 				char *specials = tepdata_dump_custom_entry(stream, entry, couplebreak_target_dump);
-				asprintf(&entry_str, "%s; %s", specials, entry_str);
+				char* origin_entry_dump = tepdata_dump_entry(stream,
+					(struct kshark_entry*)entry->offset);
+				
+				asprintf(&entry_str, "%s; %s", specials, origin_entry_dump);
+
 				free(specials);
+				free(origin_entry_dump);
+
 				return entry_str;
 			}
 		}
+		// END of change
 
 		switch (entry->event_id) {
 		case KS_EVENT_OVERFLOW:
@@ -1489,7 +1784,21 @@ static char *tepdata_dump_entry(struct kshark_data_stream *stream,
 	return entry_str;
 }
 
-// NOTE: Changed here.
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+// Possible (EXTENSION)
+/**
+ * @brief Finds the event ID of a couplebreak event based on the name given
+ * in the argument. Function checks for existence of a couplebreak event in
+ * a stream and 
+ * 
+ * @param stream Data stream pointer to which an entry belongs
+ * @param event_name Name of the event to be searched for
+ * @return Event ID of the couplebreak event, or 0 if the event name is not
+ * of a couplebreak event, or 1 if the couplebreak event does not exist in the
+ * stream.
+ * @note This function is a prime candidate for extensions, if couplebreak is
+ * ever expanded upon.
+ */
 static int couplebreak_find_event_id(struct kshark_data_stream *stream,
 	const char *event_name) {
 	static const int COUPLEBREAK_NAME_LEN = 32;
@@ -1508,14 +1817,16 @@ static int couplebreak_find_event_id(struct kshark_data_stream *stream,
 	
 	// User was asking for a couplebreak event
 	int result;
-
+	// The following two lines could be a cause of concern, since we are effectively
+	// performing a recursive call, which, if not handled, could be endless.
+	// The above if statement exists to reslove that.
 	int sched_switch_id = kshark_find_event_id(stream, SCHED_SWITCH_NAME);
 	int sched_waking_id = kshark_find_event_id(stream, SCHED_WAKING_NAME);
 
 	bool sst_exists = (stream->couplebreak_evts_flags &
-		(1 << couplebreak_origin_id_to_flag(stream, sched_switch_id))); 
+		(1 << couplebreak_origin_id_to_flag_pos(stream, sched_switch_id))); 
 	bool swt_exists = (stream->couplebreak_evts_flags &
-		(1 << couplebreak_origin_id_to_flag(stream, sched_waking_id)));
+		(1 << couplebreak_origin_id_to_flag_pos(stream, sched_waking_id)));
 
 	// If such events exist, return the couplebreak event ID according to the name
 	if (sst_exists && is_sst_name) {
@@ -1532,18 +1843,19 @@ static int couplebreak_find_event_id(struct kshark_data_stream *stream,
 static int tepdata_find_event_id(struct kshark_data_stream *stream,
 				 const char *event_name)
 {
-	//NOTE: Changed here.
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 	if (stream->couplebreak_on) {
 		int couplebreak_id = couplebreak_find_event_id(stream, event_name);
 		switch (couplebreak_id) {
-		case 0:
+		case 0: // User was not asking for a couplebreak event
 			break;
-		case 1:
+		case 1: // Couplebreak event does not exist in the stream
 			return -1;
 		default:
 			return couplebreak_id;
 		}
 	}
+	// END of change
 	
 	struct tep_event *event;
 	char *buffer, *system, *name;
@@ -1600,24 +1912,25 @@ tepdata_get_field_type(struct kshark_data_stream *stream,
 		     TEP_FIELD_IS_LONG |
 		     TEP_FIELD_IS_FLAG);
 
-	//NOTE: Changed here.
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 	/*
 		Couplebreak target events are basically just a copy of origin entry, but
-		they don't have the same pid, timestamp and especially not the same offset field
-		value, which is completely changed to store the origin entry's address.
+		they don't have the same values, like pid, timestamp, maybe even CPU, but
+		especially not the same offset field value, which is completely changed to
+		store the origin entry's address.
 
 		Hence, accomodations are done, by asking for the origin entry's fields instead, as they
-		are the same, but it wouldn't be a fruitful search for the library, if the made-up
-		couplebreak entries were used instead.
+		are the same (couplebreak event is a slightly altered twin for the origin event).
+		It would be a fruitless search for the program, if the made-up
+		couplebreak entries were used instead, as they do not exist in the trace file.
 	*/
 	const struct kshark_entry *entry = input_entry;
 	if (stream->couplebreak_on) {
-		bool is_couplebreak_evt = is_couplebreak_event(stream, entry->event_id);
-
-		if (is_couplebreak_evt) {
+		if (is_couplebreak_event(stream, entry->event_id)) {
 			entry = (const struct kshark_entry*)input_entry->offset;
 		}
 	}
+	// END of change
 
 	evt_field = get_evt_field(stream, entry->event_id, field);
 	if (!evt_field)
@@ -1680,25 +1993,26 @@ int tepdata_read_event_field(struct kshark_data_stream *stream,
 	struct tep_record *record;
 	int ret;
 
-	//NOTE: Changed here.
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 	/*
 		Couplebreak target events are basically just a copy of origin entry, but
-		they don't have the same pid, timestamp and especially not the same offset field
-		value, which is completely changed to store the origin entry's address.
+		they don't have the same values, like pid, timestamp, maybe even CPU, but
+		especially not the same offset field value, which is completely changed to
+		store the origin entry's address.
 
 		Hence, accomodations are done, by asking for the origin entry's fields instead, as they
-		are the same, but it wouldn't be a fruitful search for the library, if the made-up
-		couplebreak entries were used instead.
+		are the same (couplebreak event is a slightly altered twin for the origin event).
+		It would be a fruitless search for the program, if the made-up
+		couplebreak entries were used instead, as they do not exist in the trace file.
 	*/
 
 	const struct kshark_entry *entry = input_entry;
 	if (stream->couplebreak_on) {
-		bool is_couplebreak_evt = is_couplebreak_event(stream, entry->event_id);
-
-		if (is_couplebreak_evt) {
+		if (is_couplebreak_event(stream, entry->event_id)) {
 			entry = (const struct kshark_entry*)input_entry->offset;
 		}
 	}
+	// END of change
 
 	evt_field = get_evt_field(stream, entry->event_id, field);
 	if (!evt_field)
@@ -1716,7 +2030,15 @@ int tepdata_read_event_field(struct kshark_data_stream *stream,
 	return ret;
 }
 
-//NOTE: Changed here.
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Gets all couplebreak event IDs from a stream as an integer
+ * array. Only the Ids of detected couplebreak events in a stream will be returned.
+ * 
+ * @param stream Data stream pointer in which to search for couplebreak events
+ * @return Array of couplebreak event IDs, or NULL if no such events exist in the stream.
+ * Its size will always be stream->n_couplebreak_evts & the array must be freed by the caller.
+ */
 static int *couplebreak_get_all_ids(struct kshark_data_stream *stream)
 {
 	int *ids = NULL;
@@ -1725,7 +2047,7 @@ static int *couplebreak_get_all_ids(struct kshark_data_stream *stream)
 		int i = 0;
 		for (int j = 0; j < stream->n_couplebreak_evts; j++) {
 			if (stream->couplebreak_evts_flags & (1 << j)) {
-				ids[i] = flag_to_couplebreak_id(stream, j);
+				ids[i] = flag_pos_to_couplebreak_id(stream, j);
 				i++;
 				// This shouldn't really happen, since the flags are set once, just like increment is done once.
 				// But it never hurts to be careful.
@@ -1743,25 +2065,25 @@ static void kshark_tep_init_methods(struct kshark_generic_stream_interface *inte
 	if (!interface)
 		return;
 	
-	//NOTE: Changed here.
-	interface->get_pid = tepdata_get_pid; //changed
-	interface->get_task = tepdata_get_task; //fine
-	interface->get_event_id = tepdata_get_event_id; //changed
-	interface->get_event_name = tepdata_get_event_name; //changed
-	interface->aux_info= tepdata_get_latency; //changed
-	interface->get_info = tepdata_get_info; //changed
-	interface->find_event_id = tepdata_find_event_id; //changed
-	//!!! UNCHANGED !!! -> too many things expect an array of size n_events
-	// Changes would bring unexpected memory issues and way too many inconsistencies to fix.
+	interface->get_pid = tepdata_get_pid;
+	interface->get_task = tepdata_get_task;
+	interface->get_event_id = tepdata_get_event_id;
+	interface->get_event_name = tepdata_get_event_name;
+	interface->aux_info= tepdata_get_latency;
+	interface->get_info = tepdata_get_info;
+	interface->find_event_id = tepdata_find_event_id;
 	interface->get_all_event_ids = tepdata_get_event_ids;
-	interface->dump_entry = tepdata_dump_entry; //changed
-	interface->get_all_event_field_names = tepdata_get_field_names; //changed
-	interface->get_event_field_type = tepdata_get_field_type; //changed
-	interface->read_record_field_int64 = tepdata_read_record_field; //fine
-	interface->read_event_field_int64 = tepdata_read_event_field; //changed - return origin event's feild value
-	interface->load_entries = tepdata_load_entries; //fine
-	interface->load_matrix = tepdata_load_matrix; //fine
-	interface->get_couplebreak_ids = couplebreak_get_all_ids; //!!! ADDED !!!
+	interface->dump_entry = tepdata_dump_entry;
+	interface->get_all_event_field_names = tepdata_get_field_names;
+	interface->get_event_field_type = tepdata_get_field_type;
+	interface->read_record_field_int64 = tepdata_read_record_field;
+	interface->read_event_field_int64 = tepdata_read_event_field;
+	interface->load_entries = tepdata_load_entries;
+	interface->load_matrix = tepdata_load_matrix;
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+	// Added couplebreak specific function.
+	interface->get_couplebreak_ids = couplebreak_get_all_ids;
+	// END of change
 }
 
 /** A list of built in default plugins for FTRACE (trace-cmd) data. */
@@ -1843,10 +2165,11 @@ static int kshark_tep_stream_init(struct kshark_data_stream *stream,
 	stream->n_cpus = tep_get_cpus(tep_handle->tep);
 	stream->n_events = tep_get_events_count(tep_handle->tep);
 	stream->idle_pid = LINUX_IDLE_TASK_PID;
-	//NOTE: Changed here.
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 	stream->couplebreak_on = false;
 	stream->n_couplebreak_evts = 0;
 	stream->couplebreak_evts_flags = 0;
+	// END of change
 	
 	tep_handle->advanced_event_filter =
 		tep_filter_alloc(tep_handle->tep);
@@ -2153,10 +2476,11 @@ int kshark_tep_init_local(struct kshark_data_stream *stream)
 
 	stream->n_events = tep_get_events_count(tep_handle->tep);
 	stream->n_cpus =  tep_get_cpus(tep_handle->tep);
-	//NOTE: Changed here.
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 	stream->couplebreak_on = false;
 	stream->n_couplebreak_evts = 0;
 	stream->couplebreak_evts_flags = 0;
+	// END of change
 
 	set_tep_format(stream);
 	if (asprintf(&stream->file, "Local system") <= 0)
