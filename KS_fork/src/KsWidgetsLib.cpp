@@ -979,6 +979,7 @@ KsEventsCheckBoxWidget::KsEventsCheckBoxWidget(kshark_data_stream *stream,
 
 	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 	// Resize the event ID and checkbox vectors to fit in couplebreak events.
+	// If no couplebreak events are present, it will be 0.
 	_id.resize(stream->n_events + stream->n_couplebreak_evts);
 	_cb.resize(stream->n_events + stream->n_couplebreak_evts);
 	// END of change
@@ -1009,7 +1010,7 @@ void KsEventsCheckBoxWidget::_addCouplebreakItems(const kshark_data_stream *stre
 	QTreeWidgetItem *evtItem, *sysItem;
 	QString evtName;
 	QString sysName = "couplebreak";
-	QVector<int> couplebreakIds = KsUtils::getCoupleBreakerIdList(stream->stream_id);
+	QVector<int> couplebreakIds = KsUtils::getCouplebreakIdList(stream->stream_id);
 
 	// Setup the category checkbox (subtree root).
 	sysItem = new QTreeWidgetItem;

@@ -91,7 +91,7 @@ QVector<int> getEventIdList(int sd);
 
 //NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 
-QVector<int> getCoupleBreakerIdList(int sd);
+QVector<int> getCouplebreakIdList(int sd);
 // END of change
 
 int getEventId(int sd, const QString &eventName);

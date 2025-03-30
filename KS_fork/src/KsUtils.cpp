@@ -111,7 +111,7 @@ QVector<int> getEventIdList(int sd)
  * @return Vector of couplebreak event Ids on success or an
  * empty vector on failure.
  */
-QVector<int> getCoupleBreakerIdList(int sd) {
+QVector<int> getCouplebreakIdList(int sd) {
 	kshark_context *kshark_ctx(nullptr);
 	kshark_data_stream *stream;
 	int *ids;

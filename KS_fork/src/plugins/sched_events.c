@@ -177,9 +177,7 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream *stream)
 	int relevant_sswitch_event_id = plugin_ctx->sched_switch_event->id;
 
 	if (stream->couplebreak_on) {
-		relevant_sswitch_event_id = // Change search to couplebreak switch target events
-			COUPLEBREAK_EVENT_ID_SHIFT - relevant_sswitch_event_id;
-			// COUPLEBREAK_SST_ID;
+		relevant_sswitch_event_id = COUPLEBREAK_SST_ID;
 	}
 
 	kshark_register_event_handler(stream, relevant_sswitch_event_id,

@@ -173,6 +173,8 @@ static struct kshark_data_stream *kshark_stream_alloc()
 	stream->filter_is_applied = false;
 	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 	stream->couplebreak_on = false;
+	stream->n_couplebreak_evts = 0;
+	stream->couplebreak_evts_flags = 0;
 	// END of change
 
 	kshark_set_data_format(stream->data_format, KS_INVALID_DATA);

@@ -892,7 +892,7 @@ void KsMainWindow::_showEvents()
 		//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 		if (stream->couplebreak_on) {
 			// We want to also filter the couplebreak events, if they exist.
-			all.append(KsUtils::getCoupleBreakerIdList(sd));
+			all.append(KsUtils::getCouplebreakIdList(sd));
 		}
 		// END of change
 		_applyFilter(sd, all, show,
@@ -1714,7 +1714,7 @@ void KsMainWindow::_showCouplebreakConfig() {
 //NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 /**
  * @brief Function will toggle couplebreak on or off for each stream, both
- * given in the argument. During this plugins for each stream are updated
+ * given in the argument. During this, plugins for each stream are updated
  * to reflect the new data.
  * 
  * @param stream_couplebreaks A vector of pairs, each pair containing a stream ID and
