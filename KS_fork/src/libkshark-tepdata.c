@@ -1343,6 +1343,53 @@ static char *tepdata_get_event_name(struct kshark_data_stream *stream,
 	return buffer;
 }
 
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-30)
+/**
+ * @brief Gets the original PID of a couplebreak entry, via reconstructing how it was
+ * created before any plugin could have changed it.
+ * 
+ * @param stream Data stream pointer to which events belong.
+ * @param entry KernelShark entry for which to get original the PID.
+ * @return The original PID of the entry, or KS_EMPTY_BIN if it was not found.
+ */
+static int get_couplebreak_pid(struct kshark_data_stream *stream,
+	const struct kshark_entry *entry)
+{
+	const struct kshark_entry* origin_entry = (const struct kshark_entry*)entry->offset;
+	struct tep_record *record;
+	int pid = KS_EMPTY_BIN;
+
+	const int sst_id = find_couplebreak_event_id_from_origin_name(stream, "sched/sched_switch");
+	const int swt_id = find_couplebreak_event_id_from_origin_name(stream, "sched/sched_waking");
+
+	// Just like in the tepdata_get_pid function, we need to guard against parallel access
+	pthread_mutex_lock(&stream->input_mutex);
+	record = tracecmd_read_at(kshark_get_tep_input(stream),
+		origin_entry->offset, NULL);
+	if (record) {
+		if (entry->event_id == sst_id) {
+			// Reconstruct how the PID was obtained for a switch
+			pid = get_next_pid(stream, record);
+		} else if (entry->event_id == swt_id) {
+			// Reconstruct how the PID was obtained for a wakeup
+			struct tep_event *sched_waking_event = NULL;
+			define_wakeup_event(kshark_get_tep(stream), &sched_waking_event);
+
+			unsigned long long waked_pid_val;
+			struct tep_format_field *sched_waking_pid_field =
+				tep_find_any_field(sched_waking_event, "pid");
+			int pid_succs =
+				tep_read_number_field(sched_waking_pid_field, record->data, &waked_pid_val);
+			pid = (pid_succs == 0) ? (int32_t)waked_pid_val : origin_entry->pid;
+		}
+	}
+	tracecmd_free_record(record);
+	pthread_mutex_unlock(&stream->input_mutex);
+
+	return pid;
+}
+// END of change
+
 static int tepdata_get_pid(struct kshark_data_stream *stream,
 			   const struct kshark_entry *entry)
 {
@@ -1353,11 +1400,11 @@ static int tepdata_get_pid(struct kshark_data_stream *stream,
 		pid = entry->pid;
 	} else {
 		//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
-		if (stream->couplebreak_on && entry->event_id < COUPLEBREAK_EVENT_ID_SHIFT) {
+		if (stream->couplebreak_on) {
 			// Couplebreak events have no fallback for a changed PID, which is why
 			// such changes are not allowed.
 			if (is_couplebreak_event(stream, entry->event_id))
-				return entry->pid;
+				return get_couplebreak_pid(stream, entry);
 		}
 		// END of change
 
