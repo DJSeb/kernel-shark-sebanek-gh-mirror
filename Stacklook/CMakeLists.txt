@@ -7,8 +7,7 @@ set(PLUGIN_NAME "stacklook")
 set(SL_VERSION "2.2.3")
 
 # KernelShark meta
-
-set(KS_VERSION "2.4.1-couplebreak")
+set(KS_VERSION "2.5.0-couplebreak")
 
 # Ensure a default build type
 ## For customisability by the user
