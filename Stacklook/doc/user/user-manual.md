@@ -208,11 +208,16 @@ drawn above a button for an event happening *later*, **BUT** clicking on or hove
 the button for the *later* event. This is, to the author's knowledge, something internal to KernelShark and cannot be
 fixed on the plugin side.
 
+Opening a KernelShark session where Stacklook was active, but without preloading it will result in a segmentation
+fault and a **crash** upon hovering over a Stacklook button.
+
 If more are discovered, contact the author via e-mail `djsebofficial@gmail.com`.
 
 # Recommendations
 
 A few recommendations of usage by the author for the smoothest user experience.
+
+Always preload Stacklook before loading a session. It can save the program from nasty surprises.
 
 Do not open hundreds upon hundreds of stacklook windows, lest you wish your memory to suffer.
 

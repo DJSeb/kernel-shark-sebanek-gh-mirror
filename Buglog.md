@@ -5,6 +5,17 @@ If a bug has been solved, mark it and provide explanation (or a commit ID where 
 
 # Open bugs
 
+1. Opening KernelShark without preloading Stacklook in any way and then importing
+   session where Stacklook was loaded will result in a segmentation fault upon button
+   hover.
+
+   - Status: OPEN
+   - Cause: Who knows, same as number 6 is in Closed bugs probably.
+     - Common thread seems to be access to the graph and the function's operating on said graph.
+       Which is bad because...??? The graph exists, there shouldn't be issues.
+   - Solution: ??? Just preload the plugin, because this bug eludes me to no end.
+   - Environment: WSL-openSUSE-Tumbleweed
+
 # Closed bugs
 
 1. Switching between trace files results in a segmentation fault.

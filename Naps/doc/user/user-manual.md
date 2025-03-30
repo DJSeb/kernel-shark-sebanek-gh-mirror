@@ -161,6 +161,8 @@ contact the author via e-mail `djsebofficial@gmail.com`.
 
 A few recommendations of usage by the author for the smoothest user experience.
 
+Always preload Naps before loading a session. It can save the program from nasty surprises.
+
 If having two versions of the plugin is desired, put them into different build directories.
 
 It is recommended to turn on couplebreak in KernelShark to allow greater compatiblity with other
