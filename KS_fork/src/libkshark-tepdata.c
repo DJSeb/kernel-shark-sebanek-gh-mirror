@@ -1238,7 +1238,7 @@ static int tepdata_get_event_id(struct kshark_data_stream *stream,
 		event_id = entry->event_id;
 	} else {
 		//NOTE: Changed here. (COUPLEBREAK) (2025-03-29)
-		if (stream->couplebreak_on && entry->event_id < COUPLEBREAK_EVENT_ID_SHIFT){
+		if (stream->couplebreak_on){
 			// Since couplebreak events cannot tap into the trace event processing
 			// handler (their offset field hosts something else), we check if an
 			// event is a couplebreak one and if so, just return the event Id.
