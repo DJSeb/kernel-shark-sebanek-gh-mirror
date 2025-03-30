@@ -79,24 +79,6 @@ static void secondPass(plugin_sched_context *plugin_ctx)
 		/* Find the very last trailing event. */
 		for (; e->next; e = e->next) {
 			if (e->next->pid != plugin_sched_get_pid(cSS->data[i]->field)) { // original sched_switch pid
-				// "Find the last event, whose pid is the same as the original sched_switch pid."
-				// "(Condition in if is the stopper)."
-				// "If you find it, change its pid to the next pid of the original sched_switch or"
-				// "SST with couplebreak on."
-				// So it is exchanging owners.
-				// Is this a problem?
-				// Not for Stacklook - it includes checks against original PIDs as well.
-				// Therefore even if ftrace/kernel_stack events are changed by sched_events
-				// here, Stacklook won't care.
-				// Naps - they work only with SS and SW/SWT events, if these events are
-				// are not affected, changing this is pointless.
-				// SS events most likely are not affected, it would be quite the task to
-				// have a trailing sched_switch after a sched_switch (impossible even?)
-				// Since we care about couplebreak being on as the compatibility bridge,
-				// SW events are of no concern, as naps use SWT in this mode.
-				// SWT events would be affected if sched_waking event happened after a 
-				// sched_switch event, but is this possible? Does not seem so.
-
 				/*
 				 * This is the last trailing event. Change the
 				 * "pid" to be equal to the "next pid" of the

@@ -19,6 +19,7 @@
 // KernelShark
 #include "plugins/sched_events.h"
 #include "libkshark-tepdata.h"
+#include "libkshark-couplebreak.h"
 
 /** Plugin context instance. */
 

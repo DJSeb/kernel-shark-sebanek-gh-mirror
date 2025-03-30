@@ -19,11 +19,6 @@
 extern "C" {
 #endif
 
-//NOTE: Changed here. !!! (COUPLEBREAK) (2025-03-30)
-#define COUPLEBREAK_SST_ID -10000
-#define COUPLEBREAK_SWT_ID -10001
-// END of change
-
 /** Unique identifier of the TEP tracing data format. */
 #define TEP_DATA_FORMAT_IDENTIFIER	"tep data"
 

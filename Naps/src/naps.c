@@ -16,6 +16,7 @@
 #include "libkshark-plot.h"
 #include "libkshark-plugin.h"
 #include "libkshark-tepdata.h"
+#include "libkshark-couplebreak.h"
 
 // Plugin header
 #include "naps.h"

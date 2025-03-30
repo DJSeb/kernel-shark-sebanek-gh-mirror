@@ -999,7 +999,7 @@ KsEventsCheckBoxWidget::KsEventsCheckBoxWidget(kshark_data_stream *stream,
 //NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 /**
  * @brief Add couplebreak checkbox subtree to the checkbox tree.
- * Creates a new checkable category (couplebreak) and adds couplebreak
+ * Creates a new checkable category "couplebreak" and adds couplebreak
  * events (detected in the stream) into it, creating the new
  * subtree.
  * 

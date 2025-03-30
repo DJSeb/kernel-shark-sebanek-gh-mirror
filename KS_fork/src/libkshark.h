@@ -58,10 +58,7 @@ struct kshark_entry {
 	/** The PID of the task the record was generated. */
 	int32_t		pid;
 
-	/** The offset into the trace file, used to find the record.
-	 * If couplebreak is enabled, the offset is a pointer to the origin
-	 * entry of the couple.
-	*/
+	/** The offset into the trace file, used to find the record. */
 	int64_t		offset;
 
 	/**
