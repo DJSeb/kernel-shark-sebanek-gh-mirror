@@ -676,6 +676,12 @@ were less visibly wrong before (seeing with fresh eyes).
 A lot of boring work, but hopefully a good amount of sources
 to use in the survey paper later.
 
+...
+
+There was a couplebreak change, now the supported event Ids are
+in the header file libkshark-tepdata.h, which deletes a lot of
+string lookups.
+
 Next goals (in priority order):
 
 - Document Couplebrek -> then send to supervisor

@@ -41,11 +41,9 @@ All couplebreak events are created in the `get_records` function. They are creat
 set to create couplebreak events. They are also called "target entries" or "target events", sometimes with "waking" or 
 "switch", which denote the origin events ("sched/sched_waking" and "sched/sched_switch" respectively).
 
-Every couplebreak event has event Id equal to `(COUPLEBREAK_EVENT_ID_SHIFT - \[ORIGIN EVENT ID\])`. The origin event's Id 
-is always the one present in the trace data, to achieve consistency in the modfication's implementation, as there isn't 
-always a way to check on the origin entry's data. COUPLEBREAK_EVENT_ID_SHIFT is a macro-defined constant of value -10 000 
-(negative ten thousand). The macro is included in the header file `libkshark-tepdata.h`, so that others including this file
-can detect couplebreak events.
+Every couplebreak event has event Id lesser than -10 000 (negative ten thousand). The macros with supported couplebreak
+event Ids are included in the header file `libkshark-tepdata.h`, so that others including this file can detect couplebreak 
+events.
 
 Upon name request, each couplebreak event will generate a name of this format: `couplebreak/[ORIGIN EVENT NAME][target]`.
 Origin event name will be something like "sched_switch" or "sched_waking", missing their usual prefixes. The suffix
@@ -122,8 +120,11 @@ Couplebreak is fully compatible with sessions.
 - More events could support be supported, e.g. `sched/sched_migrate_task` could be split between the original CPU
   and the chosen CPU for migration (though this event doesn't have much to do with two processes, it does have a
   CPU "couple").
-- COUPLEBREAK_EVENT_ID_SHIFT is just one way to creating event Ids for couplebreak events. Another way is to explicitly
-  assign a range of numbers to couplebreak events as Ids and work with that.
+- Another way to assign a range of numbers to couplebreak events is to for example get the origin event Ids and then
+  shift them all. This woul be useful if the reverse situation, that is getting the origin event's Id from the target was 
+  necessary, but we couldn't access anything other than the target event's Id and our knowledge of this shifting. As
+  this situation would be incredibly rare and because being explicit is usually better, the explicit listing of event Ids
+  was chosen.
 # Usage
 
 ## GUI
@@ -145,14 +146,13 @@ Streams' new state variables `couplebreak_on`, `n_couplebreak_evts` and `coupleb
 `n_couplebreak_evts` to check how many couplebreak events there are in a stream. The flags bitmask sets each bit to 1
 if a couplebreak event for a type of an event was created. Positions are 0-indexed (0th bit is least significant bit) and 
 each bit flags an event as present as follows:
-- 0 -> `couplebreak/sched_switch[target]`
-- 1 -> `couplebreak/sched_waking[target]`
+- 0 -> `couplebreak/sched_switch[target]` (event ID: `COUPLEBREAK_SST_ID`)
+- 1 -> `couplebreak/sched_waking[target]` (event ID: `COUPLEBREAK_SWT_ID`)
 The bitmask also serves as list of supported events.
 
 It is recommended to not touch these, same as not touching `n_events` in streams, as modification depends on them heavily.
 
-To detect a couplebreak event, look for entries with event Ids set to `(COUPLEBREAK_EVENT_ID_SHIFT - [ORIGIN EVENT ID])`,
-origin event being one of the supported events (see bitmask above.)
+To detect a couplebreak event, look for entries with event Ids same as any of the "COUPLEBREAK_[]T_ID" macros.
 
 ### Couplebreak event entries
 
