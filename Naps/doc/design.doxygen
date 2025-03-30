@@ -57,7 +57,7 @@
  * such context structure, as there are predefined macros for declaring and defining common functionalities with this
  * structure in mind.
  * 
- * The C files mainly serve as a bridge connecting KernelShark and the plugn, choosing which events are relevant for the
+ * The C files mainly serve as a bridge connecting KernelShark and the plugin, choosing which events are relevant for the
  * plugin and if there should be some preprocessing done on them. There is also the definition of the font to be used by
  * the plugin. KernelShark provides event handlers for drawing on the plot or for event processing during loading -
  * these are used with callback functions defined by the user, some of which may be defined in the C++ portion.
