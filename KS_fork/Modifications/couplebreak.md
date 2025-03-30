@@ -6,7 +6,7 @@ namely `sched/sched_switch` and `sched/sched_waking`. Update plugins that could 
 
 # Main design objectives
 
-- Injective modifications
+- Almost-transparent modifications
   - No modification should change what already works, only
     when couplebreak is active should the feature do its work.
   - Same behviour if off as if it was never there
@@ -15,38 +15,68 @@ namely `sched/sched_switch` and `sched/sched_waking`. Update plugins that could 
 - As similar to a regular event as possible
   - Exceptions: must not change offset & event_id fields
 - Sessions support
+- Serve as a compatibility bridge between some plugins
 
 # Solution
 
-Source code change tag: `COUPLEBREAK`.
+(Read more in sections below.)
+
+Source code change tag: `COUPLEBREAK`. Some changes are marked with `"COUPLEBREAK"`, which means there were changes
+done during couplebreak, but not necessarily limited to it (e.g. typedef of a custom_entry_creation_func function type).
 
 ## Design
 
-Many static functions, few functions or variables that are accessible via inclusion. The goal was to have KernelShark 
-almost ignore couplebreak if it is off, so hiding a lot of functionalities was part of that.
+### General overview
 
-Almost every possible couplebreak-related call is guarded by an if statement asking if couplebreak is enabled.
+Minimal additional API created, only functions along the lines of "getters" instead of "setters". The newly created
+header file only has supported event Ids. New file to include if expecting to work with couplebreak, namely 
+`libkshark-couplebreak.h`, with its own implementation file to keep thngs tidy.
+
+Almost every possible couplebreak-related call guarded by an if statement asking if couplebreak is enabled.
 If couplebreak is showing itself off to the world (header files inclusions), it's always explicitly something with
 "couplebreak" in its name.
 
-Interaction in code should be as minimal as possible to not accidentally break something.
+A lot of changes are in `libkshark-tepdata.c`, where events are loaded - exactly where couplebreak needs to operate.
+This is also where the stream interface gets defined and also where couplebreak injects changes to these interface
+calls - couplebreak events are handled in a special way each time.
 
-One could say this is a Big Ball of Mud architecture and they wouldn't be far from the truth.
+Though the architecture most likely resembles a Big Ball of Mud, any changes to existing implementation must never break
+it, that is the most important goal.
+
+### Couplebreak events, couples, integration with existing code.
+
+The main concepts here were couples and couplebreak events/entries. Couples, as mentioned
+above, are two processes, which "share" an event. For an example, a scheduler switch event will have a task that is being
+switched from and a task that is being switched to. These two tasks are a couple. Couplebreak entries (also called "target 
+entries" or "target events", sometimes with "waking" or "switch", which denote the origin events - "sched/sched_waking" 
+and "sched/sched_switch" respectively) are sort of altered twins to the actual events. They contain almost all the same
+data, they will attempt to behave as any other event entry, but they were never captured in the trace. They happened at the
+same time, but belong to different tasks (sometimes to different CPUs as well).
+
+User must be able to work with couplebreak events as if they were real events in the basic ways, which implies
+integration with stream interfaces.
+
+### Session support
+
+As couplebreak will be a setting per stream, sessions should be compatible with this new functionality. Exporting one
+must export couplebreak settings, if loading one without it, it can be set to off, as changing this is simple.
 
 ## Implementation
 
 ### Couplebreak events creation
 
 All couplebreak events are created in the `get_records` function. They are created after their origin event, if stream is
-set to create couplebreak events. They are also called "target entries" or "target events", sometimes with "waking" or 
-"switch", which denote the origin events ("sched/sched_waking" and "sched/sched_switch" respectively).
+set to create couplebreak events.
 
-Every couplebreak event has event Id lesser than -10 000 (negative ten thousand). The macros with supported couplebreak
-event Ids are included in the header file `libkshark-tepdata.h`, so that others including this file can detect couplebreak 
-events.
+As custom events, they abide by the rule written in the source code, stating that custom entries must have a negative
+event Id. Every couplebreak event has event Id lesser than or equal to -10 000 (negative ten thousand). The macros with supported couplebreak event Ids are included in the header file `libkshark-couplebreak.h`, so that others including this file can detect couplebreak events.
+
+To have some connection to their origin event, the couplebreak entries replace their offset field's value with a pointer
+to the origin entry. This then allows them to redirect some requests to them or to get data they otherwise wouldn't have
+access to, because they are missing their offset.
 
 Upon name request, each couplebreak event will generate a name of this format: `couplebreak/[ORIGIN EVENT NAME][target]`.
-Origin event name will be something like "sched_switch" or "sched_waking", missing their usual prefixes. The suffix
+\[ORIGIN EVENT NAME\] will be something like "sched_switch" or "sched_waking", missing their usual prefixes. The suffix
 "\[target\]" appears as written.
 
 Couplebreak entries will try to follow their origin event's intentions with the next task. Scheduler switches contain
@@ -54,6 +84,8 @@ information on what task will run on the same CPU next, so the couplebreak event
 Scheduler's waking event also says on which task the awakened should run (but that's not definitive, more below), so
 the target entries change their PID and their CPU to values that are given in the closest target entry of a switch to
 the awakened task (these include definitive information).
+
+They are marked as visible in the graph and mimick normal events' behaviour to the best of their ability.
 
 #### Targets for sched/sched_waking
 
@@ -71,6 +103,20 @@ later by KernelShark. The sorted array will be freed at the end - though in most
 same array will bre created later, so the memory suffered basically nothing.
 
 This happens once per load of data, so the time spent here is mostly negligible (unless loading a massive file).
+
+### Couplebreak API
+
+A small API was also created to help users work with couplebreak. All functions provide a read-like functionality,
+so no writes to any variable are done. They are as follows:
+- *couplebreak_get_origin*: returns the origin entry of a couplebreak entry
+- *couplebreak_origin_id_to_flag_pos*: returns a flag position in the stream's couplebreak flag variable
+- *couplebreak_id_to_flag_pos*: returns a flag position based on the couplebreak event Id
+- *flag_pos_to_couplebreak_id*: returns a couplebreak event Id based on the flag position
+- *is_couplebreak_event*: returns whether or not the event entry given is a couplebreak event
+- *get_couplebreak_event_name*: returns a couplebreak event's name
+
+There are also macros with values relevant to couplebreak, namely the couplebreak event Ids and flag positions.
+These could have been static const variables, but macros can be used in switch statements, making for prettier code.
 
 ### Data stream API
 
@@ -110,6 +156,11 @@ and importing them.
 
 Couplebreak is fully compatible with sessions.
 
+### Existing plugins change
+
+The only plugin changed (or the one who seemed that they needed it) was `sched_events`. It could leverage target events
+instead of changing the owner PID of `sched/sched_switch` events and it works with couplebreak like a charm.
+
 ## Extensions
 
 - Some couplebreak functions could be moved into a header file - currently, most of them are static functions hidden in
@@ -125,6 +176,10 @@ Couplebreak is fully compatible with sessions.
   necessary, but we couldn't access anything other than the target event's Id and our knowledge of this shifting. As
   this situation would be incredibly rare and because being explicit is usually better, the explicit listing of event Ids
   was chosen.
+- The `get_all_event_ids` stream interface function cannot do what its name suggests due to couplebreak events just being
+  custom made. If one found a way to connect the `n_couplebreak_evts` variable with the `n_events` variable in streams,
+  it could be a less fractured way to work with couplebreak.
+
 # Usage
 
 ## GUI
@@ -141,7 +196,20 @@ their origin events, but even if that happens, their nature as a "twin" of the o
 
 ## API
 
+### Couplebreak API
+
+Check for couplebreak events via the provided couplebreak event Id macros. Check the flag bitmask for present
+couplebreak event types in a stream with the flag position macros. Query for flag position, event Id, event name or
+origin event via the provided functions.
+
+To detect a couplebreak event, look for entries with event Ids same as any of the "COUPLEBREAK_\[EVENT ABBREVIATION\]T_ID"
+macros, where \[EVENT ABBREVIATION\] is something like SW, which symbolises `sched/sched_waking`. The T symbolises target.
+
+By including the couplebreak header file, your code agrees to respect the possibility of being used when couplebreak is
+active.
+
 ### Data streams
+
 Streams' new state variables `couplebreak_on`, `n_couplebreak_evts` and `couplebreak_evts_flags` are now present. Use
 `n_couplebreak_evts` to check how many couplebreak events there are in a stream. The flags bitmask sets each bit to 1
 if a couplebreak event for a type of an event was created. Positions are 0-indexed (0th bit is least significant bit) and 
@@ -150,9 +218,12 @@ each bit flags an event as present as follows:
 - 1 -> `couplebreak/sched_waking[target]` (event ID: `COUPLEBREAK_SWT_ID`)
 The bitmask also serves as list of supported events.
 
-It is recommended to not touch these, same as not touching `n_events` in streams, as modification depends on them heavily.
+It is recommended to not touch these, same as not touching `n_events` in streams, as this modification depends on them 
+heavily.
 
-To detect a couplebreak event, look for entries with event Ids same as any of the "COUPLEBREAK_[]T_ID" macros.
+Every function of a stream interface can be used in the same manner as for any other events, but couplebreak events will
+most likely either redirect the request to their origin Id or construct values on the fly, they will not read the trace
+data source.
 
 ### Couplebreak event entries
 
@@ -162,9 +233,11 @@ source for the current trace graph. Consequences of this are as follows:
 - Couplebreak events **MUST NEVER** have their `event_id` and `offset` fields changed.
   - Offset has been changed to the origin entry's address - everything will break if this is changed.
   - Event Id is created on data load and cannot be found later somewhere else - asking for the original will just
-    redirect to `entry->event_id`. Changing a couplebreak entry's event Id is therefore also breaking it.
+    redirect to `entry->event_id`. Changing a couplebreak entry's event Id is the same as breaking it.
 
-
+The entries can be used in plugins (e.g. `sched_event`'s couplebreak integration) and they shine especially well when
+something needs to have an event in one task plot, but it cannot be done without editing an entry, possibly creating
+an incompatiblity with other plugins. Using couplebreak events can resolve this. 
 
 # Bugs
 
@@ -177,3 +250,5 @@ an issue, it is recommended to simply restart the program and try again.
 - Original name was "Couplebreaker", which sounds a lot like "troublemaker", making the author always think of Olly Murs'
   song of the same name.
 - Session support was not requested, but to complete the feature, the modification included it anyway.
+- Header file was a last minute inclusion, when it was deliberated upon that couplebreak hardly gives any interaction,
+  even though some would be greatly appreciated.

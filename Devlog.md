@@ -682,6 +682,11 @@ There was a couplebreak change, now the supported event Ids are
 in the header file libkshark-tepdata.h, which deletes a lot of
 string lookups.
 
+...
+
+Even greater couplebreak change, there is some sort of interface
+defined in a header file. CMake was also edited to fit all this.
+
 Next goals (in priority order):
 
 - Document Couplebrek -> then send to supervisor
