@@ -667,3 +667,21 @@ Next goals:
 More future goal is to make NUMA Topology Views (implementaton & documentation).
 
 Then "just" write the survey paper.
+
+## 2025-03-29 - 2023-03-30
+
+Writing documentations and improving parts of code that
+were less visibly wrong before (seeing with fresh eyes).
+
+A lot of boring work, but hopefully a good amount of sources
+to use in the survey paper later.
+
+Next goals (in priority order):
+
+- Document Couplebrek -> then send to supervisor
+- Create NUMA Topology Views modification
+  - Implementation
+  - Documentation
+- Revise Naps' design document
+- Write Stacklook's design document
+- Write survey paper
