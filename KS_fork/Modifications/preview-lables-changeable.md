@@ -34,3 +34,5 @@ If a plugin using the new method is not loaded when KernelShark starts or before
 said session upon import will experience a segmentation fault when setting text to a label and the program will crash. 
 This seems to be a quirk with KernelShark when plugins aren't properly loaded when importing a session or when plugins are 
 built outside the `src/plugins` directory.
+- One could argue this goes against the safe access goal, but as outlined above, the problem lies with the "unstable" way
+  KernelShark loads plugins upon session import - every other way of access is problem-free.
