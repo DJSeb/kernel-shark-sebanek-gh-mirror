@@ -70,11 +70,11 @@ QVector<int> getPidList(int sd)
 }
 
 /**
- * @brief Get a vector of all Event Ids associated with a given Data stream.
+ * @brief Get a vector of all non-custom Event Ids associated with a given Data stream.
  *
  * @param sd: Data stream identifier.
  *
- * @returns Vector of Event Ids on success or an empty vector on failure.
+ * @returns Vector of non-custom Event Ids on success or an empty vector on failure.
  */
 QVector<int> getEventIdList(int sd)
 {

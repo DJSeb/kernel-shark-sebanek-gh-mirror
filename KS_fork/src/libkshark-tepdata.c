@@ -1799,10 +1799,10 @@ static char *tepdata_dump_entry(struct kshark_data_stream *stream,
 /**
  * @brief Finds the event ID of a couplebreak event based on the name given
  * in the argument. Function checks for existence of a couplebreak event in
- * a stream and 
+ * a stream and if the inputted name matches with couplebreak names.
  * 
  * @param stream Data stream pointer to which an entry belongs
- * @param event_name Name of the event to be searched for
+ * @param event_name Input name of the event to be searched for
  * @return Event ID of the couplebreak event, or 0 if the event name is not
  * of a couplebreak event, or 1 if the couplebreak event does not exist in the
  * stream.

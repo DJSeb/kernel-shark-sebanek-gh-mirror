@@ -252,7 +252,7 @@ struct kshark_generic_stream_interface {
 	/** Method used to retrieve Id of the Event from its name. */
 	stream_find_id_func	find_event_id;
 
-	/** Method used to retrieve the array of Ids of all Events. */
+	/** Method used to retrieve the array of Ids of all non-custom Events. */
 	stream_get_ids_func	get_all_event_ids;
 
 	/** Method used to dump the entry's content to string. */

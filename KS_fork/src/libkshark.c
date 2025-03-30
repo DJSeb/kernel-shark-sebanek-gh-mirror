@@ -665,7 +665,7 @@ int kshark_get_event_id(const struct kshark_entry *entry)
 }
 
 /**
- * @brief Get an array of all event Ids for a given data stream.
+ * @brief Get an array of all non-custom event Ids for a given data stream.
  *
  * @param stream: Input location for a Trace data stream pointer.
  *
@@ -695,7 +695,7 @@ int *kshark_get_all_event_ids(struct kshark_data_stream *stream)
  * @return Array of event Ids of all found couplebreak events - the user
  * is responsible for freeing the outputted array.
  * Alternatively, returns NULL if given stream was NULL or isn't the generic
- * one, used by KernelShark or if the stream's interface
+ * one used by KernelShark or if the stream's interface
  * does not support this function (i.e. it is NULL).
  */
 int *kshark_get_couplebreak_ids(struct kshark_data_stream *stream) {
