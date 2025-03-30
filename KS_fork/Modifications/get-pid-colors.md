@@ -30,6 +30,8 @@ Make sure that any plugin using this modification is either preloaded via CLI or
 plugin was active; or include defaults and an option to use functionality with this modification - failure to do so will
 result in KernelShark crashing with a segmentation fault.
 
+Source code change tag: `GET PID COLORS`.
+
 # Bugs
 
 If a plugin using the new method is not loaded when KernelShark starts or before a session where it was active is loaded,

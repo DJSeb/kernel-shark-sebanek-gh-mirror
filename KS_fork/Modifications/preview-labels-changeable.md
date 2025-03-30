@@ -17,6 +17,8 @@ expects 5 QString arguments, but by default they are set to an empty string. Beh
 how labels are set when hovering over an entry in the graph. The method just sets each of the five labels
 the graph has to the given string.
 
+Source code change tag: `PREVIEW LABELS CHANGEABLE`.
+
 # Usage
 
 When developing a plugin and having access to the graph (most likely via the public `graphPtr()` method on main window),

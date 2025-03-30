@@ -20,6 +20,8 @@ Performance concerns are valid here, as many plugin shapes might slow down the p
 observed wth the current implementation though, which mimicks what double click event does and mouse hovers aren't as 
 frequent as one might think to slow down the program in a significant way.
 
+Source code change tag: `MOUSE HOVER PLOT OBJECTS`.
+
 # Usage
 
 Create a new object inheriting publicly from `KsPlot::PlotObject`. Override implementation of `_mouseHover` (and 
