@@ -1352,7 +1352,7 @@ static int tepdata_get_pid(struct kshark_data_stream *stream,
 	if (entry->visible & KS_PLUGIN_UNTOUCHED_MASK) {
 		pid = entry->pid;
 	} else {
-		//NOTE: Changed here. !!!!!! (COUPLEBREAK) (2025-03-21)
+		//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 		if (stream->couplebreak_on && entry->event_id < COUPLEBREAK_EVENT_ID_SHIFT) {
 			// Couplebreak events have no fallback for a changed PID, which is why
 			// such changes are not allowed.
