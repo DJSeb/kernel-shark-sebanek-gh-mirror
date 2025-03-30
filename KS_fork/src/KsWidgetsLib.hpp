@@ -335,13 +335,13 @@ public:
 			 QWidget *parent = nullptr);
 
 	/**
-	 * The "apply" signal will emit a vector containing the Ids of all
+	 * The "apply" signal will emit a vector containing the Ids of every
 	 * checked checkbox.
 	 */
 	void applyIds(bool v = true) {_applyIds = v;}
 
 	/**
-	 * The "apply" signal will emit a vector containing the statuse of all
+	 * The "apply" signal will emit a vector containing the statuses of every
 	 * checkbox.
 	 */
 	void applyStatus(bool v = true) {_applyIds = !v;}
@@ -583,6 +583,11 @@ private:
 	void _makeItems(kshark_data_stream *stream, QVector<int> eventIds);
 
 	void _makeTepEventItems(kshark_data_stream *stream, QVector<int> eventIds);
+
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+
+	void _addCouplebreakItems(const kshark_data_stream *stream);
+	// END of change
 };
 
 /**
@@ -641,6 +646,62 @@ private:
 
 	QLabel		_streamLabel, _eventLabel, _fieldLabel;
 };
+
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Configuration window for couplebreak.
+ * 
+ */
+class KsCouplebreakDialog: public QDialog {
+	Q_OBJECT
+	
+	/// @brief Simpler name to refer to a stream (by its Id) per checkbox
+	/// (by a pointer to it) pair. 
+	using StreamCboxes = std::pair<int, QCheckBox *>;
+	/// @brief Simpler type name for representing a stream (by its Id) and
+	/// its couplebreak setting (by its on/off state boolean).
+	using StreamCouplebreakSetting = std::pair<int, bool>;
+private: // Qt objects
+	/// @brief Layout containing other layouts (top-down ordering of other layouts).
+	QVBoxLayout		_main_layout;
+	
+	/// @brief Explains what changing this setting does.
+	QLabel			_explanation;
+
+	/// @brief Scroll area for the stream scheckboxes.
+	QScrollArea		_scroll_area;
+	
+	/// @brief Layout for the Apply and Close buttons.
+	QHBoxLayout     _endstage_btns_layout;
+
+    /// @brief Close button for the widget.
+    QPushButton     _close_button;
+
+    /// @brief Button applies changes to every stream.
+    QPushButton     _apply_button;
+
+	/// @brief Apply action connection to the apply button.
+	QMetaObject::Connection _apply_button_connection;
+signals:
+	/// @brief Signal emitted when the "Apply" button is pressed.
+	void apply(QVector<StreamCouplebreakSetting> settings);
+private: // Non-GUI objects
+	/// @brief Vector of pairs of stream id and couplebreaking flag.
+	QVector<StreamCboxes> _couplebreak_settings;
+private:
+	// Reaction to a clicked apply button
+	void _apply_action();
+	void _setup_explanation();
+	void _setup_endstage();
+	void _setup_streams_scroll_area(kshark_context *kshark_ctx);
+	void _setup_layout();
+public:
+	// Don't allow default constructor, it would contain invalid values.
+	KsCouplebreakDialog() = delete;
+	explicit KsCouplebreakDialog(kshark_context *kshark_ctx,
+		QWidget *parent = nullptr);
+};
+// END of change
 
 }; // KsWidgetsLib
 

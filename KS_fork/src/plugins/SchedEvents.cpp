@@ -78,7 +78,7 @@ static void secondPass(plugin_sched_context *plugin_ctx)
 
 		/* Find the very last trailing event. */
 		for (; e->next; e = e->next) {
-			if (e->next->pid != plugin_sched_get_pid(cSS->data[i]->field)) {
+			if (e->next->pid != plugin_sched_get_pid(cSS->data[i]->field)) { // original sched_switch pid
 				/*
 				 * This is the last trailing event. Change the
 				 * "pid" to be equal to the "next pid" of the
@@ -110,6 +110,7 @@ __hidden void plugin_draw(kshark_cpp_argv *argv_c,
 		return;
 
 	plugin_ctx = __get_context(sd);
+	
 	if (!plugin_ctx)
 		return;
 

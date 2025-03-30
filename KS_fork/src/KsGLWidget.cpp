@@ -248,16 +248,27 @@ int KsGLWidget::_getLastCPU(struct kshark_trace_histo *histo,
 
 }
 
+//NOTE: Changed here. (MOUSE HOVER PLOT OBJECTS) (2024-07-26)
 /**
- * NOTE: Changed here
-*/
+ * @brief Checks through every plot object and calls the mouseHover() method
+ * on them if the mouse cursor is over some. Function selects the last object
+ * from the list given in argument, which should always be the list of plugin
+ * shapes kept by KernelShark.
+ * 
+ * @param event Mouse event with details about what happened - most importantly
+ * the position of the mouse cursor.
+ * @param shapes List of shapes to check for mouse hover.
+ */
 static void _mouseMoveOverPluginShapes(QMouseEvent *event,
 									   KsPlot::PlotObjList &shapes)
 {
 	KsPlot::PlotObject *mouseOnPlugin(nullptr);
-	double distance, distanceMin = FONT_HEIGHT;
+	double distance;
+	double distanceMin = FONT_HEIGHT;
 
 	for (auto const &s: shapes) {
+		// Distance dictates if mouse is over a plugin shape, same as with
+		// double clicks. 
 		distance = s->distance(event->pos().x(), event->pos().y());
 		if (distance < distanceMin) {
 			distanceMin = distance;
@@ -265,9 +276,11 @@ static void _mouseMoveOverPluginShapes(QMouseEvent *event,
 		}
 	}
 
+	// Last found shape is to be used for mouse hover reaction
 	if (mouseOnPlugin)
 		mouseOnPlugin->mouseHover();
 }
+// END of change
 
 /** Reimplemented event handler used to receive mouse move events. */
 void KsGLWidget::mouseMoveEvent(QMouseEvent *event)
@@ -300,10 +313,13 @@ void KsGLWidget::mouseMoveEvent(QMouseEvent *event)
 		emit notFound(ksmodel_bin_ts(_model.histo(), bin), sd, cpu, pid);
 	}
 
-	/** NOTE: 
-	 * Changed here
-	*/
+	//NOTE: Changed here. (MOUSE HOVER PLOT OBJECTS) (2024-07-26)
+	// Go through all plugin shapes and attempt a mouse hover reaction.
+	// Might be demanding if there are far too many shapes to check, but
+	// mouse movement is not as frequent of an event as one might think.
+	// Still, there is room for improvement (EXTENSION).
 	_mouseMoveOverPluginShapes(event, _shapes);
+	// END of change
 }
 
 /** Reimplemented event handler used to receive mouse release events. */

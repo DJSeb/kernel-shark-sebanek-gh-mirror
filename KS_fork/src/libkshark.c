@@ -171,6 +171,12 @@ static struct kshark_data_stream *kshark_stream_alloc()
 	}
 
 	stream->filter_is_applied = false;
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+	stream->couplebreak_on = false;
+	stream->n_couplebreak_evts = 0;
+	stream->couplebreak_evts_flags = 0;
+	// END of change
+
 	kshark_set_data_format(stream->data_format, KS_INVALID_DATA);
 	stream->name = strdup(KS_UNNAMED);
 
@@ -659,7 +665,7 @@ int kshark_get_event_id(const struct kshark_entry *entry)
 }
 
 /**
- * @brief Get an array of all event Ids for a given data stream.
+ * @brief Get an array of all non-custom event Ids for a given data stream.
  *
  * @param stream: Input location for a Trace data stream pointer.
  *
@@ -680,6 +686,32 @@ int *kshark_get_all_event_ids(struct kshark_data_stream *stream)
 
 	return NULL;
 }
+
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Get an array of all couplebreak event Ids for a given data stream.
+ * 
+ * @param stream Input location for a Trace data stream pointer.
+ * @return Array of event Ids of all found couplebreak events - the user
+ * is responsible for freeing the outputted array.
+ * Alternatively, returns NULL if given stream was NULL or isn't the generic
+ * one used by KernelShark or if the stream's interface
+ * does not support this function (i.e. it is NULL).
+ */
+int *kshark_get_couplebreak_ids(struct kshark_data_stream *stream) {
+	struct kshark_generic_stream_interface *interface;
+
+	if (!stream)
+		return NULL;
+
+	interface = stream->interface;
+	if (interface->type == KS_GENERIC_DATA_INTERFACE &&
+	    interface->get_couplebreak_ids)
+		return interface->get_couplebreak_ids(stream);
+
+	return NULL;
+}
+// END of change
 
 /**
  * @brief Find the event Ids corresponding to a given event name.

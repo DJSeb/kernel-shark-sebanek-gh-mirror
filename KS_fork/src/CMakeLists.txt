@@ -9,7 +9,10 @@ add_library(kshark SHARED libkshark.c
                           libkshark-plugin.c
                           libkshark-tepdata.c
                           libkshark-configio.c
-                          libkshark-collection.c)
+                          libkshark-collection.c
+                          #NOTE: Changed here. (COUPLEBREAK) (2025-03-30)
+                          libkshark-couplebreak.c)
+                          # END of change
 
 target_link_libraries(kshark trace::cmd
                              trace::fs
@@ -34,6 +37,9 @@ install(FILES "${KS_DIR}/src/libkshark.h"
               "${KS_DIR}/src/libkshark-model.h"
               "${KS_DIR}/src/libkshark-plugin.h"
               "${KS_DIR}/src/libkshark-tepdata.h"
+              #NOTE: Changed here. (COUPLEBREAK) (2025-03-30)
+              "${KS_DIR}/src/libkshark-couplebreak.h"
+              # END of change
         DESTINATION ${KS_INCLUDS_DESTINATION}
             COMPONENT libkshark-devel)
 

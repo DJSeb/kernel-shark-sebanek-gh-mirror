@@ -1,0 +1,6 @@
+build_both.sh
+build
+unmodif_build
+doc/technical/**
+doc/docs_build.log
+doc/doxygen-awesome-css

@@ -179,6 +179,24 @@ public:
 
 	bool getPlotInfo(const QPoint &point, int *sd, int *cpu, int *pid);
 
+	// NOTE: Changed here. (GET PID COLORS) (2025-03-22)
+	/**
+	 * @brief Getter of the color table for tasks, used internally by KernelShark.
+	 * 
+	 * @return Constant color table reference for the member color table.
+	 * 
+	 * @warning This function works almost all the time - except when importing
+	 * a session with a plugin, but the plugin has not yet been loaded by KernelShark
+	 * (CLI or GUI). This function will then in the not yet loaded plugin result in a
+	 * segmentation fault and KernelShark's crash. It is therefore STRONGLY
+	 * suggested that if one wants to use this function in their plugin, they shall
+	 * include some form of a default coloring method or disallow session loading in
+	 * such a manner, i.e. plugins that use this function must demand to be preloaded
+	 * before loading a session.
+	 */
+	const KsPlot::ColorTable& getPidColors() const { return _pidColors; }
+	// END of change
+
 	/** CPUs and Tasks graphs (per data stream) to be plotted. */
 	QMap<int, KsPerStreamPlots>	_streamPlots;
 

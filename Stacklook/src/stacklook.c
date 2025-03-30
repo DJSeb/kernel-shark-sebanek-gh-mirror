@@ -102,7 +102,7 @@ static void _sl_free_ctx(struct plugin_stacklook_ctx* sl_ctx)
 
     sl_ctx->sswitch_event_id = -1;
     sl_ctx->kstack_event_id = -1;
-    sl_ctx->swake_event_id = -1;
+    sl_ctx->swaking_event_id = -1;
 }
 
 /// @cond Doxygen_Suppress
@@ -113,11 +113,12 @@ KS_DEFINE_PLUGIN_CONTEXT(struct plugin_stacklook_ctx, _sl_free_ctx);
 
 /**
  * @brief Selects supported events from unsorted trace file data
- * during plugin loading.
+ * during plugin and data loading.
+ * 
+ * @note Effective during KShark's get_records function.
  * 
  * @param stream: KernelShark's data stream
- * @param rec: Tep record structure, used only with sched_waking events
- * to determine which process is being awakened by this event.
+ * @param rec: Tep record structure holding data collected by trace-cmd
  * @param entry: KernelShark entry to be processed
  * 
  * @note Supported events are: `sched/sched_switch`,
@@ -131,20 +132,14 @@ static void _select_events(struct kshark_data_stream* stream,
     struct kshark_data_container* sl_ctx_collected_events = sl_ctx->collected_events;
     if (!sl_ctx_collected_events) return;
 
-    if (entry->event_id == sched_switch_id) {
-        /**
-         * Add the event to the plugin's collected entries' container.
-         * 
-         * -1 is a nonsensical value, but necessary so that the container
-         * isn't considered empty.
-        */
+    const bool is_supported_event = entry->event_id == sched_switch_id ||
+        entry->event_id == sched_wake_id;
+
+    if (is_supported_event) {
+        // -1 is nonsensical, but ensures the container isn't empty
+        // It will be later replaced by a pointer to the kernel stack entry
+        // if it is found.
         kshark_data_container_append(sl_ctx_collected_events, entry, (int64_t)-1);
-    } else if (entry->event_id == sched_wake_id) {
-#ifndef _NO_NAPS
-        waking_evt_tep_processing(sl_ctx, stream, rec, entry);
-#else
-        kshark_data_container_append(sl_ctx_collected_events, entry, (int64_t)-1);
-#endif
     }
 }
 
@@ -164,39 +159,33 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
     }
     if (!font_file || !bold_font_path) return 0;
     
+    kstack_id = kshark_find_event_id(stream, "ftrace/kernel_stack");
+    if (kstack_id < 0) { //This isn't totally reliable though.
+        printf("No ftrace/kernel_stack entries found, returning...\n");
+        return 0;
+    }
+
     struct plugin_stacklook_ctx* sl_ctx = __init(stream->stream_id);
 
-    if (!sl_ctx) {
+    if (!sl_ctx) { // Guard against faulty context double free (sessions)
 		__close(stream->stream_id);
 		return 0;
 	}
 
-#ifndef _NO_NAPS
-    // This check isn't useful without naps.
-    // But it is necessary with them, otherwise the tep processing would fail.
-    if (!kshark_is_tep(stream)) {
-        __close(stream->stream_id);
-        return 0;
-    }
-
-    sl_ctx->tep = kshark_get_tep(stream);
-    bool wakeup_found = define_wakeup_event(sl_ctx->tep, &sl_ctx->tep_wakeup);
-
-    if (wakeup_found) {
-        sl_ctx->sched_waking_pid_field = tep_find_any_field(sl_ctx->tep_wakeup, "pid");
-    }
-#endif
-
     sl_ctx->collected_events = kshark_init_data_container();
+
+    sl_ctx->kstacks_exist = false;
+    sl_ctx->searched_for_kstacks = false;
+    // Do not be fooled, the kstack events might not be real, but their
+    // event ID might be present in the trace file.
+    sl_ctx->kstack_event_id = kstack_id;
 
     sched_switch_id = kshark_find_event_id(stream, "sched/sched_switch");
     sl_ctx->sswitch_event_id = sched_switch_id;
 
-    kstack_id = kshark_find_event_id(stream, "ftrace/kernel_stack");
-    sl_ctx->kstack_event_id = kstack_id;
+    sl_ctx->swaking_event_id = kshark_find_event_id(stream, "sched/sched_waking");
+    sched_wake_id = sl_ctx->swaking_event_id;
 
-    sched_wake_id = kshark_find_event_id(stream, "sched/sched_waking");
-    sl_ctx->swake_event_id = sched_wake_id;
 
     kshark_register_event_handler(stream, sched_switch_id, _select_events);
     kshark_register_event_handler(stream, sched_wake_id, _select_events);
@@ -226,9 +215,8 @@ int KSHARK_PLOT_PLUGIN_DEINITIALIZER(struct kshark_data_stream* stream) {
         retval = 1;
     }
 
-    __close(stream->stream_id);
-
-    deinit_task_colors();
+    if (stream->stream_id >= 0)
+        __close(stream->stream_id);
 
     return retval;
 }

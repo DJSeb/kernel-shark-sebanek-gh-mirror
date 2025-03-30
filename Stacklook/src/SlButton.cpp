@@ -8,6 +8,7 @@
 
 // C++
 #include <string>
+#include <array>
 
 // KernelShark
 #include "libkshark.h"
@@ -22,11 +23,16 @@
 #include "SlConfig.hpp"
 #include "SlPrevState.hpp"
 
+// Usings
+///
+/// @brief Simpler to type alias for the top 3 stack items array.
+using top_3_stack_t = std::array<QString, 3>;
+
 // Static functions
 
 /**
  * @brief Adds text to a Stacklook button of a sched_switch event - text shows
- * "(PREVS_STATE)", where PREV_STATE is a letter representing what state the task
+ * "(PREV_STATE)", where PREV_STATE is a letter representing what state the task
  * was in before it was switched. Text box with the new text is then also placed under
  * the always-present "STACK" text.
  * 
@@ -85,7 +91,7 @@ static const std::string _get_specific_info(const kshark_entry* entry) {
     plugin_stacklook_ctx* ctx = __get_context(entry->stream_id);
     const std::map<int32_t, const std::string> SPECIFIC_INFO_MAP{{
         { ctx->sswitch_event_id, "Task was in state " },
-        { ctx->swake_event_id,   "Task has woken up." }
+        { ctx->swaking_event_id, "Task has woken up." }
     }};
 
     const int32_t entry_event_id = kshark_get_event_id(entry);
@@ -99,63 +105,6 @@ static const std::string _get_specific_info(const kshark_entry* entry) {
     }
 
     return spec_info;
-}
-
-/**
- * @brief Predicate function to check that the KernelShark entry is indeed kernel's
- * stack trace entry.
- * 
- * @param entry: entry whose event ID is checked.
- * 
- * @returns True if the entry is a kernel stack entry, false otherwise.
-*/
-static bool _is_kstack(kshark_entry* entry) {
-    if (entry == nullptr) {
-        return false;
-    }
-    
-    plugin_stacklook_ctx* ctx = __get_context(entry->stream_id);
-
-    /** NOTE: This could be a bit more rigorous: check the event ID, check the task and maybe even the
-     * top of the stack for confirmation it is indeed a stacktrace of the kernel for the switch or wakeup
-     * event.
-     * 
-     * However, since the stacktrace is done immediately after every event when using trace-cmd's
-     * '-T' option, events are always sorted so that stacktraces appear right after their events,
-     * so this checking would be redundant.
-     * 
-     * Of course, if data are manipulated so that they aren't sorted by time, this approach is insufficent.
-    */
-
-    return entry->event_id == ctx->kstack_event_id;
-}
-
-/**
- * @brief Simple function that returns the C-string of the info field of a KernelShark entry
- * next to the one in the argument or a nullptr on failing to fulfill the predicate in arguments.
- * @note Requires the entry in the argument to have its next field
- * initialized, otherwise it'd access nullptr.
- * 
- * @param entry: entry whose next neighbour's info we wish to get.
- * @param predicate: function which checks a KernelShark entry and returns true or false.
- * 
- * @returns Textual form of next entry's Info field as a C-string.
-*/
-static const char* _get_info_of_next_event(kshark_entry* entry,
-                                           std::function<bool(kshark_entry*)> predicate) {
-    const char* retval = nullptr;
-
-    if (entry == nullptr) {
-        return retval;
-    }
-
-    kshark_entry* next_entry = entry->next;
-
-    if (predicate(next_entry)) {
-        retval = kshark_get_info(next_entry);
-    }
-
-    return retval;
 }
 
 /**
@@ -177,7 +126,7 @@ static constexpr double _trigon_area(const ksplot_point a,
                 (c.x * (a.y - b.y))) / 2.0);
 }
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
 /**
  * @brief Cuts off the address and the arrow of the textual stack item.
  * If the item is too long, it is truncated to its 44 starting characters
@@ -209,56 +158,102 @@ static QString _prettify_stack_item(const std::string& to_prettify) {
 }
 
 /**
- * @brief Puts the top three stack items from the raw C-string stack trace
- * into a QString array after making them prettier.
+ * @brief Move string index to the start of the stack trace, which will be
+ * displayed to the user upon hovering over the button.
  * 
- * @param stacktrace: C-string of the stack trace to be processed
- * @param evt_name: for determining stack offset of an entry
- * @param out_array: output array, top traces are eventually stored there
+ * @param stack_offset - User-specified offset of the stack trace tot preview.
+ * @param trace_str - String of the whole stack trace to be processed.
+ * @return `std::size_t` Position from which to start reading the stack trace items.
+ * If the return value is `std::string::npos`, the stack offset was too high.
 */
-static void _get_top_three_stack_items(const char* stacktrace,
-                                       const std::string& evt_name,
-                                       QString out_array[]) {
-    std::string trace_str{stacktrace};
-
-    const int16_t stack_offset = SlConfig::get_instance().get_stack_offset(evt_name);
+static std::size_t _get_stack_start_pos(int16_t stack_offset,
+                                        const std::string& trace_str) {
     std::size_t str_pos = 0;
 
     for (int64_t counter = 0; counter < stack_offset; ++counter) {
         str_pos = trace_str.find("=>", str_pos);
-        
+
         if (str_pos == std::string::npos) {
-            return;
+        return std::string::npos;
         }
 
         ++str_pos;
     }
 
-    for (int64_t counter = 0; counter < 3; ++counter) {
+    return str_pos;
+}
+
+/**
+* @brief Get the top three stack items from the specified start of the stack trace.
+* 
+* @param str_pos - Position from which to start reading the stack trace items.
+* @param trace_str - String of the whole stack trace to be processed.
+* @return `top_3_stack_t` Array of the top three stack items after a user-set
+* amount of items was skipped.
+*/
+static top_3_stack_t _get_top_three_from_start(std::size_t str_pos,
+                                               const std::string& trace_str) {      
+    top_3_stack_t out_array{"-", "-", "-"};
+
+    for (std::size_t counter = 0; counter < 3; ++counter) {
         std::size_t content_start = trace_str.find("=>", str_pos);
+
 
         // We don't have enough entries
         if (content_start == std::string::npos) {
-            break;
+        break;
         }
 
+        // Find the end of the stack item's content
         std::size_t content_end = trace_str.find("=>", content_start + 1);
 
         // If we found the last entry, take the rest of the string
         // and block further iteration.
         if (content_end == std::string::npos) {
-            content_end = trace_str.length() - 1;
-            counter = 3;
+        content_end = trace_str.length() - 1;
+        counter = 3;
         }
 
-        // For future iteration
+        // Advance stack item iteration
         str_pos = content_end;
 
         auto num_of_chars = content_end - content_start;
         const std::string item_as_str = trace_str.substr(content_start, num_of_chars);
-        out_array[counter] = _prettify_stack_item(item_as_str);
-
+        const std::size_t array_pos = counter == 3 ? 2 : counter;
+        out_array[array_pos] = _prettify_stack_item(item_as_str);
     }
+
+    return out_array;
+}
+
+/**
+ * @brief Puts the top three stack items from the raw C-string stack trace
+ * into a QString C++ array of three members after making each item prettier.
+ * 
+ * @param stacktrace: C-string of the stack trace to be processed
+ * @param evt_name: for determining stack offset of an entry
+ * 
+ * @return `top_3_stack_t` Array of the top three stack items after a user-set
+ * amount of items was skipped.
+ * If the offset is too high, the array will contain three dashes (i.e. "no
+ * stack items were found").
+
+ * @note It is dependent on the configuration 'SlConfig' singleton.
+*/
+static top_3_stack_t _get_top_three_stack_items(const char* stacktrace,
+                                                const std::string& evt_name) {
+    std::string trace_str{stacktrace};
+    // Configuration access here
+    const int16_t stack_offset = SlConfig::get_instance().get_stack_offset(evt_name);    
+    
+    std::size_t str_pos = _get_stack_start_pos(stack_offset, trace_str);
+    if (str_pos == std::string::npos) {
+        return top_3_stack_t{"-", "-", "-"};
+    } 
+
+    top_3_stack_t out_array = _get_top_three_from_start(str_pos, trace_str);
+    
+    return out_array;
 }
 #endif
 
@@ -312,7 +307,9 @@ double SlTriangleButton::distance(int x, int y) const {
 void SlTriangleButton::_doubleClick() const {
     constexpr const char error_msg[] = "ERROR: No info field found!";                          
     const char* window_labeltext = kshark_get_task(_event_entry);
-    const char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _is_kstack);
+    
+    const char* kstack_string_ptr = (_kstack_entry != nullptr) ?
+        kshark_get_info(_kstack_entry) : nullptr;
     
     const char* window_text = (kstack_string_ptr != nullptr) ? 
         kstack_string_ptr : error_msg;
@@ -334,28 +331,31 @@ void SlTriangleButton::_draw(const KsPlot::Color&, float) const {
     _outline_triangle.draw(); // Make the outline by overlaying another triangle
     _text.draw();
 
-    _add_sched_switch_prev_state_text(_event_entry, _text,
-                                      *(_inner_triangle.point(2)));
+    ksplot_point text_position = *(_inner_triangle.point(2));
+
+    _add_sched_switch_prev_state_text(_event_entry, _text, text_position);
 }
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
 /**
  * @brief Action on mouse moving over the plugin's plot object event.
  * Shows the task name of the stack trace and three top items in the stack.
  *
- * @warning WILL NOT WORK WITHOUT MODIFIED KERNELSHARK WITH SUPPORT
- * FOR MOUSE MOVE OVER PLOTOBJECT REACTIONS
+ * @warning Will not work without modified KernelShark, as hover
+ * plot object's functionalities are missing in such a version.
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
-void SlTriangleButton::_mouseHover() const {
-    const char* kstack_string_ptr = _get_info_of_next_event(_event_entry, _is_kstack);
+void SlTriangleButton::_mouseHover() const {    
+    const char* kstack_string_ptr = (_kstack_entry != nullptr) ?
+        kshark_get_info(_kstack_entry) : nullptr;
     
     if (kstack_string_ptr != nullptr) {
-        QString top_three_items[3]{"-", "-", "-"};
-        _get_top_three_stack_items(kstack_string_ptr,
-                                   kshark_get_event_name(_event_entry),
-                                   top_three_items); 
+        auto event_name = kshark_get_event_name(_event_entry);
+        top_3_stack_t top_three_items = _get_top_three_stack_items(kstack_string_ptr,
+            event_name); 
         const char* last_item = (top_three_items[2] == "-") ? "(End of stack)" : "..."; 
-
+        // Configuration access here
         SlConfig::main_w_ptr->graphPtr()->setPreviewLabels(
             kshark_get_task(_event_entry),
             top_three_items[0],
@@ -364,6 +364,7 @@ void SlTriangleButton::_mouseHover() const {
             last_item
         );
     } else {
+        // Configuration access here
         SlConfig::main_w_ptr->graphPtr()->setPreviewLabels(
             kshark_get_task(_event_entry),
             "NO KERNEL STACK ENTRY FOUND"

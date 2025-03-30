@@ -15,11 +15,6 @@
 // C
 #include <stdbool.h>
 
-#ifndef _NO_NAPS
-// trace-cmd
-#include <trace-cmd.h>
-#endif
-
 // KernelShark
 #include "libkshark.h"
 #include "libkshark-plugin.h"
@@ -46,28 +41,23 @@ struct plugin_stacklook_ctx {
     */
     int kstack_event_id;
     /**
-     * @brief Numerical id of sched_waking event.
-    */
-    int swake_event_id;
-
-#ifndef _NO_NAPS
-    // Tep processing
-    
+     * @brief Flag indicating presence of kernel_stack
+     * entries in the trace. Set upon first drawing attempt,
+     * as the selected events aren't fully loaded until then.
+     * 
+     * By default false.
+     */
+    bool kstacks_exist;
     /**
-     * @brief Page event used to parse the page.
-    */
-    struct tep_handle* tep;
-
+     * @brief Flag indicating whether the plugin has already
+     * searched for kernel stacks in the trace.
+     */
+    bool searched_for_kstacks;
     /**
-     * @brief Pointer to the sched_waking_event object.
+     * @brief Numerical id of sched/sched_waking or
+     * couplebreak/sched_waking[target] event.
     */
-    struct tep_event* tep_wakeup;
-    
-    /**
-     * @brief Pointer to the sched_waking_pid_field format descriptor.
-    */
-    struct tep_format_field* sched_waking_pid_field;
-#endif
+    int swaking_event_id;
 
     /** 
      * @brief Collected switch or wakeup events.
@@ -85,16 +75,11 @@ struct ksplot_font* get_bold_font_ptr();
 
 // Global functions, defined in C++
 
+const struct kshark_entry* get_kstack_entry(
+    const struct kshark_entry* kstack_owner);
 void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
                             int val, int draw_action);
 void* plugin_set_gui_ptr(void* gui_ptr);
-void deinit_task_colors();
-#ifndef _NO_NAPS
-void waking_evt_tep_processing(struct plugin_stacklook_ctx* ctx, 
-                               struct kshark_data_stream* stream,
-                               void* rec,
-                               struct kshark_entry* entry);
-#endif
 
 #ifdef __cplusplus
 }

@@ -30,6 +30,11 @@ private: // Data members
      * the window.
     */
     kshark_entry* _event_entry;
+    /**
+     * @brief Entry from which the button will get kernel stack
+     * data from.
+     */
+    const kshark_entry* _kstack_entry;
     // Graphical
     /**
      * @brief Triangle which creates the outline of the button.
@@ -51,16 +56,19 @@ public: // Functions
      * only this).
      * 
      * @param event_entry - entry the button gets data from
+     * @param kstack_entry - entry the button gets kernel stack from
      * @param outer - triangle used for the black outline
      * @param inner - triangle used as the filling
      * @param text - text on the button
     */ 
     explicit SlTriangleButton(kshark_entry* event_entry,
+                              const kshark_entry* kstack_entry,
                               KsPlot::Triangle& outer,
                               KsPlot::Triangle& inner,
                               KsPlot::TextBox& text)
         : KsPlot::PlotObject(),
           _event_entry(event_entry),
+          _kstack_entry(kstack_entry),
           _outline_triangle(outer),
           _inner_triangle(inner),
           _text(text) {}
@@ -70,7 +78,7 @@ private: // Functions
     void _doubleClick() const override;
     void _draw(const KsPlot::Color&, float) const override;
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
     /// WARN:
     /// WILL NOT WORK WITHOUT MODIFIED KERNELSHARK WITH SUPPORT
     /// FOR MOUSE MOVE OVER PLOTOBJECT REACTIONS

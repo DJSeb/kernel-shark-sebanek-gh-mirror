@@ -53,14 +53,16 @@ static QString _prettify_data(const char* data) {
  * @param task_name: name of the task whose stack trace is viewed
  * @param specific_info: specific info of a task
  * @param data: stack trace as text
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
 SlDetailedView::SlDetailedView(const char* task_name, const char* specific_info,
                                const char* data)
-  : QWidget(SlConfig::main_w_ptr),
+  : QWidget(SlConfig::main_w_ptr), // Configuration access here
     _radio_btns(this),
     _raw_radio("Raw view", this),
     _list_radio("List view", this),
-    _which_task("Kernlestack for task '" + QString(task_name) + "':", this),
+    _which_task("Kernel stack for task '" + QString(task_name) + "':", this),
     _specific_entry_info(specific_info, this),
     _stacked_widget(this),
     _list_view(this),

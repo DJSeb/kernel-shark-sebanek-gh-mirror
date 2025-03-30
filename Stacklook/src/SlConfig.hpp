@@ -35,12 +35,12 @@ using allowed_t = bool;
  */
 using event_name_t = std::string;
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
 /**
  * @brief From which depth in the kernel stack (top being 0)
  * the preview should start.
  */
-using depth_t = uint16_t;
+using depth_t = uint32_t;
 
 /**
  * @brief Object holding meta information about events in Stacklook's
@@ -65,9 +65,11 @@ class SlConfigWindow;
  * @brief Singleton class for the config object of the plugin.
  * Holds values of: histogram limit until Stacklook buttons activate,
  * default color of Stacklook buttons, color of Stacklook buttons' outline,
- * meta information about supported events - whether it's allowed to show
- * Stacklook buttons for them and how much offset from the top of the kernel
- * stack will the preview take into account when being displayed.
+ * if task colors should be used for buttons or not (modified KernelShark
+ * feature only), and meta information about supported events - whether it's
+ * allowed to show Stacklook buttons for them and how much offset from the
+ * top of the kernel stack will the preview take into account when being
+ * displayed.
  * 
  * Uses sane defaults and is NOT persistent, i.e. settings won't be preserved
  * across different KernelShark sessions.
@@ -82,7 +84,7 @@ public: // Class data members
 private: // Data members
     /// @brief Limit value of how many entries may be visible in a
     /// histogram for the plugin to take effect.
-    int32_t _histo_entries_limit{200};
+    int32_t _histo_entries_limit{10000};
 
     ///
     /// @brief Default color of Stacklook buttons, white.
@@ -92,13 +94,11 @@ private: // Data members
     /// Used when the buttons couldn't get the color of their task.
     KsPlot::Color _button_outline_col{0, 0, 0};
 
-#ifndef _NO_NAPS
-    /// @brief Whether to draw rectangles with text between sched_switches
-    /// and sched_wakings or not.
-    bool _draw_naps{true};
-#endif
+#ifndef _UNMODIFIED_KSHARK // Task colors, stack offset
+    ///
+    /// @brief Whether to use task colors for buttons or not.
+    bool _use_task_colors{false};
 
-#ifndef _UNMODIFIED_KSHARK
     /**
      * @brief Map of event names keyed by their names with values:
      * 
@@ -127,17 +127,15 @@ private: // Data members
          {"sched/sched_waking", false}}};
 #endif
 public: // Functions
-    static const SlConfig& get_instance();
+    static SlConfig& get_instance();
     int32_t get_histo_limit() const;
-#ifndef _UNMODIFIED_KSHARK
-    uint16_t get_stack_offset(event_name_t evt_name) const;
+#ifndef _UNMODIFIED_KSHARK // Task colors, stack offset
+    bool get_use_task_colors() const;
+    depth_t get_stack_offset(event_name_t evt_name) const;
 #endif    
     const KsPlot::Color get_default_btn_col() const; 
     const KsPlot::Color get_button_outline_col() const;
     const events_meta_t& get_events_meta() const;
-#ifndef _NO_NAPS
-    bool get_draw_naps() const;
-#endif
     bool is_event_allowed(const kshark_entry* entry) const;
 };
 
@@ -145,17 +143,9 @@ public: // Functions
  * @brief Widget class for modifying the configuration via GUI.
  * It is a fixed size dialog window that allows modification
  * of all that is in the config object by applying changes via
- * the Apply button. Changes won't be saved unless this is done. 
- * 
- * Changes applied during configuration take effect AFTER this window is
- * closed.
+ * the Apply button. Changes won't be saved unless this is done.
  */
 class SlConfigWindow : public QWidget {
-private: // Class data members
-    /// @brief Reference to the configuration object. Such access along
-    /// this class being a friend of the config object's one allows
-    /// modification of inner fields.
-    static SlConfig& cfg;
 private: // Qt data members
     ///
     /// @brief Layout for the widget's control elements.
@@ -217,22 +207,20 @@ private: // Qt data members
     /// @brief Spinbox used to change the limit of entries visible
     /// before Stacklook buttons show up.
     QSpinBox        _histo_limit;
-
-#ifndef _NO_NAPS
-    // Nap rectangles
+#ifndef _UNMODIFIED_KSHARK // Task colors
+    // Task-like coloring
 
     /// @brief Layout used for the button and explanation of
     /// what it does.
-    QHBoxLayout     _nap_rects_layout;
+    QHBoxLayout     _task_col_layout;
 
     ///
     /// @brief Explanation of what the checkbox next to it does.
-    QLabel          _nap_rects_label;
+    QLabel          _task_col_label;
 
-    /// @brief Toggles whether to show nap rectangles or not.
-    QCheckBox       _nap_rects_btn;
+    /// @brief Toggles whether to use task colors for buttons or not.
+    QCheckBox       _task_col_btn;
 #endif
-
     // Events meta
 
     /// @brief Layout used for the section of the config window
@@ -249,8 +237,8 @@ public: // Qt data members
 private: // Qt functions
     void update_cfg();
     void setup_histo_section();
-#ifndef _NO_NAPS
-    void setup_nap_rects();
+#ifndef _UNMODIFIED_KSHARK // Task colors
+    void setup_use_task_coloring();
 #endif
     void setup_events_meta_widget();
     void setup_layout();

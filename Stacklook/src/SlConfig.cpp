@@ -9,9 +9,6 @@
 // C
 #include <stdint.h>
 
-// C++
-#include <limits>
-
 // KernelShark
 #include "KsPlotTools.hpp"
 #include "libkshark.h"
@@ -28,7 +25,7 @@
  * 
  * @returns Const reference to the configuration object.
  */
-const SlConfig& SlConfig::get_instance() {
+SlConfig& SlConfig::get_instance() {
     static SlConfig instance;
     return instance;
 }
@@ -41,7 +38,16 @@ const SlConfig& SlConfig::get_instance() {
 int32_t SlConfig::get_histo_limit() const
 { return _histo_entries_limit; }
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Task colors, stack offset
+/**
+ * @brief Gets whether the task colors are used for Stacklook
+ * buttons.
+ * 
+ * @return Boolean representing current configuration value. 
+ */
+bool SlConfig::get_use_task_colors() const
+{ return _use_task_colors; }
+
 /**
  * @brief Get offset from the top of the kernel stack used
  * when displaying preview of the kernel stack.
@@ -51,7 +57,7 @@ int32_t SlConfig::get_histo_limit() const
  * @returns Offset from the top of the kernel stack used
  * when displaying preview of the kernel stack.
  */
-uint16_t SlConfig::get_stack_offset(event_name_t evt_name) const {
+depth_t SlConfig::get_stack_offset(event_name_t evt_name) const {
     return (_events_meta.count(evt_name) == 0) ?
         0 : _events_meta.at(evt_name).second;
 }
@@ -96,23 +102,12 @@ bool SlConfig::is_event_allowed(const kshark_entry* entry) const {
     const std::string evt_name{kshark_get_event_name(entry)};
     return (_events_meta.count(evt_name) == 0) ?
         false
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
         : _events_meta.at(evt_name).first;
 #else
         : _events_meta.at(evt_name);
 #endif
 }
-
-#ifndef _NO_NAPS
-/**
- * @brief Gets a boolean flag whether to draw rectangles for 'naps', i.e.
- * durations between sched_switch and sched_waking.
- * 
- * @returns True if we should draw naps, false otherwise.
- */
-bool SlConfig::get_draw_naps() const
-{ return _draw_naps; }
-#endif
 
 // Window
 // Static functions
@@ -151,7 +146,7 @@ static void _change_label_bg_color(QLabel* to_change,
 
 /**
  * @brief Sets up the layout for a button to change a color and a
- * preview of the color gotten from the colro dialog displayed by
+ * preview of the color gotten from the color dialog displayed by
  * pushing the button.
  * 
  * @param parent: owner of the Qt objects
@@ -184,7 +179,7 @@ static void _setup_colorchange(QWidget* parent,
     preview->setLineWidth(2);
 
     layout->addWidget(push_btn);
-    layout->addSpacing(100);
+    layout->addStretch();
     layout->addWidget(preview);
 
     parent->connect(
@@ -204,23 +199,22 @@ static void _setup_colorchange(QWidget* parent,
 // Class functions
 
 /**
- * @brief Setup the class variable to modify the configuration object.
- */
-SlConfig& SlConfigWindow::cfg{
-    const_cast<SlConfig&>(SlConfig::get_instance())
-};
-
-/**
  * @brief Constructor for the configuration window.
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
  */
 SlConfigWindow::SlConfigWindow()
-    : QWidget(SlConfig::main_w_ptr),
+    : QWidget(SlConfig::main_w_ptr), // Configuration access here
     _def_btn_col_btn("Choose default button color", this),
     _def_btn_col_preview(this),
     _btn_outline_btn("Choose button outline color", this),
     _btn_outline_preview(this),
     _histo_label("Entries on histogram until Stacklook buttons appear: "),
     _histo_limit(this),
+#ifndef _UNMODIFIED_KSHARK // Task colors
+    _task_col_label("Use task colors for Stacklook buttons: "),
+    _task_col_btn(this),
+#endif
     _close_button("Close", this),
     _apply_button("Apply", this)
 {
@@ -231,14 +225,15 @@ SlConfigWindow::SlConfigWindow()
     setMaximumHeight(300);
 
     setup_histo_section();
-#ifndef _NO_NAPS
-    setup_nap_rects();
+#ifndef _UNMODIFIED_KSHARK // Task colors
+    setup_use_task_coloring();
 #endif
+    // Configuration access here
+    const SlConfig& cfg = SlConfig::get_instance();
+
     // Setup colors
-    const KsPlot::Color curr_def_btn_col =
-        SlConfigWindow::cfg._default_btn_col;
-    const KsPlot::Color curr_btn_outline =
-        SlConfigWindow::cfg._button_outline_col;
+    const KsPlot::Color curr_def_btn_col = cfg._default_btn_col;
+    const KsPlot::Color curr_btn_outline = cfg._button_outline_col;
     
     _setup_colorchange(this, curr_def_btn_col,
                        &_def_btn_col, &_def_btn_col_btn,
@@ -262,6 +257,8 @@ SlConfigWindow::SlConfigWindow()
 /**
  * @brief Update the configuration object's values with the values
  * from the configuration window.
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
  */
 void SlConfigWindow::update_cfg() {
     // If changing the events meta was a success
@@ -270,43 +267,45 @@ void SlConfigWindow::update_cfg() {
     // For BOTH color changes
     int r, g, b;
     
+    // Configuration access here
+    SlConfig& cfg = SlConfig::get_instance();
+
     _def_btn_col.getRgb(&r, &g, &b);
-    SlConfigWindow::cfg._default_btn_col =
-        {(uint8_t)r, (uint8_t)g, (uint8_t)b};
+    cfg._default_btn_col = {(uint8_t)r, (uint8_t)g, (uint8_t)b};
 
     _btn_outline.getRgb(&r, &g, &b);
-    SlConfigWindow::cfg._button_outline_col = 
-        {(uint8_t)r, (uint8_t)g, (uint8_t)b};
+    cfg._button_outline_col = {(uint8_t)r, (uint8_t)g, (uint8_t)b};
 
-    SlConfigWindow::cfg._histo_entries_limit = _histo_limit.value();
-#ifndef _NO_NAPS
-    SlConfigWindow::cfg._draw_naps = _nap_rects_btn.isChecked();
+    cfg._histo_entries_limit = _histo_limit.value();
+
+#ifndef _UNMODIFIED_KSHARK // Task colors
+    cfg._use_task_colors = _task_col_btn.isChecked();
 #endif
-    // Dynamically added member's need special handling 
-    static const int SUPPORTED_EVENTS_COUNT =
-        static_cast<int>(SlConfigWindow::cfg.get_events_meta().size());
+
+    // Dynamically added members need special handling 
+    const int SUPPORTED_EVENTS_COUNT = static_cast<int>(cfg.get_events_meta().size());
 
     for (int i = 0; i < SUPPORTED_EVENTS_COUNT; ++i) {
         auto index_str = std::to_string(i);
         auto event_name = this->findChild<QLabel*>("evt_name_" + index_str);
         auto event_allowed = this->findChild<QCheckBox*>("evt_allowed_" + index_str);
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
         auto event_depth = this->findChild<QSpinBox*>("evt_depth_" + index_str);
 #endif
         // On successful finds, change values in the configuration object
         if (event_name != nullptr
             && event_allowed != nullptr
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
             && event_depth != nullptr
 #endif
         ) {
             std::string event_name_str = event_name->text().toStdString();
-#ifndef _UNMODIFIED_KSHARK
-            event_meta_t& event_meta = SlConfigWindow::cfg._events_meta.at(event_name_str);
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
+            event_meta_t& event_meta = cfg._events_meta.at(event_name_str);
             event_meta.first = event_allowed->isChecked();
-            event_meta.second = (uint16_t)event_depth->value();
+            event_meta.second = (depth_t)event_depth->value();
 #else
-            allowed_t& is_allowed = SlConfigWindow::cfg._events_meta.at(event_name_str);
+            allowed_t& is_allowed = cfg._events_meta.at(event_name_str);
             is_allowed = event_allowed->isChecked();
             
 #endif
@@ -322,7 +321,7 @@ void SlConfigWindow::update_cfg() {
     const char* detailed_message = events_meta_change ?
         "Configuration was successfully altered!" :
         "Configuration alteration wasn't fully successful.\n"
-        "Changes to specific events weren't altered.\n"
+        "Changes to specific events weren't applied.\n"
         "Other configuration changes were successfully changed.";
         
     auto info_dialog = new QMessageBox(QMessageBox::Information,
@@ -335,30 +334,38 @@ void SlConfigWindow::update_cfg() {
  * @brief Sets up spinbox and explanation label.
  * Spinbox's limit values are also set. Also creates
  * aesthetic spacing. 
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
  */
 void SlConfigWindow::setup_histo_section() {
+    // Configuration access here
+    const SlConfig& cfg = SlConfig::get_instance();
+
     _histo_limit.setMinimum(0);
-    _histo_limit.setMaximum(std::numeric_limits<int>::max());
+    _histo_limit.setMaximum(1'000'000'000);
     _histo_limit.setValue(cfg._histo_entries_limit);
 
     _histo_label.setFixedHeight(32);
     _histo_layout.addWidget(&_histo_label);
-    _histo_layout.addSpacing(100);
+    _histo_layout.addStretch();
     _histo_layout.addWidget(&_histo_limit);
 }
 
-#ifndef _NO_NAPS
+#ifndef _UNMODIFIED_KSHARK // Task colors
 /**
- * @brief Sets up explanation label and check box for controlling
- * display of nap rectangles.
+ * @brief Sets up the layout, checkbox and explanation label for the
+ * task coloring configuration.
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
  */
-void SlConfigWindow::setup_nap_rects() {
-    _nap_rects_label.setText("Display nap rectangles: ");
-    _nap_rects_btn.setChecked(cfg._draw_naps);
+void SlConfigWindow::setup_use_task_coloring() {
+    // Configuration access here
+    const SlConfig& cfg = SlConfig::get_instance();
 
-    _nap_rects_layout.addWidget(&_nap_rects_label);
-    _nap_rects_layout.addStretch();
-    _nap_rects_layout.addWidget(&_nap_rects_btn);
+    _task_col_btn.setChecked(cfg._use_task_colors);
+    _task_col_layout.addWidget(&_task_col_label);
+    _task_col_layout.addStretch();
+    _task_col_layout.addWidget(&_task_col_btn);
 }
 #endif
 
@@ -367,8 +374,13 @@ void SlConfigWindow::setup_nap_rects() {
  * elements are added dynamically and require special handling,
  * e.g. setting object names to find them afterwards when getting their
  * values.
+ * 
+* @note It is dependent on the configuration 'SlConfig' singleton.
  */
 void SlConfigWindow::setup_events_meta_widget() {
+    // Configuration access here
+    const SlConfig& cfg = SlConfig::get_instance();
+    
     // Create a header row, so that the user knows what is what
     QHBoxLayout* header_row = new QHBoxLayout{nullptr};
     QLabel* header_evt_name = new QLabel{this};
@@ -377,19 +389,19 @@ void SlConfigWindow::setup_events_meta_widget() {
     header_evt_allowed->setText("Allowed");
 
     header_row->addWidget(header_evt_name);
-    header_row->addSpacing(50);
+    header_row->addStretch();
     header_row->addWidget(header_evt_allowed);
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
     QLabel* header_evt_depth = new QLabel{this};
     header_evt_depth->setText("Preview stack offset");
 
-    header_row->addSpacing(20);
+    header_row->addStretch();
     header_row->addWidget(header_evt_depth);
 #endif
     _events_meta_layout.addLayout(header_row);
 
     // Create controls for the events meta
-    const events_meta_t& evts_meta = SlConfigWindow::cfg.get_events_meta();
+    const events_meta_t& evts_meta = cfg.get_events_meta();
     // Supported entry index to differentiate object names
     int i = 0;
     
@@ -402,7 +414,7 @@ void SlConfigWindow::setup_events_meta_widget() {
         // Necessary for finding these later
         evt_name->setObjectName("evt_name_" + std::to_string(i));
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
         evt_allowed->setChecked(it->second.first);
 #else
         evt_allowed->setChecked(it->second);
@@ -410,17 +422,18 @@ void SlConfigWindow::setup_events_meta_widget() {
         evt_allowed->setObjectName("evt_allowed_" + std::to_string(i));
 
         row->addWidget(evt_name);
-        row->addSpacing(50);
+        row->addStretch();
         row->addWidget(evt_allowed);
 
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
         QSpinBox* evt_depth = new QSpinBox{this};
         
         evt_depth->setValue(it->second.second);
         evt_depth->setObjectName("evt_depth_" + std::to_string(i));
         evt_depth->setMinimum(0);
+        evt_depth->setMaximum(100'000'000);
 
-        row->addSpacing(20);
+        row->addStretch();
         row->addWidget(evt_depth);
 #endif
 
@@ -438,15 +451,18 @@ void SlConfigWindow::setup_layout() {
 
     // Add all control elements
     _layout.addLayout(&_histo_layout);
-#ifndef _NO_NAPS
-    _layout.addLayout(&_nap_rects_layout);
-#endif
     _layout.addWidget(_get_hline(this));
+    _layout.addStretch();
+#ifndef _UNMODIFIED_KSHARK // Task colors
+    _layout.addLayout(&_task_col_layout);
+#endif
     _layout.addLayout(&_def_btn_col_ctl_layout);
     _layout.addLayout(&_btn_outline_ctl_layout);
     _layout.addWidget(_get_hline(this));
+    _layout.addStretch();
     _layout.addLayout(&_events_meta_layout);
     _layout.addWidget(_get_hline(this));
+    _layout.addStretch();
     _layout.addLayout(&_endstage_btns_layout);
 
     // Set the layout of the dialog
@@ -464,22 +480,21 @@ void SlConfigWindow::setup_endstage() {
     connect(&_close_button,	&QPushButton::pressed,
             this, &QWidget::close);
     connect(&_apply_button, &QPushButton::pressed,
-            this, [this]() { this->update_cfg(); });
+            this, [this]() { this->update_cfg(); this->close(); });
 }
 
 /**
  * @brief Loads current configuration values into the configuration
  * window's control elements and inner values.
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
  */
 void SlConfigWindow::load_cfg_values() {
-    // Easier coding
-    SlConfig& cfg = SlConfigWindow::cfg;
+    // Configuration access here
+    const SlConfig& cfg = SlConfig::get_instance();
 
     // Setting of always-present members
     _histo_limit.setValue(cfg._histo_entries_limit);
-#ifndef _NO_NAPS
-    _nap_rects_btn.setChecked(cfg._draw_naps);
-#endif
 
     _def_btn_col.setRgb(cfg._default_btn_col.r(),
                         cfg._default_btn_col.g(),
@@ -491,28 +506,31 @@ void SlConfigWindow::load_cfg_values() {
                            &_def_btn_col);
     _change_label_bg_color(&_btn_outline_preview,
                            &_btn_outline);
-    
+
+#ifndef _UNMODIFIED_KSHARK // Task colors
+    _task_col_btn.setChecked(cfg._use_task_colors);
+#endif
+
     // Setting of dynamically added members - events meta
-    static const int SUPPORTED_EVENTS_COUNT =
-        static_cast<int>(SlConfigWindow::cfg.get_events_meta().size());
+    const int SUPPORTED_EVENTS_COUNT = static_cast<int>(cfg.get_events_meta().size());
     const events_meta_t& cfg_evts_meta = cfg.get_events_meta();
     // For loop to get all the event-specific objects
     for (int i = 0; i < SUPPORTED_EVENTS_COUNT; ++i) {
         auto index_str = std::to_string(i);
         auto event_name = this->findChild<QLabel*>("evt_name_" + index_str);
         auto event_allowed = this->findChild<QCheckBox*>("evt_allowed_" + index_str);
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
         auto event_depth = this->findChild<QSpinBox*>("evt_depth_" + index_str);
 #endif
         // If all went well, events meta elements were found and can be changed
         if (event_name != nullptr
             && event_allowed != nullptr
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
             && event_depth != nullptr
 #endif
         ) {
             std::string event_name_str = event_name->text().toStdString();
-#ifndef _UNMODIFIED_KSHARK
+#ifndef _UNMODIFIED_KSHARK // Stack offset, mouse hover
             const event_meta_t& specific_evt_meta = cfg_evts_meta.at(event_name_str);
             
             const allowed_t is_allowed = specific_evt_meta.first;

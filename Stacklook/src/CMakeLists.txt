@@ -45,7 +45,7 @@ set(QT6_ALL_INCLUDES
 ### KernelShark files
 #### For customisability by the user
 if (NOT _KS_INCLUDE_DIR)
-  set(_KS_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../kernelshark/src")
+  set(_KS_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../KS_fork/src")
 endif()
 
 #### For customisability by the user
@@ -66,14 +66,6 @@ set(KS_SLIB_GUI "${_KS_SHARED_LIBS_DIR}/${KS_LIB_PREFIX}kshark-gui${KS_LIB_SUFFI
 ### KernelShark conventions
 set(KS_PLUGIN_PREFIX "plugin-")
 
-## For Qt moc handling
-#set(CMAKE_AUTOMOC ON)
-
-## Add definitions if using modifed KernelShark (preview support)
-if (_UNMODIFIED_KSHARK)
-  add_definitions(-D_UNMODIFIED_KSHARK)
-endif()
-
 # Plugin building
 ## Needed source files
 set(SOURCES
@@ -90,56 +82,27 @@ set(SOURCES
     SlPrevState.cpp
 )
 
-if (_NO_NAPS)
-  add_definitions(-D_NO_NAPS)
-else()
-  list(APPEND SOURCES SlNapRectangle.hpp SlWakingTepProcessing.cpp)
-endif()
-
 ## Creating the shared library
-add_library(stacklook SHARED ${SOURCES})
-set_target_properties(stacklook PROPERTIES
+add_library(${PLUGIN_NAME} SHARED ${SOURCES})
+set_target_properties(${PLUGIN_NAME} PROPERTIES
+                      OUTPUT_NAME ${PLUGIN_NAME}
                       PREFIX ${KS_PLUGIN_PREFIX}
                       SUFFIX ".so.${SL_VERSION}")
 
 ## Include KernelShark headers
-target_include_directories(stacklook PRIVATE ${_KS_INCLUDE_DIR})
+target_include_directories(${PLUGIN_NAME} PRIVATE ${_KS_INCLUDE_DIR})
 ## Below are included as system header files in KShark, hence SYSTEM here
-target_include_directories(stacklook SYSTEM PRIVATE ${QT6_ALL_INCLUDES})
+target_include_directories(${PLUGIN_NAME} SYSTEM PRIVATE ${QT6_ALL_INCLUDES})
 
 ## Link KernelShark's shared libraries
-target_link_libraries(stacklook PRIVATE
+target_link_libraries(${PLUGIN_NAME} PRIVATE
     ${KS_SLIB_CORE}  ${KS_SLIB_PLOT}  ${KS_SLIB_GUI}
 )
 
-
-if (NOT _NO_NAPS)
-  ## Customized installs may differ in paths
-  if (NOT _TRACECMD_INCLUDE_DIR)
-    set(_TRACECMD_INCLUDE_DIR "/usr/include")
-  endif()
-
-  ## Include trace-cmd headers
-  target_include_directories(stacklook PRIVATE
-        "${_TRACECMD_INCLUDE_DIR}/trace-cmd"
-        "${_TRACECMD_INCLUDE_DIR}/traceevent"
-        "${_TRACECMD_INCLUDE_DIR}/libtracefs"
-    )
-
-  ## Customized installs may differ in paths
-  if (NOT _TRACECMD_LIBS_DIR)
-    set(_TRACECMD_LIBS_DIR "/usr/lib64")
-  endif()
-
-  ## Link trace-cmd shared libraries
-  target_link_libraries(stacklook PRIVATE
-        "${_TRACECMD_LIBS_DIR}/libtracecmd.so"
-        "${_TRACECMD_LIBS_DIR}/libtraceevent.so"
-        "${_TRACECMD_LIBS_DIR}/libtracefs.so"
-    )
-endif()
-
-set(SL_SYMLINK_NAME "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}stacklook.so")
-set(SL_SYMLINK_TARGET "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}stacklook.so.${SL_VERSION}")
-add_custom_target(stacklook_symlink ALL
-                  COMMAND ${CMAKE_COMMAND} -E create_symlink ${SL_SYMLINK_TARGET} ${SL_SYMLINK_NAME})
+# Create symlink
+set(SL_SYMLINK_NAME "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}${PLUGIN_NAME}.so")
+set(SL_SYMLINK_TARGET "${FINAL_OUTPUT_DIR}/${KS_PLUGIN_PREFIX}${PLUGIN_NAME}.so.${SL_VERSION}")
+add_custom_target("${PLUGIN_NAME}_symlink" ALL
+                  COMMAND ${CMAKE_COMMAND} -E create_symlink ${SL_SYMLINK_TARGET} ${SL_SYMLINK_NAME}
+                  BYPRODUCTS "${FINAL_OUTPUT_DIR}/${SL_SYMLINK_NAME}"
+)

@@ -31,56 +31,12 @@
 #include "SlConfig.hpp"
 #include "SlPrevState.hpp"
 
-#ifndef _NO_NAPS
-#include "SlNapRectangle.hpp"
-#endif
-
-// #########################################################################
-// Usings
-
-#ifndef _NO_NAPS
-/**
- * @brief Type to be used by the PREV_STATE_TO_COLOR constant.
- */
-using prev_state_colors_t = std::map<char, KsPlot::Color>;
-#endif
-
-// #########################################################################
-// Constants
-#ifndef _NO_NAPS
-/**
- * @brief Constant map of assigned colors to prev_state abbreviations.
- */
-static const prev_state_colors_t PREV_STATE_TO_COLOR {
-    {'S', {0, 0, 255}}, // Blue
-    {'D', {255, 0, 0}}, // Red
-    {'R', {0, 255, 0}}, // Green
-    {'I', {255, 255, 0}}, // Yellow
-    {'T', {0, 255, 255}}, // Cyan
-    {'t', {139, 69, 19}}, // Brown
-    {'X', {255, 0, 255}}, // Magenta
-    {'Z', {128, 0, 128}}, // Purple
-    {'P', {255, 165, 0}} // Orange
-};
-#endif
-
 // #########################################################################
 // Static variables
 /**
  * @brief Static pointer to the configuration window.
  */
 static SlConfigWindow* cfg_window;
-
-/**
- * @brief Color table of the tasks so that the Stacklook buttons look
- * prettier.
-*/
-static KsPlot::ColorTable task_colors{};
-
-/**
- * @brief Indicates whether the colortable has already been loaded or not.
-*/
-static bool loaded_colors;
 
 // #########################################################################
 // Static functions
@@ -90,55 +46,54 @@ static bool loaded_colors;
  * in the plot.
  * 
  * @param entry: KernelShark entry whose properties must be checked
+ * @param kstack_entry: KernelShark entry containing the correct kernel stack
+ * of the event in `entry`.
  * @param ctx: Stacklook plugin context
  * 
  * @returns True if the entry fulfills all of function's requirements,
  *          false otherwise.
+ *
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
 static bool _check_function_general(const kshark_entry* entry,
+                                    const kshark_entry* kstack_entry,
                                     const plugin_stacklook_ctx* ctx) {
-    if (!entry) return false;
-    bool correct_event_id = (ctx->sswitch_event_id == entry->event_id)
-                            || (ctx->swake_event_id == entry->event_id);
+    if (!entry || !kstack_entry)
+        return false;
     
+    bool correct_event_id = (ctx->sswitch_event_id == entry->event_id)
+                            || (ctx->swaking_event_id == entry->event_id);
+    
+    // Configuration access here.
     bool is_config_allowed = SlConfig::get_instance().is_event_allowed(entry);
-
-    const kshark_entry* next_entry = entry->next;
-    // We hate segfaults in this house - so they are banned!
-    if (!next_entry) return false;
-    int entry_evt_id = kshark_get_event_id(next_entry);
-    bool has_next_kernelstack = (ctx->kstack_event_id == entry_evt_id);
 
     bool is_visible_event = entry->visible
                             & kshark_filter_masks::KS_EVENT_VIEW_FILTER_MASK;
     bool is_visible_graph = entry->visible
                             & kshark_filter_masks::KS_GRAPH_VIEW_FILTER_MASK;
     
-    return correct_event_id && is_config_allowed && has_next_kernelstack
+    return correct_event_id && is_config_allowed
            && is_visible_event && is_visible_graph;
 }
 
+#ifndef _UNMODIFIED_KSHARK // Task colors
 /**
- * @brief Loads the current task colortable into `task_colors`.
-*/
-static void _load_current_colortable() {
-    if (!loaded_colors) {
-        task_colors = KsPlot::taskColorTable();
-        loaded_colors = true;
-    }
-}
-
-/**
- * @brief Returns either a default color or one present in the`task_colors`
- * color table based on Process ID of a task.
+ * @brief Returns either a default color or one present in the
+ * color table of the main window's GL Widget based on Process ID of a task.
  * 
- * @param task_pid: task PID to index `task_colors`.
+ * @param task_pid: task PID to index the task color table.
  * @param default_color: color to be used in case we fail in finding a color
  * in the colortable.
  * 
- * @returns Default color or one present in the`task_colors` color table.
+ * @returns Default color or one present in the main window's GL Widget
+ * color table.
+ *
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
-static KsPlot::Color _get_color(int32_t task_pid, KsPlot::Color default_color) {
+static KsPlot::Color _get_task_color(int32_t task_pid, KsPlot::Color default_color) {
+    // Configuration access here.
+    const KsPlot::ColorTable& task_colors =
+        SlConfig::get_instance().main_w_ptr->graphPtr()->glPtr()->getPidColors();
     bool task_color_exists = static_cast<bool>(task_colors.count(task_pid));
 
     KsPlot::Color triangle_color = (task_color_exists) ?
@@ -146,6 +101,7 @@ static KsPlot::Color _get_color(int32_t task_pid, KsPlot::Color default_color) {
 
     return triangle_color;
 }
+#endif
 
 /**
  * @brief Returns either black if the background color's intensity is too great,
@@ -178,124 +134,6 @@ static float _get_color_intensity(const KsPlot::Color& c) {
     return (c.b() * 0.114f) + (c.g() * 0.587f) + (c.r() * 0.299f);
 }
 
-#ifndef _NO_NAPS
-/**
- * @brief General function for checking whether to show a nap rectangle
- * in the plot.
- * 
- * @param entry: pointer to an event entry which could be a part of the
- * nap rectangle 
- * 
- * @returns True if entry is visible (and pointer wasn't null).
- */
-static bool _nap_rect_check_function_general(const kshark_entry* entry) {
-    if (!entry) return false;
-    bool is_visible_event = entry->visible
-                            & kshark_filter_masks::KS_EVENT_VIEW_FILTER_MASK;
-    bool is_visible_graph = entry->visible
-                            & kshark_filter_masks::KS_GRAPH_VIEW_FILTER_MASK;
-    return is_visible_event && is_visible_graph;
-}
-
-/**
- * @brief Creates a nap rectangle to be displayed on the plot.
- * 
- * @param graph KernelShark graphs
- * @param bin KernelShark bins
- * @param data: container of two entries between which to draw the nap
- * rectangle
- * 
- * @returns Pointer to the heap-created nap rectangle.
- */
-static SlNapRectangle* _make_sl_nap_rect(std::vector<const KsPlot::Graph*> graph,
-                                             std::vector<int> bin,
-                                             std::vector<kshark_data_field_int64*> data,
-                                             KsPlot::Color, float) {
-    kshark_entry* switch_entry = data[0]->entry;
-    kshark_entry* wakeup_entry = data[1]->entry;
-
-    // Base points and such
-    KsPlot::Point start_base_point = graph[0]->bin(bin[0])._val;
-    KsPlot::Point end_base_point = graph[0]->bin(bin[1])._val;
-    int height = 12;
-    int height_offset = 15;
-
-    auto point_0 = KsPlot::Point{start_base_point.x(),
-                                 start_base_point.y() - height_offset - height};
-    auto point_1 = KsPlot::Point{start_base_point.x(),
-                                 start_base_point.y() - height_offset};
-    auto point_3 = KsPlot::Point{end_base_point.x(),
-                                 end_base_point.y() - height_offset - height};
-    auto point_2 = KsPlot::Point{end_base_point.x(),
-                                 end_base_point.y() - height_offset};
-
-    // Create the rectangle and color it    
-    KsPlot::Rectangle rect;
-    rect.setFill(true);
-    rect._color = PREV_STATE_TO_COLOR.at(get_switch_prev_state(switch_entry)[0]);
-
-    rect.setPoint(0, point_0);
-    rect.setPoint(1, point_1);
-    rect.setPoint(2, point_2);
-    rect.setPoint(3, point_3);
-
-    // Prepare outline color
-    const KsPlot::Color outline_col = _get_color(switch_entry->pid,
-                                      SlConfig::get_instance().get_default_btn_col());
-    
-    // Prepare text color
-    float bg_intensity = _get_color_intensity(rect._color);
-    const KsPlot::Color text_color = _black_or_white_text(bg_intensity);
-
-    // Create the final nap rectangle and return it
-    SlNapRectangle* nap_rect = new SlNapRectangle{switch_entry, wakeup_entry, rect,
-                                                  outline_col, text_color};
-    return nap_rect;
-}
-
-/**
- * @brief Initializes check functions for selecting nap rectangle
- * entries and draws nap rectangles via interval plotting.
- * 
- * @param argVCpp: the C++ arguments of the drawing function of the plugin
- * @param plugin_data: input location for the container of the event's data
- * @param ctx: pointer to the plugin's context
- * @param val: process or CPU ID value
- */
-static void _draw_stacklook_nap_rectangles(KsCppArgV* argVCpp,
-                                           kshark_data_container* plugin_data,
-                                           const plugin_stacklook_ctx* ctx,
-                                           int val) {
-    IsApplicableFunc nap_rect_check_func_switch;
-    IsApplicableFunc nap_rect_check_func_wakeup;
-
-    nap_rect_check_func_switch = [=] (kshark_data_container* data_c, ssize_t t) {
-        kshark_entry* entry = data_c->data[t]->entry;
-
-        bool is_switch = (entry->event_id == ctx->sswitch_event_id);
-        bool correct_pid = (entry->pid == val);
-        return _nap_rect_check_function_general(entry) && is_switch && correct_pid;
-    };
-
-    nap_rect_check_func_wakeup = [=] (kshark_data_container* data_container, ssize_t i) {
-        kshark_entry* entry = data_container->data[i]->entry;
-        int64_t d_field = data_container->data[i]->field;
-
-        bool is_wakeup = (entry->event_id == ctx->swake_event_id);
-        bool correct_waking_pid = (d_field == val);
-        return _nap_rect_check_function_general(entry) && is_wakeup && correct_waking_pid;
-    };
-
-    // Noteworthy thing here is that KernelShark will automatically
-    // select a pair and NOT use members of it again - there won't be multiple
-    // nap rectangles from one entry.
-    // Hopefully this will never change.
-    eventFieldIntervalPlot(argVCpp, plugin_data, nap_rect_check_func_switch,
-                            plugin_data, nap_rect_check_func_wakeup,
-                            _make_sl_nap_rect, {0, 0, 0}, -1);
-}
-#endif
-
 /**
  * @brief Creates a clickable Stacklook button to be displayed on the plot.
  * 
@@ -305,16 +143,22 @@ static void _draw_stacklook_nap_rectangles(KsCppArgV* argVCpp,
  * @param col: default color of the Stacklook button's insides
  * 
  * @returns Pointer to the created button.
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
 static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph,
-                                        std::vector<int> bin,
-                                        std::vector<kshark_data_field_int64*> data,
-                                        KsPlot::Color col, float) {
+                                         std::vector<int> bin,
+                                         std::vector<kshark_data_field_int64*> data,
+                                         KsPlot::Color col, float) {
     // Constants
     constexpr int32_t BUTTON_TEXT_OFFSET = 14;
     const std::string STACK_BUTTON_TEXT = "STACK";
 
+    // Configuration access here.
+    const SlConfig& cfg = SlConfig::get_instance();
+
     kshark_entry* event_entry = data[0]->entry;
+    const kshark_entry* kstack_entry = (const kshark_entry*)(data[0]->field);
 
     // Base point
     KsPlot::Point base_point = graph[0]->bin(bin[0])._val;
@@ -332,9 +176,12 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
            2      
     */
 
-    // Triangle points
-    KsPlot::Point a {x - 24, y - 27};
-    KsPlot::Point b {x + 24, y - 27};
+   constexpr int32_t TRIANGLE_HALFWIDTH = 24;
+   constexpr int32_t TRIANGLE_HEIGHT = 27;
+   
+   // Triangle points (0-a, 1-b, 2-c)
+    KsPlot::Point a {x - TRIANGLE_HALFWIDTH, y - TRIANGLE_HEIGHT};
+    KsPlot::Point b {x + TRIANGLE_HALFWIDTH, y - TRIANGLE_HEIGHT};
     KsPlot::Point c {x, y - 2};
 
     // Outer triangle
@@ -343,13 +190,24 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
     inner_triangle.setPoint(1, b);
     inner_triangle.setPoint(2, c);
 
+    inner_triangle._color = col;
+#ifndef _UNMODIFIED_KSHARK // Task colors
     // Colors are a bit wonky with sched_switch events. Using the function
     // makes it consistent across the board.
-    inner_triangle._color = _get_color(kshark_get_pid(event_entry), col);
+    if (cfg.get_use_task_colors()) {
+        int entry_pid = (event_entry->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
+            event_entry->pid :
+            // "Emergency get" if some plugins messed around with the entry before
+            kshark_get_pid(event_entry);
+
+        inner_triangle._color = _get_task_color(entry_pid, col);
+    }
+#endif
 
     // Inner triangle
     auto back_triangle = KsPlot::Triangle(inner_triangle);
-    back_triangle._color = SlConfig::get_instance().get_button_outline_col();
+    // Configuration access here.
+    back_triangle._color = cfg.get_button_outline_col();
     back_triangle.setFill(false);
 
     // Text coords
@@ -364,7 +222,7 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
     auto text = KsPlot::TextBox(get_font_ptr(), STACK_BUTTON_TEXT, text_color,
                                 KsPlot::Point{text_x, text_y});
 
-    auto sl_button = new SlTriangleButton(event_entry, back_triangle,
+    auto sl_button = new SlTriangleButton(event_entry, kstack_entry, back_triangle,
                                           inner_triangle, text);
 
     return sl_button;
@@ -377,6 +235,8 @@ static SlTriangleButton* _make_sl_button(std::vector<const KsPlot::Graph*> graph
  * @param dc: Input location for the container of the event's data
  * @param check_func: Check function used to select events from data container
  * @param make_button: Function which specifies what will be drawn and how
+ *
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
 static void _draw_stacklook_buttons(KsCppArgV* argv, 
                                     kshark_data_container* dc,
@@ -386,6 +246,7 @@ static void _draw_stacklook_buttons(KsCppArgV* argv,
     // The default color of buttons will hopefully be overriden when
     // the button's entry's task PID is found.
     
+    // Configuration access here.
     eventFieldPlotMin(argv, dc, check_func, make_button,
                       SlConfig::get_instance().get_default_btn_col(),
                       -1);
@@ -400,15 +261,80 @@ static void config_show([[maybe_unused]] KsMainWindow*) {
     cfg_window->show();
 }
 
-// Functions used in C code
+/**
+ * @brief To be called only once per stream load. Stores kernel
+ * stack entry pointers to the field of Stacklook-relevant
+ * entries in the container in the argument.
+ * 
+ * @param dct Data container of Stacklook-relevant entries
+ * @return True if any kernel stack entry was found, false
+ * otherwise.
+ */
+static bool search_for_kstacks(const kshark_data_container* dct) {
+    if (dct == nullptr || dct->size == 0)
+        return false;
+    
+    bool found_at_least_one = false;
+
+    for (ssize_t i = 0; i < dct->size; ++i) {
+        kshark_data_field_int64* sl_relevant = dct->data[i];
+        const kshark_entry* kstack_entry = get_kstack_entry(sl_relevant->entry);
+        if (kstack_entry != nullptr) {
+            sl_relevant->field = (int64_t)(kstack_entry);
+            found_at_least_one = true;
+        }
+    }
+
+    return found_at_least_one;
+}
+
+// #########################################################################
+
+// Functions defined in the C header
 
 /**
- * @brief Deinitializes the task colors colortable, making sure it'll
- * be reloaded on new trace file load.
-*/
-void deinit_task_colors() {
-    task_colors.clear();
-    loaded_colors = false;
+ * @brief Finds the `ftrace/kernel_stack` event entry if it was
+ * recorded in the trace and is directly after the event entry on
+ * the same CPU and belongs to the same task.
+ * 
+ * @param kstack_owner Entry, whose kernel stack trace we want to find.
+ * @return Pointer to the `ftrace/kernel_stack` event entry if it was
+ * found, nullptr otherwise (or if there was an error in data access).
+ */
+const struct kshark_entry* get_kstack_entry(const struct kshark_entry* kstack_owner) {
+    const kshark_entry* kstack_entry = kstack_owner;
+    
+    if (kstack_entry == nullptr)
+        return nullptr;
+
+    plugin_stacklook_ctx* ctx = __get_context(kstack_owner->stream_id);
+    
+    if (ctx == nullptr)
+        return nullptr;
+
+    int relevant_owner_pid = (kstack_owner->visible & KS_PLUGIN_UNTOUCHED_MASK) ?
+        kstack_owner->pid :
+        // "Emergency get" if some plugins messed around with the entry before
+        kshark_get_pid(kstack_owner);
+    bool is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
+    bool is_correct_task = (relevant_owner_pid == kstack_entry->pid);
+    
+    // This loop will usually stop either after one or iterations.
+    // Unless some plugin aggressively reorders and changes innards of
+    // entries, this will be the case.
+    while (!(is_kstack && is_correct_task)) {
+        // Move onto next entry on the same CPU
+        // NOTE: kernelstack trace will be on the same CPU as the event
+        // directly after which it is made.
+        kstack_entry = kstack_entry->next;
+        if (kstack_entry == nullptr)
+            return nullptr;
+        // Update conditions
+        is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
+        is_correct_task = (relevant_owner_pid == kstack_entry->pid);
+    }
+
+    return kstack_entry;
 }
 
 /**
@@ -418,6 +344,8 @@ void deinit_task_colors() {
  * @param sd: data stream identifier
  * @param val: process or CPU ID value
  * @param draw_action: draw action identifier
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
 void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
                             int val, int draw_action) {
@@ -425,7 +353,7 @@ void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
     plugin_stacklook_ctx* ctx = __get_context(sd);
     kshark_data_container* plugin_data;
 
-    // Config data
+    // Configuration access here.
     const SlConfig& config = SlConfig::get_instance();
     const int32_t HISTO_ENTRIES_LIMIT = config.get_histo_limit();
     
@@ -435,50 +363,55 @@ void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
         return;
     }
     
-    // Don't draw with too many bins (configurable zoom-in indicator)
+    // Don't draw with too many bins (configurable zoom-in indicator).
     if (argVCpp->_histo->tot_count > HISTO_ENTRIES_LIMIT) {
-        if (loaded_colors) {
-            loaded_colors = false;
-        }
         return;
     }
 
     plugin_data = ctx->collected_events;
-    // Couldn't get the context container (any reason)
     if (!plugin_data) {
+        // Couldn't get the context container (any reason)
         return;
     }
 
-    _load_current_colortable();
+    // Search for kernelstack events once per stream on load.
+    if (!ctx->searched_for_kstacks) {
+        // Update context variable to indicate whether any
+        // kernel stack entry exists.
+        ctx->kstacks_exist = search_for_kstacks(plugin_data);
+        ctx->searched_for_kstacks = true;
+    }
+
+    if (!ctx->kstacks_exist) {
+        // No reason to draw anything, if no kernelstacks are present in
+        // the trace.
+        return;
+    }
 
     IsApplicableFunc check_func;
     
     if (draw_action == KSHARK_TASK_DRAW) {
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
             kshark_entry* entry = data_c->data[t]->entry;
-            if (!entry) return false;
+            const kshark_entry* kstack_ptr = (kshark_entry*)(data_c->data[t]->field);
+            if (!entry)
+                return false;
             bool correct_pid = (entry->pid == val);
-            return _check_function_general(entry, ctx) && correct_pid;
+            return _check_function_general(entry, kstack_ptr, ctx) && correct_pid;
         };
         
     } else if (draw_action == KSHARK_CPU_DRAW) {
         check_func = [=] (kshark_data_container* data_c, ssize_t t) {
             kshark_entry* entry = data_c->data[t]->entry;
-            if (!entry) return false;
-            bool correct_cpu = (data_c->data[t]->entry->cpu == val);
-            return _check_function_general(entry, ctx) && correct_cpu;
+            const kshark_entry* kstack_ptr = (kshark_entry*)(data_c->data[t]->field);
+            if (!entry)
+                return false;
+            bool correct_cpu = (entry->cpu == val);
+            return _check_function_general(entry, kstack_ptr, ctx) && correct_cpu;
         };
     }
 
     _draw_stacklook_buttons(argVCpp, plugin_data, check_func, _make_sl_button);
-
-#ifndef _NO_NAPS
-    // If the user wants to draw nap rectangles, do so
-    if (SlConfig::get_instance().get_draw_naps()
-        && draw_action == KSHARK_TASK_DRAW) {
-        _draw_stacklook_nap_rectangles(argVCpp, plugin_data, ctx, val);
-    }
-#endif
 }
 
 /**
@@ -491,9 +424,12 @@ void draw_stacklook_objects(struct kshark_cpp_argv* argv_c, int sd,
  * @param gui_ptr: Pointer to the main KernelShark window.
  * 
  * @returns Pointer to the configuration menu instance.
+ * 
+ * @note It is dependent on the configuration 'SlConfig' singleton.
 */
 __hidden void* plugin_set_gui_ptr(void* gui_ptr) {
     KsMainWindow* main_w = static_cast<KsMainWindow*>(gui_ptr);
+    // Configuration access here.
     SlConfig::main_w_ptr = main_w;
 
     if (cfg_window == nullptr) {

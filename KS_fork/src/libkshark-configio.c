@@ -2146,6 +2146,10 @@ kshark_export_dstream(struct kshark_context *kshark_ctx, int sd,
 	struct kshark_config_doc *dstream_conf;
 	struct kshark_data_stream *stream;
 
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-26)
+	struct kshark_config_doc *cbreak_conf;
+	// END of change
+
 	stream = kshark_get_data_stream(kshark_ctx, sd);
 	if (!stream)
 		return NULL;
@@ -2169,17 +2173,32 @@ kshark_export_dstream(struct kshark_context *kshark_ctx, int sd,
 
 	plg_conf = kshark_export_stream_plugins(stream, format);
 
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-26)
+	// There is no need to export anything else, as data
+	// will fill the other parts of couplebreak upon load during import.
+	cbreak_conf = kshark_config_alloc(KS_CONFIG_JSON);
+	cbreak_conf->conf_doc = json_object_new_boolean(stream->couplebreak_on);
+	// END of change
+
 	if (!dstream_conf ||
 	    !sd_conf ||
 	    !filter_conf ||
 	    !file_conf ||
-	    !plg_conf)
+	    !plg_conf ||
+		//NOTE: Changed here. (COUPLEBREAK) (2025-03-26)
+		!cbreak_conf
+		// END of change
+	) {
 		goto fail;
+	}
 
 	kshark_config_doc_add(dstream_conf, "stream id", sd_conf);
 	kshark_config_doc_add(dstream_conf, "data", file_conf);
 	kshark_config_doc_add(dstream_conf, "filters", filter_conf);
 	kshark_config_doc_add(dstream_conf, "plugins", plg_conf);
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-26)
+	kshark_config_doc_add(dstream_conf, "couplebreak", cbreak_conf);
+	// END of change
 
 	if (stream->calib_array_size)
 		kshark_export_calib_array(kshark_ctx, sd, &dstream_conf);
@@ -2192,9 +2211,38 @@ kshark_export_dstream(struct kshark_context *kshark_ctx, int sd,
 	kshark_free_config_doc(file_conf);
 	kshark_free_config_doc(plg_conf);
 	kshark_free_config_doc(sd_conf);
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-26)
+	kshark_free_config_doc(cbreak_conf);
+	// END of change
 
 	return NULL;
 }
+
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-26)
+/**
+ * @brief Load couplebreak's on/off flag from the configuration document.
+ * 
+ * @param stream Stream to set the flag in.
+ * @param conf Configuration document to load the flag from.
+ */
+static void kshark_import_couplebreak_flag(struct kshark_data_stream *stream,
+					  struct kshark_config_doc *conf)
+{
+	struct json_object *jcbreak = NULL;
+	bool cbreak;
+
+	if (!json_object_object_get_ex(conf->conf_doc, "couplebreak", &jcbreak) &&
+		json_object_get_type(jcbreak) != json_type_boolean) {
+		// If the session does not contain the couplebreak flag,
+		// just set it as false, which will mimick the old behavior.
+		stream->couplebreak_on = false;
+		return;
+	}
+
+	cbreak = json_object_get_boolean(jcbreak);
+	stream->couplebreak_on = cbreak;
+}
+// END of change
 
 /**
  * @brief Load Data Stream from a Configuration document.
@@ -2220,6 +2268,7 @@ int kshark_import_dstream(struct kshark_context *kshark_ctx,
 	file_conf = kshark_config_alloc(KS_CONFIG_JSON);
 	filter_conf = kshark_config_alloc(KS_CONFIG_JSON);
 	plg_conf = kshark_config_alloc(KS_CONFIG_JSON);
+
 	if (!file_conf || !filter_conf || !plg_conf) {
 		fprintf(stderr,
 			"Failed to allocate memory for Json document.\n");
@@ -2232,17 +2281,24 @@ int kshark_import_dstream(struct kshark_context *kshark_ctx,
 		sd = kshark_import_trace_file(kshark_ctx, file_conf);
 		if (sd < 0) {
 			fprintf(stderr,
-				"Failed to import data file form Json document.\n");
+				"Failed to import data file from Json document.\n");
 			goto free;
 		}
 
 		stream = kshark_ctx->stream[sd];
+
+		//NOTE: Changed here. (COUPLEBREAK) (2025-03-26)
+		// There is no need to import anything else, as data
+		// will fill the other parts of couplebreak upon load.
+		kshark_import_couplebreak_flag(stream, conf);
+		// END of change
+
 		kshark_import_calib_array(kshark_ctx, sd, conf);
 		ret = kshark_import_all_filters(kshark_ctx, sd,
 						filter_conf);
 		if (!ret) {
 			fprintf(stderr,
-				"Failed to import filters form Json document.\n");
+				"Failed to import filters from Json document.\n");
 			kshark_close(kshark_ctx, sd);
 			sd = -EFAULT;
 			goto free;
@@ -2252,7 +2308,7 @@ int kshark_import_dstream(struct kshark_context *kshark_ctx,
 
 		if (!ret) {
 			fprintf(stderr,
-				"Failed to import stream plugins form Json document.\n");
+				"Failed to import stream plugins from Json document.\n");
 			kshark_close(kshark_ctx, sd);
 			sd = -EFAULT;
 			goto free;

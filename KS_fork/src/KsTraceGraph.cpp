@@ -819,15 +819,27 @@ void KsTraceGraph::_onCustomContextMenu(const QPoint &point)
 	}
 }
 
-/** NOTE: Changed here **/
+//NOTE: Changed here. (PREVIEW LABELS CHANGEABLE) (2024-07-26)
+/**
+ * @brief Set the labels of the preview area. By default, each
+ * argument is an empty string.
+ * 
+ * @param label1 Text to be put into the first label (leftmost).
+ * @param label2 Text to be put into the second label.
+ * @param label3 Text to be put into the third label.
+ * @param label4 Text to be put into the fourth label.
+ * @param label5 Text to be put into the fifth label (rightmost).
+ */
 void KsTraceGraph::setPreviewLabels(const QString& label1,
 									const QString& label2,
 									const QString& label3,
 									const QString& label4,
 									const QString& label5) {
+	// It is really that simple
 	_labelI1.setText(label1);
 	_labelI2.setText(label2);
 	_labelI3.setText(label3);
 	_labelI4.setText(label4);
 	_labelI5.setText(label5);
 }
+// END of change

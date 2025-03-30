@@ -70,11 +70,11 @@ QVector<int> getPidList(int sd)
 }
 
 /**
- * @brief Get a vector of all Event Ids associated with a given Data stream.
+ * @brief Get a vector of all non-custom Event Ids associated with a given Data stream.
  *
  * @param sd: Data stream identifier.
  *
- * @returns Vector of Event Ids on success or an empty vector on failure.
+ * @returns Vector of non-custom Event Ids on success or an empty vector on failure.
  */
 QVector<int> getEventIdList(int sd)
 {
@@ -101,6 +101,41 @@ QVector<int> getEventIdList(int sd)
 
 	return evts;
 }
+
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+/**
+ * @brief Get a vector of all couplebreak event Ids associated
+ * with a given Data stream.
+ * 
+ * @param sd Data stream identifier.
+ * @return Vector of couplebreak event Ids on success or an
+ * empty vector on failure.
+ */
+QVector<int> getCouplebreakIdList(int sd) {
+	kshark_context *kshark_ctx(nullptr);
+	kshark_data_stream *stream;
+	int *ids;
+
+	if (!kshark_instance(&kshark_ctx))
+		return {};
+
+	stream = kshark_get_data_stream(kshark_ctx, sd);
+	if (!stream)
+		return {};
+
+	ids = kshark_get_couplebreak_ids(stream);
+	if (!ids)
+		return {};
+
+	QVector<int> evts(stream->n_couplebreak_evts);
+	for (int i = 0; i < stream->n_couplebreak_evts; ++i)
+		evts[i] = ids[i];
+	
+	free(ids);
+
+	return evts;
+}
+// END of change
 
 /**
  * @brief Retrieve the unique Id of the event.

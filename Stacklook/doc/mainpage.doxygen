@@ -1,102 +1,28 @@
-/**
- * @mainpage Stacklook - plugin for KernelShark
+/*!
+ * @file mainpage.doxygen
+ * @date 2025-03-25
+ * @version 1.0
+ * @copyright Copyright (C) 2025, David Jaromír Šebánek <djsebofficial@gmail.com>
  * 
- * @section intro Introduction
- * 
- * Stacklook allows the user to check kernel stack data of a task
- * captured by trace-cmd after a task is switched by the scheduler
- * or woken up by it. It can also display duration between a task's 
- * switch and its closest next wakeup. Many of the visualizations
- * can be configured via the configuration window.
- * The plugin works with minimal changes to the
- * original KernelShark code in full (and if necessary, can be built
- * for an unmodified KernelShark) to work with vanilla KernelShark
- * as well.
- * 
- * @section features Features
- * 
- * @subsection btns Buttons
- * 
- * Above each `sched/sched_switch` and `sched/sched_waking`
- * event in the KernelShark plot, an upside down triangle button will
- * appear when the plugin is loaded in. 
- * 
- * **Hovering** over them with
- * the mouse cursor will show the top three items on the kernel stack
- * as well as the name of the task the stack is for. The preview skips
- * first **3** entries by default, but this can be configured, see
- * @ref config .
- * 
- * **Double clicking** on a button will spawn a window with the full
- * kernel stack trace in its text form.
- * 
- * The buttons will only appear when there are no more than **200**
- * entries shown on the KernelShark plot in the main window with
- * the graph. The value can be configured later, see @ref config .
- * 
- * Color of the buttons depends on the color of the tasks. The buttons
- * work for both task and CPU plots.
- * 
- * @subsection windows Windows
- * 
- * Aforementioned windows show the kernel stack of a specific task.
- * The stack is in text form and can be viewed as raw text with newlines
- * or a list of strings. A text is shown above the stack text with the
- * name of the task the stack belongs to.
- * 
- * The windows can be closed, resized and minimzed. When KernelShark's
- * main window closes, so do the, but not the other way around.
- * 
- * There can be multiple windows spawned for a single entry or different
- * entries.
- * 
- * Windows are made using Qt6, just like KernelShark and do not spawn
- * their own processes, rather they are objects belonging to KernelShark,
- * specifically Stacklook.
+ * @mainpage
+ * @section foreword Foreword
  *
- * @subsection naps Visualizing naps
- * 
- * Firstly, what are 'naps'? **Nap** in this plugin is "a space between
- * a sched_switch event and a sched_waking event of the same task in
- * the plot when event entries are sorted by their timestamps".
- * 
- * The plugin will show a rectangle with upper and lower horizontal lines
- * highlighted and a text with the full name of the prev_state field of
- * a sched_switch event; this rectangle is placed between a sched_switch
- * event of a task and its closest next sched_waking. The rectangle's
- * filling color is also based on the prev_state field. Text will NOT be
- * displayed if the rectangle isn't wide enough.
- * 
- * The nap rectangles cannot be interacted with, only viewed.
+ * This is the API documentation for the Stacklook plugin. For user documentation, seek out "user-manual" markdown or
+ * PDF document elsewhere. If **design documentation** is desired, navigate to it via the navigation menu.
  *
- * This feature can be omitted during building by specifying `_NO_NAPS`
- * variable to CMake. Plugin compiled this way will not provide this feature
- * at all, not even in the configuration.
+ * @section nondocced Private and static variables, members and functions
+ * This documentation does not include any private or static methods defined by the plugin - as such, if there is a
+ * reader hungry for more documentation, they should look at the source code files and read through them themselves.
+ * The files include documentation mainly in the implementation files, mimicking KernelShark's style of documentation.
+ * However, unlike KernelShark, every static and private function or variable or object's member is documented, all in
+ * the same manner as anything to be found in this documentation. Additionally, non-documentation comments can
+ * be found there, detailing some more obsure computation steps.
  *
- * @subsection config Configuration 
- * 
- * The plugin adds a dialog window for tweaking certain aspects of the plugin.
- * It can be accessed via KernelShark's main window via
- * "Tools/Stacklook Configuration".
+ * As such, reading through the source code is recommended for a complete understanding.
  *
- * It is possible to tweak: limit of visible entries before the plugin 
- * kicks in, visibility of nap rectangles (if enabled), color of
- * Stacklook's buttons, default color of said buttons if color of the task
- * wasn't available, plugin's meta information of supported events -
- * namely whether to show Stacklook buttons above them and how great
- * should the offset into the kernel stack for the preview be (if using
- * modified KernelShark - otherwise, this last option isn't shown, as it
- * isn't compiled into the program).
- *
- * @section other_features Changes made to KernelShark
- * 
- * Visit @ref ks_modifs.
- * 
- * @section not_my_job What the plugin does NOT do
- * 
- * The plugin won't show the buttons above any other events other
- * than those specified above and in code.
- * 
- * There is no customization of: the text in the buttons,
- * windows, adding events to show buttons for, button sizes or positions.
-*/
+ * @section aslib Using the plugin as a library
+ *   
+ * Plugin was designed as a standalone shared library and not as a library to use in other projects. As such this kind
+ * of use of this plugin is discouraged, but not banned - after all, if someone is brave enough, they can utilise 
+ * anything. It all depends on how familiar with all aspects of plugin's code someone willing to do this will be.
+ */
