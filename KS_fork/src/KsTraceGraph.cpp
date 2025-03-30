@@ -819,7 +819,7 @@ void KsTraceGraph::_onCustomContextMenu(const QPoint &point)
 	}
 }
 
-//NOTE: Changed here. (PREVIEW LABLS CHANGEABLE) (2024-07-26)
+//NOTE: Changed here. (PREVIEW LABELS CHANGEABLE) (2024-07-26)
 /**
  * @brief Set the labels of the preview area. By default, each
  * argument is an empty string.
