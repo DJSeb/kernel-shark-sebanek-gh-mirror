@@ -28,6 +28,10 @@ modification). See figure 2.
 Figure 2 - Stacklook button (highlighted by the red circle) asks preview labels to change upon mouse hover to some 
 information
 
+Make sure that any plugin using this modification is either preloaded via CLI or GUI before importing a session where such
+plugin was active; or include defaults and an option to use functionality with this modification - failure to do so will
+result in KernelShark crashing with a segmentation fault.
+
 # Bugs
 
 If a plugin using the new method is not loaded when KernelShark starts or before a session where it was active is loaded,
