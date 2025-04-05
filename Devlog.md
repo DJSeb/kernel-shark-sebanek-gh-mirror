@@ -696,3 +696,125 @@ Next goals (in priority order):
 - Revise Naps' design document
 - Write Stacklook's design document
 - Write survey paper
+
+## 2025-04-04
+
+_Author note: Back from vacation._
+NUMA work starts (-ed a little earlier with "thinking about it").
+Currently the main goal is designing some sort of Qt window, which
+will be the main interface for users.
+
+The feature will most likely work per-stream, as streams can be any
+set of traces for some CPUs and tasks, but multiple traces can
+be opend via "Append traces". It definitely will require some sort
+of stream-NUMA connection, either in streams directly (not the best
+choice, doesn't feel like it's right) or via some sort of hash map
+kept by the feature (which will require more work on managing which
+stream closed and which stream is up, but hopefully nothing major).
+
+## 2025-04-05
+
+Deliberations are continuing. Quite a lot to think about with this
+modification. Design is starting from the GUI. The window for the
+modification will look like this:
+
+```
+-----------------------------------------------------
+|                   HEADER                          |
+-----------------------------------------------------
+|                                                   |
+|                   EXPLANATION                     |
+|                                                   |
+|---------------------------------------------------|
+||  Stream #1             ____________             ||
+||  STATUS                | LOAD BTN |             ||
+||                        ------------             ||
+||  0 Default   O Tree ...[more radio options]     ||
+||-------------------------------------------------||
+||  Stream #2             ------------             ||
+||  STATUS                | LOAD BTN |             ||
+||                        ------------             ||
+||  O Default   0 Tree ...[more radio options]     ||
+||-------------------------------------------------||
+.....................................................
+||-------------------------------------------------||
+|       _____________           ______________      |
+|       | APPLY BTN |           | CANCEL BTN |      |
+|       -------------           --------------      |
+-----------------------------------------------------
+```
+
+Similar in nature to couplebreak's dialog (maybe a
+generalisation of that could help here, retooling it
+into a "KsPerStreamFeatureDialog" or similar).
+
+Apply would obviosly apply changes and make the graph (and
+any of its drawn parts) to be redrawn, CPUs hidden or shown, etc.
+Cancel would close the dialog and cancel any temporary changes.
+Header is the standard header with an X button, which will do the
+same as Cancel probably.
+
+The radio buttons for each stream would determine which kind of
+view is to be shown for each stream's CPU plot part. Tree would
+be the one showing off the NUMA topology. Default is what KernelShark
+uses currently. Load button will open a file dialog window, which
+will allow only an XML file of a topology to be loaded.
+
+There should probably be validation of the number of PUs and CPUs in
+a stream. Anything else would be difficult to verify, so that won't
+be done. Status field would probably show something as "LOADED \[FILE\]",
+"NO TOPOLOGY", "BAD TOPOLOGY". There should be some space for more
+radio buttons/options later.
+
+The other design decisions are about how to connect the topology with
+KernelShark's visualisation. There'll firstly need to be some sort of
+a data structure representing a machine (a stream for KernelShark),
+which means tracking the nodes, cores and PUs (CPUs for KShark).
+Additionally, groups and packages should be tracked too, for completeness
+(and possible future extensions, though they won't be used, most likely, in
+this project). Cores will probably hold its PUs and memberships, but some
+parts might be shaved if proven to be unnecessarily complex. This part isn't
+fully fleshed out yet.
+
+Next problem is, how do we keep this for a stream to be drawn and redrawn?
+An obvious possibility is giving streams some sort of pointer to the C++
+structures, but this feels incorrect though possible. Another possibility is
+keeping a map of loaded topologies and give streams the means to ask about them.
+This should work nicely, as unordered_map in C++'s STL would be a good fit and
+memory could be efficiently kept. Only question is where to store the map -
+for that, the best place is probably some sort of static data or a class member.
+Another possiblity is a singleton, as this would technically hold configurations
+and a "lot" of data, which singletons are good for. Either way, the map has to
+be widely accessible to other KernelShark modules, so maybe a special class for
+access could be made as well. This will be subject to further deliberation.
+
+Another question is how to parse the XML file. There "could" be a custom XML
+parsing code... but that is a lot of work for not as much profit. A better
+solution would be some XML parsing library for C++. Rapid XML seems rather
+widespread, but no exact library was chosen yet. It would also introduce
+another dependency to KernelShark, which might be less favourable, but then
+again, it is just an XML parsing library, which shouldn't be that heavy.
+
+Penultimate decisions lie in control on the graph. The tree view would be best
+collapsible, it is a really user-friendly feature for this kind of view. This
+does mean introducing even more Qt objects into the graph area though and worse,
+connecting actions to them.
+
+Lastly, session support. It WOULD be nice to keep data in sessions. This is not
+something outlined in the specification, but it seems like a natural thing to
+include, as many per-stream settings are included. There would have to be the
+whole topology and which layers are shown and which are hidden. It wouldn't be
+impossible (nothing really ever is), but it would be a bit of work. Probably the
+last thing to be done, if to be done.
+
+Sidenote, naming can sometimes be nicely shortened. Henceforth, NUMA Topology Views
+will be also referred to as NUMA TV, which is slightly funny and unintentionally so.
+
+NUMA TV goals:
+
+- Create configuration window (maybe reuse couplebreak's)
+- Create a data structure for a machine in topology's eyes
+- Parse XML data into the data structure
+- Create a connection between streams and topologies
+- Figure out control elements of the tree view, create more space in the graph
+- Figure out session support
