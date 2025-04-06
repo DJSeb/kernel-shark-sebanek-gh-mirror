@@ -30,6 +30,9 @@
 #include "KsCmakeDef.hpp"
 #include "KsMainWindow.hpp"
 #include "KsAdvFilteringDialog.hpp"
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
+#include "KsNUMATopologyViews.hpp"
+// END of change
 
 using namespace KsWidgetsLib;
 
@@ -65,6 +68,9 @@ KsMainWindow::KsMainWindow(QWidget *parent)
   _addOffcetAction("Add Time Offset", this),
   //NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
   _couplebreakAction("Couplebreak Settings", this),
+  // END of change
+  //NOTE: Changed here. (NUMA TV) (2025-04-06)
+  _numaTVAction("NUMA Topology Views", this),
   // END of change
   _colorAction(this),
   _colSlider(this),
@@ -363,6 +369,12 @@ void KsMainWindow::_createActions()
 		this, &KsMainWindow::_showCouplebreakConfig); // Reactor + action on reactor
 	// END of change
 
+	//NOTE: Changed here. (NUMA TV) (2025-04-06)
+	_numaTVAction.setStatusTip("Control NUMA topology views");
+	connect(&_numaTVAction, &QAction::triggered, // Actor + action on actor
+		this, &KsMainWindow::_showNUMATVConfig); // Reactor + action on reactor
+	// END of change
+
 	_colorPhaseSlider.setMinimum(20);
 	_colorPhaseSlider.setMaximum(180);
 	_colorPhaseSlider.setValue(KsPlot::Color::rainbowFrequency() * 100);
@@ -513,6 +525,9 @@ void KsMainWindow::_createMenus()
 	tools->addAction(&_captureAction);
 	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 	tools->addAction(&_couplebreakAction);
+	// END of change
+	//NOTE: Changed here. (NUMA TV) (2025-04-06)
+	tools->addAction(&_numaTVAction);
 	// END of change
 	tools->addAction(&_managePluginsAction);
 	tools->addAction(&_addPluginsAction);
@@ -1748,6 +1763,45 @@ void KsMainWindow::_updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_
 		}
 		
 		_pluginUpdate(sc.first, stream_plugins);
+	}
+}
+// END of change
+
+//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
+void KsMainWindow::_showNUMATVConfig() {
+	KsNUMATVDialog *dialog;
+	kshark_context *kshark_ctx(nullptr);
+
+	if (!kshark_instance(&kshark_ctx)) {
+		return;
+	}
+	
+	// Same check as for most other stream-reliant functions.
+	if (kshark_ctx->n_streams == 0) {
+		QString err("Data has to be loaded first.");
+		QMessageBox msgBox;
+		msgBox.critical(nullptr, "Error", err);
+
+		return;
+	}
+	
+	dialog = new KsNUMATVDialog{kshark_ctx, this};
+	connect(dialog, &KsNUMATVDialog::apply, // Actor + action on actor
+		this, &KsMainWindow::_updateNUMATVs); // Reactor + action on reactor
+
+	dialog->show();
+	// Update the graph with the new data, there were new entries created
+	_graph.update(&_data);
+}
+// END of change
+
+//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
+void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
+	// Nothing for now
+	//NUMA TV TODO: This whole function.
+	for (int i = 0; i < stream_numa.size(); i++) {
+		printf("Topology file: %s\n", stream_numa[i].second.second.toStdString().c_str());
+		printf("View mode: %d\n", stream_numa[i].second.first);
 	}
 }
 // END of change
