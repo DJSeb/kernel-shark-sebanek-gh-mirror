@@ -439,9 +439,10 @@ KsCaptureMonitor::KsCaptureMonitor(QWidget *parent)
 
 	connect(&_maxLinNumEdit,	&QLineEdit::textChanged,
 		this,			&KsCaptureMonitor::_maxLineNumber);
-
-	connect(&_readOnlyCB,		&QCheckBox::stateChanged,
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+	connect(&_readOnlyCB,		&QCheckBox::checkStateChanged,
 		this,			&KsCaptureMonitor::_readOnly);
+// END of change
 
 	connect(&_consolOutput,		&QPlainTextEdit::textChanged,
 		this,			&KsCaptureMonitor::_argVModified);
@@ -458,8 +459,10 @@ void KsCaptureMonitor::_maxLineNumber(const QString &test)
 		_consolOutput.setMaximumBlockCount(max);
 }
 
-void KsCaptureMonitor::_readOnly(int state)
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+void KsCaptureMonitor::_readOnly(Qt::CheckState state)
 {
+// END of change
 	if (state == Qt::Checked)
 		_consolOutput.setReadOnly(true);
 	else
@@ -564,9 +567,10 @@ KsCaptureDialog::KsCaptureDialog(QWidget *parent)
 	_layout.addWidget(&_captureCtrl);
 	_layout.addWidget(&_captureMon);
 	this->setLayout(&_layout);
-
-	connect(&_captureCtrl._commandCheckBox,	&QCheckBox::stateChanged,
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+	connect(&_captureCtrl._commandCheckBox,	&QCheckBox::checkStateChanged,
 		this,				&KsCaptureDialog::_setChannelMode);
+// END of change
 
 	connect(&_captureCtrl._captureButton,	&QPushButton::pressed,
 		this,				&KsCaptureDialog::_capture);
@@ -621,9 +625,11 @@ void KsCaptureDialog::_capture()
 	}
 }
 
-void KsCaptureDialog::_setChannelMode(int state)
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+void KsCaptureDialog::_setChannelMode(Qt::CheckState state)
 {
-	if (state > 0) {
+	if (state != Qt::CheckState::Unchecked) {
+// END of change
 		_captureMon._mergedChannels = true;
 	} else {
 		_captureMon._mergedChannels = false;

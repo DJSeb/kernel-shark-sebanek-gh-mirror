@@ -472,16 +472,19 @@ void KsMainWindow::_createMenus()
 	_graphFilterSyncCBox =
 		KsUtils::addCheckBoxToMenu(filter, "Apply filters to Graph");
 	_graphFilterSyncCBox->setChecked(true);
-
-	connect(_graphFilterSyncCBox,	&QCheckBox::stateChanged,
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+	connect(_graphFilterSyncCBox,	&QCheckBox::checkStateChanged,
 		this,			&KsMainWindow::_graphFilterSync);
+// END of change
 
 	_listFilterSyncCBox =
 		KsUtils::addCheckBoxToMenu(filter, "Apply filters to List");
 	_listFilterSyncCBox->setChecked(true);
 
-	connect(_listFilterSyncCBox,	&QCheckBox::stateChanged,
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+	connect(_listFilterSyncCBox,	&QCheckBox::checkStateChanged,
 		this,			&KsMainWindow::_listFilterSync);
+// END of change
 
 	filter->addAction(&_showEventsAction);
 	filter->addAction(&_showTasksAction);
@@ -769,17 +772,23 @@ void KsMainWindow::_updateFilterMenu()
 		_filterSyncCBoxUpdate(kshark_ctx);
 }
 
-void KsMainWindow::_listFilterSync(int state)
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+void KsMainWindow::_listFilterSync(Qt::CheckState state)
 {
-	KsUtils::listFilterSync(state);
+	bool is_not_unchecked = (state != Qt::CheckState::Unchecked);
+	KsUtils::listFilterSync(is_not_unchecked);
 	_data.update();
 }
+// END of change
 
-void KsMainWindow::_graphFilterSync(int state)
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+void KsMainWindow::_graphFilterSync(Qt::CheckState state)
 {
-	KsUtils::graphFilterSync(state);
+	bool is_not_unchecked = (state != Qt::CheckState::Unchecked);
+	KsUtils::graphFilterSync(is_not_unchecked);
 	_data.update();
 }
+// END of change
 
 void KsMainWindow::_presetCBWidget(kshark_hash_id *showFilter,
 				   kshark_hash_id *hideFilter,
@@ -1681,12 +1690,16 @@ void KsMainWindow::_rootWarning()
 
 	QCheckBox cb("Don't show this message again.");
 
-	auto lamCbChec = [&] (int state) {
-		if (state)
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+	auto lamCbChec = [&] (Qt::CheckState state) {
+		if (state != Qt::CheckState::Unchecked)
 			_settings.setValue(cbFlag, true);
 	};
+// END of change
 
-	connect(&cb, &QCheckBox::stateChanged, lamCbChec);
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+	connect(&cb, &QCheckBox::checkStateChanged, lamCbChec);
+// END of change
 	warn.setCheckBox(&cb);
 	warn.exec();
 }

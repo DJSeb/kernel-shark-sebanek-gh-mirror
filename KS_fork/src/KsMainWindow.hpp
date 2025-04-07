@@ -236,9 +236,11 @@ private:
 
 	void _exportSession();
 
-	void _listFilterSync(int state);
+	//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+	void _listFilterSync(Qt::CheckState state);
 
-	void _graphFilterSync(int state);
+	void _graphFilterSync(Qt::CheckState state);
+	// END of change
 
 	void _presetCBWidget(kshark_hash_id *showFilter,
 			     kshark_hash_id *hideFilter,
