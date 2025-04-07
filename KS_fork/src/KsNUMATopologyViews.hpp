@@ -12,6 +12,7 @@
 
 // C++
 #include <vector>
+#include <optional>
 
 // Qt
 #include <QtWidgets>
@@ -71,7 +72,7 @@ public:
     int id() const { return _id; }
 };
 */
-class TopoCore {
+class TopologyCore {
     int _core_id;
     int _owner_node;
     int _owner_package;
@@ -79,12 +80,18 @@ class TopoCore {
     std::vector<int> _groups;
 };
 
-class NUMATopology {
+class MachineTopology {
     std::vector<int> _PUs; // Do I need this? eh....
-    std::vector<TopoCore> _cores;
+    std::vector<TopologyCore> _cores;
     std::vector<int> _packages; // ints are cpu ids
     std::vector<int> _nodes; // ints are cpu ids
     std::vector<void*> _groups; // this will be a bit more complicated, since groups cna group anything
+};
+
+class StreamTopologyConfig {
+    ViewType _applied_view;
+    std::string _topology_fpath;
+    std::optional<MachineTopology> _machine;
 };
 
 #endif
