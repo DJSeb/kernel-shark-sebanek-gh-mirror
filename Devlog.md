@@ -818,3 +818,42 @@ NUMA TV goals:
 - Create a connection between streams and topologies
 - Figure out control elements of the tree view, create more space in the graph
 - Figure out session support
+
+## 2025-04-07
+
+A little bit of work done on the NUMA TV config window, nothing too difficult.
+More importantly, the annoying warnings about deprecated stateChanged function
+have been resolved by just updating code with adjustments to the new function
+(which really just changes a state being represented by an int into an enum).
+Rejoice, for no more annoying warnings about things that should never have been
+present to begin with happen now.
+
+XML topology file examinations are underway. Because the XML is large and
+custom XML parsing seems like far too much work, external XML library will be
+used. For being light, fast and time-proven, [pugixml](https://pugixml.org) was
+ultimately chosen. This does mean KernelShark will gain a new dependency, but
+it's better than toiling with XML parsing, which has been solved N times over,
+instead of focusing on the actual project contents.
+
+...
+
+Scrath the previous paragraph altogether (but it is kept as something that
+happened). [Hwloc](https://www.open-mpi.org/projects/hwloc/), which produces
+the XML file, can also load the topology from it, so no XML parsing will be
+done, just operations with the hwloc library.
+
+It was added to CMake as a dependency, although how it works with it is not
+made clear on the internet.
+
+...
+
+One thing is clear though, the data structure seems too "rich" with data, so
+either some sort of slimming down via hwloc's API will be necessary or a custom
+class will store what's necessary for displaying the topology (which currently
+means nodes, their cores and the cores' physical units).
+
+Packages and groups won't be supported just yet, as they will be more of a
+completeness feature, not a necessity, since they are not outlined in the
+specification. There's also the question of nested NUMA nodes in NUMA nodes
+(which, sadly for the author, is possible), but let's focus on the easy
+situation first.
