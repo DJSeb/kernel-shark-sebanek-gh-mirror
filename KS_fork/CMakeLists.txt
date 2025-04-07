@@ -52,7 +52,7 @@ find_package(TraceCmd   REQUIRED)
 
 find_package(JSONC      REQUIRED)
 #NOTE: Changed here. (NUMA TV) (2025-04-07)
-find_package(PugiXML    REQUIRED)
+find_package(HWLOC    REQUIRED)
 # END of change
 
 find_package(Doxygen)
