@@ -1801,7 +1801,7 @@ void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 	//NUMA TV TODO: This whole function.
 	for (int i = 0; i < stream_numa.size(); i++) {
 		printf("Topology file: %s\n", stream_numa[i].second.second.toStdString().c_str());
-		printf("View mode: %d\n", stream_numa[i].second.first);
+		printf("View mode: %d\n", static_cast<int>(stream_numa[i].second.first));
 	}
 }
 // END of change
