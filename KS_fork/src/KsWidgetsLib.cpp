@@ -1729,19 +1729,21 @@ void KsNUMATVDialog::_setup_load_button_per_stream(QPushButton* load_btn,
 	file_dialog->setAcceptMode(QFileDialog::AcceptOpen);
 
 	// Connect the button to actions
-	connect(load_btn, &QPushButton::pressed,
-		[file_dialog, topo_file_location] {
-			file_dialog->show();
 
-			// Show the file dialog and get the selected files
-			if (file_dialog->exec() == QDialog::Accepted) {
-				QStringList selected_files = file_dialog->selectedFiles();
-				if (!selected_files.isEmpty()) {
-					// Set the label text to the selected file
-					topo_file_location->setText(selected_files[0]);
-				}
+	auto lamFileDialogAction = [file_dialog, topo_file_location] {
+		file_dialog->show();
+
+		// Show the file dialog and get the selected files
+		if (file_dialog->exec() == QDialog::Accepted) {
+			QStringList selected_files = file_dialog->selectedFiles();
+			if (!selected_files.isEmpty()) {
+				// Set the label text to the selected file
+				topo_file_location->setText(selected_files[0]);
 			}
-		});
+		}
+	};
+
+	connect(load_btn, &QPushButton::pressed, lamFileDialogAction);
 }
 // END of change
 
@@ -1752,19 +1754,32 @@ QLabel* KsNUMATVDialog::_setup_status_per_stream(QVBoxLayout* parent_layout) {
 	QVBoxLayout* status_topofile_layout = new QVBoxLayout{};
 	// NUMA TV TODO: Change status based on if machine topology is
 	// found.
+
 	// NUMA TV TODO: Try to color the status
 	QLabel* status = new QLabel{"NOT LOADED"};
-	// NUMA TV TODO: Link changes of this to file dialog.
+	QString status_txt_color;
+	// NUMA TV TODO: Color based on status of configuration
+	// Currently just red.
+	status_txt_color = "red";
+	status->setStyleSheet("QLabel { color : " + status_txt_color + "; }");
+	
 	QLabel* topo_file_location = new QLabel{"-"};
 	status_topofile_layout->addWidget(status);
 	status_topofile_layout->addStretch();
 	status_topofile_layout->addWidget(topo_file_location);
-	// NUMA TV TODO: Show a file dialog upon clicking this.
+
+	QPushButton* clear_btn = new QPushButton{"Clear"};
+	clear_btn->setFixedWidth(STRING_WIDTH("---Clear---"));
+	connect(clear_btn, &QPushButton::pressed, [topo_file_location] {
+		topo_file_location->setText("-");
+	});
+
 	QPushButton* load_btn = new QPushButton{"Load ..."};
 	_setup_load_button_per_stream(load_btn, topo_file_location);
 
 	stat_topo_load_layout->addLayout(status_topofile_layout);
 	stat_topo_load_layout->addStretch();
+	stat_topo_load_layout->addWidget(clear_btn);
 	stat_topo_load_layout->addWidget(load_btn);
 
 	parent_layout->addLayout(stat_topo_load_layout);
@@ -1870,10 +1885,12 @@ void KsNUMATVDialog::_apply_action()
 
 	for (auto const &stream_topos: _topology_choice) {
 		int sd = stream_topos.first;
-		ViewType view_type = static_cast<ViewType>(stream_topos.second.first->checkedId()); 
+
+		ViewType view_type = static_cast<ViewType>(stream_topos.second.first->checkedId());
 		const QString topo_fpath = stream_topos.second.second->text();
 		ViewTopologyPair view_topo = {view_type, topo_fpath};
 		StreamNUMATVSettings numatv_stream_settings = {sd, view_topo};
+
 		settings.append(numatv_stream_settings);
 	}
 
