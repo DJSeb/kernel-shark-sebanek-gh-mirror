@@ -1749,17 +1749,14 @@ void KsNUMATVDialog::_setup_load_button_per_stream(QPushButton* load_btn,
 
 //NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
 QLabel* KsNUMATVDialog::_setup_status_per_stream(QVBoxLayout* parent_layout) {
-	// Status, topofile and load button for file dialog setups
+	// Status, topology file and load button for file dialog setups
 	QHBoxLayout* stat_topo_load_layout = new QHBoxLayout{};
 	QVBoxLayout* status_topofile_layout = new QVBoxLayout{};
 	// NUMA TV TODO: Change status based on if machine topology is
 	// found.
 
-	// NUMA TV TODO: Try to color the status
 	QLabel* status = new QLabel{"NOT LOADED"};
 	QString status_txt_color;
-	// NUMA TV TODO: Color based on status of configuration
-	// Currently just red.
 	status_txt_color = "red";
 	status->setStyleSheet("QLabel { color : " + status_txt_color + "; }");
 	
@@ -1804,6 +1801,7 @@ void KsNUMATVDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx) {
     QVBoxLayout *list_layout = new QVBoxLayout{list_container};
 
 	// Setup stream couplebreak settings and checkboxes
+	int streams_processed = 0;
 	QVector<int> stream_ids = KsUtils::getStreamIdList(kshark_ctx);
 	for (auto const &sd: stream_ids) {
 		kshark_data_stream* stream = kshark_get_data_stream(kshark_ctx, sd);
@@ -1821,8 +1819,12 @@ void KsNUMATVDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx) {
 		// Add NUMA TV settings to inner vector
 		ViewTopologyGUIPair view_file_pair{radio_btn_grp, topo_file_location};
 		_topology_choice.append(StreamRadiosLabels{sd, view_file_pair});
-		// Denote each stream with a horizontal line
-		list_layout->addWidget(_get_hline(list_container));
+		
+		++streams_processed;
+		if (kshark_ctx->n_streams != streams_processed) {
+			// Divide streams with a horizontal line, except the last one
+			list_layout->addWidget(_get_hline(list_container));
+		}
 	}
 
 	// Create bonds for scroll area
