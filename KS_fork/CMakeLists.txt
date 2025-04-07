@@ -51,6 +51,9 @@ find_package(TraceFS    REQUIRED)
 find_package(TraceCmd   REQUIRED)
 
 find_package(JSONC      REQUIRED)
+#NOTE: Changed here. (NUMA TV) (2025-04-07)
+find_package(PugiXML    REQUIRED)
+# END of change
 
 find_package(Doxygen)
 
@@ -60,7 +63,7 @@ find_package(GLUT)
 
 set(KS_FONT FreeSans)
 if (NOT TT_FONT_FILE)
-  execute_process(COMMAND  bash "-c" "fc-list '${KS_FONT}' |grep -E ${KS_FONT}'(\.otf|\.ttf)' | cut -d':' -f 1 -z"
+  execute_process(COMMAND  bash "-c" "fc-list '${KS_FONT}' | grep -E ${KS_FONT}'(\.otf|\.ttf)' | cut -d':' -f 1 -z"
                     OUTPUT_VARIABLE TT_FONT_FILE)
 endif (NOT TT_FONT_FILE)
 
@@ -146,7 +149,7 @@ if (_DOXYGEN_DOC AND DOXYGEN_FOUND)
 
   message("\n doxygen documentation ...")
   add_custom_target(doc ALL)
-  add_custom_command(TARGET doc
+  add_custom_command(TARGET doc POST_BUILD
                        COMMAND doxygen dox_config > dox_build.log
                        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Documentation/doxygen)
 
