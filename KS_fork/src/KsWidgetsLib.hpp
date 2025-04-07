@@ -713,8 +713,11 @@ public:
  */
 class KsNUMATVDialog: public QDialog {
 	Q_OBJECT
-private: // Usings & private classes
+private: // Usings
+	/// @brief Simpler name to refer to the GUI elements representing
+	/// chosen configuration of NUMA Topology Views.
 	using ViewTopologyGUIPair = std::pair<QButtonGroup *, QLabel *>;
+
 	/// @brief Simpler name to refer to a stream (by its Id) per topology
 	/// file location (set in a label, represented by a pointer).
 	/// The label shall contain just a dash unless a file is loaded, then
