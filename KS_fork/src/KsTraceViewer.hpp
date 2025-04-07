@@ -170,7 +170,9 @@ private:
 
 	void _searchEditText(const QString &);
 
-	void _graphFollowsChanged(int);
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+	void _graphFollowsChanged(Qt::CheckState);
+// END of change
 
 	void _lockSearchPanel(bool lock);
 

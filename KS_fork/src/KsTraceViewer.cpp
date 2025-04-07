@@ -151,8 +151,10 @@ KsTraceViewer::KsTraceViewer(QWidget *parent)
 	_toolbar.addWidget(&_graphFollowsCheckBox);
 	_toolbar.addWidget(&_labelGrFollows);
 	_graphFollowsCheckBox.setCheckState(Qt::Checked);
-	connect(&_graphFollowsCheckBox,	&QCheckBox::stateChanged,
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+	connect(&_graphFollowsCheckBox,	&QCheckBox::checkStateChanged,
 		this,			&KsTraceViewer::_graphFollowsChanged);
+// END of change
 
 	/* Initialize the trace viewer. */
 	_view.horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
@@ -305,14 +307,16 @@ void KsTraceViewer::_searchEditText([[maybe_unused]] const QString &text)
 	_searchReset(); // The search has been modified.
 }
 
-void KsTraceViewer::_graphFollowsChanged(int state)
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+void KsTraceViewer::_graphFollowsChanged(Qt::CheckState state)
 {
 	int row = selectedRow();
 
-	_graphFollows = (bool) state;
+	_graphFollows = (state != Qt::CheckState::Unchecked);
 	if (_graphFollows && row != KS_NO_ROW_SELECTED)
 		emit select(row); // Send a signal to the Graph widget.
 }
+// END of change
 
 void KsTraceViewer::_search()
 {
