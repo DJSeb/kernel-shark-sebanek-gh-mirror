@@ -130,6 +130,12 @@ if (Qt6Widgets_FOUND AND TT_FONT_FILE)
                                      Qt6::OpenGLWidgets
                                      Qt6::StateMachine)
 
+    #NOTE: Changed here. (NUMA TV) (2025-04-08)
+    target_link_libraries(kshark-gui ${HWLOC_LINK_LIBRARIES})
+    target_include_directories(kshark-gui PRIVATE ${HWLOC_INCLUDE_DIRS})
+    target_compile_options(kshark-gui PRIVATE ${HWLOC_CFLAGS})
+    target_link_options(kshark-gui PRIVATE ${HWLOC_LDFLAGS})
+    # END of change
 
     set_target_properties(kshark-gui PROPERTIES  SUFFIX ".so.${KS_VERSION_STRING}")
 

@@ -1803,7 +1803,9 @@ void KsMainWindow::_showNUMATVConfig() {
 		this, &KsMainWindow::_updateNUMATVs); // Reactor + action on reactor
 
 	dialog->show();
-	// Update the graph with the new data, there were new entries created
+	
+	// Just update the graph, since it contains all the things we'll be changing, inner data
+	// are not affected.
 	_graph.update(&_data);
 }
 // END of change
@@ -1813,8 +1815,12 @@ void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 	// Nothing for now
 	//NUMA TV TODO: This whole function.
 	for (int i = 0; i < stream_numa.size(); i++) {
-		printf("Topology file: %s\n", stream_numa[i].second.second.toStdString().c_str());
-		printf("View mode: %d\n", static_cast<int>(stream_numa[i].second.first));
+		// Unpack the vector
+		int stream_id = stream_numa[i].first;
+		ViewType view = stream_numa[i].second.first;
+		QString topology_file = stream_numa[i].second.second;
+
+		NUMATVContext::get_instance().add_config(stream_id, view, topology_file);
 	}
 }
 // END of change
