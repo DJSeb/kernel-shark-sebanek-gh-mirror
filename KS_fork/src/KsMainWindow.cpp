@@ -1813,14 +1813,38 @@ void KsMainWindow::_showNUMATVConfig() {
 //NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
 void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 	// Nothing for now
-	//NUMA TV TODO: This whole function.
+	//NUMA TV TODO: Instead of deleting the whole cfg, just delete the topology
+	NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
 	for (int i = 0; i < stream_numa.size(); i++) {
 		// Unpack the vector
 		int stream_id = stream_numa[i].first;
 		ViewType view = stream_numa[i].second.first;
 		QString topology_file = stream_numa[i].second.second;
 
-		NUMATVContext::get_instance().add_config(stream_id, view, topology_file);
+
+		if (numatv_ctx.exists_for(stream_id)) {
+			if (QFile(topology_file).exists()) {
+				// Proper file was given + config exists, applying means updating the configuration
+				printf("[INFO] Chosen OLD+FILE branch for stream: '%d'\n", stream_id);
+				numatv_ctx.update_cfg(stream_id, view, topology_file.toStdString());
+			} else {
+				// No proper file was given, applying means clear of the topology ("I apply nothing")
+				// Topology-less configuration wouldn't be able to show the tree view.
+				printf("[INFO] Chosen OLD+NOFILE branch for stream: '%d'\n", stream_id);
+				numatv_ctx.delete_cfg(stream_id);
+			}
+		} else {
+			if (QFile(topology_file).exists()) {
+				// Proper file was given + no config exists, applying means creating new topology
+				printf("[INFO] Chosen NEW+FILE branch for stream: '%d'\n", stream_id);
+				numatv_ctx.add_config(stream_id, view, topology_file.toStdString());
+			} else {
+				printf("[INFO] Chosen NEW+NOFILE path for stream: '%d'\n", stream_id);
+			}
+			// If no proper file was given, we can expect default behaviour (no tree view)
+		}
+		
 	}
+
 }
 // END of change

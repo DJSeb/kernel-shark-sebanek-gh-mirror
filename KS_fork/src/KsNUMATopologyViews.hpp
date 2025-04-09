@@ -39,14 +39,17 @@ public:
     ViewType applied_view;
     std::string topo_fpath;
     hwloc_topology_t topology;
-public:
+public: // Creation, destruction, assigns
     StreamTopologyConfig();
     StreamTopologyConfig(ViewType view, const std::string& fpath);
     StreamTopologyConfig(const StreamTopologyConfig&);
     StreamTopologyConfig& operator=(const StreamTopologyConfig&);
-    StreamTopologyConfig(StreamTopologyConfig&&);
-    StreamTopologyConfig& operator=(StreamTopologyConfig&&);
+    StreamTopologyConfig(StreamTopologyConfig&&) noexcept;
+    StreamTopologyConfig& operator=(StreamTopologyConfig&&) noexcept;
     ~StreamTopologyConfig();
+public: //Business
+    const std::string& get_topo_fpath() const;
+    ViewType get_view_type() const;
 };
 
 class NUMATVContext {
@@ -56,7 +59,12 @@ private:
     using ActiveNUMATVs_t = std::unordered_map<int, StreamTopologyConfig>;
     ActiveNUMATVs_t _active_numatvs;
 public:
-    void add_config(int stream_id, ViewType view, const QString& topology_file);
+    void add_config(int stream_id, ViewType view, const std::string& topology_file);
+    int get_stream_topo_depth(int stream_id) const;
+    const StreamTopologyConfig* observe_stream_topo_cfg(int stream_id) const;
+    bool exists_for(int stream_id) const;
+    void delete_cfg(int stream_id);
+    void update_cfg(int stream_id, ViewType view, const std::string& topology_file);
 private:
     NUMATVContext();
     NUMATVContext(const NUMATVContext&) = delete;

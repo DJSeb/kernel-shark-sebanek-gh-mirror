@@ -1688,20 +1688,28 @@ void KsNUMATVDialog::_setup_stream_header(int stream_id, QVBoxLayout* parent_lay
 // END of change
 
 //NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
-QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(QVBoxLayout* parent_layout) {
+QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(QVBoxLayout* parent_layout, int stream_id) {
+	const NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
+	bool a_topo_exists = numatv_ctx.exists_for(stream_id);
+
+	ViewType applied_view = (a_topo_exists) ?
+		numatv_ctx.observe_stream_topo_cfg(stream_id)->get_view_type() :
+		ViewType::DEFAULT;
+
 	// Radio buttons
 	QLabel* views_header = new QLabel{"Choose view to use in CPU plots:"};
 	QHBoxLayout* radio_btns_layout = new QHBoxLayout{};
 	QButtonGroup* applied_view_grp = new QButtonGroup{};
 	QRadioButton* default_view = new QRadioButton{"Default"};
 	QRadioButton* tree_view = new QRadioButton{"NUMA tree view"};
-	default_view->setChecked(true); // Sane default (standard KShark behaviour)
 	//
 	applied_view_grp->addButton(default_view,
 		static_cast<int>(ViewType::DEFAULT));
 	applied_view_grp->addButton(tree_view,
 		static_cast<int>(ViewType::TREE));
 	applied_view_grp->setParent(radio_btns_layout);
+	//
+	applied_view_grp->button(static_cast<int>(applied_view))->setChecked(true);
 	//
 	radio_btns_layout->addWidget(default_view);
 	radio_btns_layout->addStretch();
@@ -1716,8 +1724,8 @@ QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(QVBoxLayout* parent_layou
 
 //NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
 void KsNUMATVDialog::_setup_load_button_per_stream(QPushButton* load_btn,
-	QLabel* topo_file_location)
-{
+	QLabel* topo_file_location, QString last_fpath) {
+	
 	// Load button
 	load_btn->setFixedWidth(STRING_WIDTH("---Load ...---"));
 	load_btn->setAutoDefault(false);
@@ -1725,8 +1733,16 @@ void KsNUMATVDialog::_setup_load_button_per_stream(QPushButton* load_btn,
 	QFileDialog* file_dialog = new QFileDialog{load_btn};
 	file_dialog->setFileMode(QFileDialog::ExistingFiles);
 	file_dialog->setNameFilter("*.xml");
-	file_dialog->setDirectory(QDir::homePath());
 	file_dialog->setAcceptMode(QFileDialog::AcceptOpen);
+
+	if (last_fpath != "-") {
+		// Set the last used file path as the starting directory
+		QDir dir = QFileInfo(last_fpath).absoluteDir();
+		file_dialog->setDirectory(dir);
+	} else {
+		// Set the home directory as the starting directory
+		file_dialog->setDirectory(QDir::homePath());
+	}
 
 	// Connect the button to actions
 
@@ -1748,31 +1764,46 @@ void KsNUMATVDialog::_setup_load_button_per_stream(QPushButton* load_btn,
 // END of change
 
 //NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
-QLabel* KsNUMATVDialog::_setup_status_per_stream(QVBoxLayout* parent_layout) {
+QLabel* KsNUMATVDialog::_setup_status_per_stream(QVBoxLayout* parent_layout, int stream_id) {
+	const NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
+
 	// Status, topology file and load button for file dialog setups
 	QHBoxLayout* stat_topo_load_layout = new QHBoxLayout{};
 	QVBoxLayout* status_topofile_layout = new QVBoxLayout{};
-	// NUMA TV TODO: Change status based on if machine topology is
-	// found.
+	
+	bool a_topo_exists = numatv_ctx.exists_for(stream_id);
+	QString topo_fpath = "-";
+	QString status_text = "NOT LOADED";
+	QString status_txt_color = "red";
 
-	QLabel* status = new QLabel{"NOT LOADED"};
-	QString status_txt_color;
-	status_txt_color = "red";
+	if (a_topo_exists) {
+		status_text = "LOADED";
+		status_txt_color = "green";
+
+		const StreamTopologyConfig* s_topo_cfg = numatv_ctx.observe_stream_topo_cfg(stream_id);
+		const std::string& topol_fpath = s_topo_cfg->get_topo_fpath();
+		topo_fpath = QString::fromStdString(topol_fpath);
+	}
+
+	QLabel* status = new QLabel{status_text};
 	status->setStyleSheet("QLabel { color : " + status_txt_color + "; }");
 	
-	QLabel* topo_file_location = new QLabel{"-"};
+	QLabel* topo_file_location = new QLabel{topo_fpath};
+
 	status_topofile_layout->addWidget(status);
 	status_topofile_layout->addStretch();
 	status_topofile_layout->addWidget(topo_file_location);
 
 	QPushButton* clear_btn = new QPushButton{"Clear"};
 	clear_btn->setFixedWidth(STRING_WIDTH("---Clear---"));
-	connect(clear_btn, &QPushButton::pressed, [topo_file_location] {
+	connect(clear_btn, &QPushButton::pressed, [topo_file_location, status] {
 		topo_file_location->setText("-");
+		status->setText("NOT LOADED");
+		status->setStyleSheet("QLabel { color : red; }");
 	});
 
 	QPushButton* load_btn = new QPushButton{"Load ..."};
-	_setup_load_button_per_stream(load_btn, topo_file_location);
+	_setup_load_button_per_stream(load_btn, topo_file_location, topo_fpath);
 
 	stat_topo_load_layout->addLayout(status_topofile_layout);
 	stat_topo_load_layout->addStretch();
@@ -1804,17 +1835,9 @@ void KsNUMATVDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx) {
 	int streams_processed = 0;
 	QVector<int> stream_ids = KsUtils::getStreamIdList(kshark_ctx);
 	for (auto const &sd: stream_ids) {
-		kshark_data_stream* stream = kshark_get_data_stream(kshark_ctx, sd);
-
-		// NUMA TV TODO: Load current settings per stream
-		// stream->id, get_machine_topology(id) and so on
-
 		_setup_stream_header(sd, list_layout);
-		QLabel* topo_file_location = _setup_status_per_stream(list_layout);
-		QButtonGroup* radio_btn_grp = _setup_radios_per_stream(list_layout);
-
-		// NUMA TV TODO: Set GUI elements per current stream settings
-		// stream->id, get_machine_topology(id) and so on
+		QLabel* topo_file_location = _setup_status_per_stream(list_layout, sd);
+		QButtonGroup* radio_btn_grp = _setup_radios_per_stream(list_layout, sd);
 		
 		// Add NUMA TV settings to inner vector
 		ViewTopologyGUIPair view_file_pair{radio_btn_grp, topo_file_location};
