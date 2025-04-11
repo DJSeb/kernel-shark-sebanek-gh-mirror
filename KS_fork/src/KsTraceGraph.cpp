@@ -424,8 +424,11 @@ void KsTraceGraph::_markerReDraw()
 void KsTraceGraph::cpuReDraw(int sd, QVector<int> v)
 {
 	startOfWork(KsWidgetsLib::KsDataWork::EditPlotList);
-	if (_glWindow._streamPlots.contains(sd))
-		_glWindow._streamPlots[sd]._cpuList = v;
+	if (_glWindow._streamPlots.contains(sd)) {
+		QVector<int> reversedList = QVector<int>(v);
+		std::reverse(reversedList.begin(), reversedList.end());
+		_glWindow._streamPlots[sd]._cpuList = reversedList;
+	}
 
 	_selfUpdate();
 	endOfWork(KsWidgetsLib::KsDataWork::EditPlotList);
@@ -482,6 +485,7 @@ void KsTraceGraph::addCPUPlot(int sd, int cpu)
 		return;
 
 	list.append(cpu);
+	// NUMA TV TODO: Do no sort if NUMA view is on
 	std::sort(list.begin(), list.end());
 
 	_selfUpdate();

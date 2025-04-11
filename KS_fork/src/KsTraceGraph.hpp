@@ -56,23 +56,23 @@ public:
 
 	void markEntry(size_t);
 
-	void cpuReDraw(int sd, QVector<int> cpus);
+	void cpuReDraw(int sd, QVector<int> cpus);  // NUMA TV TODO: Modify this
 
 	void taskReDraw(int sd, QVector<int> pids);
 
 	void comboReDraw(int sd, QVector<int> v);
 
-	void addCPUPlot(int sd, int cpu);
+	void addCPUPlot(int sd, int cpu); // NUMA TV TODO: Modify this
 
 	void addTaskPlot(int sd, int pid);
 
-	void removeCPUPlot(int sd, int cpu);
+	void removeCPUPlot(int sd, int cpu);  // NUMA TV TODO: Modify this
 
 	void removeTaskPlot(int sd, int pid);
 
 	void update(KsDataStore *data);
 
-	void updateGeom();
+	void updateGeom();  // NUMA TV TODO: Modify this
 
 	void resizeEvent(QResizeEvent* event) override;
 
