@@ -857,3 +857,18 @@ completeness feature, not a necessity, since they are not outlined in the
 specification. There's also the question of nested NUMA nodes in NUMA nodes
 (which, sadly for the author, is possible), but let's focus on the easy
 situation first.
+
+## 2025-04-08 - 2025-04-09
+
+NUMA TV GUI work, its reactivity to the user, hwloc topologies and all that was
+worked on. Not much to say, as it was mostly trial and error regarding restricted
+pointers, lifetimes and expected behaviours and nothing too interesting except
+endless debugging took place.
+
+## 2025-04-10
+
+Supervisor sent review of couplebreak and co., only real bug is that the CPU
+runtime rectangles shouldn't appear after sched_switch's stacktrace and after
+sched_waking target event. Will investigate later, after NUMA most likely, to
+search for a fix of these. Otherwise, it was apparently very good, which is
+great to read, after so much work.
