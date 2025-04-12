@@ -82,7 +82,6 @@ StreamTopologyConfig::StreamTopologyConfig()
 StreamTopologyConfig::StreamTopologyConfig(ViewType view, const std::string& fpath) {
     applied_view = view;
     topo_fpath = fpath;
-    int depth;
     int result;
 
     result = hwloc_topology_init(&topology);
@@ -107,16 +106,9 @@ StreamTopologyConfig::StreamTopologyConfig(ViewType view, const std::string& fpa
         topology = nullptr;
         return;
     }
-
-    printf("[SUCCESS] View mode: %d\n", static_cast<int>(view));
-    printf("[SUCCESS] Topology file: %s\n", topo_fpath.c_str());
-    
-    depth = hwloc_topology_get_depth(topology);
-    printf("[SUCCESS] Depth of topology: %d\n", depth);
 }
 
 StreamTopologyConfig::StreamTopologyConfig(const StreamTopologyConfig& other) {
-    printf("[DEBUG] Copy constructor called.\n");
     applied_view = other.applied_view;
     topo_fpath = other.topo_fpath;
     topology = nullptr;
@@ -131,7 +123,6 @@ StreamTopologyConfig::StreamTopologyConfig(const StreamTopologyConfig& other) {
 }
 
 StreamTopologyConfig& StreamTopologyConfig::operator=(const StreamTopologyConfig& other) {
-    printf("[DEBUG] Copy assignment operator called.\n");
     if (this != &other) {
         applied_view = other.applied_view;
         topo_fpath = other.topo_fpath;
@@ -155,12 +146,10 @@ StreamTopologyConfig& StreamTopologyConfig::operator=(const StreamTopologyConfig
 StreamTopologyConfig::StreamTopologyConfig(StreamTopologyConfig&& other) noexcept
 : applied_view(other.applied_view),
   topo_fpath(std::move(other.topo_fpath)), topology(other.topology) {
-    printf("[DEBUG] Move constructor called.\n");
     other.topology = nullptr;
 }
 
 StreamTopologyConfig& StreamTopologyConfig::operator=(StreamTopologyConfig&& other) noexcept {
-    printf("[DEBUG] Move assignment operator called.\n");
     if (this != &other) {
         applied_view = other.applied_view;
         topo_fpath = std::move(other.topo_fpath);
@@ -172,11 +161,8 @@ StreamTopologyConfig& StreamTopologyConfig::operator=(StreamTopologyConfig&& oth
 
 StreamTopologyConfig::~StreamTopologyConfig() {
     if (topology != nullptr) {
-        printf("Destroying topology for '%s' ...\n", topo_fpath.c_str());
         hwloc_topology_destroy(topology);
         topology = nullptr;
-    } else {
-        printf("Topology for '%s' already destroyed.\n", topo_fpath.c_str());
     }
 }
 
