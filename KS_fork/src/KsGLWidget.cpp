@@ -13,11 +13,19 @@
 #include <GL/glut.h>
 #include <GL/gl.h>
 
+// hwloc
+//NOTE: Changed here. (NUMA TV) (2025-04-12)
+//#include <hwloc.h>
+// END of change
+
 // KernelShark
 #include "libkshark-plugin.h"
 #include "KsGLWidget.hpp"
 #include "KsUtils.hpp"
 #include "KsPlugins.hpp"
+//NOTE: Changed here. (NUMA TV) (2025-04-12)
+#include "KsNUMATopologyViews.hpp"
+// END of change
 
 /** A stream operator for converting vector of integers into KsPlotEntry. */
 KsPlotEntry &operator <<(KsPlotEntry &plot, QVector<int> &v)
@@ -852,7 +860,24 @@ KsPlot::Graph *KsGLWidget::_newCPUGraph(int sd, int cpu)
 	graph = new KsPlot::Graph(_model.histo(), &_pidColors, &_pidColors);
 	graph->setIdleSuppressed(true, stream->idle_pid);
 	graph->setHeight(KS_GRAPH_HEIGHT);
-	graph->setLabelText(KsUtils::cpuPlotName(cpu).toStdString());
+	// NUMA TV TODO: Maybe modify this.
+	std::string cpu_name = KsUtils::cpuPlotName(cpu).toStdString();
+	NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
+	if (numatv_ctx.exists_for(sd)) {
+		const StreamTopologyConfig* stc_observer = numatv_ctx.observe_stream_topo_cfg(sd);
+		if (stc_observer->get_view_type() != ViewType::DEFAULT) {
+			cpu_name.append("[NN(s): ");
+			printf("[INFO] Attempting to get NUMA nodes for CPU %d\n", cpu);
+			hwloc_obj_t cpu_as_pu = hwloc_get_pu_obj_by_os_index(stc_observer->topology, (unsigned int)cpu);
+			unsigned int id = 69;
+			hwloc_bitmap_foreach_begin(id, cpu_as_pu->nodeset);
+			cpu_name.append(std::to_string(id));
+			cpu_name.append(", ");
+			hwloc_bitmap_foreach_end();
+			cpu_name.append("]");
+		}
+	}
+	graph->setLabelText(cpu_name);
 
 	col = kshark_find_data_collection(kshark_ctx->collections,
 					  KsUtils::matchCPUVisible,

@@ -425,14 +425,8 @@ void KsTraceGraph::cpuReDraw(int sd, QVector<int> v)
 {
 	startOfWork(KsWidgetsLib::KsDataWork::EditPlotList);
 	if (_glWindow._streamPlots.contains(sd)) {
-		// NUMA TV TODO: Don't reverse, but instead map according to
-		// nodes, cores and PU os indices
-		QVector<int> reversedList = QVector<int>{};
-		reversedList.reserve(v.size());
-		for (auto it = v.rbegin(); it != v.rend(); ++it)
-			reversedList.append(*it);
-		
-		_glWindow._streamPlots[sd]._cpuList = reversedList;
+		// NUMA TV TODO: Rearrange CPUs here
+		_glWindow._streamPlots[sd]._cpuList = v;
 	}
 
 	_selfUpdate();
