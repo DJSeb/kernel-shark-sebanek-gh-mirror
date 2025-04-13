@@ -565,7 +565,7 @@ public:
 
 	//NOTE: Changed here. ("NUMA TV") (2025-04-13)
 	/** @brief Get the horizontal coordinate of the Graph's base. */ 
-	int baseX() const {return _bins[0]._base.x();}
+	int baseX() const {return _bins[0]._base.x() - _labelSize - _hMargin;}
 	// END of change
 
 	void setHeight(int h);
