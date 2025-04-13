@@ -561,7 +561,12 @@ public:
 	void setBase(int b);
 
 	/** @brief Get the vertical coordinate of the Graph's base. */
-	int base() const {return _bins[0]._base.y();}
+	int baseY() const {return _bins[0]._base.y();}
+
+	//NOTE: Changed here. ("NUMA TV") (2025-04-13)
+	/** @brief Get the horizontal coordinate of the Graph's base. */ 
+	int baseX() const {return _bins[0]._base.x();}
+	// END of change
 
 	void setHeight(int h);
 

@@ -969,7 +969,7 @@ void Graph::setLabelAppearance(ksplot_font *f, Color col, int lSize, int hMargin
 	_labelSize = lSize;
 	_hMargin = hMargin;
 
-	_label.setPos({_hMargin, base()});
+	_label.setPos({_hMargin, baseY()});
 	_label.setFont(f);
 	_label.setBoxAppearance(col, lSize, height());
 

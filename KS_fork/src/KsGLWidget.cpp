@@ -82,10 +82,27 @@ void KsGLWidget::freePluginShapes()
 	}
 }
 
+//NOTE: Changed here. (NUMA TV) (2025-04-12)
+void KsGLWidget::_freeTopoShapes()
+{
+	while(!_topoShapes.empty()) {
+		int key = _topoShapes.begin()->first;
+		auto s = _topoShapes.begin()->second;
+		if (s != nullptr)
+			delete s;
+		s = nullptr;
+		_topoShapes.erase(key);
+	}
+}
+// END of change
+
 KsGLWidget::~KsGLWidget()
 {
 	_freeGraphs();
 	freePluginShapes();
+	//NOTE: Changed here. (NUMA TV) (2025-04-12)
+	_freeTopoShapes();
+	// END of change
 }
 
 /** Reimplemented function used to set up all required OpenGL resources. */
@@ -160,6 +177,18 @@ void KsGLWidget::paintGL()
 		s->draw();
 	}
 
+	//NOTE: Changed here. (NUMA TV) (2025-04-12)
+	for (auto const &ts: _topoShapes) {
+		if (!ts.second)
+			continue;
+
+		if (ts.second->_size < 0)
+			ts.second->_size = size + abs(ts.second->_size + 1);
+
+		ts.second->draw();
+	}
+	// END of change
+
 	/*
 	 * Update and draw the markers. Make sure that the active marker
 	 * is drawn on top.
@@ -174,6 +203,11 @@ void KsGLWidget::render()
 {
 	/* Process and draw all graphs by using the built-in logic. */
 	_makeGraphs();
+	
+	//NOTE: Changed here. (NUMA TV) (2025-04-12)
+	/** Process and draw all topology-specific shapes */
+	//_makeTopoShapes();
+	// END of change
 
 	/* Process and draw all plugin-specific shapes. */
 	_makePluginShapes();
@@ -564,14 +598,14 @@ void KsGLWidget::setMarkPoints(const KsDataStore &data, KsGraphMark *mark)
 
 	for (int i = 0; i < _streamPlots[sd]._cpuList.count(); ++i) {
 		if (_streamPlots[sd]._cpuList[i] == e->cpu) {
-			mark->_mark.setCPUY(_streamPlots[sd]._cpuGraphs[i]->base());
+			mark->_mark.setCPUY(_streamPlots[sd]._cpuGraphs[i]->baseY());
 			mark->_mark.setCPUVisible(true);
 		}
 	}
 
 	for (int i = 0; i < _streamPlots[sd]._taskList.count(); ++i) {
 		if (_streamPlots[sd]._taskList[i] == e->pid) {
-			mark->_mark.setTaskY(_streamPlots[sd]._taskGraphs[i]->base());
+			mark->_mark.setTaskY(_streamPlots[sd]._taskGraphs[i]->baseY());
 			mark->_mark.setTaskVisible(true);
 		}
 	}
@@ -583,11 +617,11 @@ void KsGLWidget::setMarkPoints(const KsDataStore &data, KsGraphMark *mark)
 
 			if (p._type & KSHARK_CPU_DRAW &&
 			    p._id == e->cpu) {
-				mark->_mark.setComboY(p.base());
+				mark->_mark.setComboY(p.baseY());
 				mark->_mark.setComboVisible(true);
 			} else if (p._type & KSHARK_TASK_DRAW &&
 				   p._id == e->pid) {
-				mark->_mark.setComboY(p.base());
+				mark->_mark.setComboY(p.baseY());
 				mark->_mark.setComboVisible(true);
 			}
 		}
@@ -702,6 +736,9 @@ void KsGLWidget::_makeGraphs()
 
 	/* The very first thing to do is to clean up. */
 	_freeGraphs();
+	//NOTE: Changed here. (NUMA TV) (2025-04-12)
+	_freeTopoShapes();
+	// END of change
 
 	if (!_data || !_data->size())
 		return;
@@ -744,6 +781,27 @@ void KsGLWidget::_makeGraphs()
 		it.value()._cpuGraphs = {};
 		for (auto const &cpu: it.value()._cpuList) {
 			g = lamAddGraph(sd, _newCPUGraph(sd, cpu), _vSpacing);
+			//NOTE: Change here. (NUMA TV) (2025-04-12)
+			NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
+			if (numatv_ctx.exists_for(sd)) {
+				const StreamTopologyConfig* stc_observer = numatv_ctx.observe_stream_topo_cfg(sd);
+				if (stc_observer->get_view_type() != ViewType::DEFAULT) {
+					std::string pu_name = "PU " + std::to_string(cpu);
+					g->setLabelText(pu_name);
+					KsPlot::Line* core_line = new KsPlot::Line();
+					KsPlot::Point pu_point = {g->baseX(), g->baseY()};
+					core_line->setA(pu_point.x(), pu_point.y());
+					core_line->setB(pu_point.x() - 50, pu_point.y() + 20);
+					core_line->_color = {255, 0, 0};
+					core_line->_visible = true;
+					core_line->_size = 4.0;
+					if (_topoShapes.count(cpu) != 0) {
+						delete _topoShapes[cpu];
+					}
+					_topoShapes[cpu] = core_line;
+				}
+			}
+			// END of change
 			it.value()._cpuGraphs.append(g);
 		}
 
@@ -842,6 +900,10 @@ void KsGLWidget::_makePluginShapes()
 	}
 }
 
+//void KsGLWidget::_makeTopoShapes() {
+//
+//}
+
 KsPlot::Graph *KsGLWidget::_newCPUGraph(int sd, int cpu)
 {
 	KsPlot::Graph *graph = nullptr;
@@ -860,24 +922,7 @@ KsPlot::Graph *KsGLWidget::_newCPUGraph(int sd, int cpu)
 	graph = new KsPlot::Graph(_model.histo(), &_pidColors, &_pidColors);
 	graph->setIdleSuppressed(true, stream->idle_pid);
 	graph->setHeight(KS_GRAPH_HEIGHT);
-	// NUMA TV TODO: Maybe modify this.
-	std::string cpu_name = KsUtils::cpuPlotName(cpu).toStdString();
-	NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
-	if (numatv_ctx.exists_for(sd)) {
-		const StreamTopologyConfig* stc_observer = numatv_ctx.observe_stream_topo_cfg(sd);
-		if (stc_observer->get_view_type() != ViewType::DEFAULT) {
-			cpu_name.append("[NN(s): ");
-			printf("[INFO] Attempting to get NUMA nodes for CPU %d\n", cpu);
-			hwloc_obj_t cpu_as_pu = hwloc_get_pu_obj_by_os_index(stc_observer->topology, (unsigned int)cpu);
-			unsigned int id = 69;
-			hwloc_bitmap_foreach_begin(id, cpu_as_pu->nodeset);
-			cpu_name.append(std::to_string(id));
-			cpu_name.append(", ");
-			hwloc_bitmap_foreach_end();
-			cpu_name.append("]");
-		}
-	}
-	graph->setLabelText(cpu_name);
+	graph->setLabelText(KsUtils::cpuPlotName(cpu).toStdString());
 
 	col = kshark_find_data_collection(kshark_ctx->collections,
 					  KsUtils::matchCPUVisible,
@@ -1259,7 +1304,7 @@ bool KsGLWidget::getPlotInfo(const QPoint &point, int *sd, int *cpu, int *pid)
 	for (auto it = _streamPlots.constBegin(); it != _streamPlots.constEnd(); ++it) {
 		n = it.value()._cpuList.count();
 		for (int i = 0; i < n; ++i) {
-			base = it.value()._cpuGraphs[i]->base();
+			base = it.value()._cpuGraphs[i]->baseY();
 			if (base - KS_GRAPH_HEIGHT < point.y() &&
 			    point.y() < base) {
 				*sd = it.key();
@@ -1271,7 +1316,7 @@ bool KsGLWidget::getPlotInfo(const QPoint &point, int *sd, int *cpu, int *pid)
 
 		n = it.value()._taskList.count();
 		for (int i = 0; i < n; ++i) {
-			base = it.value()._taskGraphs[i]->base();
+			base = it.value()._taskGraphs[i]->baseY();
 			if (base - KS_GRAPH_HEIGHT < point.y() &&
 			    point.y() < base) {
 				*sd = it.key();
@@ -1284,7 +1329,7 @@ bool KsGLWidget::getPlotInfo(const QPoint &point, int *sd, int *cpu, int *pid)
 
 	for (auto const &c: _comboPlots) {
 		for (auto const &p: c) {
-			base = p.base();
+			base = p.baseY();
 			if (base - KS_GRAPH_HEIGHT < point.y() && point.y() < base) {
 				*sd = p._streamId;
 				if (p._type & KSHARK_CPU_DRAW)
