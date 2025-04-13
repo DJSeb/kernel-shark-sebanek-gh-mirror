@@ -872,3 +872,34 @@ runtime rectangles shouldn't appear after sched_switch's stacktrace and after
 sched_waking target event. Will investigate later, after NUMA most likely, to
 search for a fix of these. Otherwise, it was apparently very good, which is
 great to read, after so much work.
+
+## 2025-04-11 - 2025-04-13
+
+Lot of experimentation with how to draw the topology - most unsuccessful.
+Anchoring some drawing to another inside the GL widget is simple enough, but
+the biggest problem currently is creating space for the topology part. The idea
+was either to make some Qt thing or creating it inside the GL canvas itself.
+
+Both Qt and GL approaches have resulted in failure. Qt moreso, as it completely
+cut off the graph on the left, making everything on that side useless. The GL
+approach was a little better, but shifting every drawing proved to be not enough
+as the drawing's positions are not shifted, leading into inconsistencies with
+what's displayed and where it is in terms of coordinates. The right part of the
+graph also keeps getting cut off, with no obvious fix.
+
+However, the GL approach will most likely be chosen, as it contains the necessary
+contexts for the tree view and makes visualisation less confusing, albeit a
+massive chore, because a lot of positioning will now have to somehow get a
+"topology correction offset".
+
+...
+
+Actually, this approach also seems to have some inherent problems, like there
+just not existing any way to sanely reposition everything. It truly feels like
+nothing works.
+
+Really unfun to be stuck. It feels like being trapped in a never-resolving hell.
+
+...
+
+Honestly, no idea this will be solved. Praying for a miracle, currently.
