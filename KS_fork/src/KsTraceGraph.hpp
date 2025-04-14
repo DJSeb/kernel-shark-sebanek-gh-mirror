@@ -139,6 +139,8 @@ private:
 	//NOTE: Changed here. (NUMA TV) (2025-04-12)
 	QHBoxLayout* _glWrapper;
 
+	QScrollArea _topoScrollArea;
+
 	QWidget	_topoSpace;
 	// END of change
 

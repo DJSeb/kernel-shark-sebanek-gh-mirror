@@ -33,7 +33,8 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
   _labelI3("", this),
   _labelI4("", this),
   _labelI5("", this),
-  _topoSpace(this),
+  _topoScrollArea(this),
+  _topoSpace(&_topoScrollArea),
   _scrollArea(this),
   _glWindow(&_scrollArea),
   _mState(nullptr),
@@ -110,14 +111,25 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 		this,		&KsTraceGraph::_onCustomContextMenu);
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-12)
-	_topoSpace.setMinimumWidth(200);
+	//_topoSpace.setMinimumWidth(200);
 	_topoSpace.setContentsMargins(0, 0, 0, 0);
 	_topoSpace.setStyleSheet("QWidget {background-color : white;}");
 	_topoSpace.setAttribute(Qt::WA_TransparentForMouseEvents, true);
+	auto lol = new QVBoxLayout();
+	for (int i = 0; i < 1000; ++i) {
+		lol->addWidget(new QLabel("Label " + QString::number(i)));
+	}
+	_topoSpace.setLayout(lol);
+
+	_topoScrollArea.setWidget(&_topoSpace);
+	_topoScrollArea.setFixedWidth(300);
+	_topoScrollArea.setWidgetResizable(true);
+	_topoScrollArea.setStyleSheet("QScrollArea {background-color : red;}");
 
 	_glWrapper = new QHBoxLayout();
-	_glWrapper->addWidget(&_topoSpace);
+	_glWrapper->addWidget(&_topoScrollArea);
 	_glWrapper->addWidget(&_scrollArea);
+	_glWrapper->setSpacing(0);
 
 	_scrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	_scrollArea.setWidget(&_glWindow);
@@ -580,7 +592,7 @@ void KsTraceGraph::updateGeom()
 
 	/* Set the size of the Scroll Area. */
 	saWidth = width() - _layout.contentsMargins().left() -
-				_layout.contentsMargins().right() - _topoSpace.width();
+				_layout.contentsMargins().right() - _topoScrollArea.width();
 
 	saHeight = height() - _pointerBar.height() -
 			      _navigationBar.height() -
