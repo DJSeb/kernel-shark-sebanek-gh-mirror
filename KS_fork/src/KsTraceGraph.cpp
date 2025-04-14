@@ -115,11 +115,11 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 	_topoSpace.setContentsMargins(0, 0, 0, 0);
 	_topoSpace.setStyleSheet("QWidget {background-color : white;}");
 	_topoSpace.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-	auto lol = new QVBoxLayout();
-	for (int i = 0; i < 1000; ++i) {
-		lol->addWidget(new QLabel("Label " + QString::number(i)));
-	}
-	_topoSpace.setLayout(lol);
+	//auto lol = new QVBoxLayout();
+	//for (int i = 0; i < 1000; ++i) {
+	//	lol->addWidget(new QLabel("Label " + QString::number(i)));
+	//}
+	//_topoSpace.setLayout(lol);
 
 	_topoScrollArea.setWidget(&_topoSpace);
 	_topoScrollArea.setFixedWidth(300);
@@ -612,6 +612,7 @@ void KsTraceGraph::updateGeom()
 			qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
 
 	_glWindow.resize(dwWidth, _glWindow.height());
+	_topoSpace.setFixedHeight(_glWindow.height());
 
 	/* Set the minimum height of the Graph widget. */
 	hMin = _glWindow.height() +
