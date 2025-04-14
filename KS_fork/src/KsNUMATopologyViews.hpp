@@ -55,6 +55,7 @@ public: //Business
 class NUMATVContext {
 public:
     static NUMATVContext& get_instance();
+    inline static float opengl_x_correction{100.f};
 private:
     using ActiveNUMATVs_t = std::unordered_map<int, StreamTopologyConfig>;
     ActiveNUMATVs_t _active_numatvs;

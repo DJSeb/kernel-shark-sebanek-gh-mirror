@@ -791,7 +791,7 @@ void KsGLWidget::_makeGraphs()
 					KsPlot::Line* core_line = new KsPlot::Line();
 					KsPlot::Point pu_point = {g->baseX(), g->baseY()};
 					core_line->setA(pu_point.x(), pu_point.y());
-					core_line->setB(pu_point.x() - 50, pu_point.y() + 20);
+					core_line->setB(pu_point.x() - 500, pu_point.y());
 					core_line->_color = {255, 0, 0};
 					core_line->_visible = true;
 					core_line->_size = 4.0;
@@ -899,10 +899,6 @@ void KsGLWidget::_makePluginShapes()
 		}
 	}
 }
-
-//void KsGLWidget::_makeTopoShapes() {
-//
-//}
 
 KsPlot::Graph *KsGLWidget::_newCPUGraph(int sd, int cpu)
 {

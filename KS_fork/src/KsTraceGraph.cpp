@@ -33,6 +33,7 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
   _labelI3("", this),
   _labelI4("", this),
   _labelI5("", this),
+  _topoSpace(this),
   _scrollArea(this),
   _glWindow(&_scrollArea),
   _mState(nullptr),
@@ -108,8 +109,19 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 	connect(&_glWindow,	&QWidget::customContextMenuRequested,
 		this,		&KsTraceGraph::_onCustomContextMenu);
 
+	//NOTE: Changed here. (NUMA TV) (2025-04-12)
+	_topoSpace.setMinimumWidth(200);
+	_topoSpace.setContentsMargins(0, 0, 0, 0);
+	_topoSpace.setStyleSheet("QWidget {background-color : white;}");
+	_topoSpace.setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+	_glWrapper = new QHBoxLayout();
+	_glWrapper->addWidget(&_topoSpace);
+	_glWrapper->addWidget(&_scrollArea);
+
 	_scrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	_scrollArea.setWidget(&_glWindow);
+	// END of change
 
 	lamMakeNavButton(&_scrollLeftButton);
 	connect(&_scrollLeftButton,	&QPushButton::pressed,
@@ -139,7 +151,7 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 
 	_layout.addWidget(&_pointerBar);
 	_layout.addWidget(&_navigationBar);
-	_layout.addWidget(&_scrollArea);
+	_layout.addLayout(_glWrapper);
 	this->setLayout(&_layout);
 	updateGeom();
 }
@@ -568,7 +580,7 @@ void KsTraceGraph::updateGeom()
 
 	/* Set the size of the Scroll Area. */
 	saWidth = width() - _layout.contentsMargins().left() -
-			    _layout.contentsMargins().right();
+				_layout.contentsMargins().right() - _topoSpace.width();
 
 	saHeight = height() - _pointerBar.height() -
 			      _navigationBar.height() -

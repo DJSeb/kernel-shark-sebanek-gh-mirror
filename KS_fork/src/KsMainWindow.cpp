@@ -1821,7 +1821,6 @@ void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 		ViewType view = stream_numa[i].second.first;
 		QString topology_file = stream_numa[i].second.second;
 
-
 		if (numatv_ctx.exists_for(stream_id)) {
 			if (QFile(topology_file).exists()) {
 				// Proper file was given + config exists, applying means updating the configuration

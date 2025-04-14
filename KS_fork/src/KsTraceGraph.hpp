@@ -136,6 +136,12 @@ private:
 	QLabel	_labelP1, _labelP2,				  // Pointer
 		_labelI1, _labelI2, _labelI3, _labelI4, _labelI5; // Proc. info
 
+	//NOTE: Changed here. (NUMA TV) (2025-04-12)
+	QHBoxLayout* _glWrapper;
+
+	QWidget	_topoSpace;
+	// END of change
+
 	KsGraphScrollArea	_scrollArea;
 
 	KsGLWidget	_glWindow;
