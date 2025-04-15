@@ -62,7 +62,7 @@ private:
 public:
     void add_config(int stream_id, ViewType view, const std::string& topology_file);
     int get_stream_topo_depth(int stream_id) const;
-    const StreamTopologyConfig* observe_stream_topo_cfg(int stream_id) const;
+    const StreamTopologyConfig* observe_cfg(int stream_id) const;
     bool exists_for(int stream_id) const;
     void delete_cfg(int stream_id);
     void update_cfg(int stream_id, ViewType view, const std::string& topology_file);

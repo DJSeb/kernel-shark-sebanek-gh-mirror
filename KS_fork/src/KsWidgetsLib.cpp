@@ -1693,7 +1693,7 @@ QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(QVBoxLayout* parent_layou
 	bool a_topo_exists = numatv_ctx.exists_for(stream_id);
 
 	ViewType applied_view = (a_topo_exists) ?
-		numatv_ctx.observe_stream_topo_cfg(stream_id)->get_view_type() :
+		numatv_ctx.observe_cfg(stream_id)->get_view_type() :
 		ViewType::DEFAULT;
 
 	// Radio buttons
@@ -1780,7 +1780,7 @@ QLabel* KsNUMATVDialog::_setup_status_per_stream(QVBoxLayout* parent_layout, int
 		status_text = "LOADED";
 		status_txt_color = "green";
 
-		const StreamTopologyConfig* s_topo_cfg = numatv_ctx.observe_stream_topo_cfg(stream_id);
+		const StreamTopologyConfig* s_topo_cfg = numatv_ctx.observe_cfg(stream_id);
 		const std::string& topol_fpath = s_topo_cfg->get_topo_fpath();
 		topo_fpath = QString::fromStdString(topol_fpath);
 	}

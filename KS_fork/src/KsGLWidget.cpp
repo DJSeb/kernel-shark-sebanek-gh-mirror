@@ -784,7 +784,7 @@ void KsGLWidget::_makeGraphs()
 			//NOTE: Change here. (NUMA TV) (2025-04-12)
 			NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
 			if (numatv_ctx.exists_for(sd)) {
-				const StreamTopologyConfig* stc_observer = numatv_ctx.observe_stream_topo_cfg(sd);
+				const StreamTopologyConfig* stc_observer = numatv_ctx.observe_cfg(sd);
 				if (stc_observer->get_view_type() != ViewType::DEFAULT) {
 					std::string pu_name = "PU " + std::to_string(cpu);
 					g->setLabelText(pu_name);

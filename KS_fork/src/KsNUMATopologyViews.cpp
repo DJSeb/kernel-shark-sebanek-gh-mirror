@@ -46,7 +46,7 @@ bool NUMATVContext::exists_for(int stream_id) const {
     return _active_numatvs.count(stream_id) > 0;
 }
 
-const StreamTopologyConfig* NUMATVContext::observe_stream_topo_cfg(int stream_id) const {
+const StreamTopologyConfig* NUMATVContext::observe_cfg(int stream_id) const {
     if (_active_numatvs.count(stream_id) > 0) {
         const StreamTopologyConfig* topo_cfg = &(_active_numatvs.at(stream_id));
         return topo_cfg;
