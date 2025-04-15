@@ -903,3 +903,29 @@ Really unfun to be stuck. It feels like being trapped in a never-resolving hell.
 ...
 
 Honestly, no idea this will be solved. Praying for a miracle, currently.
+
+## 2025-04-14 - 2025-04-15
+
+Time management on this is horrible, first of all.
+
+Second of all, Qt-based approach was chosen. It does have better separation of
+concerns and is much more flexible. All that is missing currently is somehow
+intertwining the graph with whatever will display the topology, at least in that
+visualisation department.
+
+The approach gave way to a button to dynamically hide or show the topology
+view portion and a dynamic resizing of the contents of the topology widget.
+It is also much simpler to use in code.
+
+Goals:
+
+- Reorder CPUs based on topology
+- Pick a visualisation of the topology
+  - Qt tree (basic, most likely won't work)
+  - Own grid-based widget
+  - Amalgamation of labels and lines and spacings
+  - Note: collapsibility is an important factor here
+- Session support maybe
+- Clean up after yourself
+- Document it all
+- Maybe package tree view as well

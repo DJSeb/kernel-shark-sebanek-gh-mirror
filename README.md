@@ -15,14 +15,15 @@ Charles University. It is, in general, concerned with improving existing softwar
 explained below.
 
 It is composed of four main directories, each representing a portion of the thesis project.
+
 - **Stacklook** - plugin for visualising stack traces via a more GUI-centric way
 - **Naps** - plugin for visualising timeslices between a task's switch and next waking
 - **KS_fork** - modified copy of KernelShark's source code with multiple additions, what many parts across different
   documentations will call "custom KernelShark"
-  - *Couplebreak* functionality is a new ability of KernelShark to split some events (chosen in code) into two
-  - *NUMA Topology Views* functionality gives KernelShark the ability to show CPU plots with respect to the NUMA
+  - _Couplebreak_ functionality is a new ability of KernelShark to split some events (chosen in code) into two
+  - _NUMA Topology Views_ functionality gives KernelShark the ability to show CPU plots with respect to the NUMA
     topology given by the user to the program
-  - *Other smaller additions to KernelShark's abilities*
+  - _Other smaller additions to KernelShark's abilities_
 - **SurveyPaper** - directory containing the survey paper **in Czech** about the plugins & enhancements above, along
   with `ExamplePrograms` directory in which traces of simple programs showcasing above's abilities may be found.
 
@@ -66,7 +67,8 @@ Bachelor thesis project part WIP.
 Things not in specification aren't mandatory, but would be pretty useful.
 
 **Semester project part:**
-*Functionalities:*
+_Functionalities:_
+
 - [x] KernelShark Record adjustment for stacktracing
 - [x] Stacklook
   - [x] Get scheduler event for when the task was about to go to sleep and the stacktracing event
@@ -85,11 +87,13 @@ Things not in specification aren't mandatory, but would be pretty useful.
   - [x] _(Not in specification, but requested)_ Visualization of prev_states after a sched/sched_switch
   - [x] _(Implied)_ Make it work for CPU and task plots
 
-*Demonstration:*
+_Demonstration:_
+
 - [x] Create example trace files for demonstration
 
 **Below are bachelor thesis part's appended requirements:**
-*Functionalities:*
+_Functionalities:_
+
 - [x] Events involving two processes shall be split into initiators and targets
   - E.g. `sched/sched_waking` should be split into "awaker" and "awakened" events, one belonging to each respective
     process
@@ -97,9 +101,9 @@ Things not in specification aren't mandatory, but would be pretty useful.
   - \[ABANDONED\] Try to keep the logic inside the plugin (minimizing KernelShark changes)
     - NOTE: Not doable, insufficeint API, KernelShark source code changes necessary.
 - [ ] NUMA topology visualization in KernelShark (either as a plugin or KernelShark modification)
-  - [ ] Parse data from Istopo (XML format)
+  - [x] Parse data from Istopo (XML format)
   - [ ] Visualize said data on the screen
-    - [ ] If no Istopo data are given, use default KShark visualization
+    - [x] If no Istopo data are given, use default KShark visualization
     - [ ] CPU reordering according to topology (NUMA nodes, hyperthread siblings)
     - [ ] Tree grouping of CPUs
       - [ ] May be collapsible (preferred)
@@ -107,7 +111,7 @@ Things not in specification aren't mandatory, but would be pretty useful.
         CPUs are sorted by topology, but tree-like is the one
         that will be implemented as basis
     - [ ] Colorful differentiation of different groups
-  - [ ] Configurable display method via some option in KShark's menu
+  - [x] Configurable display method via some option in KShark's menu
 - [x] Allow `sched_events` plugin compatibility
   - NOTE: XOR choice
   - \[ABANDONED\] Either integrate Stacklook into sched_events plugin
@@ -120,14 +124,16 @@ Things not in specification aren't mandatory, but would be pretty useful.
     - Unknown probability of success (very high)
     - Ultimately chosen due to KernelShark's insufficient API for creating new entries.
 
-*Demonstration:*
+_Demonstration:_
+
 - [ ] Create example trace files for demonstration
   - [ ] Write a program that will do something with the kernel stack to see it with Stacklook.
   - [ ] Create a trace file without kernel stack entries to show off inacting Stacklook.
   - [ ] Create/get a trace file to show off NUMA topology views
     - \[NOTE\] This might be just a matter of implementation of said feature and previous trace files might be reused.
 
-*General SW goal:*
+_General SW goal:_
+
 - [x] Debug the plugins even more, stabilise performance where necessary
 - [ ] Debug created extensions for KernelShark
   - [x] Record kstack
@@ -140,7 +146,8 @@ Things not in specification aren't mandatory, but would be pretty useful.
 - [ ] _("Optional")_ Create proper design documents
   - Would be quite good to include in technical documentation
 
-*Non-software goal - write survey paper:*
+_Non-software goal - write survey paper:_
+
 - [ ] Survey paper
   - [ ] Stack tracing (in Linux)
     - Mostly basics, some more info about KernelShark's stack tracer
@@ -159,3 +166,4 @@ Things not in specification aren't mandatory, but would be pretty useful.
       - Mainly to get a rough idea if only reading the paper
     - [ ] Purpose & limits
     - [ ] Results of implementation
+
