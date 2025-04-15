@@ -11,6 +11,11 @@
 #ifndef _KS_TRACEGRAPH_H
 #define _KS_TRACEGRAPH_H
 
+//NOTE: Changed here. (NUMA TV) (2025-04-15)
+// Qt
+#include <QMutex>
+// END of change
+
 // KernelShark
 #include "KsWidgetsLib.hpp"
 #include "KsGLWidget.hpp"
@@ -137,11 +142,17 @@ private:
 		_labelI1, _labelI2, _labelI3, _labelI4, _labelI5; // Proc. info
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-12)
-	QHBoxLayout* _glWrapper;
+	QHBoxLayout* _topoGlWrapper;
 
 	QScrollArea _topoScrollArea;
 
+	QVBoxLayout* _topoLayout;
+
 	QWidget	_topoSpace;
+
+	QMutex _scrollMutex;
+
+	bool _scrollSync;
 	// END of change
 
 	KsGraphScrollArea	_scrollArea;
