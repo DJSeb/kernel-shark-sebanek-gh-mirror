@@ -153,6 +153,8 @@ private:
 	QMutex _scrollMutex;
 
 	bool _scrollSync;
+
+	QPushButton _hideTopoBtn;
 	// END of change
 
 	KsGraphScrollArea	_scrollArea;

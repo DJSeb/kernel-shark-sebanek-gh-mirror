@@ -42,6 +42,7 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
   _topoSpace(&_topoScrollArea),
   _scrollMutex(),
   _scrollSync(false),
+  _hideTopoBtn(">", this),
   _scrollArea(this),
   _glWindow(&_scrollArea),
   _mState(nullptr),
@@ -140,6 +141,22 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 	_topoScrollArea.setWidgetResizable(true);
 	_topoScrollArea.setStyleSheet("QScrollArea {background-color : red;}");
 
+	_hideTopoBtn.setFixedWidth(FONT_WIDTH * 3);
+	_hideTopoBtn.setFixedHeight(_topoScrollArea.height());
+	connect(&_hideTopoBtn, &QPushButton::pressed,
+		this,	[this]() {
+			if (_topoScrollArea.isHidden()) {
+				_topoScrollArea.show();
+				_hideTopoBtn.setText("<");
+			} else {
+				_topoScrollArea.hide();
+				_topoScrollArea.setFixedWidth(0);
+				_hideTopoBtn.setText(">");
+			}
+			updateGeom();
+		}
+	);
+
 	connect(_topoScrollArea.verticalScrollBar(), &QScrollBar::valueChanged,
 		[this](int value) {
 			if (_scrollSync)
@@ -167,6 +184,7 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 	);
 
 	_topoGlWrapper = new QHBoxLayout();
+	_topoGlWrapper->addWidget(&_hideTopoBtn);
 	_topoGlWrapper->addWidget(&_topoScrollArea);
 	_topoGlWrapper->addWidget(&_scrollArea);
 	_topoGlWrapper->setSpacing(0);
@@ -632,9 +650,10 @@ void KsTraceGraph::updateGeom()
 
 	/* Set the size of the Scroll Area. */
 	saWidth = width() - _layout.contentsMargins().left() -
-				_layout.contentsMargins().right();
+				_layout.contentsMargins().right() - _hideTopoBtn.width();
 	
-	_topoScrollArea.setFixedWidth(saWidth / 4);
+	if (!_topoScrollArea.isHidden())
+		_topoScrollArea.setFixedWidth(saWidth / 4);
 
 	saWidth -= _topoScrollArea.width();
 
