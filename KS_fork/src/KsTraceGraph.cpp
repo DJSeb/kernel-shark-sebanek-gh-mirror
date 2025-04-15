@@ -137,12 +137,14 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 	_topoLayout->addWidget(dummyTree);
 
 	_topoScrollArea.setWidget(&_topoSpace);
-	_topoScrollArea.setFixedWidth(300);
+	_topoScrollArea.setHidden(true);
+	_topoScrollArea.setFixedWidth(0);
 	_topoScrollArea.setWidgetResizable(true);
 	_topoScrollArea.setStyleSheet("QScrollArea {background-color : red;}");
 
 	_hideTopoBtn.setFixedWidth(FONT_WIDTH * 3);
 	_hideTopoBtn.setFixedHeight(_topoScrollArea.height());
+
 	connect(&_hideTopoBtn, &QPushButton::pressed,
 		this,	[this]() {
 			if (_topoScrollArea.isHidden()) {
@@ -664,6 +666,7 @@ void KsTraceGraph::updateGeom()
 			      _layout.contentsMargins().bottom();
 
 	_scrollArea.resize(saWidth, saHeight);
+	_hideTopoBtn.setFixedHeight(saHeight);
 
 	/*
 	 * Calculate the width of the Draw Window, taking into account the size
