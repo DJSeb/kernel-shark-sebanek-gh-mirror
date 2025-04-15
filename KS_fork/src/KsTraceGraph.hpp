@@ -91,6 +91,11 @@ public:
 						  const QString& label4 = "",
 						  const QString& label5 = "");
 	// END of change
+	
+	//NOTE: Changed here. (NUMA TV) (2025-04-15)
+	void hideTopologyWidget(bool hide);
+	// END of change
+
 
 signals:
 	/**

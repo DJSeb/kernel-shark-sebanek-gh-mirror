@@ -1815,35 +1815,44 @@ void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 	// Nothing for now
 	//NUMA TV TODO: Instead of deleting the whole cfg, just delete the topology
 	NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
+	bool hide_topo_button = true;
+
 	for (int i = 0; i < stream_numa.size(); i++) {
 		// Unpack the vector
 		int stream_id = stream_numa[i].first;
 		ViewType view = stream_numa[i].second.first;
 		QString topology_file = stream_numa[i].second.second;
 
-		if (numatv_ctx.exists_for(stream_id)) {
+		bool topology_exists = numatv_ctx.exists_for(stream_id);
+
+		if (topology_exists) {
 			if (QFile(topology_file).exists()) {
 				// Proper file was given + config exists, applying means updating the configuration
-				printf("[INFO] Chosen OLD+FILE branch for stream: '%d'\n", stream_id);
 				numatv_ctx.update_cfg(stream_id, view, topology_file.toStdString());
 			} else {
 				// No proper file was given, applying means clear of the topology ("I apply nothing")
 				// Topology-less configuration wouldn't be able to show the tree view.
-				printf("[INFO] Chosen OLD+NOFILE branch for stream: '%d'\n", stream_id);
 				numatv_ctx.delete_cfg(stream_id);
 			}
 		} else {
 			if (QFile(topology_file).exists()) {
 				// Proper file was given + no config exists, applying means creating new topology
-				printf("[INFO] Chosen NEW+FILE branch for stream: '%d'\n", stream_id);
 				numatv_ctx.add_config(stream_id, view, topology_file.toStdString());
-			} else {
-				printf("[INFO] Chosen NEW+NOFILE path for stream: '%d'\n", stream_id);
 			}
 			// If no proper file was given, we can expect default behaviour (no tree view)
 		}
-		
-	}
 
+		// Hide or show the topology widget if a topology view is asked for
+		bool show_this_topo = (view != ViewType::DEFAULT && numatv_ctx.exists_for(stream_id));
+		if (show_this_topo) {
+			const StreamTopologyConfig* cfg_observer =
+				numatv_ctx.observe_cfg(stream_id);
+			show_this_topo &= (cfg_observer->get_view_type() != ViewType::DEFAULT);
+		}
+		
+		hide_topo_button &= !show_this_topo;
+	}
+	
+	graphPtr()->hideTopologyWidget(hide_topo_button);
 }
 // END of change
