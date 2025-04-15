@@ -40,6 +40,16 @@ public:
 	}
 };
 
+//NOTE: Changed here. !!!!!!! (NUMA TV) (2025-04-15)
+class KsTopologyScrollArea : public QScrollArea {
+public:
+	explicit KsTopologyScrollArea(QWidget *parent = nullptr)
+	: QScrollArea(parent) {}
+
+	void wheelEvent([[maybe_unused]] QWheelEvent *evt) override {}
+};
+// END of change
+
 /**
  * The KsTraceViewer class provides a widget for interactive visualization of
  * trace data shown as time-series.
@@ -149,7 +159,7 @@ private:
 	//NOTE: Changed here. (NUMA TV) (2025-04-12)
 	QHBoxLayout* _topoGlWrapper;
 
-	QScrollArea _topoScrollArea;
+	KsTopologyScrollArea _topoScrollArea;
 
 	QVBoxLayout* _topoLayout;
 
