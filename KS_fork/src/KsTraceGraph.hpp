@@ -77,17 +77,17 @@ public:
 
 	void comboReDraw(int sd, QVector<int> v);
 
-	void addCPUPlot(int sd, int cpu); // NUMA TV TODO: Modify this
+	void addCPUPlot(int sd, int cpu);
 
 	void addTaskPlot(int sd, int pid);
 
-	void removeCPUPlot(int sd, int cpu);  // NUMA TV TODO: Modify this
+	void removeCPUPlot(int sd, int cpu);
 
 	void removeTaskPlot(int sd, int pid);
 
 	void update(KsDataStore *data);
 
-	void updateGeom();  // NUMA TV TODO: Modify this
+	void updateGeom();
 
 	void resizeEvent(QResizeEvent* event) override;
 
