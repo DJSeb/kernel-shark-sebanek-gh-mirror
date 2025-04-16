@@ -966,6 +966,13 @@ full scope of the topology be shown).
 Topology configs are now destroyed upon opening a new trace file (which is
 the only way to destroy data streams except exiting).
 
+...
+
+Absolutely final work today was cleaning up some code, introducing static
+functions and a few member functions, etc. and deleting NUMA TV's presence
+from the GL Widget, which has been declared as forbidden grounds, as its
+behaviour is far too unpredictable.
+
 Goals:
 
 - Pick a visualisation of the topology
