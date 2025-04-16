@@ -55,17 +55,16 @@ public: //Business
 class NUMATVContext {
 public:
     static NUMATVContext& get_instance();
-    inline static float opengl_x_correction{100.f};
 private:
     using ActiveNUMATVs_t = std::unordered_map<int, StreamTopologyConfig>;
     ActiveNUMATVs_t _active_numatvs;
 public:
-    void add_config(int stream_id, ViewType view, const std::string& topology_file);
-    int get_stream_topo_depth(int stream_id) const;
-    const StreamTopologyConfig* observe_cfg(int stream_id) const;
     bool exists_for(int stream_id) const;
+    int add_config(int stream_id, ViewType view, const std::string& topology_file);
+    int update_cfg(int stream_id, ViewType view, const std::string& topology_file);
+    const StreamTopologyConfig* observe_cfg(int stream_id) const;
     void delete_cfg(int stream_id);
-    void update_cfg(int stream_id, ViewType view, const std::string& topology_file);
+    void clear();
 private:
     NUMATVContext();
     NUMATVContext(const NUMATVContext&) = delete;

@@ -12,6 +12,7 @@
 
 // KernelShark
 #include "KsNUMATopologyViews.hpp"
+#include "libkshark.h"
 
 // NUMATVContext
 
@@ -24,26 +25,64 @@ NUMATVContext::NUMATVContext() {
     _active_numatvs = {};
 }
 
-void NUMATVContext::add_config(int stream_id, ViewType view, const std::string& topology_file) {
+bool NUMATVContext::exists_for(int stream_id) const {
+    return _active_numatvs.count(stream_id) > 0;
+}
+
+int NUMATVContext::add_config(int stream_id, ViewType view, const std::string& topology_file) {
+    kshark_context *kshark_ctx(nullptr);
+    int retval = -1;
+    
+    if (!kshark_instance(&kshark_ctx)) {
+        return -2;
+    }
+    
     if (!std::filesystem::exists(topology_file) ||
         (_active_numatvs.count(stream_id) > 0 &&
             topology_file == _active_numatvs[stream_id].topo_fpath))
     {
-        return;
+        return retval;
     }
 
-    _active_numatvs[stream_id] = StreamTopologyConfig(view, topology_file);
+    int stream_ncpus = kshark_get_data_stream(kshark_ctx, stream_id)->n_cpus;
+    
+    auto new_topo_cfg = StreamTopologyConfig(view, topology_file);
+    int topo_npus = hwloc_get_nbobjs_by_type(new_topo_cfg.topology, HWLOC_OBJ_PU);
+    
+    if (topo_npus == stream_ncpus) {
+        _active_numatvs[stream_id] = StreamTopologyConfig(view, topology_file);
+        retval = 0;
+    }
+
+    return retval;
 }
 
-int NUMATVContext::get_stream_topo_depth(int stream_id) const {
+int NUMATVContext::update_cfg(int stream_id, ViewType view, const std::string& topology_file) {
+    kshark_context *kshark_ctx(nullptr);
+    bool retval = -1;
+    
     if (_active_numatvs.count(stream_id) > 0) {
-        return hwloc_topology_get_depth(_active_numatvs.at(stream_id).topology);
+        StreamTopologyConfig& topo_cfg = _active_numatvs.at(stream_id);
+        if (topology_file != topo_cfg.topo_fpath) {
+            if (!kshark_instance(&kshark_ctx)) {
+                return -2;
+            }
+            int stream_ncpus = kshark_get_data_stream(kshark_ctx, stream_id)->n_cpus;
+            
+            auto new_topo_cfg = StreamTopologyConfig(view, topology_file);
+            int topo_npus = hwloc_get_nbobjs_by_type(new_topo_cfg.topology, HWLOC_OBJ_PU);
+            
+            if (topo_npus == stream_ncpus) {
+                _active_numatvs[stream_id] = std::move(new_topo_cfg);
+                retval = 0;
+            }
+        } else {
+            topo_cfg.applied_view = view;
+            retval = 1;
+        }
     }
-    return -1;
-}
 
-bool NUMATVContext::exists_for(int stream_id) const {
-    return _active_numatvs.count(stream_id) > 0;
+    return retval;
 }
 
 const StreamTopologyConfig* NUMATVContext::observe_cfg(int stream_id) const {
@@ -58,15 +97,8 @@ void NUMATVContext::delete_cfg(int stream_id) {
     _active_numatvs.erase(stream_id);
 }
 
-void NUMATVContext::update_cfg(int stream_id, ViewType view, const std::string& topology_file) {
-    if (_active_numatvs.count(stream_id) > 0) {
-        StreamTopologyConfig& topo_cfg = _active_numatvs.at(stream_id);
-        if (topology_file != topo_cfg.topo_fpath) {
-            _active_numatvs[stream_id] = StreamTopologyConfig(view, topology_file);
-        } else {
-            topo_cfg.applied_view = view;
-        }
-    }
+void NUMATVContext::clear() {
+    _active_numatvs.clear();
 }
 
 // StreamTopologyConfig
