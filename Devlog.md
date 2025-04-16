@@ -929,3 +929,51 @@ Goals:
 - Clean up after yourself
 - Document it all
 - Maybe package tree view as well
+
+## 2025-04-16
+
+Today, it was first cleaner code in the KsTraceGraph constructor, some stylisation
+if the toggle button for the topology view and then the first big job: reordering
+CPUs based on topology. It took a while to find the best suitable candidate, but
+we managed to do so - find number of numa nodes, index from zero to the count (which
+counts as logical indices), find PU from the given CPU (which is a physical/OS index,
+according to hwloc (sidenote, pronouncing it as \[have lock\] or as a name Havelock
+makes it sound pretty cool), find the ancestor core of the PU (which should be just
+one level higher), put them in a map (which is sorted and can keep more maps
+as values) of maps of maps, with the structure
+{numa:{core:{PU-logical:PU-physical}}}. Then just reiterate through this fully
+sorted collection and have the CPUs display in a sorted manner. It currently
+ignores what PUs were supposed to be hidden, but that will be ironed out, maybe
+with a search through the vector upon each attempted adition of a PU to the sorted
+collection (though that could take a while - on the other hand, CPU draw is a
+blocking function called rarely, design helps us in ignoring this currently).
+
+...
+
+Actually, it was really easy to just go through the vector and check if it
+contains a CPU number.
+
+...
+
+And now a file with a different amount of cpus cannot be a topology for a
+stream with a set amount of CPUs. Lastly, applying a NUMA topology will also
+redraw the CPUs. It will force to show all of them (which makes sense, since
+we now want to see a topology, it only makes sense (to the author) that the
+full scope of the topology be shown).
+
+...
+
+Topology configs are now destroyed upon opening a new trace file (which is
+the only way to destroy data streams except exiting).
+
+Goals:
+
+- Pick a visualisation of the topology
+  - Qt tree (basic, most likely won't work)
+  - Own grid-based widget
+  - Amalgamation of labels and lines and spacings
+  - Note: collapsibility is an important factor here
+- Session support maybe
+- Clean up after yourself
+- Document it all
+- Maybe package tree view as well
