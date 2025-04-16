@@ -501,14 +501,14 @@ void KsTraceGraph::cpuReDraw(int sd, QVector<int> v)
 			int n_numa_nodes = hwloc_get_nbobjs_by_type(stream_cfg->topology, HWLOC_OBJ_NUMANODE);
 			for (unsigned int i = 0; i < (unsigned int)n_numa_nodes; i++) {
 				hwloc_obj_t node = hwloc_get_obj_by_type(stream_cfg->topology, HWLOC_OBJ_NUMANODE, i);
-				numaCorePUMap[node->logical_index] = std::map<int, std::map<int, int>>();
 				// Iterate over the PUs in the cpuset
 				unsigned int id = 0;
 				hwloc_bitmap_foreach_begin(id, node->cpuset)
 
 					hwloc_obj_t pu = hwloc_get_pu_obj_by_os_index(stream_cfg->topology, id);
 					hwloc_obj_t core_of_pu = hwloc_get_ancestor_obj_by_type(stream_cfg->topology, HWLOC_OBJ_CORE, pu);
-					numaCorePUMap[node->logical_index][core_of_pu->logical_index][pu->logical_index] = pu->os_index;
+					if (v.contains(pu->os_index))
+						numaCorePUMap[node->logical_index][core_of_pu->logical_index][pu->logical_index] = pu->os_index;
 					
 				hwloc_bitmap_foreach_end();
 			}
@@ -521,6 +521,8 @@ void KsTraceGraph::cpuReDraw(int sd, QVector<int> v)
 				}
 			}
 			v = sortedPUList;
+
+			//NUMA TV TODO: Generate a topology widget tree to display in the topology widget
 		}
 
 		_glWindow._streamPlots[sd]._cpuList = v;
