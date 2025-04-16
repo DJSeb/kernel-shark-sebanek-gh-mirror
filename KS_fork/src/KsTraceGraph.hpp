@@ -50,6 +50,23 @@ public:
 };
 // END of change
 
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+class KsStreamTopology : public QWidget {
+	Q_OBJECT
+private: // Qt parts
+	QHBoxLayout _layout;
+	QLabel _machine;
+	QVBoxLayout _nodes;
+	QVBoxLayout _cores;
+	QVBoxLayout _pus;
+public:
+	explicit KsStreamTopology
+	(QWidget *parent = nullptr, const NUMANodeToCoreToPU& brief_topo);
+private:
+	KsStreamTopology() = delete;
+};
+// END of change
+
 /**
  * The KsTraceViewer class provides a widget for interactive visualization of
  * trace data shown as time-series.
