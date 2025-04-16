@@ -13,19 +13,11 @@
 #include <GL/glut.h>
 #include <GL/gl.h>
 
-// hwloc
-//NOTE: Changed here. (NUMA TV) (2025-04-12)
-//#include <hwloc.h>
-// END of change
-
 // KernelShark
 #include "libkshark-plugin.h"
 #include "KsGLWidget.hpp"
 #include "KsUtils.hpp"
 #include "KsPlugins.hpp"
-//NOTE: Changed here. (NUMA TV) (2025-04-12)
-#include "KsNUMATopologyViews.hpp"
-// END of change
 
 /** A stream operator for converting vector of integers into KsPlotEntry. */
 KsPlotEntry &operator <<(KsPlotEntry &plot, QVector<int> &v)
@@ -82,27 +74,10 @@ void KsGLWidget::freePluginShapes()
 	}
 }
 
-//NOTE: Changed here. (NUMA TV) (2025-04-12)
-void KsGLWidget::_freeTopoShapes()
-{
-	while(!_topoShapes.empty()) {
-		int key = _topoShapes.begin()->first;
-		auto s = _topoShapes.begin()->second;
-		if (s != nullptr)
-			delete s;
-		s = nullptr;
-		_topoShapes.erase(key);
-	}
-}
-// END of change
-
 KsGLWidget::~KsGLWidget()
 {
 	_freeGraphs();
 	freePluginShapes();
-	//NOTE: Changed here. (NUMA TV) (2025-04-12)
-	_freeTopoShapes();
-	// END of change
 }
 
 /** Reimplemented function used to set up all required OpenGL resources. */
@@ -177,18 +152,6 @@ void KsGLWidget::paintGL()
 		s->draw();
 	}
 
-	//NOTE: Changed here. (NUMA TV) (2025-04-12)
-	for (auto const &ts: _topoShapes) {
-		if (!ts.second)
-			continue;
-
-		if (ts.second->_size < 0)
-			ts.second->_size = size + abs(ts.second->_size + 1);
-
-		ts.second->draw();
-	}
-	// END of change
-
 	/*
 	 * Update and draw the markers. Make sure that the active marker
 	 * is drawn on top.
@@ -203,12 +166,6 @@ void KsGLWidget::render()
 {
 	/* Process and draw all graphs by using the built-in logic. */
 	_makeGraphs();
-	
-	//NOTE: Changed here. (NUMA TV) (2025-04-12)
-	/** Process and draw all topology-specific shapes */
-	//_makeTopoShapes();
-	// END of change
-
 	/* Process and draw all plugin-specific shapes. */
 	_makePluginShapes();
 };
@@ -736,9 +693,6 @@ void KsGLWidget::_makeGraphs()
 
 	/* The very first thing to do is to clean up. */
 	_freeGraphs();
-	//NOTE: Changed here. (NUMA TV) (2025-04-12)
-	_freeTopoShapes();
-	// END of change
 
 	if (!_data || !_data->size())
 		return;
@@ -781,27 +735,6 @@ void KsGLWidget::_makeGraphs()
 		it.value()._cpuGraphs = {};
 		for (auto const &cpu: it.value()._cpuList) {
 			g = lamAddGraph(sd, _newCPUGraph(sd, cpu), _vSpacing);
-			//NOTE: Change here. (NUMA TV) (2025-04-12)
-			NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
-			if (numatv_ctx.exists_for(sd)) {
-				const StreamTopologyConfig* stc_observer = numatv_ctx.observe_cfg(sd);
-				if (stc_observer->get_view_type() != ViewType::DEFAULT) {
-					std::string pu_name = "PU " + std::to_string(cpu);
-					g->setLabelText(pu_name);
-					KsPlot::Line* core_line = new KsPlot::Line();
-					KsPlot::Point pu_point = {g->baseX(), g->baseY()};
-					core_line->setA(pu_point.x(), pu_point.y());
-					core_line->setB(pu_point.x() - 500, pu_point.y());
-					core_line->_color = {255, 0, 0};
-					core_line->_visible = true;
-					core_line->_size = 4.0;
-					if (_topoShapes.count(cpu) != 0) {
-						delete _topoShapes[cpu];
-					}
-					_topoShapes[cpu] = core_line;
-				}
-			}
-			// END of change
 			it.value()._cpuGraphs.append(g);
 		}
 

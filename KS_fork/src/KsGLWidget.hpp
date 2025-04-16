@@ -12,11 +12,6 @@
 #ifndef _KS_GLWIDGET_H
 #define _KS_GLWIDGET_H
 
-//NOTE: Changed here. (NUMA TV) (2025-04-12)
-// C++
-#include <unordered_map>
-// END of change
-
 // Qt
 #include <QRubberBand>
 #include <QOpenGLWidget>
@@ -286,10 +281,6 @@ private:
 
 	KsPlot::PlotObjList	_shapes;
 
-	//NOTE: Changed here. (NUMA TV) (2025-04-12)
-	std::unordered_map<int, KsPlot::PlotObject*> _topoShapes;
-	// END of change
-
 	KsPlot::ColorTable	_pidColors;
 
 	KsPlot::ColorTable	_cpuColors;
@@ -322,19 +313,11 @@ private:
 
 	void _freeGraphs();
 
-	//NOTE: Changed here. (NUMA TV) (2025-04-12)
-	void _freeTopoShapes();
-	// END of change
-
 	void _drawAxisX(float size);
 
 	int _getMaxLabelSize();
 
 	void _makeGraphs();
-
-	//NOTE: Changed here. (NUMA TV) (2025-04-12)
-	//void _makeTopoShapes();
-	// END of change
 
 	KsPlot::Graph *_newCPUGraph(int sd, int cpu);
 
