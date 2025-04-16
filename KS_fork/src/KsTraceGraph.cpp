@@ -10,8 +10,8 @@
  */
 
 //NOTE: Changed here. (NUMA TV) (2025-04-15)
-// Qt
-#include <QMutex>
+// C++
+#include <map>
 // END of change
 
 // KernelShark
@@ -492,6 +492,37 @@ void KsTraceGraph::cpuReDraw(int sd, QVector<int> v)
 	startOfWork(KsWidgetsLib::KsDataWork::EditPlotList);
 	if (_glWindow._streamPlots.contains(sd)) {
 		// NUMA TV TODO: Rearrange CPUs here
+		const NUMATVContext& numa_ctx = NUMATVContext::get_instance();
+		const StreamTopologyConfig* stream_cfg = numa_ctx.observe_cfg(sd);
+		if (stream_cfg && stream_cfg->get_view_type() != ViewType::DEFAULT) {
+			QVector<int> sortedPUList;
+			std::map<int, std::map<int, std::map<int, int>>> numaCorePUMap;
+
+			int n_numa_nodes = hwloc_get_nbobjs_by_type(stream_cfg->topology, HWLOC_OBJ_NUMANODE);
+			for (unsigned int i = 0; i < (unsigned int)n_numa_nodes; i++) {
+				hwloc_obj_t node = hwloc_get_obj_by_type(stream_cfg->topology, HWLOC_OBJ_NUMANODE, i);
+				numaCorePUMap[node->logical_index] = std::map<int, std::map<int, int>>();
+				// Iterate over the PUs in the cpuset
+				unsigned int id = 0;
+				hwloc_bitmap_foreach_begin(id, node->cpuset)
+
+					hwloc_obj_t pu = hwloc_get_pu_obj_by_os_index(stream_cfg->topology, id);
+					hwloc_obj_t core_of_pu = hwloc_get_ancestor_obj_by_type(stream_cfg->topology, HWLOC_OBJ_CORE, pu);
+					numaCorePUMap[node->logical_index][core_of_pu->logical_index][pu->logical_index] = pu->os_index;
+					
+				hwloc_bitmap_foreach_end();
+			}
+
+			for (auto const &node: numaCorePUMap) {
+				for (auto const &core: node.second) {
+					for (auto const &pu: core.second) {
+						sortedPUList.append(pu.second);
+					}
+				}
+			}
+			v = sortedPUList;
+		}
+
 		_glWindow._streamPlots[sd]._cpuList = v;
 	}
 
