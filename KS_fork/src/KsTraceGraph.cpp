@@ -38,11 +38,15 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
   _labelI3("", this),
   _labelI4("", this),
   _labelI5("", this),
-  _topoScrollArea(this),
+//NOTE: Changed here. (NUMA TV) (2025-04-16)
+  _topoGlWrapper(this),
+  _topoGlLayout(&_topoGlWrapper),
+  _topoScrollArea(&_topoGlWrapper),
+  _hideTopoBtn(">", &_topoGlWrapper),
   _topoSpace(&_topoScrollArea),
-  _scrollMutex(),
-  _scrollSync(false),
-  _hideTopoBtn(">", this),
+  _topoLayout(&_topoSpace),
+  _topoHeader("Topology", &_topoSpace),
+// END of change
   _scrollArea(this),
   _glWindow(&_scrollArea),
   _mState(nullptr),
@@ -119,33 +123,39 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 		this,		&KsTraceGraph::_onCustomContextMenu);
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-12)
-	_topoLayout = new QVBoxLayout();
+	_topoGlWrapper.setContentsMargins(0, 0, 0, 0);
+	_topoGlWrapper.setLayout(&_topoGlLayout);
 
-	_topoSpace.setStyleSheet("QWidget {background-color : white;}");
-	_topoSpace.setLayout(_topoLayout);
-	
-	// auto dummyTree = new QTreeWidget(&_topoSpace);
-	// dummyTree->setColumnCount(3);
-	// dummyTree->setHeaderHidden(true);
-	// dummyTree->setSelectionBehavior(QAbstractItemView::SelectRows);
-	// dummyTree->addTopLevelItems(
-	// 	{new QTreeWidgetItem(dummyTree, QStringList() << "Dummy"),
-	// 	 new QTreeWidgetItem(dummyTree, QStringList() << "Dummy"),
-	// 	 new QTreeWidgetItem(dummyTree, QStringList() << "Dummy")});
-	// dummyTree->setUniformRowHeights(true);
-	// dummyTree->setContentsMargins(0, 10, 0, 10);
-	// _topoLayout->addWidget(dummyTree);
+	_topoGlLayout.setContentsMargins(0, 0, 0, 0);
+	_topoGlLayout.setSpacing(0);
+	_topoGlLayout.addWidget(&_hideTopoBtn);
+	_topoGlLayout.addWidget(&_topoScrollArea);
+	_topoGlLayout.addWidget(&_scrollArea);
 
 	_topoScrollArea.setContentsMargins(0, 0, 0, 0);
-	_topoScrollArea.setWidget(&_topoSpace);
 	_topoScrollArea.setHidden(true);
 	_topoScrollArea.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_topoScrollArea.setAttribute(Qt::WA_TransparentForMouseEvents);
 	_topoScrollArea.setWidgetResizable(true);
+	_topoScrollArea.setWidget(&_topoSpace);
 
 	_hideTopoBtn.setFixedWidth(FONT_WIDTH * 3);
 	_hideTopoBtn.setFixedHeight(_topoScrollArea.height());
 	_hideTopoBtn.setHidden(true);
+	_hideTopoBtn.setStyleSheet("QPushButton {background-color : green;}");
 
+	_topoSpace.setStyleSheet("QWidget {background-color : white;}");
+	_topoSpace.setLayout(&_topoLayout);
+	
+	_topoLayout.setAlignment(Qt::AlignTop);
+	_topoLayout.setContentsMargins(0, 0, 0, 0);
+	_topoLayout.setSpacing(0);
+
+	_topoHeader.setFixedHeight(30);
+	_topoHeader.setStyleSheet("QLabel {background-color : lightgray;}");
+	_topoLayout.addWidget(&_topoHeader);
+
+	// Connections
 	connect(&_hideTopoBtn, &QPushButton::pressed,
 		this,	[this]() {
 			if (_topoScrollArea.isHidden()) {
@@ -159,42 +169,13 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 			updateGeom();
 		}
 	);
-
-	connect(_topoScrollArea.verticalScrollBar(), &QScrollBar::valueChanged,
-		[this](int value) {
-			if (_scrollSync)
-				return;
-			QMutexLocker locker(&_scrollMutex);
-			if (_scrollSync)
-				return;
-			_scrollSync = true;
-			_scrollArea.verticalScrollBar()->setValue(value);
-			_scrollSync = false;
-		}
-	);
 	
 	connect(_scrollArea.verticalScrollBar(), &QScrollBar::valueChanged,
-		[this](int value) {
-			if (_scrollSync)
-				return;
-			QMutexLocker locker(&_scrollMutex);
-			if (_scrollSync)
-				return;
-			_scrollSync = true;
-			_topoScrollArea.verticalScrollBar()->setValue(value);
-			_scrollSync = false;
-		}
-	);
-
-	_topoGlWrapper = new QHBoxLayout();
-	_topoGlWrapper->addWidget(&_hideTopoBtn);
-	_topoGlWrapper->addWidget(&_topoScrollArea);
-	_topoGlWrapper->addWidget(&_scrollArea);
-	_topoGlWrapper->setSpacing(0);
-
+		_topoScrollArea.verticalScrollBar(), &QScrollBar::setValue);
+	// END of change
+	
 	_scrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	_scrollArea.setWidget(&_glWindow);
-	// END of change
 
 	lamMakeNavButton(&_scrollLeftButton);
 	connect(&_scrollLeftButton,	&QPushButton::pressed,
@@ -224,7 +205,7 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 
 	_layout.addWidget(&_pointerBar);
 	_layout.addWidget(&_navigationBar);
-	_layout.addLayout(_topoGlWrapper);
+	_layout.addWidget(&_topoGlWrapper);
 	this->setLayout(&_layout);
 	updateGeom();
 }
@@ -651,28 +632,34 @@ void KsTraceGraph::updateGeom()
 {
 	int saWidth, saHeight, dwWidth, hMin;
 
-	//NOTE: Changed here. (NUMA TV) (2025-04-15)
-	int hideBtnCorrection = _hideTopoBtn.isHidden() ? 0 : _hideTopoBtn.width();
-	// END of change
-
 	/* Set the size of the Scroll Area. */
 	saWidth = width() - _layout.contentsMargins().left() -
-				_layout.contentsMargins().right()
-				//NOTE: Changed here. (NUMA TV) (2025-04-15)
-				- hideBtnCorrection;
-				// END of change
-	//NOTE: Changed here. (NUMA TV) (2025-04-15)
-	if (!_topoScrollArea.isHidden()) {
-		_topoScrollArea.setFixedWidth(saWidth / 4);
-		saWidth -= _topoScrollArea.width();
-	}
-	// END of change
+				_layout.contentsMargins().right();
 
 	saHeight = height() - _pointerBar.height() -
 			      _navigationBar.height() -
 			      _layout.spacing() * 2 -
 			      _layout.contentsMargins().top() -
 			      _layout.contentsMargins().bottom();
+
+	//NOTE: Changed here. (NUMA TV) (2025-04-16)
+	_topoGlWrapper.resize(saWidth, saHeight);
+	// END of change
+
+	//NOTE: Changed here. (NUMA TV) (2025-04-15)
+	int hideBtnCorrection = _hideTopoBtn.isHidden() ? 0 : _hideTopoBtn.width();
+	// END of change
+
+	//NOTE: Changed here. (NUMA TV) (2025-04-15)
+	saWidth -= hideBtnCorrection;
+	// END of change
+
+	//NOTE: Changed here. (NUMA TV) (2025-04-15)
+	if (!_topoScrollArea.isHidden()) {
+		_topoScrollArea.setFixedWidth(saWidth / 3);
+		saWidth -= _topoScrollArea.width();
+	}
+	// END of change
 
 	_scrollArea.resize(saWidth, saHeight);
 	//NOTE: Changed here. (NUMA TV) (2025-04-15)

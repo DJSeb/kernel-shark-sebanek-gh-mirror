@@ -157,19 +157,19 @@ private:
 		_labelI1, _labelI2, _labelI3, _labelI4, _labelI5; // Proc. info
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-12)
-	QHBoxLayout* _topoGlWrapper;
+	QWidget _topoGlWrapper;
+
+	QHBoxLayout _topoGlLayout;
 
 	KsTopologyScrollArea _topoScrollArea;
-
-	QVBoxLayout* _topoLayout;
-
-	QWidget	_topoSpace;
-
-	QMutex _scrollMutex;
-
-	bool _scrollSync;
-
+	
 	QPushButton _hideTopoBtn;
+	
+	QWidget	_topoSpace;
+	
+	QVBoxLayout _topoLayout;
+	
+	QLabel _topoHeader;
 	// END of change
 
 	KsGraphScrollArea	_scrollArea;
