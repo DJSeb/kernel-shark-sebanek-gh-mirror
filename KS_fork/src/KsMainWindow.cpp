@@ -623,8 +623,13 @@ void KsMainWindow::_open()
 				    "trace-cmd files (*.dat);;All files (*)",
 				    _lastDataFilePath);
 
-	if (!fileName.isEmpty())
+	if (!fileName.isEmpty()) {
+		//NOTE: Changed here. (NUMA TV) (2025-04-16)
+		NUMATVContext::get_instance().clear();
+		graphPtr()->hideTopologyWidget(true);
+		// END of change
 		loadDataFile(fileName);
+	}
 }
 
 void KsMainWindow::_append()
@@ -1804,7 +1809,7 @@ void KsMainWindow::_showNUMATVConfig() {
 
 	dialog->show();
 	
-	// Just update the graph, since it contains all the things we'll be changing, inner data
+	// Just update the graph an redraw CPUs, since it contains all the things we'll be changing, inner data
 	// are not affected.
 	_graph.update(&_data);
 }
@@ -1828,16 +1833,56 @@ void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 		if (topology_exists) {
 			if (QFile(topology_file).exists()) {
 				// Proper file was given + config exists, applying means updating the configuration
-				numatv_ctx.update_cfg(stream_id, view, topology_file.toStdString());
+				int result = numatv_ctx.update_cfg(stream_id, view, topology_file.toStdString());
+				switch (result) {
+				case 0:
+					// New topology made
+					printf("[INFO] Topology updated for stream '%d'\n", stream_id);
+					// NUMA TV TODO: Update/recreate topology widget for this stream
+					break;
+				case 1:
+					// Topology file was not changed
+					printf("[INFO] Topology file '%s' was not changed\n", topology_file.toStdString().c_str());
+					break;
+				case -1:
+					// Couldn't find previous configuration
+					printf("[INFO] Couldn't find previous configuration for stream '%d'\n", stream_id);
+					break;
+				case -2:
+					// Couldn't get Kshark context
+					printf("[INFO] Couldn't get Kshark context\n");
+					break;
+				default: break;
+				}
 			} else {
 				// No proper file was given, applying means clear of the topology ("I apply nothing")
 				// Topology-less configuration wouldn't be able to show the tree view.
 				numatv_ctx.delete_cfg(stream_id);
+				// NUMA TV TODO: Delete topology widget for this stream, but keep spacing
 			}
 		} else {
 			if (QFile(topology_file).exists()) {
 				// Proper file was given + no config exists, applying means creating new topology
-				numatv_ctx.add_config(stream_id, view, topology_file.toStdString());
+				int result = numatv_ctx.add_config(stream_id, view, topology_file.toStdString());
+
+				switch (result) {
+				case 0:
+					// New topology made
+					printf("[INFO] Topology created for stream '%d'\n", stream_id);
+					break;
+				case -1:
+					// Topology file was not changed
+					printf("[INFO] Topology file '%s' doesn't have the same amount of CPUs as the stream\n",
+						topology_file.toStdString().c_str());
+					break;
+				case -2:
+					// Couldn't get Kshark context
+					printf("[INFO] Couldn't get Kshark context\n");
+					break;
+				default: break;
+				}
+
+				// NUMA TV TODO: Create topology widget for this stream
 			}
 			// If no proper file was given, we can expect default behaviour (no tree view)
 		}
@@ -1851,6 +1896,7 @@ void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 		}
 		
 		hide_topo_button &= !show_this_topo;
+		graphPtr()->cpuReDraw(stream_id, KsUtils::getCPUList(stream_id));
 	}
 	
 	graphPtr()->hideTopologyWidget(hide_topo_button);
