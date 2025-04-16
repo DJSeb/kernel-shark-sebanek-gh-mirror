@@ -10,6 +10,9 @@
 // C++
 #include <filesystem>
 
+// Qt
+#include <QVector>
+
 // KernelShark
 #include "KsNUMATopologyViews.hpp"
 #include "libkshark.h"
@@ -21,13 +24,10 @@ NUMATVContext& NUMATVContext::get_instance() {
     return instance;
 }
 
-NUMATVContext::NUMATVContext() {
-    _active_numatvs = {};
-}
+NUMATVContext::NUMATVContext() : _active_numatvs({}) {}
 
-bool NUMATVContext::exists_for(int stream_id) const {
-    return _active_numatvs.count(stream_id) > 0;
-}
+bool NUMATVContext::exists_for(int stream_id) const
+{ return _active_numatvs.count(stream_id) > 0; }
 
 int NUMATVContext::add_config(int stream_id, ViewType view, const std::string& topology_file) {
     kshark_context *kshark_ctx(nullptr);
@@ -93,23 +93,15 @@ const StreamTopologyConfig* NUMATVContext::observe_cfg(int stream_id) const {
     return nullptr;
 }
 
-void NUMATVContext::delete_cfg(int stream_id) {
-    _active_numatvs.erase(stream_id);
-}
+void NUMATVContext::delete_cfg(int stream_id)
+{ _active_numatvs.erase(stream_id); }
 
-void NUMATVContext::clear() {
-    _active_numatvs.clear();
-}
+void NUMATVContext::clear()
+{ _active_numatvs.clear(); }
 
 // StreamTopologyConfig
-const std::string& StreamTopologyConfig::get_topo_fpath() const
-{ return topo_fpath; }
-
-ViewType StreamTopologyConfig::get_view_type() const
-{ return applied_view; }
-
 StreamTopologyConfig::StreamTopologyConfig()
-: applied_view(ViewType::DEFAULT), topo_fpath("-"), topology(nullptr) {}
+: applied_view(ViewType::DEFAULT), topo_fpath(""), topology(nullptr) {}
 
 StreamTopologyConfig::StreamTopologyConfig(ViewType view, const std::string& fpath) {
     applied_view = view;
@@ -140,11 +132,9 @@ StreamTopologyConfig::StreamTopologyConfig(ViewType view, const std::string& fpa
     }
 }
 
-StreamTopologyConfig::StreamTopologyConfig(const StreamTopologyConfig& other) {
-    applied_view = other.applied_view;
-    topo_fpath = other.topo_fpath;
-    topology = nullptr;
-
+StreamTopologyConfig::StreamTopologyConfig(const StreamTopologyConfig& other)
+: applied_view(other.applied_view), topo_fpath(other.topo_fpath), topology(nullptr)
+{
     if (other.topology != nullptr) {
         int result = hwloc_topology_dup(&topology, other.topology);
         if (result != 0) {
@@ -176,8 +166,9 @@ StreamTopologyConfig& StreamTopologyConfig::operator=(const StreamTopologyConfig
 }
 
 StreamTopologyConfig::StreamTopologyConfig(StreamTopologyConfig&& other) noexcept
-: applied_view(other.applied_view),
-  topo_fpath(std::move(other.topo_fpath)), topology(other.topology) {
+: applied_view(other.applied_view), topo_fpath(std::move(other.topo_fpath)),
+    topology(other.topology)
+{
     other.topology = nullptr;
 }
 
@@ -196,6 +187,53 @@ StreamTopologyConfig::~StreamTopologyConfig() {
         hwloc_topology_destroy(topology);
         topology = nullptr;
     }
+}
+
+const std::string& StreamTopologyConfig::get_topo_fpath() const
+{ return topo_fpath; }
+
+ViewType StreamTopologyConfig::get_view_type() const
+{ return applied_view; }
+
+const NUMANodeToCoreToPU StreamTopologyConfig::get_brief_topo() const {
+    NUMANodeToCoreToPU numaCorePUMap{};
+
+    int n_numa_nodes = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE);
+	for (unsigned int i = 0; i < (unsigned int)n_numa_nodes; i++) {
+		hwloc_obj_t node = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, i);
+		// Iterate over the PUs in the cpuset
+		unsigned int id = 0;
+		hwloc_bitmap_foreach_begin(id, node->cpuset)
+			hwloc_obj_t pu = hwloc_get_pu_obj_by_os_index(topology, id);
+			hwloc_obj_t core_of_pu = hwloc_get_ancestor_obj_by_type(topology, HWLOC_OBJ_CORE, pu);
+			numaCorePUMap[node->logical_index][core_of_pu->logical_index][pu->logical_index] = pu->os_index;
+		hwloc_bitmap_foreach_end();
+	}
+
+    return numaCorePUMap;
+}
+
+QVector<int> StreamTopologyConfig::rearrangeCPUs(const QVector<int>& cpu_ids) const {
+	NUMANodeToCoreToPU brief_topo = get_brief_topo();
+    return rearrangeCPUsWithBriefTopo(cpu_ids, brief_topo);
+}
+
+QVector<int> StreamTopologyConfig::rearrangeCPUsWithBriefTopo
+(const QVector<int>& cpu_ids, const NUMANodeToCoreToPU& brief_topo) const {
+    QVector<int> rearranged{};
+
+    // Since maps are sorted, the resulting vector will be sorted as well
+	for (auto const &node: brief_topo) {
+		for (auto const &core: node.second) {
+			for (auto const &pu: core.second) {
+                if (cpu_ids.contains(pu.second)) {
+				    rearranged.append(pu.second);
+                }
+			}
+		}
+	}
+
+	return rearranged;
 }
 
 // END of change

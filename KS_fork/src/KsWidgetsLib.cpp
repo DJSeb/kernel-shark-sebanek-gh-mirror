@@ -1735,7 +1735,7 @@ void KsNUMATVDialog::_setup_load_button_per_stream(QPushButton* load_btn,
 	file_dialog->setNameFilter("*.xml");
 	file_dialog->setAcceptMode(QFileDialog::AcceptOpen);
 
-	if (last_fpath != "-") {
+	if (!last_fpath.isEmpty()) {
 		// Set the last used file path as the starting directory
 		QDir dir = QFileInfo(last_fpath).absoluteDir();
 		file_dialog->setDirectory(dir);
@@ -1771,12 +1771,11 @@ QLabel* KsNUMATVDialog::_setup_status_per_stream(QVBoxLayout* parent_layout, int
 	QHBoxLayout* stat_topo_load_layout = new QHBoxLayout{};
 	QVBoxLayout* status_topofile_layout = new QVBoxLayout{};
 	
-	bool a_topo_exists = numatv_ctx.exists_for(stream_id);
-	QString topo_fpath = "-";
-	QString status_text = "NOT LOADED";
-	QString status_txt_color = "red";
+	QString topo_fpath{};
+	QString status_text{"NOT LOADED"};
+	QString status_txt_color{"red"};
 
-	if (a_topo_exists) {
+	if (numatv_ctx.exists_for(stream_id)) {
 		status_text = "LOADED";
 		status_txt_color = "green";
 
@@ -1797,7 +1796,7 @@ QLabel* KsNUMATVDialog::_setup_status_per_stream(QVBoxLayout* parent_layout, int
 	QPushButton* clear_btn = new QPushButton{"Clear"};
 	clear_btn->setFixedWidth(STRING_WIDTH("---Clear---"));
 	connect(clear_btn, &QPushButton::pressed, [topo_file_location, status] {
-		topo_file_location->setText("-");
+		topo_file_location->setText("");
 		status->setText("NOT LOADED");
 		status->setStyleSheet("QLabel { color : red; }");
 	});
@@ -1831,7 +1830,7 @@ void KsNUMATVDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx) {
 	QWidget *list_container = new QWidget{&_scroll_area};
     QVBoxLayout *list_layout = new QVBoxLayout{list_container};
 
-	// Setup stream couplebreak settings and checkboxes
+	// Setup stream NUMA TV settings and checkboxes
 	int streams_processed = 0;
 	QVector<int> stream_ids = KsUtils::getStreamIdList(kshark_ctx);
 	for (auto const &sd: stream_ids) {

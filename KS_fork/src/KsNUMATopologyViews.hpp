@@ -13,10 +13,11 @@
 // C++
 #include <vector>
 #include <unordered_map>
-#include <memory>
+#include <map>
 
 // Qt
 #include <QtWidgets>
+#include <QVector>
 
 // hwloc
 #include "hwloc.h"
@@ -30,6 +31,7 @@ enum class ViewType { DEFAULT = 0, TREE };
 
 /// @brief Simpler name to package a view type and chosen topology file.
 using ViewTopologyPair = std::pair<ViewType, QString>;
+using NUMANodeToCoreToPU = std::map<int, std::map<int, std::map<int, int>>>;
 
 // Classes
 
@@ -50,6 +52,10 @@ public: // Creation, destruction, assigns
 public: //Business
     const std::string& get_topo_fpath() const;
     ViewType get_view_type() const;
+    const NUMANodeToCoreToPU get_brief_topo() const;
+    QVector<int> rearrangeCPUs(const QVector<int>& cpu_ids) const;
+    QVector<int> rearrangeCPUsWithBriefTopo
+    (const QVector<int>& cpu_ids, const NUMANodeToCoreToPU& brief_topo) const;
 };
 
 class NUMATVContext {
@@ -69,8 +75,10 @@ private:
     NUMATVContext();
     NUMATVContext(const NUMATVContext&) = delete;
     NUMATVContext& operator=(const NUMATVContext&) = delete;
+    NUMATVContext(NUMATVContext&&) = delete;
+    NUMATVContext& operator=(NUMATVContext&&) = delete;
     ~NUMATVContext() = default;
 };
 
-#endif
+#endif // _KS_NUMA_TV_HPP
 // END of change
