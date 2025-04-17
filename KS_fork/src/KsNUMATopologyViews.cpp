@@ -7,9 +7,6 @@
  *  @brief   Implementations for working with NUMA topologies.
 */
 
-// C++
-#include <filesystem>
-
 // Qt
 #include <QVector>
 
@@ -35,13 +32,6 @@ int NUMATVContext::add_config(int stream_id, ViewType view, const std::string& t
     
     if (!kshark_instance(&kshark_ctx)) {
         return -2;
-    }
-    
-    if (!std::filesystem::exists(topology_file) ||
-        (_active_numatvs.count(stream_id) > 0 &&
-            topology_file == _active_numatvs[stream_id].topo_fpath))
-    {
-        return retval;
     }
 
     int stream_ncpus = kshark_get_data_stream(kshark_ctx, stream_id)->n_cpus;
@@ -93,8 +83,8 @@ const StreamTopologyConfig* NUMATVContext::observe_cfg(int stream_id) const {
     return nullptr;
 }
 
-void NUMATVContext::delete_cfg(int stream_id)
-{ _active_numatvs.erase(stream_id); }
+int NUMATVContext::delete_cfg(int stream_id)
+{ return _active_numatvs.erase(stream_id); }
 
 void NUMATVContext::clear()
 { _active_numatvs.clear(); }
@@ -223,17 +213,53 @@ QVector<int> StreamTopologyConfig::rearrangeCPUsWithBriefTopo
     QVector<int> rearranged{};
 
     // Since maps are sorted, the resulting vector will be sorted as well
-	for (auto const &node: brief_topo) {
-		for (auto const &core: node.second) {
-			for (auto const &pu: core.second) {
-                if (cpu_ids.contains(pu.second)) {
-				    rearranged.append(pu.second);
+	for (const auto& [node_lid, cores]: brief_topo) {
+		for (const auto& [core_lid, PUs]: cores) {
+			for (const auto& [pu_lid, pu_osid]: PUs) {
+                if (cpu_ids.contains(pu_osid)) {
+				    rearranged.append(pu_osid);
                 }
 			}
 		}
 	}
 
 	return rearranged;
+}
+
+// Global functions
+
+int numatv_count_PUs(const NUMANodeToCoreToPU& brief_topo) {
+    int count = 0;
+    for (const auto& [node_lid, cores]: brief_topo) {
+        for (const auto& [core_lid, PUs]: cores) {
+            count += PUs.size();
+        }
+    }
+    return count;
+}
+
+int numatv_count_cores(const NUMANodeToCoreToPU& brief_topo) {
+    int count = 0;
+    for (const auto& [node_lid, cores]: brief_topo) {
+        count += cores.size();
+    }
+    return count;
+}
+
+NUMANodeToCoreToPU numatv_filter_by_PUs(const NUMANodeToCoreToPU& brief_topo, QVector<int> PUs) {
+    NUMANodeToCoreToPU filtered_topo{};
+
+    for (const auto& [node_lid, cores]: brief_topo) {
+        for (const auto& [core_lid, PUs_map]: cores) {
+            for (const auto& [pu_lid, pu_osid]: PUs_map) {
+                if (PUs.contains(pu_osid)) {
+                    filtered_topo[node_lid][core_lid][pu_lid] = pu_osid;
+                }
+            }
+        }
+    }
+
+    return filtered_topo;
 }
 
 // END of change

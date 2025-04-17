@@ -69,7 +69,7 @@ public:
     int add_config(int stream_id, ViewType view, const std::string& topology_file);
     int update_cfg(int stream_id, ViewType view, const std::string& topology_file);
     const StreamTopologyConfig* observe_cfg(int stream_id) const;
-    void delete_cfg(int stream_id);
+    int delete_cfg(int stream_id);
     void clear();
 private:
     NUMATVContext();
@@ -79,6 +79,11 @@ private:
     NUMATVContext& operator=(NUMATVContext&&) = delete;
     ~NUMATVContext() = default;
 };
+
+// Global functions
+int numatv_count_PUs(const NUMANodeToCoreToPU& brief_topo);
+int numatv_count_cores(const NUMANodeToCoreToPU& brief_topo);
+NUMANodeToCoreToPU numatv_filter_by_PUs(const NUMANodeToCoreToPU& brief_topo, QVector<int> PUs);
 
 #endif // _KS_NUMA_TV_HPP
 // END of change
