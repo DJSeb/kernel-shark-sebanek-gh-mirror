@@ -53,7 +53,7 @@ struct KsPlotEntry {
 	KsPlot::Graph	*_graph;
 
 	/** "Y" coordinates of the bases of the plot. */
-	int baseY() const {return _graph->baseY();}
+	int base() const {return _graph->base();}
 };
 
 KsPlotEntry &operator <<(KsPlotEntry &plot, QVector<int> &v);

@@ -555,14 +555,14 @@ void KsGLWidget::setMarkPoints(const KsDataStore &data, KsGraphMark *mark)
 
 	for (int i = 0; i < _streamPlots[sd]._cpuList.count(); ++i) {
 		if (_streamPlots[sd]._cpuList[i] == e->cpu) {
-			mark->_mark.setCPUY(_streamPlots[sd]._cpuGraphs[i]->baseY());
+			mark->_mark.setCPUY(_streamPlots[sd]._cpuGraphs[i]->base());
 			mark->_mark.setCPUVisible(true);
 		}
 	}
 
 	for (int i = 0; i < _streamPlots[sd]._taskList.count(); ++i) {
 		if (_streamPlots[sd]._taskList[i] == e->pid) {
-			mark->_mark.setTaskY(_streamPlots[sd]._taskGraphs[i]->baseY());
+			mark->_mark.setTaskY(_streamPlots[sd]._taskGraphs[i]->base());
 			mark->_mark.setTaskVisible(true);
 		}
 	}
@@ -574,11 +574,11 @@ void KsGLWidget::setMarkPoints(const KsDataStore &data, KsGraphMark *mark)
 
 			if (p._type & KSHARK_CPU_DRAW &&
 			    p._id == e->cpu) {
-				mark->_mark.setComboY(p.baseY());
+				mark->_mark.setComboY(p.base());
 				mark->_mark.setComboVisible(true);
 			} else if (p._type & KSHARK_TASK_DRAW &&
 				   p._id == e->pid) {
-				mark->_mark.setComboY(p.baseY());
+				mark->_mark.setComboY(p.base());
 				mark->_mark.setComboVisible(true);
 			}
 		}
@@ -1233,7 +1233,7 @@ bool KsGLWidget::getPlotInfo(const QPoint &point, int *sd, int *cpu, int *pid)
 	for (auto it = _streamPlots.constBegin(); it != _streamPlots.constEnd(); ++it) {
 		n = it.value()._cpuList.count();
 		for (int i = 0; i < n; ++i) {
-			base = it.value()._cpuGraphs[i]->baseY();
+			base = it.value()._cpuGraphs[i]->base();
 			if (base - KS_GRAPH_HEIGHT < point.y() &&
 			    point.y() < base) {
 				*sd = it.key();
@@ -1245,7 +1245,7 @@ bool KsGLWidget::getPlotInfo(const QPoint &point, int *sd, int *cpu, int *pid)
 
 		n = it.value()._taskList.count();
 		for (int i = 0; i < n; ++i) {
-			base = it.value()._taskGraphs[i]->baseY();
+			base = it.value()._taskGraphs[i]->base();
 			if (base - KS_GRAPH_HEIGHT < point.y() &&
 			    point.y() < base) {
 				*sd = it.key();
@@ -1258,7 +1258,7 @@ bool KsGLWidget::getPlotInfo(const QPoint &point, int *sd, int *cpu, int *pid)
 
 	for (auto const &c: _comboPlots) {
 		for (auto const &p: c) {
-			base = p.baseY();
+			base = p.base();
 			if (base - KS_GRAPH_HEIGHT < point.y() && point.y() < base) {
 				*sd = p._streamId;
 				if (p._type & KSHARK_CPU_DRAW)
