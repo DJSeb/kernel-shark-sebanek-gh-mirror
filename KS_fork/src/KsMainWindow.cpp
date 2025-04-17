@@ -627,6 +627,7 @@ void KsMainWindow::_open()
 		//NOTE: Changed here. (NUMA TV) (2025-04-16)
 		NUMATVContext::get_instance().clear();
 		graphPtr()->hideTopologyWidget(true);
+		graphPtr()->clearTopologyWidgets();
 		// END of change
 		loadDataFile(fileName);
 	}
@@ -1817,78 +1818,122 @@ void KsMainWindow::_showNUMATVConfig() {
 
 //NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-16)
 static void apply_numatv_update(int stream_id, ViewType view, 
-	QString topology_file, NUMATVContext& numatv_ctx)
+	QString topology_file, NUMATVContext& numatv_ctx,
+	KsTraceGraph* graph)
 {
 	// Proper file was given + config exists, applying means updating the configuration
 	int result = numatv_ctx.update_cfg(stream_id, view, topology_file.toStdString());
 	
 	switch (result) {
-	case 0:
-		// New topology made
-		printf("[INFO] Topology updated for stream '%d'\n", stream_id);
-		// NUMA TV TODO: Update/recreate topology widget for this stream
-		break;
 	case 1:
-		// Topology file was not changed
-		printf("[INFO] Topology file  was not changed\n");
+		// Topology file was not changed - no need to redraw
+		printf("[INFO] Topology file was not changed for stream '%d'\n", stream_id);
+		break;
+	case 0:
+		// New topology made - redraw
+		printf("[INFO] Topology updated for stream '%d'\n", stream_id);
+		graph->cpuReDraw(stream_id, KsUtils::getCPUList(stream_id));
 		break;
 	case -1:
-		// Couldn't find previous configuration
+		// Couldn't find previous configuration - no need to redraw
 		printf("[INFO] Couldn't find previous configuration for stream '%d'\n", stream_id);
 		break;
 	case -2:
-		// Couldn't get Kshark context
-		printf("[INFO] Couldn't get Kshark context\n");
+		// Couldn't get Kshark context - no need to redraw
+		printf("[ERROR] Couldn't get Kshark context\n");
 		break;
-	default: break;
+	default:
+		// Unknown error - no need to redraw
+		printf("[ERROR] Unknown error during topology update for stream '%d'\n", stream_id);
+		// This should maybe throw an exception, but the question would be which one.
+		break;
+	}
+}
+// END of change
+
+//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-17)
+static void apply_numatv_remove(int stream_id, NUMATVContext& numatv_ctx,
+	KsTraceGraph* graph)
+{
+	int result = numatv_ctx.delete_cfg(stream_id);
+	
+	switch (result) {
+	case 1:
+		// Topology was removed - redraw
+		printf("[INFO] Topology removed for stream '%d'\n", stream_id);
+		graph->cpuReDraw(stream_id, KsUtils::getCPUList(stream_id));
+		break;
+	case 0:
+		// No topology was removed - no need to redraw
+		printf("[INFO] No topology was removed for stream '%d' - nothing to remove\n",
+			stream_id);
+		break;
+	default:
+		// Unknown error - no need to redraw
+		printf("[ERROR] Unknown error during topology removal for stream '%d'\n",
+			stream_id);
+		// This should maybe throw an exception, but the question would be which one.
+		break;
 	}
 }
 // END of change
 
 //NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-16)
-static void apply_numatv_new_topo( int stream_id, ViewType view,
-	QString topology_file, NUMATVContext& numatv_ctx)
+static void apply_numatv_new_topo(int stream_id, ViewType view,
+	QString topology_file, NUMATVContext& numatv_ctx,
+	KsTraceGraph* graph)
 {
 	// Proper file was given + no config exists, applying means creating new topology
 	int result = numatv_ctx.add_config(stream_id, view, topology_file.toStdString());
 
 	switch (result) {
 	case 0:
-		// New topology made
-		printf("[INFO] Topology created for stream '%d'\n", stream_id);
-		// NUMA TV TODO: Create topology widget for this stream
+		// New topology made - redraw
+		printf("[INFO] New topology created for stream '%d'\n", stream_id);
+		// Redraw will be applied to the stream's graph - new topology will
+		// be automatically created there.
+		graph->cpuReDraw(stream_id, KsUtils::getCPUList(stream_id));
 		break;
 	case -1:
-		// Topology file was not changed
-		printf("[INFO] Topology file '%s' doesn't have the same amount of CPUs as the stream\n",
-			topology_file.toStdString().c_str());
+		// Topology was not created- no need to redraw
+		printf("[INFO] Topology file '%s' doesn't have the same amount of CPUs as stream '%d'\n",
+			topology_file.toStdString().c_str(), stream_id);
 		break;
 	case -2:
-		// Couldn't get Kshark context
-		printf("[INFO] Couldn't get Kshark context\n");
+		// Couldn't get Kshark context - no need to redraw
+		printf("[ERROR] Couldn't get Kshark context during topology creation for stream '%d'\n",
+			stream_id);
 		break;
-	default: break;
+	default:
+		// Unknown error - no need to redraw
+		printf("[ERROR] Unknown error during topology creation for stream '%d'\n", stream_id);
+		// This should maybe throw an exception, but the question would be which one.
+		break;
 	}
 }
 // END of change
 
 //NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-16)
 static void apply_numatv(int stream_id, ViewType view,
-	QString topology_file, NUMATVContext& numatv_ctx)
+	QString topology_file, NUMATVContext& numatv_ctx,
+	KsTraceGraph* graph)
 {
 	bool topology_exists = numatv_ctx.exists_for(stream_id);
 	bool file_exists = QFile(topology_file).exists();
 
-	if (topology_exists & file_exists) {
-		apply_numatv_update(stream_id, view, topology_file, numatv_ctx);
-	} else if (topology_exists & !file_exists) {
-		// No proper file was given, applying means clear of the topology ("I apply nothing")
-		// Topology-less configuration wouldn't be able to show the tree view.
-		numatv_ctx.delete_cfg(stream_id);
-		// NUMA TV TODO: Delete topology widget for this stream, but keep spacing
-	} else if (!topology_exists & file_exists) {
-		apply_numatv_new_topo(stream_id, view, topology_file, numatv_ctx);
-		// If no proper file was given, we can expect default behaviour (no tree view)
+	if (topology_exists) {
+		if (file_exists) {
+			apply_numatv_update(stream_id, view, topology_file, numatv_ctx, graph);
+		} else {
+			// No proper file was given, applying means clear of the topology ("I apply nothing")
+			// Topology-less configuration cannot visualise it.
+			apply_numatv_remove(stream_id, numatv_ctx, graph);
+		}
+	} else {
+		if (file_exists) {
+			apply_numatv_new_topo(stream_id, view, topology_file, numatv_ctx, graph);
+		} /* If no proper file was given to a topology-less stream,
+			 we can expect default behaviour (no tree view) */
 	}
 }
 // END of change
@@ -1900,6 +1945,8 @@ static bool stream_wants_topology_widget(int stream_id, ViewType view,
 	bool show_this_topo = (view != ViewType::DEFAULT && numatv_ctx.exists_for(stream_id));
 	if (show_this_topo) {
 		const StreamTopologyConfig* cfg_observer = numatv_ctx.observe_cfg(stream_id);
+		// It wasn't just specified in the dialog, the configuration is also
+		// requesting this type of view.
 		show_this_topo &= (cfg_observer->get_view_type() != ViewType::DEFAULT);
 	}
 		
@@ -1913,18 +1960,15 @@ void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 	bool hide_topo_button = true;
 
 	for (int i = 0; i < stream_numa.size(); i++) {
-		// Unpack the vector
+		// Unpack the vector's items
 		int stream_id = stream_numa[i].first;
 		ViewType view = stream_numa[i].second.first;
 		QString topology_file = stream_numa[i].second.second;
 
-		apply_numatv(stream_id, view, topology_file, numatv_ctx);
+		apply_numatv(stream_id, view, topology_file, numatv_ctx, graphPtr());
 
 		// Hide or show the topology widget if a topology view is asked for
 		hide_topo_button &= !stream_wants_topology_widget(stream_id, view, numatv_ctx);
-		
-		// Force redraw of all CPUs in the stream
-		graphPtr()->cpuReDraw(stream_id, KsUtils::getCPUList(stream_id));
 	}
 	
 	graphPtr()->hideTopologyWidget(hide_topo_button);
