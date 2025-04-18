@@ -1542,4 +1542,20 @@ void VirtGap::_draw([[maybe_unused]]const Color &col,
 	g.draw();
 }
 
+//NOTE: Changed here. ("NUMA TV") (2025-04-18)
+Color black_or_white(float color_intensity, float limit) {
+    const static Color WHITE {0xFF, 0xFF, 0xFF};
+    const static Color BLACK {0, 0, 0};
+
+    return (color_intensity > limit) ? BLACK : WHITE;
+}
+
+float get_color_intensity(const Color& c) {
+    // Color multipliers are chosen the way they are based on human
+    // eye's receptiveness to each color (green being the color human
+    // eyes focus on the most).
+    return (c.b() * 0.114f) + (c.g() * 0.587f) + (c.r() * 0.299f);
+}
+// END of change
+
 } // KsPlot

@@ -685,6 +685,30 @@ private:
 	void _draw(const Color &col, float size) const override;
 };
 
+//NOTE: Changed here. ("NUMA TV") (2025-04-18)
+/**
+ * @brief Returns either black if the color intensity is too great,
+ * otherwise returns white.
+ * 
+ * @param color_intensity: computed intensity of an RGB color.
+ * @param limit: limit of intensity, after which black is returned.
+ * By default, it is set to 128.0.
+ * 
+ * @returns Black on high intensity, white otheriwse.
+*/
+Color black_or_white(float color_intensity, float limit = 128.f);
+
+/**
+ * @brief Gets the color intensity using the formula
+ * `(red * 0.299) + (green * 0.587) + (blue * 0.114)`.
+ * 
+ * @param c: RGB color value whose components will be checked.
+ * 
+ * @returns Color intensity as floating-point value.
+*/
+float get_color_intensity(const Color& c);
+// END of change
+
 }; // KsPlot
 
 #endif  /* _KS_PLOT_TOOLS_H */
