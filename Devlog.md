@@ -1024,3 +1024,30 @@ to the topology constructor.
 
 API of KsTraceGraph was also privatized more and explicitly named with "numatv"
 prefixes.
+
+...
+
+Colors in the topology wiget now (allegedly) correspond to colors of CPUs held
+by the GL widget. Cores use an average of their PUs' color, analogously for
+NUMA nodes. Each part of the topology block-tree now has a 1px solid black
+border around itself, which makes it a little prettier + it highlights
+connections between the children and parent (2px solid black line naturally
+forms).
+
+KsPlotTools also got new tools, getting color intensity (courtesy of Stacklook),
+and black or white color based on intensity (again, thank you Stacklook).
+It felt more natural to put these two tools there, as they popped up thrice
+by now in the project and seem rather useful.
+
+Overall, a good day.
+
+Goals:
+
+- Fix bugs, polish
+- Session support maybe
+- Clean up after yourself
+- Document it all
+
+Package tree view will be left as something for extensions.
+Session support most likely will happen.
+Everything else is necessary and required.
