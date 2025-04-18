@@ -999,3 +999,19 @@ _Author's note: Writing this at 3AM, so not a lot to say in this state of mind._
 - Clean up after yourself
 - Document it all
 - Maybe package tree view as well
+
+## 2025-04-18
+
+So, in regards to that bug found "today" - it seems that histogram's data pointer
+cannot be accessed for unknown reasons. Best theory from testing though is
+that since the CPUs have been reordered, the histogram gets very confused
+and somewhere along the line, the data pointer becomes crazy.
+
+With more experimentation, the fault seems entirely situated in a single state
+of the graph: one trace is opened && it has a topology view, which rearranges
+its CPUs && that topology is used && task redraw has never been called.
+
+It's super-situational and likely smell of something else than just rearrangement
+of CPUs being a big bad change. Either way, since it actually nicely coincided
+with needing to redraw tasks to adjust task padding, just calling task redraw
+each time NUMA TV calls cpu redraw seems to have fixed it.
