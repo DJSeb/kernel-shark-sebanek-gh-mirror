@@ -21,6 +21,7 @@
 #include "KsQuickContextMenu.hpp"
 //NOTE: Changed here. (NUMA TV) (2025-04-17)
 #include "KsNUMATopologyViews.hpp"
+#include "KsPlotTools.hpp"
 // END of change
 
 /** Create a default (empty) Trace graph widget. */
@@ -680,7 +681,7 @@ void KsTraceGraph::updateGeom()
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-15)
 	if (!_topoScrollArea.isHidden()) {
-		_topoScrollArea.setFixedWidth(saWidth / 3);
+		_topoScrollArea.setFixedWidth(saWidth / 5);
 		saWidth -= _topoScrollArea.width();
 	}
 	// END of change
@@ -1099,7 +1100,8 @@ KsStreamTopology::KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
   _PUs_layout(&_PUs),
   _tasks_padding(this)
 {
-	int v_spacing = const_cast<KsTraceGraph *>(trace_graph)->glPtr()->vSpacing();
+	KsGLWidget* gl_widget = const_cast<KsTraceGraph *>(trace_graph)->glPtr();
+	int v_spacing = gl_widget->vSpacing();
 	this->setContentsMargins(0, 0, 0, 0);
 	this->setLayout(&_main_layout);
 
@@ -1110,15 +1112,12 @@ KsStreamTopology::KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
 	_tasks_padding.setContentsMargins(0, 0, 0, 0);
 	_tasks_padding.setFixedHeight(v_spacing);
 	_tasks_padding.setHidden(true);
-	_tasks_padding.setStyleSheet("QWidget {background-color : aquamarine;}");
 
 	_topo.setContentsMargins(0, 0, 0, 0);
 	_topo.setLayout(&_topo_layout);
 	
 	_topo_layout.setContentsMargins(0, 0, 0, 0);
 	_topo_layout.setSpacing(0);
-
-	_machine.setStyleSheet("QWidget {background-color : black; color: white;}");
 	
 	_nodes.setContentsMargins(0, 0, 0, 0);
 	_nodes.setLayout(&_nodes_layout);
@@ -1147,45 +1146,150 @@ KsStreamTopology::KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
 	_main_layout.addWidget(&_tasks_padding);
 
 	// Create topologies
+	KsPlot::ColorTable cpu_cols = gl_widget->getCPUColors();
+	KsPlot::ColorTable stream_cols = gl_widget->getStreamColors();
+
 	_machine.setText(QString{
-		"Machine #%1\n"
+		"Machine\n"
 		"Stream #%1\n"
-		"[More topology info]"
+		// There could be more info here
 	}.arg(stream_id));
 	_machine.setWordWrap(true);
+	KsPlot::Color stream_color = stream_cols.at(stream_id);
+	float stream_color_intensity = KsPlot::get_color_intensity(stream_color);
+	KsPlot::Color stream_text_color = KsPlot::black_or_white(stream_color_intensity);
+	QString stream_bg_color = QString{"%1, %2, %3"}
+		.arg(stream_color.r())
+		.arg(stream_color.g())
+		.arg(stream_color.b()
+	);
+	QString stream_text_color_str = QString{"%1, %2, %3"}
+		.arg(stream_text_color.r())
+		.arg(stream_text_color.g())
+		.arg(stream_text_color.b()
+	);
+	_machine.setStyleSheet(QString{
+		"QLabel {font-weight: bold; font-style: italic;"
+		"border: 1px solid black;"
+		"background-color: rgb(" + stream_bg_color + ");"
+		"color: rgb(" + stream_text_color_str + ");}"}
+	);
+
 	_machine.setAlignment(Qt::AlignCenter);
 
 	for (const auto& [node_lid, cores] : brief_topo) {
 		QLabel* node = new QLabel(&_nodes);
-		node->setText(QString("Node %1").arg(node_lid));
+		node->setText(QString("NUMA Node L#%1").arg(node_lid));
 		node->setAlignment(Qt::AlignCenter);
-		node->setStyleSheet("QLabel {background-color : purple; color: white;}");
 		_nodes_layout.addWidget(node);
+
 		int node_height = 0;
+		unsigned int node_reds = 0;
+		unsigned int node_greens = 0;
+		unsigned int node_blues = 0;
 
 		for (const auto& [core_lid, PUs] : cores) {
 			QLabel* core = new QLabel(node);
-			core->setText(QString("Core %1").arg(core_lid));
+			core->setText(QString("Core L#%1").arg(core_lid));
 			core->setAlignment(Qt::AlignCenter);
-			core->setStyleSheet("QLabel {background-color : brown; color: white;}");
 			_cores_layout.addWidget(core);
+
+			unsigned int pu_reds = 0;
+			unsigned int pu_greens = 0;
+			unsigned int pu_blues = 0;
 
 			for (const auto& [pu_lid, pu_osid] : PUs) {
 				QLabel* pu = new QLabel(core);
-				pu->setText(QString("PU %1").arg(pu_osid));
+				pu->setText(QString("PU P#%1").arg(pu_osid));
 				pu->setAlignment(Qt::AlignCenter);
-				pu->setStyleSheet("QLabel {background-color : green; color: black;}");
+				KsPlot::Color cpu_color = cpu_cols.at(pu_osid);
+				float cpu_color_intensity = KsPlot::get_color_intensity(cpu_color);
+				KsPlot::Color cpu_text_color = KsPlot::black_or_white(cpu_color_intensity);
+				QString cpu_bg_color = QString{"%1, %2, %3"}
+					.arg(cpu_color.r())
+					.arg(cpu_color.g())
+					.arg(cpu_color.b()
+				);
+				QString cpu_text_color_str = QString{"%1, %2, %3"}
+					.arg(cpu_text_color.r())
+					.arg(cpu_text_color.g())
+					.arg(cpu_text_color.b()
+				);
+				pu_reds += cpu_color.r();
+				pu_greens += cpu_color.g();
+				pu_blues += cpu_color.b();
+				pu->setStyleSheet(
+					QString{"QLabel {border: 1px solid black;"
+						"background-color: rgb(" + cpu_bg_color + ");"
+						"color: rgb(" + cpu_text_color_str + ");}"}
+				);
+				
 				_PUs_layout.addWidget(pu);
 				pu->setFixedHeight(KS_GRAPH_HEIGHT);
 			}
 
-			int core_height = (KS_GRAPH_HEIGHT * PUs.size()) + ((PUs.size() - 1) * v_spacing);
+			int cpus_in_core = int(PUs.size());
+			int n_spacings = (cpus_in_core - 1);
+			int graph_heights = (KS_GRAPH_HEIGHT * cpus_in_core);
+			int spacings_heights = (n_spacings * v_spacing);
+			int core_height = graph_heights + spacings_heights;
+
 			node_height += core_height + v_spacing;
 			core->setFixedHeight(core_height);
+			auto core_color = KsPlot::Color{
+				uint8_t(pu_reds / cpus_in_core),
+				uint8_t(pu_greens / cpus_in_core),
+				uint8_t(pu_blues / cpus_in_core)
+			};
+			float core_color_intensity = KsPlot::get_color_intensity(core_color);
+			KsPlot::Color core_text_color = KsPlot::black_or_white(core_color_intensity);
+			QString bg_color = QString{"%1, %2, %3"}
+				.arg(core_color.r())
+				.arg(core_color.g())
+				.arg(core_color.b()
+			);
+			QString text_color = QString{"%1, %2, %3"}
+				.arg(core_text_color.r())
+				.arg(core_text_color.g())
+				.arg(core_text_color.b()
+			);
+			core->setStyleSheet(QString{
+				"QLabel {border: 1px solid black;"
+				"background-color: rgb(" + bg_color + ");"
+				"color: rgb(" + text_color + ");}"}
+			);
+
+			node_reds += core_color.r();
+			node_greens += core_color.g();
+			node_blues += core_color.b();
 		}
 
 		node_height -= v_spacing; // One less core spacing
 		node->setFixedHeight(node_height);
+
+		int cores_in_node = int(cores.size());
+		auto node_color = KsPlot::Color{
+			uint8_t(node_reds / cores_in_node),
+			uint8_t(node_greens / cores_in_node),
+			uint8_t(node_blues / cores_in_node)
+		};
+		float node_color_intensity = KsPlot::get_color_intensity(node_color);
+		KsPlot::Color node_text_color = KsPlot::black_or_white(node_color_intensity);
+		QString bg_color = QString{"%1, %2, %3"}
+			.arg(node_color.r())
+			.arg(node_color.g())
+			.arg(node_color.b())
+		;
+		QString text_color = QString{"%1, %2, %3"}
+			.arg(node_text_color.r())
+			.arg(node_text_color.g())
+			.arg(node_text_color.b()
+		);
+		node->setStyleSheet(QString{
+			"QLabel {border: 1px solid black;"
+			"background-color: rgb(" + bg_color + ");"
+			"color: rgb(" + text_color + ");}"}
+		);
 	}
 }
 // END of change
