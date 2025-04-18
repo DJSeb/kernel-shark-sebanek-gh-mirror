@@ -19,6 +19,9 @@
 #include "KsDualMarker.hpp"
 #include "KsTraceGraph.hpp"
 #include "KsQuickContextMenu.hpp"
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+#include "KsNUMATopologyViews.hpp"
+// END of change
 
 /** Create a default (empty) Trace graph widget. */
 KsTraceGraph::KsTraceGraph(QWidget *parent)
@@ -45,7 +48,7 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
   _hideTopoBtn(">", &_topoGlWrapper),
   _topoSpace(&_topoScrollArea),
   _topoLayout(&_topoSpace),
-  _topoHeader("Topology", &_topoSpace),
+  _topoWidgets({}),
 // END of change
   _scrollArea(this),
   _glWindow(&_scrollArea),
@@ -133,10 +136,9 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 	_topoGlLayout.addWidget(&_scrollArea);
 
 	_topoScrollArea.setContentsMargins(0, 0, 0, 0);
+	_topoScrollArea.setWidgetResizable(true);
 	_topoScrollArea.setHidden(true);
 	_topoScrollArea.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	_topoScrollArea.setAttribute(Qt::WA_TransparentForMouseEvents);
-	_topoScrollArea.setWidgetResizable(true);
 	_topoScrollArea.setWidget(&_topoSpace);
 
 	_hideTopoBtn.setFixedWidth(FONT_WIDTH * 3);
@@ -147,13 +149,11 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 	_topoSpace.setStyleSheet("QWidget {background-color : white;}");
 	_topoSpace.setLayout(&_topoLayout);
 	
+	int v_margin = _glWindow.vMargin();
+	int v_spacing = _glWindow.vSpacing();
 	_topoLayout.setAlignment(Qt::AlignTop);
-	_topoLayout.setContentsMargins(0, 0, 0, 0);
-	_topoLayout.setSpacing(0);
-
-	_topoHeader.setFixedHeight(30);
-	_topoHeader.setStyleSheet("QLabel {background-color : lightgray;}");
-	_topoLayout.addWidget(&_topoHeader);
+	_topoLayout.setContentsMargins(0, 2*v_margin, 0, v_margin);
+	_topoLayout.setSpacing(v_spacing);
 
 	// Connections
 	connect(&_hideTopoBtn, &QPushButton::pressed,
@@ -482,7 +482,7 @@ void KsTraceGraph::_markerReDraw()
 }
 
 /**
- * @brief Redreaw all CPU graphs.
+ * @brief Redraw all CPU graphs.
  *
  * @param sd: Data stream identifier.
  * @param v: CPU ids to be plotted.
@@ -492,12 +492,34 @@ void KsTraceGraph::cpuReDraw(int sd, QVector<int> v)
 	startOfWork(KsWidgetsLib::KsDataWork::EditPlotList);
 	if (_glWindow._streamPlots.contains(sd)) {
 		const NUMATVContext& numa_ctx = NUMATVContext::get_instance();
-		const StreamTopologyConfig* stream_cfg = numa_ctx.observe_cfg(sd);
-		if (stream_cfg && stream_cfg->get_view_type() != ViewType::DEFAULT) {
-			NUMANodeToCoreToPU brief_topo = stream_cfg->get_brief_topo();
-			v = stream_cfg->rearrangeCPUsWithBriefTopo(v, brief_topo);
-			//NUMA TV TODO: Generate a topology widget tree to display in the topology widget
+		bool topology_exists = numa_ctx.exists_for(sd);
+		if (topology_exists) {
+			const StreamTopologyConfig* stream_cfg = numa_ctx.observe_cfg(sd);
+			if (stream_cfg->get_view_type() == ViewType::TREE) {
+				NUMANodeToCoreToPU brief_topo = stream_cfg->get_brief_topo();
+				brief_topo = numatv_filter_by_PUs(brief_topo, v);
+				v = stream_cfg->rearrangeCPUsWithBriefTopo(v, brief_topo);
+				printf("[INFO] Rearranging CPUs for stream '%d' with topology\n", sd);
+				addTopologyWidget(sd, brief_topo);
+			} else {
+				if (_topoWidgets.contains(sd)) {
+					printf("[INFO] Hiding topology widget for stream '%d'\n", sd);
+					getTopologyWidget(sd)->hide_topology(true);
+				} else {
+					printf("[INFO] Not hiding topology widget for stream '%d'\n", sd);
+				}
+			}
+		} else {
+			if (_topoWidgets.contains(sd)) {
+				// Delete remaining topology widget
+				printf("[INFO] Removing topology widget for stream '%d'\n", sd);
+				removeTopologyWidget(sd);
+			} else {
+				// Nothing really
+				printf("[INFO] Default view + no topology for stream '%d'\n", sd);
+			}
 		}
+
 		_glWindow._streamPlots[sd]._cpuList = v;
 	}
 
@@ -514,8 +536,30 @@ void KsTraceGraph::cpuReDraw(int sd, QVector<int> v)
 void KsTraceGraph::taskReDraw(int sd, QVector<int> v)
 {
 	startOfWork(KsWidgetsLib::KsDataWork::EditPlotList);
-	if (_glWindow._streamPlots.contains(sd))
+	if (_glWindow._streamPlots.contains(sd)) {
+		//NOTE: Changed here. (NUMA TV) (2025-04-18)
+		const NUMATVContext& numa_ctx = NUMATVContext::get_instance();
+		bool topology_exists = numa_ctx.exists_for(sd);
+		if (topology_exists) {
+			if (_topoWidgets.contains(sd)) {
+				KsStreamTopology* taskPadding = getTopologyWidget(sd);
+				if (!v.isEmpty()) {
+					int v_spacing = glPtr()->vSpacing();
+					int task_count = v.count();
+					int tasks_spacings = (task_count - 1) * v_spacing;
+					int tasks_heights = task_count * KS_GRAPH_HEIGHT;
+					int task_padding = v_spacing + tasks_heights + tasks_spacings;
+					
+					taskPadding->change_task_padding(task_padding);
+					taskPadding->hide_task_padding(false);
+				} else {
+					taskPadding->hide_task_padding(true);
+				}
+			}
+		}
+		// END of change
 		_glWindow._streamPlots[sd]._taskList = v;
+	}
 
 	_selfUpdate();
 	endOfWork(KsWidgetsLib::KsDataWork::EditPlotList);
@@ -954,4 +998,160 @@ void KsTraceGraph::hideTopologyWidget(bool hide) {
 	_topoScrollArea.setHidden(hide);
 	updateGeom();
 }
+// END of change
+
+//NOTE: Changed here. !!!! (NUMA TV) (2025-04-17)
+void KsTraceGraph::clearTopologyWidgets() {
+	for (auto&& widget : _topoWidgets) {
+		if (widget) {
+			delete widget;
+			widget = nullptr;
+		}
+	}
+	_topoWidgets.clear();
+}
+// END of change
+
+//NOTE: Changed here. !!!!! (NUMA TV) (2025-04-17)
+void KsTraceGraph::removeTopologyWidget(int sd) {
+	KsStreamTopology* topoWidget = _topoWidgets[sd];
+	delete topoWidget;
+	_topoWidgets.remove(sd);
+}
+// END of change
+
+//NOTE: Changed here. !!!!! (NUMA TV) (2025-04-17)
+KsStreamTopology* KsTraceGraph::getTopologyWidget(int sd)
+{ return _topoWidgets[sd]; }
+// END of change
+
+//NOTE: Changed here. !!!! (NUMA TV) (2025-04-17)
+void KsTraceGraph::addTopologyWidget(int sd,
+	const NUMANodeToCoreToPU& brief_topo)
+{
+	if (_topoWidgets.contains(sd)) {
+		// Remove existing topology widget
+		removeTopologyWidget(sd);
+	}
+	_topoWidgets.insert(sd, new KsStreamTopology{brief_topo, this, &_topoSpace});
+	_topoLayout.addWidget(_topoWidgets[sd]);
+}
+// END of change
+
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+KsStreamTopology::KsStreamTopology(const NUMANodeToCoreToPU& brief_topo,
+	const KsTraceGraph* trace_graph, QWidget* parent)
+: QWidget(parent),
+  _main_layout(this),
+  _topo(this),
+  _topo_layout(&_topo),
+  _machine(&_topo),
+  _nodes(&_topo),
+  _nodes_layout(&_nodes),
+  _cores(&_topo),
+  _cores_layout(&_cores),
+  _PUs(&_topo),
+  _PUs_layout(&_PUs),
+  _tasks_padding(this)
+{
+	int v_spacing = const_cast<KsTraceGraph *>(trace_graph)->glPtr()->vSpacing();
+	this->setContentsMargins(0, 0, 0, 0);
+	this->setLayout(&_main_layout);
+
+	_main_layout.setContentsMargins(0, 0, 0, 0);
+	_main_layout.setSpacing(0);
+	_main_layout.setAlignment(Qt::AlignTop);
+
+	_tasks_padding.setContentsMargins(0, 0, 0, 0);
+	_tasks_padding.setFixedHeight(v_spacing);
+	_tasks_padding.setHidden(true);
+	_tasks_padding.setStyleSheet("QWidget {background-color : aquamarine;}");
+
+	_topo.setContentsMargins(0, 0, 0, 0);
+	_topo.setLayout(&_topo_layout);
+	
+	_topo_layout.setContentsMargins(0, 0, 0, 0);
+	_topo_layout.setSpacing(0);
+
+	_machine.setStyleSheet("QWidget {background-color : black; color: white;}");
+	
+	_nodes.setContentsMargins(0, 0, 0, 0);
+	_nodes.setLayout(&_nodes_layout);
+	
+	_nodes_layout.setContentsMargins(0, 0, 0, 0);
+	_nodes_layout.setSpacing(v_spacing);
+	
+	_cores.setContentsMargins(0, 0, 0, 0);
+	_cores.setLayout(&_cores_layout);
+
+	_cores_layout.setContentsMargins(0, 0, 0, 0);
+	_cores_layout.setSpacing(v_spacing);
+
+	_PUs.setContentsMargins(0, 0, 0, 0);
+	_PUs.setLayout(&_PUs_layout);
+
+	_PUs_layout.setContentsMargins(0, 0, 0, 0);
+	_PUs_layout.setSpacing(v_spacing);
+
+	_topo_layout.addWidget(&_machine);
+	_topo_layout.addWidget(&_nodes);
+	_topo_layout.addWidget(&_cores);
+	_topo_layout.addWidget(&_PUs);
+
+	_main_layout.addWidget(&_topo);
+	_main_layout.addWidget(&_tasks_padding);
+
+	// Create topologies
+	_machine.setText("Machine");
+	_machine.setWordWrap(true);
+	_machine.setAlignment(Qt::AlignCenter);
+
+	for (const auto& [node_lid, cores] : brief_topo) {
+		QLabel* node = new QLabel(&_nodes);
+		node->setText(QString("Node %1").arg(node_lid));
+		node->setAlignment(Qt::AlignCenter);
+		node->setStyleSheet("QLabel {background-color : purple; color: white;}");
+		_nodes_layout.addWidget(node);
+		int node_height = 0;
+
+		for (const auto& [core_lid, PUs] : cores) {
+			QLabel* core = new QLabel(node);
+			core->setText(QString("Core %1").arg(core_lid));
+			core->setAlignment(Qt::AlignCenter);
+			core->setStyleSheet("QLabel {background-color : brown; color: white;}");
+			_cores_layout.addWidget(core);
+
+			for (const auto& [pu_lid, pu_osid] : PUs) {
+				QLabel* pu = new QLabel(core);
+				pu->setText(QString("PU %1").arg(pu_osid));
+				pu->setAlignment(Qt::AlignCenter);
+				pu->setStyleSheet("QLabel {background-color : green; color: black;}");
+				_PUs_layout.addWidget(pu);
+				pu->setFixedHeight(KS_GRAPH_HEIGHT);
+			}
+
+			int core_height = (KS_GRAPH_HEIGHT * PUs.size()) + ((PUs.size() - 1) * v_spacing);
+			node_height += core_height + v_spacing;
+			core->setFixedHeight(core_height);
+		}
+
+		node_height -= v_spacing; // One less core spacing
+		node->setFixedHeight(node_height);
+	}
+}
+// END of change
+
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+void KsStreamTopology::hide_topology(bool hide)
+{ this->setHidden(hide); }
+// END of change
+
+//NOTE: Changed here. (NUMA TV) (2025-04-18)
+void KsStreamTopology::change_task_padding(int task_padding)
+{ _tasks_padding.setFixedHeight(task_padding); }
+// END of change
+
+//NOTE: Changed here. (NUMA TV) (2025-04-18)
+void KsStreamTopology::hide_task_padding(bool hide)
+{ _tasks_padding.setHidden(hide); }
 // END of change

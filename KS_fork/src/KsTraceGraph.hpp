@@ -11,14 +11,17 @@
 #ifndef _KS_TRACEGRAPH_H
 #define _KS_TRACEGRAPH_H
 
-//NOTE: Changed here. (NUMA TV) (2025-04-15)
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
 // Qt
-#include <QMutex>
+#include <QMap>
 // END of change
 
 // KernelShark
 #include "KsWidgetsLib.hpp"
 #include "KsGLWidget.hpp"
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+#include "KsNUMATopologyViews.hpp"
+// END of change
 
 /**
  * Scroll Area class, needed in order to reimplemented the handler for mouse
@@ -51,20 +54,7 @@ public:
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-17)
-class KsStreamTopology : public QWidget {
-	Q_OBJECT
-private: // Qt parts
-	QHBoxLayout _layout;
-	QLabel _machine;
-	QVBoxLayout _nodes;
-	QVBoxLayout _cores;
-	QVBoxLayout _pus;
-public:
-	explicit KsStreamTopology
-	(QWidget *parent = nullptr, const NUMANodeToCoreToPU& brief_topo);
-private:
-	KsStreamTopology() = delete;
-};
+class KsStreamTopology;
 // END of change
 
 /**
@@ -122,7 +112,17 @@ public:
 	//NOTE: Changed here. (NUMA TV) (2025-04-15)
 	void hideTopologyWidget(bool hide);
 	// END of change
+	
+	//NOTE: Changed here. (NUMA TV) (2025-04-17)
+	void addTopologyWidget(int stream_id,
+		const NUMANodeToCoreToPU& brief_topo);
+	
+	KsStreamTopology* getTopologyWidget(int stream_id);
 
+	void removeTopologyWidget(int stream_id);
+
+	void clearTopologyWidgets();
+	// END of change
 
 signals:
 	/**
@@ -185,8 +185,8 @@ private:
 	QWidget	_topoSpace;
 	
 	QVBoxLayout _topoLayout;
-	
-	QLabel _topoHeader;
+
+	QMap<int, KsStreamTopology*> _topoWidgets;
 	// END of change
 
 	KsGraphScrollArea	_scrollArea;
@@ -201,5 +201,84 @@ private:
 
 	bool		 _keyPressed;
 };
+
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+/*
+Tree-like layout of the topology view with NUMA nodes.
+It shall be constructed right to left, first matching CPUs
+in KernelShark's GL window to PUs in the topology. They shall
+have the same height as each CPU graph (their heights do not
+change, which allows to use this invariant).
+NUMA TV rearranges the CPUs, which allows construction of
+such UI, that nodes and cores can be sorted by their logical
+indices, as specified by hwloc. By creating the rightmost
+column first, the core column can then create cores with the
+height of the PU(s) it owns - analogously for NUMA nodes.
+By doing this, if some cores have more or less PUs, their
+height will adjust accordingly. Similarly for NUMA nodes
+and their cores. It also comes with a bonus reactivity to 
+hidden & visible CPUs as specified by KernelShark - construction
+right to left also allows to show only the relevant parts of the
+topology.
+
+Total height is then used for the machine column, which
+also denotes the height of the stream's graph. It shall use
+the stream's color (if there are more streams open).
+
+Caveats: Some exotic topologies won't work, e.g. nested NUMA nodes,
+PUs shared across cores or cores shared across NUMA nodes.
+
+Technically, it should be a visualisation of the NUMANodeToCoreToPU
+mappings.
+
+To take task graphs into account, spacing is added at the bottom of
+the topology 
+
+Example look:
+```
+______________________________________________________________
+|------------------------------------------------------------|
+||              |               |               |   PU P1   ||
+||				|				|	core L1		|-----------||
+||				|				|				|	PU P8	||
+||				|	Nnode L1	|---------------|-----------||
+||				|				|				|	PU P2	||
+||				|				|	core L2		|-----------||
+||				|				|				|	PU P7	||
+||	machine		|---------------|---------------|-----------||
+||	(stream X)	|				|				|	PU P3	||
+|| (topo info)	|				|	core L3		|-----------||
+||				|				|				|	PU P6	||
+||				|	Nnode L2	|---------------|-----------||
+||				|				|				|	PU P4	||
+||				|				|	core L4		|-----------||
+||				|				|				|	PU P5	||
+|------------------------------------------------------------|
+|[							SPACING							]|
+--------------------------------------------------------------
+```
+*/
+class KsStreamTopology : public QWidget {
+	Q_OBJECT
+private: // Qt parts
+	QVBoxLayout _main_layout;
+	QWidget _topo;
+	QHBoxLayout _topo_layout;
+	QLabel _machine;
+	QWidget _nodes;
+	QVBoxLayout _nodes_layout;
+	QWidget _cores;
+	QVBoxLayout _cores_layout;
+	QWidget _PUs;
+	QVBoxLayout _PUs_layout;
+	QWidget _tasks_padding;
+public:
+	explicit KsStreamTopology(const NUMANodeToCoreToPU& brief_topo,
+		const KsTraceGraph* trace_graph, QWidget* parent = nullptr);
+	void hide_topology(bool hide);
+	void change_task_padding(int height);
+	void hide_task_padding(bool hide);
+};
+// END of change
 
 #endif // _KS_TRACEGRAPH_H
