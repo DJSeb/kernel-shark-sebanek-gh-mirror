@@ -626,8 +626,8 @@ void KsMainWindow::_open()
 	if (!fileName.isEmpty()) {
 		//NOTE: Changed here. (NUMA TV) (2025-04-16)
 		NUMATVContext::get_instance().clear();
-		graphPtr()->hideTopologyWidget(true);
-		graphPtr()->clearTopologyWidgets();
+		graphPtr()->numatvHideTopologyWidget(true);
+		graphPtr()->numatvClearTopologyWidgets();
 		// END of change
 		loadDataFile(fileName);
 	}
@@ -1974,6 +1974,6 @@ void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 		hide_topo_button &= !stream_wants_topology_widget(stream_id, view, numatv_ctx);
 	}
 	
-	graphPtr()->hideTopologyWidget(hide_topo_button);
+	graphPtr()->numatvHideTopologyWidget(hide_topo_button);
 }
 // END of change

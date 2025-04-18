@@ -110,18 +110,10 @@ public:
 	// END of change
 	
 	//NOTE: Changed here. (NUMA TV) (2025-04-15)
-	void hideTopologyWidget(bool hide);
+	void numatvHideTopologyWidget(bool hide);
 	// END of change
-	
-	//NOTE: Changed here. (NUMA TV) (2025-04-17)
-	void addTopologyWidget(int stream_id,
-		const NUMANodeToCoreToPU& brief_topo);
-	
-	KsStreamTopology* getTopologyWidget(int stream_id);
 
-	void removeTopologyWidget(int stream_id);
-
-	void clearTopologyWidgets();
+	void numatvClearTopologyWidgets();
 	// END of change
 
 signals:
@@ -159,6 +151,25 @@ private:
 	void _updateGraphs(KsWidgetsLib::KsDataWork action);
 
 	void _onCustomContextMenu(const QPoint &point);
+
+	//NOTE: Changed here. (NUMA TV) (2025-04-18)
+	void _numatv_insert_topology_widget(int stream_id,
+		const NodeCorePU& brief_topo);
+
+	void _numatv_remove_topology_widget(int stream_id);
+
+	void _numatv_existing_topology_action(int stream_id, bool widget_exists,
+		QVector<int>& cpusToDraw, const NUMATVContext& numa_ctx);
+
+	void _numatv_no_topology_action(int stream_id, bool widget_exists);
+	
+	void _numatv_hide_stream_topo(int stream_id, bool hide);
+
+	void _numatv_tree_view_action(int stream_id, bool widget_exists,
+		QVector<int>& cpusToDraw, const StreamTopologyConfig* stream_cfg);
+
+	void _numatv_redraw_topo_widgets(int stream_id, QVector<int>& cpusToDraw);
+	// END of change
 
 	QString _t2str(uint64_t sec, uint64_t usec);
 
@@ -228,7 +239,7 @@ the stream's color (if there are more streams open).
 Caveats: Some exotic topologies won't work, e.g. nested NUMA nodes,
 PUs shared across cores or cores shared across NUMA nodes.
 
-Technically, it should be a visualisation of the NUMANodeToCoreToPU
+Technically, it should be a visualisation of the NodeCorePU
 mappings.
 
 To take task graphs into account, spacing is added at the bottom of
@@ -273,7 +284,7 @@ private: // Qt parts
 	QVBoxLayout _PUs_layout;
 	QWidget _tasks_padding;
 public:
-	explicit KsStreamTopology(const NUMANodeToCoreToPU& brief_topo,
+	explicit KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
 		const KsTraceGraph* trace_graph, QWidget* parent = nullptr);
 	void hide_topology(bool hide);
 	void change_task_padding(int height);

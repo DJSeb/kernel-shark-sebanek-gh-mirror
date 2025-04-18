@@ -185,8 +185,8 @@ const std::string& StreamTopologyConfig::get_topo_fpath() const
 ViewType StreamTopologyConfig::get_view_type() const
 { return applied_view; }
 
-const NUMANodeToCoreToPU StreamTopologyConfig::get_brief_topo() const {
-    NUMANodeToCoreToPU numaCorePUMap{};
+const NodeCorePU StreamTopologyConfig::get_brief_topo() const {
+    NodeCorePU numaCorePUMap{};
 
     int n_numa_nodes = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE);
 	for (unsigned int i = 0; i < (unsigned int)n_numa_nodes; i++) {
@@ -204,12 +204,12 @@ const NUMANodeToCoreToPU StreamTopologyConfig::get_brief_topo() const {
 }
 
 QVector<int> StreamTopologyConfig::rearrangeCPUs(const QVector<int>& cpu_ids) const {
-	NUMANodeToCoreToPU brief_topo = get_brief_topo();
+	NodeCorePU brief_topo = get_brief_topo();
     return rearrangeCPUsWithBriefTopo(cpu_ids, brief_topo);
 }
 
 QVector<int> StreamTopologyConfig::rearrangeCPUsWithBriefTopo
-(const QVector<int>& cpu_ids, const NUMANodeToCoreToPU& brief_topo) const {
+(const QVector<int>& cpu_ids, const NodeCorePU& brief_topo) const {
     QVector<int> rearranged{};
 
     // Since maps are sorted, the resulting vector will be sorted as well
@@ -228,7 +228,7 @@ QVector<int> StreamTopologyConfig::rearrangeCPUsWithBriefTopo
 
 // Global functions
 
-int numatv_count_PUs(const NUMANodeToCoreToPU& brief_topo) {
+int numatv_count_PUs(const NodeCorePU& brief_topo) {
     int count = 0;
     for (const auto& [node_lid, cores]: brief_topo) {
         for (const auto& [core_lid, PUs]: cores) {
@@ -238,7 +238,7 @@ int numatv_count_PUs(const NUMANodeToCoreToPU& brief_topo) {
     return count;
 }
 
-int numatv_count_cores(const NUMANodeToCoreToPU& brief_topo) {
+int numatv_count_cores(const NodeCorePU& brief_topo) {
     int count = 0;
     for (const auto& [node_lid, cores]: brief_topo) {
         count += cores.size();
@@ -246,8 +246,8 @@ int numatv_count_cores(const NUMANodeToCoreToPU& brief_topo) {
     return count;
 }
 
-NUMANodeToCoreToPU numatv_filter_by_PUs(const NUMANodeToCoreToPU& brief_topo, QVector<int> PUs) {
-    NUMANodeToCoreToPU filtered_topo{};
+NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo, QVector<int> PUs) {
+    NodeCorePU filtered_topo{};
 
     for (const auto& [node_lid, cores]: brief_topo) {
         for (const auto& [core_lid, PUs_map]: cores) {

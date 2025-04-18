@@ -31,7 +31,7 @@ enum class ViewType { DEFAULT = 0, TREE };
 
 /// @brief Simpler name to package a view type and chosen topology file.
 using ViewTopologyPair = std::pair<ViewType, QString>;
-using NUMANodeToCoreToPU = std::map<int, std::map<int, std::map<int, int>>>;
+using NodeCorePU = std::map<int, std::map<int, std::map<int, int>>>;
 
 // Classes
 
@@ -52,10 +52,10 @@ public: // Creation, destruction, assigns
 public: //Business
     const std::string& get_topo_fpath() const;
     ViewType get_view_type() const;
-    const NUMANodeToCoreToPU get_brief_topo() const;
+    const NodeCorePU get_brief_topo() const;
     QVector<int> rearrangeCPUs(const QVector<int>& cpu_ids) const;
     QVector<int> rearrangeCPUsWithBriefTopo
-    (const QVector<int>& cpu_ids, const NUMANodeToCoreToPU& brief_topo) const;
+    (const QVector<int>& cpu_ids, const NodeCorePU& brief_topo) const;
 };
 
 class NUMATVContext {
@@ -81,9 +81,9 @@ private:
 };
 
 // Global functions
-int numatv_count_PUs(const NUMANodeToCoreToPU& brief_topo);
-int numatv_count_cores(const NUMANodeToCoreToPU& brief_topo);
-NUMANodeToCoreToPU numatv_filter_by_PUs(const NUMANodeToCoreToPU& brief_topo, QVector<int> PUs);
+int numatv_count_PUs(const NodeCorePU& brief_topo);
+int numatv_count_cores(const NodeCorePU& brief_topo);
+NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo, QVector<int> PUs);
 
 #endif // _KS_NUMA_TV_HPP
 // END of change

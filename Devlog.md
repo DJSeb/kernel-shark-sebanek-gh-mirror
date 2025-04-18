@@ -1015,3 +1015,12 @@ It's super-situational and likely smell of something else than just rearrangemen
 of CPUs being a big bad change. Either way, since it actually nicely coincided
 with needing to redraw tasks to adjust task padding, just calling task redraw
 each time NUMA TV calls cpu redraw seems to have fixed it.
+
+...
+
+Fixed scaling bug of topologz views (who would have thought that the bottom
+space is not margin, but one additional spacing), added some stream identification
+to the topology constructor.
+
+API of KsTraceGraph was also privatized more and explicitly named with "numatv"
+prefixes.
