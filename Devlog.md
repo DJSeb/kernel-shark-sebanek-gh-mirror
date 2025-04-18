@@ -984,3 +984,18 @@ Goals:
 - Clean up after yourself
 - Document it all
 - Maybe package tree view as well
+
+## 2025-04-17 (and a bit of 2025-04-18)
+
+Visualisation of NUMA topology works! Rather splendidly as well.
+
+Only problem now is a weird segmentation fault bug upon trace append, but
+it otherwise works great! It is a blocky-tree, but it gets the job done well.
+
+_Author's note: Writing this at 3AM, so not a lot to say in this state of mind._
+
+- Fix bugs, polish
+- Session support maybe
+- Clean up after yourself
+- Document it all
+- Maybe package tree view as well
