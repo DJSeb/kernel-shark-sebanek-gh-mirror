@@ -1826,11 +1826,11 @@ static void apply_numatv_update(int stream_id, ViewType view,
 	
 	switch (result) {
 	case 1:
-		// Topology file was not changed - no need to redraw
-		printf("[INFO] Topology file was not changed for stream '%d'\n", stream_id);
+		// Topology file was not changed, but view might have changed - no need to redraw
+		printf("[INFO] Nothing was changed for stream '%d'\n", stream_id);
 		break;
 	case 0:
-		// New topology made - redraw
+		// File or view changed (or were created) - redraw
 		printf("[INFO] Topology updated for stream '%d'\n", stream_id);
 		graph->cpuReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList);
 		graph->taskReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._taskList);
@@ -1862,7 +1862,7 @@ static void apply_numatv_remove(int stream_id, NUMATVContext& numatv_ctx,
 	case 1:
 		// Topology was removed - redraw
 		printf("[INFO] Topology removed for stream '%d'\n", stream_id);
-		graph->cpuReDraw(stream_id, KsUtils::getCPUList(stream_id));
+		graph->cpuReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList);
 		graph->taskReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._taskList);
 		break;
 	case 0:
@@ -1894,7 +1894,7 @@ static void apply_numatv_new_topo(int stream_id, ViewType view,
 		printf("[INFO] New topology created for stream '%d'\n", stream_id);
 		// Redraw will be applied to the stream's graph - new topology will
 		// be automatically created there.
-		graph->cpuReDraw(stream_id, KsUtils::getCPUList(stream_id));
+		graph->cpuReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList);
 		graph->taskReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._taskList);
 		break;
 	case -1:
