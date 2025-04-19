@@ -1091,7 +1091,6 @@ void KsStreamTopology::_setup_widget_structure(int v_spacing) {
 	_tasks_padding.setMinimumHeight(0);
 	_tasks_padding.setFixedHeight(v_spacing);
 	_tasks_padding.setHidden(true);
-	_tasks_padding.setStyleSheet("background-color: rgb(0, 180, 160);");
 
 	_topo.setContentsMargins(0, 0, 0, 0);
 	_topo.setMinimumHeight(0);
@@ -1157,15 +1156,18 @@ static QString make_topo_item_stylesheet(const KsPlot::Color& color) {
 }
 
 KsPlot::Color KsStreamTopology::_setup_topology_tree_pu(int pu_lid, int pu_osid,
-	const KsGLWidget* gl_widget, QLabel* core_parent, unsigned int& core_reds,
-	unsigned int& core_greens, unsigned int& core_blues)
+	int node_lid, int core_lid, const KsGLWidget* gl_widget, QLabel* core_parent,
+	unsigned int& core_reds, unsigned int& core_greens, unsigned int& core_blues)
 {
 	QLabel* pu = new QLabel(core_parent);
 
-	pu->setText(QString("PU P#%1 (L#%2)").arg(pu_osid).arg(pu_lid));
+	pu->setText(QString("(NN %1, C %2) PU L%3").arg(node_lid)
+		.arg(core_lid).arg(pu_lid));
+	pu->setToolTip(QString{"PU %1 in Core %2 in NUMA Node %3"}
+		.arg(pu_lid).arg(core_lid).arg(node_lid));
 	pu->setAlignment(Qt::AlignCenter);
-	_PUs_layout.addWidget(pu);
 	pu->setFixedHeight(KS_GRAPH_HEIGHT);
+	_PUs_layout.addWidget(pu);
 	
 	const KsPlot::ColorTable& cpu_cols = gl_widget->getCPUColors();
 	const KsPlot::Color& pu_color = cpu_cols.at(pu_osid);
@@ -1179,13 +1181,15 @@ KsPlot::Color KsStreamTopology::_setup_topology_tree_pu(int pu_lid, int pu_osid,
 	return pu_color;
 }
 
-int KsStreamTopology::_setup_topology_tree_core(int core_lid, int v_spacing,
-	const PUIds& PUs, const KsGLWidget* gl_widget, QLabel* node_parent,
-	unsigned int& node_reds, unsigned int& node_greens,
+int KsStreamTopology::_setup_topology_tree_core(int core_lid, int node_lid,
+	int v_spacing, const PUIds& PUs, const KsGLWidget* gl_widget,
+	QLabel* node_parent, unsigned int& node_reds, unsigned int& node_greens,
 	unsigned int& node_blues)
 {
 	QLabel* core = new QLabel(node_parent);
-	core->setText(QString("Core L#%1").arg(core_lid));
+	core->setText(QString("(NN %1) C %2").arg(node_lid).arg(core_lid));
+	core->setToolTip(QString{"Core %1 in NUMA Node %2"}
+		.arg(core_lid).arg(node_lid));
 	core->setAlignment(Qt::AlignCenter);
 	_cores_layout.addWidget(core);
 
@@ -1194,8 +1198,8 @@ int KsStreamTopology::_setup_topology_tree_core(int core_lid, int v_spacing,
 	unsigned int pu_blues = 0;
 
 	for (const auto& [pu_lid, pu_osid] : PUs) {
-		_setup_topology_tree_pu(pu_lid, pu_osid, gl_widget, core,
-			pu_reds, pu_greens, pu_blues);
+		_setup_topology_tree_pu(pu_lid, pu_osid, node_lid, core_lid,
+			gl_widget, core, pu_reds, pu_greens, pu_blues);
 	}
 
 	int cpus_in_core = int(PUs.size());
@@ -1220,13 +1224,14 @@ int KsStreamTopology::_setup_topology_tree_core(int core_lid, int v_spacing,
 	return core_height;
 }
 
-int KsStreamTopology::_setup_topology_tree_node(int node_lid, int v_spacing, 
+int KsStreamTopology::_setup_topology_tree_node(int node_lid, int v_spacing,
 	const CorePU& cores, const KsGLWidget* gl_widget)
 {
 	
 	QLabel* node = new QLabel(&_nodes);
-	node->setText(QString("NUMA Node L#%1").arg(node_lid));
+	node->setText(QString{"NN %1"}.arg(node_lid));
 	node->setAlignment(Qt::AlignCenter);
+	node->setToolTip(QString{"NUMA Node %1"}.arg(node_lid));
 	_nodes_layout.addWidget(node);
 
 	int node_height = 0;
@@ -1236,7 +1241,7 @@ int KsStreamTopology::_setup_topology_tree_node(int node_lid, int v_spacing,
 
 	for (const auto& [core_lid, PUs] : cores) {
 		int core_height = _setup_topology_tree_core(core_lid,
-			v_spacing, PUs, gl_widget, node, core_reds,
+			node_lid, v_spacing, PUs, gl_widget, node, core_reds,
 			core_greens, core_blues);
 		node_height += core_height + v_spacing;
 	}
@@ -1259,10 +1264,11 @@ int KsStreamTopology::_setup_topology_tree_node(int node_lid, int v_spacing,
 void KsStreamTopology::_setup_topology_tree(int stream_id, int v_spacing, 
 	const NodeCorePU& brief_topo, KsGLWidget* gl_widget)
 {
-	QString machine_name = QString("Machine (stream)\nL#%1").arg(stream_id);
+	QString machine_name = QString("M %1").arg(stream_id);
+	_machine.setText(machine_name);
+	_machine.setToolTip(QString{"Machine (stream) %1"}.arg(stream_id));
 	_machine.setAlignment(Qt::AlignCenter);
 	_machine.setWordWrap(true);
-	_machine.setText(machine_name);
 	
 	const KsPlot::ColorTable& stream_cols = gl_widget->getStreamColors();
 	const KsPlot::Color& stream_color = stream_cols.at(stream_id);

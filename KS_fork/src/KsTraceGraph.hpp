@@ -293,13 +293,13 @@ private:
 	void _setup_widget_structure(int v_spacing);
 	void _setup_widget_layouts();
 	KsPlot::Color _setup_topology_tree_pu(int pu_lid, int pu_osid,
-		const KsGLWidget* gl_widget, QLabel* core_parent,
-		unsigned int& core_reds, unsigned int& core_greens,
-		unsigned int& core_blues);
-	int _setup_topology_tree_core(int core_lid, int v_spacing,
-		const PUIds& PUs, const KsGLWidget* gl_widget, QLabel* node_parent,
-		unsigned int& node_reds, unsigned int& node_greens,
-		unsigned int& node_blues);
+		int node_lid, int core_lid, const KsGLWidget* gl_widget,
+		QLabel* core_parent, unsigned int& core_reds,
+		unsigned int& core_greens, unsigned int& core_blues);
+	int _setup_topology_tree_core(int core_lid, int node_lid,
+		int v_spacing, const PUIds& PUs, const KsGLWidget* gl_widget,
+		QLabel* node_parent, unsigned int& node_reds,
+		unsigned int& node_greens, unsigned int& node_blues);
 	int _setup_topology_tree_node(int node_lid, int v_spacing,
 		const CorePU& cores, const KsGLWidget* gl_widget);
 	void _setup_topology_tree(int stream_id, int v_spacing,
