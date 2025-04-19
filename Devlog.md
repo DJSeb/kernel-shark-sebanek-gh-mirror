@@ -1091,9 +1091,18 @@ Removing it brought more space and less color chaos to the topology widget.
 The machine column will stay - while not super useful, it is better to show off
 the topology as an actual tree and not a forest implictly connected.
 
+...
+
+Session support will actually be postponed until specifically request - current
+implementation might be problematic due to the static data of NUMATVContextl, it
+being a singleton. They would logically belong to streams, but those their
+destruction code is hard to find.
+
+It might be worth just "exporting" stream topology configuration data into
+a stream and work from there. Issue for tomorrow I suppose.
+
 Goals:
 
 - Fix bugs, polish
-- Session support maybe
 - Clean up after yourself
 - Document it all
