@@ -1016,7 +1016,7 @@ void KsTraceGraph::_numatv_hide_stream_topo(int stream_id, bool hide)
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-18)
-void KsTraceGraph::_numatv_tree_view_action(int stream_id, bool widget_exists,
+void KsTraceGraph::_numatv_tree_view_action(int stream_id,
 	QVector<int>& cpusToDraw, const StreamTopologyConfig* stream_cfg)
 {
 	NodeCorePU brief_topo = stream_cfg->get_brief_topo();
@@ -1024,11 +1024,10 @@ void KsTraceGraph::_numatv_tree_view_action(int stream_id, bool widget_exists,
 	cpusToDraw = stream_cfg->rearrangeCPUsWithBriefTopo(cpusToDraw,
 		brief_topo);
 
-	if (!widget_exists) {
-		_numatv_insert_topology_widget(stream_id, brief_topo);
-	}
-	// We want to see the widget
-	_numatv_hide_stream_topo(stream_id, false);
+	_numatv_insert_topology_widget(stream_id, brief_topo);
+
+	// We want to see the widget, if there are any
+	_numatv_hide_stream_topo(stream_id, cpusToDraw.isEmpty());
 }
 // END of change
 
@@ -1044,8 +1043,7 @@ void KsTraceGraph::_numatv_existing_topology_action(int stream_id,
 	
 	switch (stream_view) {
 	case ViewType::TREE:
-		_numatv_tree_view_action(stream_id, widget_exists,
-			cpusToDraw, stream_cfg);
+		_numatv_tree_view_action(stream_id, cpusToDraw, stream_cfg);
 		break;
 	case ViewType::DEFAULT:
 		if (widget_exists) {
@@ -1110,10 +1108,12 @@ KsStreamTopology::KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
 	_main_layout.setAlignment(Qt::AlignTop);
 
 	_tasks_padding.setContentsMargins(0, 0, 0, 0);
+	_tasks_padding.setMaximumHeight(0);
 	_tasks_padding.setFixedHeight(v_spacing);
 	_tasks_padding.setHidden(true);
 
 	_topo.setContentsMargins(0, 0, 0, 0);
+	_topo.setMinimumHeight(0);
 	_topo.setLayout(&_topo_layout);
 	
 	_topo_layout.setContentsMargins(0, 0, 0, 0);
@@ -1151,7 +1151,7 @@ KsStreamTopology::KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
 
 	_machine.setText(QString{
 		"Machine\n"
-		"Stream #%1\n"
+		"Stream #%1"
 		// There could be more info here
 	}.arg(stream_id));
 	_machine.setWordWrap(true);
@@ -1176,7 +1176,9 @@ KsStreamTopology::KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
 	);
 
 	_machine.setAlignment(Qt::AlignCenter);
-
+	
+	int machine_height = 0;
+	
 	for (const auto& [node_lid, cores] : brief_topo) {
 		QLabel* node = new QLabel(&_nodes);
 		node->setText(QString("NUMA Node L#%1").arg(node_lid));
@@ -1290,7 +1292,11 @@ KsStreamTopology::KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
 			"background-color: rgb(" + bg_color + ");"
 			"color: rgb(" + text_color + ");}"}
 		);
+		machine_height += node_height + v_spacing;
 	}
+
+	machine_height -= v_spacing; // One less node spacing
+	_machine.setFixedHeight(machine_height);
 }
 // END of change
 

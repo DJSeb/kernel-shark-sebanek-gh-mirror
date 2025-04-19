@@ -165,7 +165,7 @@ private:
 	
 	void _numatv_hide_stream_topo(int stream_id, bool hide);
 
-	void _numatv_tree_view_action(int stream_id, bool widget_exists,
+	void _numatv_tree_view_action(int stream_id,
 		QVector<int>& cpusToDraw, const StreamTopologyConfig* stream_cfg);
 
 	void _numatv_redraw_topo_widgets(int stream_id, QVector<int>& cpusToDraw);
