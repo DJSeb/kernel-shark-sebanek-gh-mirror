@@ -52,7 +52,7 @@ public: // Creation, destruction, assigns
     StreamTopologyConfig(StreamTopologyConfig&&) noexcept;
     StreamTopologyConfig& operator=(StreamTopologyConfig&&) noexcept;
     ~StreamTopologyConfig();
-public: //Business
+public: // Business
     const std::string& get_topo_fpath() const;
     ViewType get_view_type() const;
     const NodeCorePU get_brief_topo() const;
