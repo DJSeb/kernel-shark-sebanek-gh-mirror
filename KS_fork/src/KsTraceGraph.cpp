@@ -206,7 +206,9 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 
 	_layout.addWidget(&_pointerBar);
 	_layout.addWidget(&_navigationBar);
+	//NOTE: Changed here. (NUMA TV) (2025-04-19)
 	_layout.addWidget(&_topoGlWrapper);
+	// END of change
 	this->setLayout(&_layout);
 	updateGeom();
 }
@@ -575,7 +577,7 @@ void KsTraceGraph::addCPUPlot(int sd, int cpu)
 		return;
 
 	list.append(cpu);
-	// NUMA TV TODO: Do no sort if NUMA view is on
+
 	std::sort(list.begin(), list.end());
 
 	_selfUpdate();
