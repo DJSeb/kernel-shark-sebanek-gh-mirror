@@ -18,6 +18,9 @@
 // KernelShark
 #include "libkshark.h"
 #include "KsUtils.hpp"
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
+#include "KsNUMATopologyViews.hpp"
+// END of change
 
 namespace KsWidgetsLib
 {
@@ -699,6 +702,74 @@ public:
 	// Don't allow default constructor, it would contain invalid values.
 	KsCouplebreakDialog() = delete;
 	explicit KsCouplebreakDialog(kshark_context *kshark_ctx,
+		QWidget *parent = nullptr);
+};
+// END of change
+
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
+/**
+ * @brief Configuration window for NUMA Topology Views.
+ * 
+ */
+class KsNUMATVDialog: public QDialog {
+	Q_OBJECT
+private: // Usings
+	/// @brief Simpler name to refer to the GUI elements representing
+	/// chosen configuration of NUMA Topology Views.
+	using ViewTopologyGUIPair = std::pair<QButtonGroup *, QLabel *>;
+
+	/// @brief Simpler name to refer to a stream (by its Id) per topology
+	/// file location (set in a label, represented by a pointer).
+	/// The label shall contain just a dash unless a file is loaded, then
+	/// it shall be a full path to the file.
+	using StreamRadiosLabels = std::pair<int, ViewTopologyGUIPair>;
+	
+	/// @brief Simpler type name for representing a stream (by its Id) and
+	/// its chosen view and a NUMA TV topology file path.
+	using StreamNUMATVSettings = std::pair<int, ViewTopologyPair>;
+private: // Qt objects
+	/// @brief Layout containing other layouts (top-down ordering of other layouts).
+	QVBoxLayout		_main_layout;
+	
+	/// @brief Explains what changing this setting does.
+	QLabel			_explanation;
+
+	/// @brief Scroll area for the stream scheckboxes.
+	QScrollArea		_scroll_area;
+	
+	/// @brief Layout for the Apply and Close buttons.
+	QHBoxLayout     _endstage_btns_layout;
+
+    /// @brief Close button for the widget.
+    QPushButton     _close_button;
+
+    /// @brief Button applies changes to every stream.
+    QPushButton     _apply_button;
+
+	/// @brief Apply action connection to the apply button.
+	QMetaObject::Connection _apply_button_connection;
+signals:
+	/// @brief Signal emitted when the "Apply" button is pressed.
+	void apply(QVector<StreamNUMATVSettings> topo_files);
+private: // Non-GUI objects
+	/// @brief Vector of pairs of stream id and NUMA topology
+	/// file locations.
+	QVector<StreamRadiosLabels> _topology_choice;
+private:
+	// Reaction to a clicked apply button
+	void _apply_action();
+	void _setup_explanation();
+	void _setup_endstage();
+	void _setup_stream_header(int stream_id, QVBoxLayout* parent_layout);
+	void _setup_load_button_per_stream(QPushButton* load_btn, QLabel* topo_file_loc, QString last_fpath) ;
+	QLabel* _setup_status_per_stream(QVBoxLayout* parent_layout, int stream_id);
+	QButtonGroup* _setup_radios_per_stream(QVBoxLayout* parent_layout, int stream_id);
+	void _setup_streams_scroll_area(kshark_context *kshark_ctx);
+	void _setup_layout();
+public:
+	// Don't allow default constructor, it would contain invalid values.
+	KsNUMATVDialog() = delete;
+	explicit KsNUMATVDialog(kshark_context *kshark_ctx,
 		QWidget *parent = nullptr);
 };
 // END of change

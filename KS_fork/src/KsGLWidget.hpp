@@ -197,6 +197,14 @@ public:
 	const KsPlot::ColorTable& getPidColors() const { return _pidColors; }
 	// END of change
 
+	//NOTE: Changed here. (NUMA TV) (2025-04-18)
+	const KsPlot::ColorTable& getCPUColors() const { return _cpuColors; }
+	// END of change
+
+	//NOTE: Changed here. (NUMA TV) (2025-04-18)
+	const KsPlot::ColorTable& getStreamColors() const { return _streamColors; }
+	// END of change
+
 	/** CPUs and Tasks graphs (per data stream) to be plotted. */
 	QMap<int, KsPerStreamPlots>	_streamPlots;
 

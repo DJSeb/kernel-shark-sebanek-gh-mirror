@@ -11,9 +11,17 @@
 #ifndef _KS_TRACEGRAPH_H
 #define _KS_TRACEGRAPH_H
 
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+// Qt
+#include <QMap>
+// END of change
+
 // KernelShark
 #include "KsWidgetsLib.hpp"
 #include "KsGLWidget.hpp"
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+#include "KsNUMATopologyViews.hpp"
+// END of change
 
 /**
  * Scroll Area class, needed in order to reimplemented the handler for mouse
@@ -34,6 +42,20 @@ public:
 			QScrollArea::wheelEvent(evt);
 	}
 };
+
+//NOTE: Changed here. !!!!!!! (NUMA TV) (2025-04-15)
+class KsTopologyScrollArea : public QScrollArea {
+public:
+	explicit KsTopologyScrollArea(QWidget *parent = nullptr)
+	: QScrollArea(parent) {}
+
+	void wheelEvent([[maybe_unused]] QWheelEvent *evt) override {}
+};
+// END of change
+
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+class KsStreamTopology;
+// END of change
 
 /**
  * The KsTraceViewer class provides a widget for interactive visualization of
@@ -56,7 +78,7 @@ public:
 
 	void markEntry(size_t);
 
-	void cpuReDraw(int sd, QVector<int> cpus);
+	void cpuReDraw(int sd, QVector<int> cpus);  // NUMA TV TODO: Modify this
 
 	void taskReDraw(int sd, QVector<int> pids);
 
@@ -85,6 +107,13 @@ public:
 						  const QString& label3 = "",
 						  const QString& label4 = "",
 						  const QString& label5 = "");
+	// END of change
+	
+	//NOTE: Changed here. (NUMA TV) (2025-04-15)
+	void numatvHideTopologyWidget(bool hide);
+	// END of change
+
+	void numatvClearTopologyWidgets();
 	// END of change
 
 signals:
@@ -123,6 +152,25 @@ private:
 
 	void _onCustomContextMenu(const QPoint &point);
 
+	//NOTE: Changed here. (NUMA TV) (2025-04-18)
+	void _numatv_insert_topology_widget(int stream_id,
+		const NodeCorePU& brief_topo);
+
+	void _numatv_remove_topology_widget(int stream_id);
+
+	void _numatv_existing_topology_action(int stream_id, bool widget_exists,
+		QVector<int>& cpusToDraw, const NUMATVContext& numa_ctx);
+
+	void _numatv_no_topology_action(int stream_id, bool widget_exists);
+	
+	void _numatv_hide_stream_topo(int stream_id, bool hide);
+
+	void _numatv_tree_view_action(int stream_id,
+		QVector<int>& cpusToDraw, const StreamTopologyConfig* stream_cfg);
+
+	void _numatv_redraw_topo_widgets(int stream_id, QVector<int>& cpusToDraw);
+	// END of change
+
 	QString _t2str(uint64_t sec, uint64_t usec);
 
 	QToolBar	_pointerBar, _navigationBar;
@@ -136,6 +184,22 @@ private:
 	QLabel	_labelP1, _labelP2,				  // Pointer
 		_labelI1, _labelI2, _labelI3, _labelI4, _labelI5; // Proc. info
 
+	//NOTE: Changed here. (NUMA TV) (2025-04-12)
+	QWidget _topoGlWrapper;
+
+	QHBoxLayout _topoGlLayout;
+
+	KsTopologyScrollArea _topoScrollArea;
+	
+	QPushButton _hideTopoBtn;
+	
+	QWidget	_topoSpace;
+	
+	QVBoxLayout _topoLayout;
+
+	QMap<int, KsStreamTopology*> _topoWidgets;
+	// END of change
+
 	KsGraphScrollArea	_scrollArea;
 
 	KsGLWidget	_glWindow;
@@ -148,5 +212,94 @@ private:
 
 	bool		 _keyPressed;
 };
+
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+/*
+Tree-like layout of the topology view with NUMA nodes.
+It shall be constructed right to left, first matching CPUs
+in KernelShark's GL window to PUs in the topology.
+NUMA TV rearranges the CPUs, which allows construction of
+such UI, that nodes and cores can be sorted by their logical
+indices, as specified by hwloc. By creating the rightmost
+column first, the core column can then create cores with the
+height of the CPU(s) it owns - analogously for NUMA nodes.
+By doing this, if some cores have more or less PUs, their
+height will adjust accordingly. Similarly for NUMA nodes
+and their cores. It also comes with a bonus reactivity to 
+hidden & visible CPUs as specified by KernelShark - construction
+right to left also allows to show only the relevant parts of the
+topology.
+
+Total height is then used for the machine column, which
+also denotes the height of the stream's graph. It shall use
+the stream's color (if there are more streams open).
+
+Each tree node will have a tooltip to display less compact
+information (useful if losing track of the label's text).
+
+Caveats: Some exotic topologies won't work, e.g. nested NUMA nodes,
+PUs shared across cores or cores shared across NUMA nodes.
+
+Technically, it should be a visualisation of the NodeCorePU
+mappings.
+
+To take task graphs into account, spacing is added at the bottom of
+the topology 
+
+Example look:
+```
+__________________________________________________
+|-----------------------------------------------|| KS GL graphs
+||              |               |               ||  CPU 1
+||              |               |    core L1    ||----------
+||              |               |               ||  CPU 8
+||              |   Nnode L1    |---------------||----------
+||              |               |               ||  CPU 2
+||              |               |    core L2    ||----------
+||              |               |               ||  CPU 7
+||   machine    |---------------|---------------||----------
+||  (stream) X  |               |               ||  CPU 3
+||              |               |    core L3    ||----------
+||              |               |               ||  CPU 6
+||              |   Nnode L2    |---------------||----------
+||              |               |               ||  CPU 4
+||              |               |    core L4    ||----------
+||              |               |               ||  CPU 5
+|------------------------------------------------|----------
+|[                  SPACING                     ]|  taskXYZ
+--------------------------------------------------
+```
+*/
+class KsStreamTopology : public QWidget {
+	Q_OBJECT
+private: // Qt parts
+	QVBoxLayout _main_layout;
+	QWidget _topo;
+	QHBoxLayout _topo_layout;
+	QLabel _machine;
+	QWidget _nodes;
+	QVBoxLayout _nodes_layout;
+	QWidget _cores;
+	QVBoxLayout _cores_layout;
+	QWidget _tasks_padding;
+public:
+	explicit KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
+		const KsTraceGraph* trace_graph, QWidget* parent = nullptr);
+	void hide_topology(bool hide);
+	void change_task_padding(int height);
+	void hide_task_padding(bool hide);
+private:
+	void _setup_widget_structure(int v_spacing);
+	void _setup_widget_layouts();
+	int _setup_topology_tree_core(int core_lid, int node_lid,
+		int v_spacing, const PUIds& PUs, const KsGLWidget* gl_widget,
+		QLabel* node_parent, unsigned int& node_reds,
+		unsigned int& node_greens, unsigned int& node_blues);
+	int _setup_topology_tree_node(int node_lid, int v_spacing,
+		const CorePU& cores, const KsGLWidget* gl_widget);
+	void _setup_topology_tree(int stream_id, int v_spacing,
+		const NodeCorePU& brief_topo, KsGLWidget* gl_widget);
+};
+// END of change
 
 #endif // _KS_TRACEGRAPH_H

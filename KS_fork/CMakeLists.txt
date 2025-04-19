@@ -6,9 +6,9 @@ project(kernel-shark)
 
 set(KS_APP_NAME "kernelshark")
 set(KS_VERSION_MAJOR 2)
-set(KS_VERSION_MINOR 5)
+set(KS_VERSION_MINOR 6)
 set(KS_VERSION_PATCH 0)
-set(KS_VERSION_DESCRIPTOR "couplebreak")
+set(KS_VERSION_DESCRIPTOR "numatv")
 set(KS_VERSION_STRING ${KS_VERSION_MAJOR}.${KS_VERSION_MINOR}.${KS_VERSION_PATCH}-${KS_VERSION_DESCRIPTOR})
 message("\n project: Kernel Shark: (version: ${KS_VERSION_STRING})\n")
 
@@ -51,6 +51,27 @@ find_package(TraceFS    REQUIRED)
 find_package(TraceCmd   REQUIRED)
 
 find_package(JSONC      REQUIRED)
+#NOTE: Changed here. (NUMA TV) (2025-04-08)
+include(FindPkgConfig)
+if(PKG_CONFIG_EXECUTABLE)
+  unset(HWLOC_FOUND CACHE)
+  pkg_search_module(HWLOC hwloc)
+  if(HWLOC_FOUND)
+    message(STATUS "HWLOC_LIBRARIES=${HWLOC_LIBRARIES}")
+    message(STATUS "HWLOC_LINK_LIBRARIES=${HWLOC_LINK_LIBRARIES}")
+    message(STATUS "HWLOC_LIBRARY_DIRS=${HWLOC_LIBRARY_DIRS}")
+    message(STATUS "HWLOC_LDFLAGS=${HWLOC_LDFLAGS}")
+    message(STATUS "HWLOC_LDFLAGS_OTHERS=${HWLOC_LDFLAGS_OTHERS}")
+    message(STATUS "HWLOC_INCLUDE_DIRS=${HWLOC_INCLUDE_DIRS}")
+    message(STATUS "HWLOC_CFLAGS=${HWLOC_CFLAGS}")
+    message(STATUS "HWLOC_CFLAGS_OTHER=${HWLOC_CFLAGS_OTHER}")
+  else()
+    message(FATAL_ERROR "HWLOC not found with pkg-config, add the path to hwloc.pc in PKG_CONFIG_PATH.")
+  endif()
+else()
+  message(FATAL_ERROR "PKG_CONFIG_EXECUTABLE: not found.")
+endif()
+# END of change
 
 find_package(Doxygen)
 
@@ -60,7 +81,7 @@ find_package(GLUT)
 
 set(KS_FONT FreeSans)
 if (NOT TT_FONT_FILE)
-  execute_process(COMMAND  bash "-c" "fc-list '${KS_FONT}' |grep -E ${KS_FONT}'(\.otf|\.ttf)' | cut -d':' -f 1 -z"
+  execute_process(COMMAND  bash "-c" "fc-list '${KS_FONT}' | grep -E ${KS_FONT}'(\.otf|\.ttf)' | cut -d':' -f 1 -z"
                     OUTPUT_VARIABLE TT_FONT_FILE)
 endif (NOT TT_FONT_FILE)
 
@@ -146,7 +167,7 @@ if (_DOXYGEN_DOC AND DOXYGEN_FOUND)
 
   message("\n doxygen documentation ...")
   add_custom_target(doc ALL)
-  add_custom_command(TARGET doc
+  add_custom_command(TARGET doc POST_BUILD
                        COMMAND doxygen dox_config > dox_build.log
                        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Documentation/doxygen)
 
