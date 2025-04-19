@@ -25,13 +25,16 @@
 // Enum classes
 
 /// @brief Differentiable view types, mainly used by the radio buttons per each stream.
-enum class ViewType { DEFAULT = 0, TREE };
+enum class ViewType { DEFAULT = 0, NUMATREE };
 
 // Usings
 
 /// @brief Simpler name to package a view type and chosen topology file.
 using ViewTopologyPair = std::pair<ViewType, QString>;
-using NodeCorePU = std::map<int, std::map<int, std::map<int, int>>>;
+
+using PUIds = std::map<int, int>;
+using CorePU = std::map<int, PUIds>;
+using NodeCorePU = std::map<int, CorePU>;
 
 // Classes
 

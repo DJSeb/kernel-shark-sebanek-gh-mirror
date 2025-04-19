@@ -67,7 +67,10 @@ int NUMATVContext::update_cfg(int stream_id, ViewType view, const std::string& t
                 retval = 0;
             }
         } else {
-            topo_cfg.applied_view = view;
+            if (topo_cfg.applied_view != view) {
+                topo_cfg.applied_view = view;
+                retval = 0;
+            }
             retval = 1;
         }
     }
