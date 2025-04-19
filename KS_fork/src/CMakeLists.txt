@@ -11,12 +11,8 @@ add_library(kshark SHARED libkshark.c
                           libkshark-configio.c
                           libkshark-collection.c
                           #NOTE: Changed here. (COUPLEBREAK) (2025-03-30)
-                          libkshark-couplebreak.c
+                          libkshark-couplebreak.c)
                           # END of change
-                          #NOTE: Changed here. (NUMA TV) (2025-04-19)
-                          libkshark-numatv.c
-                          # END of change
-)
 
 target_link_libraries(kshark trace::cmd
                              trace::fs
@@ -43,9 +39,6 @@ install(FILES "${KS_DIR}/src/libkshark.h"
               "${KS_DIR}/src/libkshark-tepdata.h"
               #NOTE: Changed here. (COUPLEBREAK) (2025-03-30)
               "${KS_DIR}/src/libkshark-couplebreak.h"
-              # END of change
-              #NOTE: Changed here. (NUMA TV) (2025-04-19)
-              "${KS_DIR}/src/libkshark-numatv.h"
               # END of change
         DESTINATION ${KS_INCLUDS_DESTINATION}
             COMPONENT libkshark-devel)

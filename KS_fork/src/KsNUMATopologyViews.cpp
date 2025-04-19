@@ -11,9 +11,8 @@
 #include <QVector>
 
 // KernelShark
-#include "libkshark.h"
-#include "libkshark-numatv.h"
 #include "KsNUMATopologyViews.hpp"
+#include "libkshark.h"
 
 // NUMATVContext
 
@@ -260,25 +259,6 @@ NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo, QVector<int> PUs) 
     }
 
     return filtered_topo;
-}
-
-// Global functions (C only)
-const char* numatv_get_topo_fpath(int stream_id) {
-    const NUMATVContext& numa_ctx = NUMATVContext::get_instance();
-    const StreamTopologyConfig* topo_cfg = numa_ctx.observe_cfg(stream_id);
-    if (topo_cfg) {
-        return topo_cfg->get_topo_fpath().c_str();
-    }
-    return nullptr;
-}
-
-int numatv_get_topo_view(int stream_id) {
-    const NUMATVContext& numa_ctx = NUMATVContext::get_instance();
-    const StreamTopologyConfig* topo_cfg = numa_ctx.observe_cfg(stream_id);
-    if (topo_cfg) {
-        return static_cast<int>(topo_cfg->get_view_type());
-    }
-    return -1;
 }
 
 // END of change
