@@ -1706,7 +1706,7 @@ QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(QVBoxLayout* parent_layou
 	applied_view_grp->addButton(default_view,
 		static_cast<int>(ViewType::DEFAULT));
 	applied_view_grp->addButton(tree_view,
-		static_cast<int>(ViewType::TREE));
+		static_cast<int>(ViewType::NUMATREE));
 	applied_view_grp->setParent(radio_btns_layout);
 	//
 	applied_view_grp->button(static_cast<int>(applied_view))->setChecked(true);
