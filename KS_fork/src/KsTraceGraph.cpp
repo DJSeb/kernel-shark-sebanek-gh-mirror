@@ -1107,11 +1107,12 @@ void KsStreamTopology::_setup_widget_structure(int v_spacing) {
 
 	_cores_layout.setContentsMargins(0, 0, 0, 0);
 	_cores_layout.setSpacing(v_spacing);
-
+	/*
 	_PUs.setContentsMargins(0, 0, 0, 0);
 	
 	_PUs_layout.setContentsMargins(0, 0, 0, 0);
 	_PUs_layout.setSpacing(v_spacing);
+	*/
 }
 
 //NOTE: Changed here. (NUMA TV) (2025-04-19)
@@ -1120,12 +1121,12 @@ void KsStreamTopology::_setup_widget_layouts() {
 	_topo.setLayout(&_topo_layout);
 	_nodes.setLayout(&_nodes_layout);
 	_cores.setLayout(&_cores_layout);
-	_PUs.setLayout(&_PUs_layout);
+	//_PUs.setLayout(&_PUs_layout);
 
 	_topo_layout.addWidget(&_machine);
 	_topo_layout.addWidget(&_nodes);
 	_topo_layout.addWidget(&_cores);
-	_topo_layout.addWidget(&_PUs);
+	//_topo_layout.addWidget(&_PUs);
 
 	_main_layout.addWidget(&_topo);
 	_main_layout.addWidget(&_tasks_padding);
@@ -1155,9 +1156,9 @@ static QString make_topo_item_stylesheet(const KsPlot::Color& color) {
 	return stylesheet;
 }
 
+/*
 KsPlot::Color KsStreamTopology::_setup_topology_tree_pu(int pu_lid, int pu_osid,
-	int node_lid, int core_lid, const KsGLWidget* gl_widget, QLabel* core_parent,
-	unsigned int& core_reds, unsigned int& core_greens, unsigned int& core_blues)
+	int node_lid, int core_lid, const KsGLWidget* gl_widget, QLabel* core_parent)
 {
 	QLabel* pu = new QLabel(core_parent);
 
@@ -1173,13 +1174,10 @@ KsPlot::Color KsStreamTopology::_setup_topology_tree_pu(int pu_lid, int pu_osid,
 	const KsPlot::Color& pu_color = cpu_cols.at(pu_osid);
 	
 	pu->setStyleSheet(make_topo_item_stylesheet(pu_color));
-
-	core_reds += pu_color.r();
-	core_greens += pu_color.g();
-	core_blues += pu_color.b();
 	
 	return pu_color;
 }
+*/
 
 int KsStreamTopology::_setup_topology_tree_core(int core_lid, int node_lid,
 	int v_spacing, const PUIds& PUs, const KsGLWidget* gl_widget,
@@ -1197,9 +1195,16 @@ int KsStreamTopology::_setup_topology_tree_core(int core_lid, int node_lid,
 	unsigned int pu_greens = 0;
 	unsigned int pu_blues = 0;
 
+	const KsPlot::ColorTable& cpu_cols = gl_widget->getCPUColors();
 	for (const auto& [pu_lid, pu_osid] : PUs) {
+		const KsPlot::Color& pu_color = cpu_cols.at(pu_osid);
+		pu_reds += pu_color.r();
+		pu_greens += pu_color.g();
+		pu_blues += pu_color.b();
+		/*
 		_setup_topology_tree_pu(pu_lid, pu_osid, node_lid, core_lid,
-			gl_widget, core, pu_reds, pu_greens, pu_blues);
+			gl_widget, core);
+		*/
 	}
 
 	int cpus_in_core = int(PUs.size());
@@ -1299,8 +1304,10 @@ KsStreamTopology::KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
   _nodes_layout(&_nodes),
   _cores(&_topo),
   _cores_layout(&_cores),
+  /*
   _PUs(&_topo),
   _PUs_layout(&_PUs),
+  */
   _tasks_padding(this)
 {
 	KsGLWidget* gl_widget = const_cast<KsTraceGraph *>(trace_graph)->glPtr();

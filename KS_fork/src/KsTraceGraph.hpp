@@ -280,8 +280,10 @@ private: // Qt parts
 	QVBoxLayout _nodes_layout;
 	QWidget _cores;
 	QVBoxLayout _cores_layout;
+	/*
 	QWidget _PUs;
 	QVBoxLayout _PUs_layout;
+	*/
 	QWidget _tasks_padding;
 public:
 	explicit KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
@@ -292,10 +294,11 @@ public:
 private:
 	void _setup_widget_structure(int v_spacing);
 	void _setup_widget_layouts();
+	/*
 	KsPlot::Color _setup_topology_tree_pu(int pu_lid, int pu_osid,
 		int node_lid, int core_lid, const KsGLWidget* gl_widget,
-		QLabel* core_parent, unsigned int& core_reds,
-		unsigned int& core_greens, unsigned int& core_blues);
+		QLabel* core_parent);
+	*/
 	int _setup_topology_tree_core(int core_lid, int node_lid,
 		int v_spacing, const PUIds& PUs, const KsGLWidget* gl_widget,
 		QLabel* node_parent, unsigned int& node_reds,
