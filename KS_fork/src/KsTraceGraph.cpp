@@ -1133,6 +1133,7 @@ void KsStreamTopology::_setup_widget_layouts() {
 }
 // END of change
 
+//NOTE: Changed here. (NUMA TV) (2025-04-19)
 static QString make_topo_item_stylesheet(const KsPlot::Color& color) {
 	QString bg_color_str = QString{"%1, %2, %3"}
 		.arg(color.r())
@@ -1155,30 +1156,9 @@ static QString make_topo_item_stylesheet(const KsPlot::Color& color) {
 	
 	return stylesheet;
 }
+// END of change
 
-/*
-KsPlot::Color KsStreamTopology::_setup_topology_tree_pu(int pu_lid, int pu_osid,
-	int node_lid, int core_lid, const KsGLWidget* gl_widget, QLabel* core_parent)
-{
-	QLabel* pu = new QLabel(core_parent);
-
-	pu->setText(QString("(NN %1, C %2) PU L%3").arg(node_lid)
-		.arg(core_lid).arg(pu_lid));
-	pu->setToolTip(QString{"PU %1 in Core %2 in NUMA Node %3"}
-		.arg(pu_lid).arg(core_lid).arg(node_lid));
-	pu->setAlignment(Qt::AlignCenter);
-	pu->setFixedHeight(KS_GRAPH_HEIGHT);
-	_PUs_layout.addWidget(pu);
-	
-	const KsPlot::ColorTable& cpu_cols = gl_widget->getCPUColors();
-	const KsPlot::Color& pu_color = cpu_cols.at(pu_osid);
-	
-	pu->setStyleSheet(make_topo_item_stylesheet(pu_color));
-	
-	return pu_color;
-}
-*/
-
+//NOTE: Changed here. (NUMA TV) (2025-04-19)
 int KsStreamTopology::_setup_topology_tree_core(int core_lid, int node_lid,
 	int v_spacing, const PUIds& PUs, const KsGLWidget* gl_widget,
 	QLabel* node_parent, unsigned int& node_reds, unsigned int& node_greens,
@@ -1201,10 +1181,6 @@ int KsStreamTopology::_setup_topology_tree_core(int core_lid, int node_lid,
 		pu_reds += pu_color.r();
 		pu_greens += pu_color.g();
 		pu_blues += pu_color.b();
-		/*
-		_setup_topology_tree_pu(pu_lid, pu_osid, node_lid, core_lid,
-			gl_widget, core);
-		*/
 	}
 
 	int cpus_in_core = int(PUs.size());
@@ -1228,7 +1204,10 @@ int KsStreamTopology::_setup_topology_tree_core(int core_lid, int node_lid,
 
 	return core_height;
 }
+// END of change
 
+
+//NOTE: Changed here. (NUMA TV) (2025-04-19)
 int KsStreamTopology::_setup_topology_tree_node(int node_lid, int v_spacing,
 	const CorePU& cores, const KsGLWidget* gl_widget)
 {
@@ -1265,7 +1244,9 @@ int KsStreamTopology::_setup_topology_tree_node(int node_lid, int v_spacing,
 	
 	return node_height;
 }
+// END of change
 
+//NOTE: Changed here. (NUMA TV) (2025-04-19)
 void KsStreamTopology::_setup_topology_tree(int stream_id, int v_spacing, 
 	const NodeCorePU& brief_topo, KsGLWidget* gl_widget)
 {
@@ -1291,6 +1272,7 @@ void KsStreamTopology::_setup_topology_tree(int stream_id, int v_spacing,
 	machine_height -= v_spacing; // One less node spacing
 	_machine.setFixedHeight(std::max(machine_height, 0));
 }
+// END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-17)
 KsStreamTopology::KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
@@ -1304,10 +1286,6 @@ KsStreamTopology::KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
   _nodes_layout(&_nodes),
   _cores(&_topo),
   _cores_layout(&_cores),
-  /*
-  _PUs(&_topo),
-  _PUs_layout(&_PUs),
-  */
   _tasks_padding(this)
 {
 	KsGLWidget* gl_widget = const_cast<KsTraceGraph *>(trace_graph)->glPtr();

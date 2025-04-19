@@ -217,14 +217,12 @@ private:
 /*
 Tree-like layout of the topology view with NUMA nodes.
 It shall be constructed right to left, first matching CPUs
-in KernelShark's GL window to PUs in the topology. They shall
-have the same height as each CPU graph (their heights do not
-change, which allows to use this invariant).
+in KernelShark's GL window to PUs in the topology.
 NUMA TV rearranges the CPUs, which allows construction of
 such UI, that nodes and cores can be sorted by their logical
 indices, as specified by hwloc. By creating the rightmost
 column first, the core column can then create cores with the
-height of the PU(s) it owns - analogously for NUMA nodes.
+height of the CPU(s) it owns - analogously for NUMA nodes.
 By doing this, if some cores have more or less PUs, their
 height will adjust accordingly. Similarly for NUMA nodes
 and their cores. It also comes with a bonus reactivity to 
@@ -235,6 +233,9 @@ topology.
 Total height is then used for the machine column, which
 also denotes the height of the stream's graph. It shall use
 the stream's color (if there are more streams open).
+
+Each tree node will have a tooltip to display less compact
+information (useful if losing track of the label's text).
 
 Caveats: Some exotic topologies won't work, e.g. nested NUMA nodes,
 PUs shared across cores or cores shared across NUMA nodes.
@@ -247,26 +248,26 @@ the topology
 
 Example look:
 ```
-______________________________________________________________
-|------------------------------------------------------------|
-||              |               |               |   PU P1   ||
-||				|				|	core L1		|-----------||
-||				|				|				|	PU P8	||
-||				|	Nnode L1	|---------------|-----------||
-||				|				|				|	PU P2	||
-||				|				|	core L2		|-----------||
-||				|				|				|	PU P7	||
-||	machine		|---------------|---------------|-----------||
-||	(stream X)	|				|				|	PU P3	||
-|| (topo info)	|				|	core L3		|-----------||
-||				|				|				|	PU P6	||
-||				|	Nnode L2	|---------------|-----------||
-||				|				|				|	PU P4	||
-||				|				|	core L4		|-----------||
-||				|				|				|	PU P5	||
-|------------------------------------------------------------|
-|[							SPACING							]|
---------------------------------------------------------------
+__________________________________________________
+|-----------------------------------------------|| KS GL graphs
+||              |               |               ||  CPU 1
+||              |               |    core L1    ||----------
+||              |               |               ||  CPU 8
+||              |   Nnode L1    |---------------||----------
+||              |               |               ||  CPU 2
+||              |               |    core L2    ||----------
+||              |               |               ||  CPU 7
+||   machine    |---------------|---------------||----------
+||  (stream) X  |               |               ||  CPU 3
+||              |               |    core L3    ||----------
+||              |               |               ||  CPU 6
+||              |   Nnode L2    |---------------||----------
+||              |               |               ||  CPU 4
+||              |               |    core L4    ||----------
+||              |               |               ||  CPU 5
+|------------------------------------------------|----------
+|[                  SPACING                     ]|  taskXYZ
+--------------------------------------------------
 ```
 */
 class KsStreamTopology : public QWidget {
@@ -280,10 +281,6 @@ private: // Qt parts
 	QVBoxLayout _nodes_layout;
 	QWidget _cores;
 	QVBoxLayout _cores_layout;
-	/*
-	QWidget _PUs;
-	QVBoxLayout _PUs_layout;
-	*/
 	QWidget _tasks_padding;
 public:
 	explicit KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
@@ -294,11 +291,6 @@ public:
 private:
 	void _setup_widget_structure(int v_spacing);
 	void _setup_widget_layouts();
-	/*
-	KsPlot::Color _setup_topology_tree_pu(int pu_lid, int pu_osid,
-		int node_lid, int core_lid, const KsGLWidget* gl_widget,
-		QLabel* core_parent);
-	*/
 	int _setup_topology_tree_core(int core_lid, int node_lid,
 		int v_spacing, const PUIds& PUs, const KsGLWidget* gl_widget,
 		QLabel* node_parent, unsigned int& node_reds,
