@@ -1051,3 +1051,49 @@ Goals:
 Package tree view will be left as something for extensions.
 Session support most likely will happen.
 Everything else is necessary and required.
+
+## 2025-04-19
+
+Today was mostly spent on code decomposition and bug fixes.
+KsStreamTopology's monster-constructor was broken up into setup functions
+and some helper static functions were also created, namely for creating
+stylesheets for topology items.
+
+Coloring looks quite random, which is a sad sight to see, but there that is
+a consequence of using KernelShark's colors. Not much to do about that.
+A possible change would be somehow choosing colors independently. But that
+loses a connection to already existing context. Another change is using
+lines instead of blocks, but that loses "quick" check of what is currently
+visible (not as quick, unless one is good at remembering colors). Maybe
+instead of repeating "PU P#X L#Y", it could say "N#A-C#B-P#X" or similar.
+It would make the information clearer. It is not necessary to specify machine,
+since those are represented by color in KernelShark already and aren't really
+as important as a topology of a stream - which also means there isn't THAT
+big of a reason to display a machine column, though it is done for completeness.
+
+...
+
+Well, names were shortened to M, NN, C, PU for machine, NUMA node, core and
+processing unit respectively. This will be easy to understand and convey in
+the documentation anyway. PU tree leaves will have a prefix of '(NN X, C Y) ',
+cores will have a prefix of '(NN ) '. This is done to quicken lookup. Machines
+are, again, differentiable easily by color and most likely don't need to be
+included (might even be unnecessary as is).
+
+To be fair, maybe even the PU column is a little redundant - it's already
+connecting to the CPUs, so maybe all of this is unnecessary. the information is
+already there.
+
+...
+
+PU column was commented out after some deliberation if it is actually useful.
+Removing it brought more space and less color chaos to the topology widget.
+The machine column will stay - while not super useful, it is better to show off
+the topology as an actual tree and not a forest implictly connected.
+
+Goals:
+
+- Fix bugs, polish
+- Session support maybe
+- Clean up after yourself
+- Document it all
