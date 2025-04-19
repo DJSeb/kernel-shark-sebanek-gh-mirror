@@ -54,9 +54,9 @@ Bachelor thesis project part WIP.
 
 - [x] Brief project descrption
 - [x] Specification
-- [ ] Basic working version\*
+- [x] Basic working version\*
   - [x] Split events involving two processes
-  - [ ] NUMA topology visualisation
+  - [x] NUMA topology visualisation
   - [x] sched_events interoperability with created plugin(s)
 - [ ] Final version
 
@@ -102,15 +102,17 @@ _Functionalities:_
     - NOTE: Not doable, insufficeint API, KernelShark source code changes necessary.
 - [ ] NUMA topology visualization in KernelShark (either as a plugin or KernelShark modification)
   - [x] Parse data from Istopo (XML format)
-  - [ ] Visualize said data on the screen
+  - [x] Visualize said data on the screen
     - [x] If no Istopo data are given, use default KShark visualization
-    - [ ] CPU reordering according to topology (NUMA nodes, hyperthread siblings)
-    - [ ] Tree grouping of CPUs
-      - [ ] May be collapsible (preferred)
+    - [x] CPU reordering according to topology (NUMA nodes, hyperthread siblings)
+    - [x] Tree grouping of CPUs
+      - [x] May be collapsible (preferred)
+        - NOTE: It is collapsible, but as a whole, not a single tree or
+          or single node - that would be unnecessarily complicated
       - NOTE: Other grouping visualizations are possible, if
         CPUs are sorted by topology, but tree-like is the one
         that will be implemented as basis
-    - [ ] Colorful differentiation of different groups
+    - [x] Colorful differentiation of different groups
   - [x] Configurable display method via some option in KShark's menu
 - [x] Allow `sched_events` plugin compatibility
   - NOTE: XOR choice
@@ -129,7 +131,7 @@ _Demonstration:_
 - [ ] Create example trace files for demonstration
   - [ ] Write a program that will do something with the kernel stack to see it with Stacklook.
   - [ ] Create a trace file without kernel stack entries to show off inacting Stacklook.
-  - [ ] Create/get a trace file to show off NUMA topology views
+  - [x] Create/get a trace file to show off NUMA topology views
     - \[NOTE\] This might be just a matter of implementation of said feature and previous trace files might be reused.
 
 _General SW goal:_
@@ -153,17 +155,19 @@ _Non-software goal - write survey paper:_
     - Mostly basics, some more info about KernelShark's stack tracer
     - Mainly to set context for the project
   - [ ] Basic visualizations of trace data
-    - Not eclusive to stack tracing, but mostly about it
+    - Not exclusive to stack tracing, but mostly about it
   - [ ] Theoretical part of KernelShark
     - [ ] Basic overview of design
     - [ ] How is it visualizing the data?
     - [ ] What are the limitations?
       - I.e. why make the project in the first place?
     - [ ] What is the job of plugins? / Removing limitations
-  - [ ] Theoretical part of Stacklook & KShark modifications
-    - [ ] Brief overview of plugin's design
-      - Shouldn't be too long, that's what the documentations are for
-      - Mainly to get a rough idea if only reading the paper
+  - [ ] Theoretical part of Stacklook, Naps & KShark modifications
+    - [ ] Overview of piece of SW's design
+      - Should be included in the documentation
     - [ ] Purpose & limits
     - [ ] Results of implementation
-
+      - [ ] "Ultra-documentation" - user, design and maybe interesting parts
+            of technical
+      - [ ] "How was development? What interesting things happened?"
+    - [ ] Extensions
