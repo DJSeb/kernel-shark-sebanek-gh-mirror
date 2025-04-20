@@ -18,6 +18,12 @@ It is composed of four main directories, each representing a portion of the thes
 
 - **Stacklook** - plugin for visualising stack traces via a more GUI-centric way
 - **Naps** - plugin for visualising timeslices between a task's switch and next waking
+- **NoBoxes** - plugin which disables some plugin's ability to partake in drawing taskboxes
+  - This plugin doesn't work perfectly, as it seems there's a lot of seemingly random pop-in upon GL Widget updates,
+    as the bins are a little unruly when it comes to being consistent with their visibilites.
+    But unless a pretty big guttting of KernelShark's visualisation is done, this is currently possibly the best approach.
+  - This was a requested bug fix, but is presented as a plugin for easy on/off changes - flickering may be too much for some.
+    It is not a necessity for the project, hence it's presented as "best effort" solution.
 - **KS_fork** - modified copy of KernelShark's source code with multiple additions, what many parts across different
   documentations will call "custom KernelShark"
   - _Couplebreak_ functionality is a new ability of KernelShark to split some events (chosen in code) into two
@@ -27,7 +33,8 @@ It is composed of four main directories, each representing a portion of the thes
 - **SurveyPaper** - directory containing the survey paper **in Czech** about the plugins & enhancements above, along
   with `ExamplePrograms` directory in which traces of simple programs showcasing above's abilities may be found.
 
-These four components' requirements are defined in the [project specification document](./ProjectSpecification.md). Each plugin has their own README and documentations, **KS_fork** inclues a document detailing changes made there.
+These five components' requirements are defined in the [project specification document](./ProjectSpecification.md). Each plugin has
+their own README and documentations, **KS_fork** includes a document detailing changes made there.
 
 See each directory for more details about that part of the project.
 
@@ -100,7 +107,7 @@ _Functionalities:_
   - [x] Specification demands at least `sched/sched_switch` and `sched/sched_waking` should be split.
   - \[ABANDONED\] Try to keep the logic inside the plugin (minimizing KernelShark changes)
     - NOTE: Not doable, insufficeint API, KernelShark source code changes necessary.
-- [ ] NUMA topology visualization in KernelShark (either as a plugin or KernelShark modification)
+- [x] NUMA topology visualization in KernelShark (either as a plugin or KernelShark modification)
   - [x] Parse data from Istopo (XML format)
   - [x] Visualize said data on the screen
     - [x] If no Istopo data are given, use default KShark visualization
@@ -137,13 +144,13 @@ _Demonstration:_
 _General SW goal:_
 
 - [x] Debug the plugins even more, stabilise performance where necessary
-- [ ] Debug created extensions for KernelShark
+- [x] Debug created extensions for KernelShark
   - [x] Record kstack
   - [x] Get PID color
   - [x] Preview labels changeable
   - [x] Mouse hover plot objects
   - [x] Couplebreak
-  - [ ] NUMA Topology Views
+  - [x] NUMA Topology Views
 - [x] Revise README and other non-code parts of repository to reflect project extensions
 - [ ] _("Optional")_ Create proper design documents
   - Would be quite good to include in technical documentation
