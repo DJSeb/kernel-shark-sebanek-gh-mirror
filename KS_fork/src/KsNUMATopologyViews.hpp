@@ -43,8 +43,8 @@ public:
 private:
     NodeCorePU _brief_topo;
 public: // Creation, destruction, assigns
+explicit StreamTopologyConfig(ViewType view, const std::string& fpath);
     StreamTopologyConfig();
-    StreamTopologyConfig(ViewType view, const std::string& fpath);
     StreamTopologyConfig(const StreamTopologyConfig&);
     StreamTopologyConfig& operator=(const StreamTopologyConfig&);
     StreamTopologyConfig(StreamTopologyConfig&&) noexcept;
@@ -85,7 +85,10 @@ private:
 // Global functions
 int numatv_count_PUs(const NodeCorePU& brief_topo);
 int numatv_count_cores(const NodeCorePU& brief_topo);
-NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo, QVector<int> PUs);
+NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo,
+    QVector<int> PUs);
+bool numatv_stream_wants_topology_widget(int stream_id,
+    ViewType view, NUMATVContext& numatv_ctx);
 
 #endif // _KS_NUMA_TV_HPP
 // END of change

@@ -12,8 +12,8 @@
 #define _KS_TRACEGRAPH_H
 
 //NOTE: Changed here. (NUMA TV) (2025-04-17)
-// Qt
-#include <QMap>
+// C++
+#include <map>
 // END of change
 
 // KernelShark
@@ -158,17 +158,14 @@ private:
 
 	void _numatv_remove_topology_widget(int stream_id);
 
-	void _numatv_existing_topology_action(int stream_id, bool widget_exists,
+	void _numatv_existing_topology_action(int stream_id,
 		QVector<int>& cpusToDraw, const NUMATVContext& numa_ctx);
-
-	void _numatv_no_topology_action(int stream_id, bool widget_exists);
 	
 	void _numatv_hide_stream_topo(int stream_id, bool hide);
 
-	void _numatv_tree_view_action(int stream_id,
-		QVector<int>& cpusToDraw, const StreamTopologyConfig* stream_cfg);
-
 	void _numatv_redraw_topo_widgets(int stream_id, QVector<int>& cpusToDraw);
+
+	void _numatv_adjust_topo_task_padding(int stream_id);
 	// END of change
 
 	QString _t2str(uint64_t sec, uint64_t usec);
@@ -197,7 +194,7 @@ private:
 	
 	QVBoxLayout _topoLayout;
 
-	QMap<int, KsStreamTopology*> _topoWidgets;
+	std::map<int, KsStreamTopology*> _topoWidgets;
 	// END of change
 
 	KsGraphScrollArea	_scrollArea;
@@ -281,13 +278,11 @@ private: // Qt parts
 	QVBoxLayout _nodes_layout;
 	QWidget _cores;
 	QVBoxLayout _cores_layout;
-	QWidget _tasks_padding;
 public:
 	explicit KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
 		const KsTraceGraph* trace_graph, QWidget* parent = nullptr);
 	void hide_topology(bool hide);
-	void change_task_padding(int height);
-	void hide_task_padding(bool hide);
+	void resize_topology_widget(int new_height);
 private:
 	void _setup_widget_structure(int v_spacing);
 	void _setup_widget_layouts();

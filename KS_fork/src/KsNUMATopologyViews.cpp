@@ -126,24 +126,13 @@ const StreamTopologyConfig* NUMATVContext::observe_cfg(int stream_id) const {
     return nullptr;
 }
 
-int NUMATVContext::delete_cfg(int stream_id) {
-    kshark_context *kshark_ctx(nullptr);
-    if (!kshark_instance(&kshark_ctx)) {
-        return 0;
-    }
-
-    kshark_data_stream* stream = kshark_get_data_stream(kshark_ctx, stream_id);
-
-    return _active_numatvs.erase(stream_id);
-}
+int NUMATVContext::delete_cfg(int stream_id)
+{ return _active_numatvs.erase(stream_id); }
 
 void NUMATVContext::clear()
 { _active_numatvs.clear(); }
 
 // StreamTopologyConfig
-StreamTopologyConfig::StreamTopologyConfig()
-: applied_view(ViewType::DEFAULT), topo_fpath(""), _brief_topo({}) {}
-
 StreamTopologyConfig::StreamTopologyConfig(ViewType view, const std::string& fpath)
 : applied_view(view), topo_fpath(fpath), _brief_topo({}) {
     hwloc_topology_t topology = get_hwloc_topology(topo_fpath);
@@ -161,6 +150,9 @@ StreamTopologyConfig::StreamTopologyConfig(ViewType view, const std::string& fpa
     hwloc_topology_destroy(topology);
     topology = nullptr;
 }
+
+StreamTopologyConfig::StreamTopologyConfig()
+: applied_view(ViewType::DEFAULT), topo_fpath(""), _brief_topo({}) {}
 
 StreamTopologyConfig::StreamTopologyConfig(const StreamTopologyConfig& other)
 : applied_view(other.applied_view), topo_fpath(other.topo_fpath), _brief_topo(other._brief_topo) {}
@@ -199,8 +191,7 @@ const NodeCorePU& StreamTopologyConfig::get_brief_topo() const
 { return _brief_topo; }
 
 QVector<int> StreamTopologyConfig::rearrangeCPUs(const QVector<int>& cpu_ids) const {
-	NodeCorePU brief_topo = get_brief_topo();
-    return rearrangeCPUsWithBriefTopo(cpu_ids, brief_topo);
+    return rearrangeCPUsWithBriefTopo(cpu_ids, _brief_topo);
 }
 
 QVector<int> StreamTopologyConfig::rearrangeCPUsWithBriefTopo
@@ -256,5 +247,21 @@ NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo, QVector<int> PUs) 
 
     return filtered_topo;
 }
+
+//NOTE: Changed here. (NUMA TV) (2025-04-20)
+bool numatv_stream_wants_topology_widget(int stream_id, ViewType view,
+	NUMATVContext& numatv_ctx)
+{
+	bool show_this_topo = (view != ViewType::DEFAULT && numatv_ctx.exists_for(stream_id));
+	if (show_this_topo) {
+		const StreamTopologyConfig* cfg_observer = numatv_ctx.observe_cfg(stream_id);
+		// It wasn't just specified in the dialog, the configuration is also
+		// requesting this type of view.
+		show_this_topo &= (cfg_observer->get_view_type() != ViewType::DEFAULT);
+	}
+		
+	return show_this_topo;
+}
+// END of change
 
 // END of change

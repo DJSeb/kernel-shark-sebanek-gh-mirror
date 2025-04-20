@@ -734,6 +734,9 @@ void KsMainWindow::_updateSession()
 
 	_session.saveVisModel(_graph.glPtr()->model()->histo());
 	_session.saveDataStreams(kshark_ctx);
+	//NOTE: Changed here. (NUMA TV) (2025-04-20)
+	_session.saveTopology(kshark_ctx->n_streams, NUMATVContext::get_instance());
+	// END of change
 	_session.saveGraphs(kshark_ctx, _graph);
 	_session.saveDualMarker(&_mState);
 	_session.saveTable(_view);
@@ -1515,6 +1518,11 @@ void KsMainWindow::loadSession(const QString &fileName)
 	_updateSessionSize = true;
 	pb.setValue(180);
 
+	//NOTE: Changed here. (NUMA TV) (2025-04-20)
+	_session.loadTopology(&_graph, NUMATVContext::get_instance());
+	pb.setValue(185);
+	// END of change
+
 	_session.loadDualMarker(&_mState, &_graph);
 	_session.loadVisModel(_graph.glPtr()->model());
 	_mState.updateMarkers(_data, _graph.glPtr());
@@ -1826,22 +1834,20 @@ static void apply_numatv_update(int stream_id, ViewType view,
 	
 	switch (result) {
 	case 1:
-		// Topology file was not changed, but view might have changed - no need to redraw
-		printf("[INFO] Nothing was changed for stream '%d'\n", stream_id);
+		// Nothing changed - no need to redraw
 		break;
 	case 0:
 		// File or view changed (or were created) - redraw
-		printf("[INFO] Topology updated for stream '%d'\n", stream_id);
 		graph->cpuReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList);
 		graph->taskReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._taskList);
 		break;
 	case -1:
 		// Couldn't find previous configuration - no need to redraw
-		printf("[INFO] Couldn't find previous configuration for stream '%d'\n", stream_id);
 		break;
 	case -2:
 		// Couldn't get Kshark context - no need to redraw
-		printf("[ERROR] Couldn't get Kshark context\n");
+		printf("[ERROR] Couldn't get Kshark context during topology update for stream '%d'\n",
+			stream_id);
 		break;
 	default:
 		// Unknown error - no need to redraw
@@ -1861,14 +1867,11 @@ static void apply_numatv_remove(int stream_id, NUMATVContext& numatv_ctx,
 	switch (result) {
 	case 1:
 		// Topology was removed - redraw
-		printf("[INFO] Topology removed for stream '%d'\n", stream_id);
 		graph->cpuReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList);
 		graph->taskReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._taskList);
 		break;
 	case 0:
 		// No topology was removed - no need to redraw
-		printf("[INFO] No topology was removed for stream '%d' - nothing to remove\n",
-			stream_id);
 		break;
 	default:
 		// Unknown error - no need to redraw
@@ -1891,7 +1894,6 @@ static void apply_numatv_new_topo(int stream_id, ViewType view,
 	switch (result) {
 	case 0:
 		// New topology made - redraw
-		printf("[INFO] New topology created for stream '%d'\n", stream_id);
 		// Redraw will be applied to the stream's graph - new topology will
 		// be automatically created there.
 		graph->cpuReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList);
@@ -1899,7 +1901,7 @@ static void apply_numatv_new_topo(int stream_id, ViewType view,
 		break;
 	case -1:
 		// Topology was not created- no need to redraw
-		printf("[INFO] Topology file '%s' doesn't have the same amount of CPUs as stream '%d'\n",
+		printf("[ERROR] Topology file '%s' doesn't have the same amount of CPUs as stream '%d'\n",
 			topology_file.toStdString().c_str(), stream_id);
 		break;
 	case -2:
@@ -1935,25 +1937,14 @@ static void apply_numatv(int stream_id, ViewType view,
 	} else {
 		if (file_exists) {
 			apply_numatv_new_topo(stream_id, view, topology_file, numatv_ctx, graph);
-		} /* If no proper file was given to a topology-less stream,
-			 we can expect default behaviour (no tree view) */
+		} else {
+			// Just redraw
+			// This will also add a widget to the topology widgets, but it will be empty,
+			// ensuring that there is some topology widget to put into the layout.
+			graph->cpuReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList);
+			graph->taskReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._taskList);
+		}
 	}
-}
-// END of change
-
-//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-16)
-static bool stream_wants_topology_widget(int stream_id, ViewType view,
-	NUMATVContext& numatv_ctx)
-{
-	bool show_this_topo = (view != ViewType::DEFAULT && numatv_ctx.exists_for(stream_id));
-	if (show_this_topo) {
-		const StreamTopologyConfig* cfg_observer = numatv_ctx.observe_cfg(stream_id);
-		// It wasn't just specified in the dialog, the configuration is also
-		// requesting this type of view.
-		show_this_topo &= (cfg_observer->get_view_type() != ViewType::DEFAULT);
-	}
-		
-	return show_this_topo;
 }
 // END of change
 
@@ -1971,7 +1962,7 @@ void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 		apply_numatv(stream_id, view, topology_file, numatv_ctx, graphPtr());
 
 		// Hide or show the topology widget if a topology view is asked for
-		hide_topo_button &= !stream_wants_topology_widget(stream_id, view, numatv_ctx);
+		hide_topo_button &= !numatv_stream_wants_topology_widget(stream_id, view, numatv_ctx);
 	}
 	
 	graphPtr()->numatvHideTopologyWidget(hide_topo_button);
