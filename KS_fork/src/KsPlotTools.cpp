@@ -19,6 +19,9 @@
 
 // KernelShark
 #include "KsPlotTools.hpp"
+//NOTE: Changed here. (COUPLEBREAK) (2025-04-20)
+#include "libkshark-couplebreak.h"
+// END of change 
 
 namespace KsPlot
 {
@@ -1446,7 +1449,11 @@ void Graph::draw(float size)
 	 * contains data and determine its PID.
 	 */
 	for (; b < _size; ++b) {
-		if (lamCheckEnsblVal(_bins[b]._idBack)) {
+		if (lamCheckEnsblVal(_bins[b]._idBack)
+			//NOTE: Changed here. (SKIP SOME RECTS) (2025-04-20)
+			&& (_bins[b]._visMask & KS_DRAW_TASKBOX_MASK)
+			// END of change
+			) {
 			lastPid = _bins[b]._idFront;
 			/*
 			 * Initialize a box starting from this bin.
@@ -1463,6 +1470,16 @@ void Graph::draw(float size)
 	}
 
 	for (; b < _size; ++b) {
+		//NOTE: Changed here. (SKIP SOME RECTS) (2025-04-20)
+		if (!(_bins[b]._visMask & KS_DRAW_TASKBOX_MASK)) {
+			/*
+			 * The bin doesn't want to participate in the drawing of
+			 * the taskBox. Skip it.
+			 */
+			continue;
+		}
+		// END of change
+		
 		if (_bins[b]._idFront == KS_EMPTY_BIN &&
 		    _bins[b]._idBack == KS_EMPTY_BIN) {
 			/*
@@ -1511,10 +1528,17 @@ void Graph::draw(float size)
 		 * This is the end of the Graph and we have a process running.
 		 * Close its colored box and draw.
 		 */
-		taskBox.setPoint(3, _bins[_size - 1]._base.x(),
-				_bins[_size - 1]._base.y() - boxH);
-		taskBox.setPoint(2, _bins[_size - 1]._base.x(),
-				_bins[_size - 1]._base.y());
+		//NOTE: Changed here. (SKIP SOME RECTS) (2025-04-20)
+		int last_bin = _size - 1;
+		if (!(_bins[last_bin]._visMask & KS_DRAW_TASKBOX_MASK)) {
+			last_bin--;
+		}
+		// END of change
+
+		taskBox.setPoint(3, _bins[last_bin]._base.x(),
+				_bins[last_bin]._base.y() - boxH);
+		taskBox.setPoint(2, _bins[last_bin]._base.x(),
+				_bins[last_bin]._base.y());
 		taskBox.draw();
 	}
 }
@@ -1549,7 +1573,9 @@ Color black_or_white(float color_intensity, float limit) {
 
     return (color_intensity > limit) ? BLACK : WHITE;
 }
+// END of change
 
+//NOTE: Changed here. ("NUMA TV") (2025-04-18)
 float get_color_intensity(const Color& c) {
     // Color multipliers are chosen the way they are based on human
     // eye's receptiveness to each color (green being the color human

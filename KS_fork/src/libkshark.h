@@ -550,14 +550,19 @@ enum kshark_filter_masks {
 
 	/** Special mask used whene filtering events. */
 	KS_EVENT_VIEW_FILTER_MASK	= 1 << 2,
-
-	/* The next 4 bits are reserved for more KS_X_VIEW_FILTER_MASKs. */
-
+	
+	/* The next 3 bits are reserved for more KS_X_VIEW_FILTER_MASKs. */
+	
+	//NOTE: Changed here. (COUPLEBREAK) (2025-04-20)
+	KS_DRAW_TASKBOX_MASK	= 1 << 6,
+	// END of change
+	
 	/**
 	 * Use this mask to check if the content of the entry has been accessed
 	 * by a plugin-defined function.
 	 */
 	KS_PLUGIN_UNTOUCHED_MASK	= 1 << 7
+
 };
 
 /** Filter type identifier. */

@@ -482,6 +482,10 @@ static int create_custom_entry(struct kshark_context *kshark_ctx,
 	struct kshark_entry *target_entry = create_custom_func(stream,
 		*temp_rec, rec, entry);
 
+	//NOTE: Changed here. (SKIP SOME RECTS) (2025-04-20)
+	target_entry->visible &= ~KS_DRAW_TASKBOX_MASK;
+	// END of change
+
 	/* Apply time calibration. */
 	kshark_postprocess_entry(stream, rec, target_entry);
 
@@ -813,6 +817,11 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 						if (retcode == 1) goto fail;
 					}
 				}
+				//NOTE: Changed here. (SKIP SOME RECTS) (2025-04-20) 
+				else if (entry->event_id == kshark_find_event_id(stream, "ftrace/kernel_stack")) {
+					entry->visible &= ~KS_DRAW_TASKBOX_MASK;
+				}
+				// END of change
 				// END of change
 
 				tracecmd_free_record(rec);
