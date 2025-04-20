@@ -1106,3 +1106,35 @@ Goals:
 - Fix bugs, polish
 - Clean up after yourself
 - Document it all
+
+## 2025-04-20
+
+Nevermind, session support exists after it was determined that markers are saved,
+so other C++ parts have to be saved, that also aren't a part of the stream.
+
+What's more worrying is that loading a topology for stream #1, while having
+none for stream #1, assigns the topologyt tree to stream #0 in the visual model.
+That's REALLY bad. They are supposed to be at their stream's position, this
+is a huge inconsistence.
+
+...
+
+OK, big rewrite, but it was fixed. We've come to ALWAYS make a topology
+widget if the Apply button is clicked, which can be reasoned about, but
+the main need was to allow "gaps" in the topology layout. It shouln't
+slow down things much though, since this will happen literally only if
+a CPU redraw is called (which is not often) or by NUMA TV dalog (still not
+often). It's fine.
+
+But this SHOULD mean all bugs found in this are fixed. There are sometimes
+segmentation faults or json faults, but they are random and hard to pinpoint.
+Probably nothing major though.
+
+Now just the couplebreak and kernelstack bugs need fixing, along with
+documentation of NUMA TV.
+
+Goals:
+
+- Fix bugs, polish
+- Clean up after yourself
+- Document it all
