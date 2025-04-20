@@ -7,7 +7,7 @@ set(PLUGIN_NAME "naps")
 set(NAPS_VERSION "1.2.0")
 
 # KernelShark meta
-set(KS_VERSION "2.5.0-couplebreak")
+set(KS_VERSION "2.6.0-numatv")
 
 # Ensure a default build type
 ## For customisability by the user
