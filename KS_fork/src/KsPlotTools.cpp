@@ -1474,7 +1474,7 @@ void Graph::draw(float size)
 		}
 	}
 
-	for (; b < _size; ++b) {		
+	for (; b < _size; ++b) {
 		if (_bins[b]._idFront == KS_EMPTY_BIN &&
 		    _bins[b]._idBack == KS_EMPTY_BIN) {
 			/*
@@ -1490,7 +1490,11 @@ void Graph::draw(float size)
 			/* A new process starts here. */
 			if (b > 0 && lamCheckEnsblVal(lastPid)) {
 				//NOTE: Changed here. (NO BOXES) (2025-04-20)
-				dont_draw |= !(_bins[b]._visMask & KS_DRAW_TASKBOX_MASK);
+				if (!(_bins[b]._visMask & KS_DRAW_TASKBOX_MASK)) {
+					// Skip this bin, it does not wish to help with the
+					// taskBox.
+					continue;
+				}
 				// END of change
 				/*
 				 * There is another process running up to this

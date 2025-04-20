@@ -38,8 +38,7 @@ static void nb_free_ctx(struct plugin_noboxes_context* nb_ctx)
  * @param rec Tep record structure holding data collected by trace-cmd - unnecessary here
  * @param entry KernelShark entry to be processed
  * @note Supported events are: `ftrace/kernel_stack`,
- *                             `couplebreak/sched_waking[target]`,
- *                             `couplebreak/sched_switch[target]`.
+ *                             `couplebreak/sched_waking[target]`.
  * Couplebreak events are modified only if a modified KernelShark is used, which
  * has this modification.
  */
@@ -75,7 +74,7 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
 
     nb_ctx->kstack_event_id = kshark_find_event_id(stream, "ftrace/kernel_stack");
 #ifndef _UNMODIFIED_KSHARK
-    kshark_register_event_handler(stream, COUPLEBREAK_SST_ID, adjust_visiblity);
+    //kshark_register_event_handler(stream, COUPLEBREAK_SST_ID, adjust_visiblity);
     kshark_register_event_handler(stream, COUPLEBREAK_SWT_ID, adjust_visiblity);
 #endif
     kshark_register_event_handler(stream, nb_ctx->kstack_event_id, adjust_visiblity);
@@ -99,7 +98,7 @@ int KSHARK_PLOT_PLUGIN_DEINITIALIZER(struct kshark_data_stream* stream) {
 
     if (nb_ctx) {
 #ifndef _UNMODIFIED_KSHARK
-        kshark_unregister_event_handler(stream, COUPLEBREAK_SST_ID, adjust_visiblity);
+        //kshark_unregister_event_handler(stream, COUPLEBREAK_SST_ID, adjust_visiblity);
         kshark_unregister_event_handler(stream, COUPLEBREAK_SWT_ID, adjust_visiblity);
 #endif
         kshark_unregister_event_handler(stream, nb_ctx->kstack_event_id, adjust_visiblity);
