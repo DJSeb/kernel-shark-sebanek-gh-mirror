@@ -18,6 +18,20 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Context for the plugin, basically structured
+ * globally shared data. It's inclusion here is mostly
+ * required by the API, since all we need is the id of a
+ * kernel stack event.
+ */
+struct plugin_noboxes_context {
+    /// @brief Event ID of the kernel stack event.
+    int kstack_event_id;
+};
+
+// Macro'd declarations by KernelShark which makes it simpler to integrate the plugin.
+KS_DECLARE_PLUGIN_CONTEXT_METHODS(struct plugin_noboxes_context)
+
 #ifdef __cplusplus
 }
 #endif
