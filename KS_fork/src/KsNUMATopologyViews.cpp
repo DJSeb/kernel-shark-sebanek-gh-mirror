@@ -95,7 +95,7 @@ int NUMATVContext::update_cfg(int stream_id, ViewType view, const std::string& t
     
     if (_active_numatvs.count(stream_id) > 0) {
         StreamTopologyConfig& topo_cfg = _active_numatvs.at(stream_id);
-        if (topology_file != topo_cfg.topo_fpath || topo_cfg.get_view_type() != view) {
+        if (topology_file != topo_cfg.topo_fpath) {
             if (!kshark_instance(&kshark_ctx)) {
                 return -2;
             }
@@ -110,6 +110,9 @@ int NUMATVContext::update_cfg(int stream_id, ViewType view, const std::string& t
                 _active_numatvs[stream_id] = std::move(new_topo_cfg);
                 retval = 0;
             }
+        } else if (topo_cfg.get_view_type() != view) {
+            topo_cfg.applied_view = view;
+            retval = 0;
         } else {
             retval = 1;
         }
