@@ -1549,7 +1549,9 @@ Color black_or_white(float color_intensity, float limit) {
 
     return (color_intensity > limit) ? BLACK : WHITE;
 }
+// END of change
 
+//NOTE: Changed here. ("NUMA TV") (2025-04-18)
 float get_color_intensity(const Color& c) {
     // Color multipliers are chosen the way they are based on human
     // eye's receptiveness to each color (green being the color human
