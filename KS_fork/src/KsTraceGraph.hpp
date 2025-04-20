@@ -78,7 +78,7 @@ public:
 
 	void markEntry(size_t);
 
-	void cpuReDraw(int sd, QVector<int> cpus);  // NUMA TV TODO: Modify this
+	void cpuReDraw(int sd, QVector<int> cpus);
 
 	void taskReDraw(int sd, QVector<int> pids);
 

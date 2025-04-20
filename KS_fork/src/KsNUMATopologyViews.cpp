@@ -7,6 +7,9 @@
  *  @brief   Implementations for working with NUMA topologies.
 */
 
+// hwloc
+#include "hwloc.h"
+
 // Qt
 #include <QVector>
 
@@ -14,7 +17,44 @@
 #include "KsNUMATopologyViews.hpp"
 #include "libkshark.h"
 
-// NUMATVContext
+
+// Statics
+static hwloc_topology_t get_hwloc_topology(const std::string& topo_fpath) {
+    int hwloc_load_result;
+    hwloc_topology_t topology;
+    hwloc_load_result = hwloc_topology_init(&topology);
+    if (hwloc_load_result != 0) {
+        printf("[FAIL] Not enough memory for allocation of topology...\n");
+        topology = nullptr;
+        return nullptr;
+    }
+    hwloc_load_result = hwloc_topology_set_xml(topology, topo_fpath.c_str());
+
+    if (hwloc_load_result != 0) {
+        printf("[FAIL] Couldn't set topology to be loaded by XML file...\n");
+        hwloc_topology_destroy(topology);
+        topology = nullptr;
+        return nullptr;
+    }
+
+    hwloc_load_result = hwloc_topology_load(topology);
+    if (hwloc_load_result != 0) {
+        printf("[FAIL] Couldn't load topology...\n");
+        hwloc_topology_destroy(topology);
+        topology = nullptr;
+        return nullptr;
+    }
+    return topology;
+}
+
+int StreamTopologyConfig::get_topo_npus() const {
+    hwloc_topology_t topology = get_hwloc_topology(topo_fpath);
+    int topo_npus = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PU);
+    hwloc_topology_destroy(topology);
+    topology = nullptr;
+
+    return topo_npus;
+}
 
 NUMATVContext& NUMATVContext::get_instance() {
     static NUMATVContext instance;
@@ -34,13 +74,15 @@ int NUMATVContext::add_config(int stream_id, ViewType view, const std::string& t
         return -2;
     }
 
-    int stream_ncpus = kshark_get_data_stream(kshark_ctx, stream_id)->n_cpus;
+    kshark_data_stream* stream = kshark_get_data_stream(kshark_ctx, stream_id);
+    int stream_ncpus = stream->n_cpus;
     
     auto new_topo_cfg = StreamTopologyConfig(view, topology_file);
-    int topo_npus = hwloc_get_nbobjs_by_type(new_topo_cfg.topology, HWLOC_OBJ_PU);
+
+    int topo_npus = new_topo_cfg.get_topo_npus();
     
     if (topo_npus == stream_ncpus) {
-        _active_numatvs[stream_id] = StreamTopologyConfig(view, topology_file);
+        _active_numatvs[stream_id] = std::move(new_topo_cfg);
         retval = 0;
     }
 
@@ -57,10 +99,12 @@ int NUMATVContext::update_cfg(int stream_id, ViewType view, const std::string& t
             if (!kshark_instance(&kshark_ctx)) {
                 return -2;
             }
-            int stream_ncpus = kshark_get_data_stream(kshark_ctx, stream_id)->n_cpus;
+
+            kshark_data_stream* stream = kshark_get_data_stream(kshark_ctx, stream_id);
+            int stream_ncpus = stream->n_cpus;
             
             auto new_topo_cfg = StreamTopologyConfig(view, topology_file);
-            int topo_npus = hwloc_get_nbobjs_by_type(new_topo_cfg.topology, HWLOC_OBJ_PU);
+            int topo_npus = new_topo_cfg.get_topo_npus();
             
             if (topo_npus == stream_ncpus) {
                 _active_numatvs[stream_id] = std::move(new_topo_cfg);
@@ -82,111 +126,27 @@ const StreamTopologyConfig* NUMATVContext::observe_cfg(int stream_id) const {
     return nullptr;
 }
 
-int NUMATVContext::delete_cfg(int stream_id)
-{ return _active_numatvs.erase(stream_id); }
+int NUMATVContext::delete_cfg(int stream_id) {
+    kshark_context *kshark_ctx(nullptr);
+    if (!kshark_instance(&kshark_ctx)) {
+        return 0;
+    }
+
+    kshark_data_stream* stream = kshark_get_data_stream(kshark_ctx, stream_id);
+
+    return _active_numatvs.erase(stream_id);
+}
 
 void NUMATVContext::clear()
 { _active_numatvs.clear(); }
 
 // StreamTopologyConfig
 StreamTopologyConfig::StreamTopologyConfig()
-: applied_view(ViewType::DEFAULT), topo_fpath(""), topology(nullptr) {}
+: applied_view(ViewType::DEFAULT), topo_fpath(""), _brief_topo({}) {}
 
-StreamTopologyConfig::StreamTopologyConfig(ViewType view, const std::string& fpath) {
-    applied_view = view;
-    topo_fpath = fpath;
-    int result;
-
-    result = hwloc_topology_init(&topology);
-    if (result != 0) {
-        printf("[FAIL] Not enough memory for allocation of topology...\n");
-        topology = nullptr;
-        return;
-    }
-    result = hwloc_topology_set_xml(topology, fpath.c_str());
-
-    if (result != 0) {
-        printf("[FAIL] Couldn't set topology to be loaded by XML file...\n");
-        hwloc_topology_destroy(topology);
-        topology = nullptr;
-        return;
-    }
-
-    result = hwloc_topology_load(topology);
-    if (result != 0) {
-        printf("[FAIL] Couldn't load topology...\n");
-        hwloc_topology_destroy(topology);
-        topology = nullptr;
-        return;
-    }
-}
-
-StreamTopologyConfig::StreamTopologyConfig(const StreamTopologyConfig& other)
-: applied_view(other.applied_view), topo_fpath(other.topo_fpath), topology(nullptr)
-{
-    if (other.topology != nullptr) {
-        int result = hwloc_topology_dup(&topology, other.topology);
-        if (result != 0) {
-            printf("[FAIL] Not enough memory for allocation of topology...\n");
-            topology = nullptr;
-        }
-    }
-}
-
-StreamTopologyConfig& StreamTopologyConfig::operator=(const StreamTopologyConfig& other) {
-    if (this != &other) {
-        applied_view = other.applied_view;
-        topo_fpath = other.topo_fpath;
-
-        if (topology != nullptr) {
-            hwloc_topology_destroy(topology);
-        }
-
-        topology = nullptr;
-        if (other.topology != nullptr) {
-            int result = hwloc_topology_dup(&topology, other.topology);
-            if (result != 0) {
-                printf("[FAIL] Not enough memory for allocation of topology...\n");
-                topology = nullptr;
-            }
-        }
-    }
-    return *this;
-}
-
-StreamTopologyConfig::StreamTopologyConfig(StreamTopologyConfig&& other) noexcept
-: applied_view(other.applied_view), topo_fpath(std::move(other.topo_fpath)),
-    topology(other.topology)
-{
-    other.topology = nullptr;
-}
-
-StreamTopologyConfig& StreamTopologyConfig::operator=(StreamTopologyConfig&& other) noexcept {
-    if (this != &other) {
-        applied_view = other.applied_view;
-        topo_fpath = std::move(other.topo_fpath);
-        topology = other.topology;
-        other.topology = nullptr;
-    }
-    return *this;
-}
-
-StreamTopologyConfig::~StreamTopologyConfig() {
-    if (topology != nullptr) {
-        hwloc_topology_destroy(topology);
-        topology = nullptr;
-    }
-}
-
-const std::string& StreamTopologyConfig::get_topo_fpath() const
-{ return topo_fpath; }
-
-ViewType StreamTopologyConfig::get_view_type() const
-{ return applied_view; }
-
-const NodeCorePU StreamTopologyConfig::get_brief_topo() const {
-    NodeCorePU numaCorePUMap{};
-
+StreamTopologyConfig::StreamTopologyConfig(ViewType view, const std::string& fpath)
+: applied_view(view), topo_fpath(fpath), _brief_topo({}) {
+    hwloc_topology_t topology = get_hwloc_topology(topo_fpath);
     int n_numa_nodes = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE);
 	for (unsigned int i = 0; i < (unsigned int)n_numa_nodes; i++) {
 		hwloc_obj_t node = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, i);
@@ -195,12 +155,48 @@ const NodeCorePU StreamTopologyConfig::get_brief_topo() const {
 		hwloc_bitmap_foreach_begin(id, node->cpuset)
 			hwloc_obj_t pu = hwloc_get_pu_obj_by_os_index(topology, id);
 			hwloc_obj_t core_of_pu = hwloc_get_ancestor_obj_by_type(topology, HWLOC_OBJ_CORE, pu);
-			numaCorePUMap[node->logical_index][core_of_pu->logical_index][pu->logical_index] = pu->os_index;
+			_brief_topo[node->logical_index][core_of_pu->logical_index][pu->logical_index] = pu->os_index;
 		hwloc_bitmap_foreach_end();
 	}
-
-    return numaCorePUMap;
+    hwloc_topology_destroy(topology);
+    topology = nullptr;
 }
+
+StreamTopologyConfig::StreamTopologyConfig(const StreamTopologyConfig& other)
+: applied_view(other.applied_view), topo_fpath(other.topo_fpath), _brief_topo(other._brief_topo) {}
+
+StreamTopologyConfig& StreamTopologyConfig::operator=(const StreamTopologyConfig& other) {
+    if (this != &other) {
+        applied_view = other.applied_view;
+        topo_fpath = other.topo_fpath;
+        _brief_topo = other._brief_topo;
+    }
+    return *this;
+}
+
+StreamTopologyConfig::StreamTopologyConfig(StreamTopologyConfig&& other) noexcept
+: applied_view(other.applied_view), topo_fpath(std::move(other.topo_fpath)),
+  _brief_topo(std::move(other._brief_topo)) {}
+
+StreamTopologyConfig& StreamTopologyConfig::operator=(StreamTopologyConfig&& other) noexcept {
+    if (this != &other) {
+        applied_view = other.applied_view;
+        topo_fpath = std::move(other.topo_fpath);
+        _brief_topo = std::move(other._brief_topo);
+    }
+    return *this;
+}
+
+StreamTopologyConfig::~StreamTopologyConfig() {}
+
+const std::string& StreamTopologyConfig::get_topo_fpath() const
+{ return topo_fpath; }
+
+ViewType StreamTopologyConfig::get_view_type() const
+{ return applied_view; }
+
+const NodeCorePU& StreamTopologyConfig::get_brief_topo() const
+{ return _brief_topo; }
 
 QVector<int> StreamTopologyConfig::rearrangeCPUs(const QVector<int>& cpu_ids) const {
 	NodeCorePU brief_topo = get_brief_topo();

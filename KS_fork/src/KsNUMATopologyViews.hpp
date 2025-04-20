@@ -19,9 +19,6 @@
 #include <QtWidgets>
 #include <QVector>
 
-// hwloc
-#include "hwloc.h"
-
 // Enum classes
 
 /// @brief Differentiable view types, mainly used by the radio buttons per each stream.
@@ -43,7 +40,8 @@ struct StreamTopologyConfig {
 public:
     ViewType applied_view;
     std::string topo_fpath;
-    hwloc_topology_t topology;
+private:
+    NodeCorePU _brief_topo;
 public: // Creation, destruction, assigns
     StreamTopologyConfig();
     StreamTopologyConfig(ViewType view, const std::string& fpath);
@@ -55,10 +53,11 @@ public: // Creation, destruction, assigns
 public: // Business
     const std::string& get_topo_fpath() const;
     ViewType get_view_type() const;
-    const NodeCorePU get_brief_topo() const;
+    const NodeCorePU& get_brief_topo() const;
     QVector<int> rearrangeCPUs(const QVector<int>& cpu_ids) const;
     QVector<int> rearrangeCPUsWithBriefTopo
     (const QVector<int>& cpu_ids, const NodeCorePU& brief_topo) const;
+    int get_topo_npus() const;
 };
 
 class NUMATVContext {
