@@ -1,5 +1,3 @@
-<!--TODO-->
-
 # Source code modifications navigation
 
 Each modification has a source code tag in a comment, which navigates to parts of code relevant to that modification.
