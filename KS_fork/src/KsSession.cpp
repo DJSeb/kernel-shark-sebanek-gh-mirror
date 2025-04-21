@@ -759,7 +759,7 @@ void KsSession::saveTopology(int n_streams, const NUMATVContext& numatv_ctx) {
  * 
  * @param graph Pointer to the KsTraceGraph object, so that if no
  * non-DEFAULT topology views are used, the topology widget can be hidden.
- * @param numatv_ctx Reference to the NUMA TV singleton to load indormation into.
+ * @param numatv_ctx Reference to the NUMA TV singleton to load information into.
  * This is done to have an obvious dependency on the configuraton, instead of hiding
  * it in code's implementation - otherwise, it could just be inside the function.
  */
