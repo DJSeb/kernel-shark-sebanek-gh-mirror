@@ -2,9 +2,10 @@
 
 /**
  * @file    noboxes.h
- * @brief   
+ * @brief   Plugin for KernelShark to disable drawing of taskboxes from
+ *          certain events' bins or ending at certain bins.
  * 
- * @note   
+ * @note    Definitions in `noboxes.c`.
 */
 
 #ifndef _KS_PLUGIN_NOBOXES_H

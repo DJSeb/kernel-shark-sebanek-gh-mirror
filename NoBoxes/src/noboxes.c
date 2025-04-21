@@ -2,15 +2,16 @@
 
 /**
  * @file    noboxes.c
- * @brief   
+ * @brief   Plugin for KernelShark to disable drawing of taskboxes from
+ *          certain events' bins or ending at certain bins.
+ * 
+ * @note    Declarations in `noboxes.c`.
 */
 
 // KernelShark
 #include "libkshark.h"
 #include "libkshark-plugin.h"
-#ifndef _UNMODIFIED_KSHARK
 #include "libkshark-couplebreak.h"
-#endif
 
 // Plugin header
 #include "noboxes.h"
@@ -73,10 +74,8 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream* stream) {
 	}
 
     nb_ctx->kstack_event_id = kshark_find_event_id(stream, "ftrace/kernel_stack");
-#ifndef _UNMODIFIED_KSHARK
-    //kshark_register_event_handler(stream, COUPLEBREAK_SST_ID, adjust_visiblity);
+
     kshark_register_event_handler(stream, COUPLEBREAK_SWT_ID, adjust_visiblity);
-#endif
     kshark_register_event_handler(stream, nb_ctx->kstack_event_id, adjust_visiblity);
 
     return 1;
@@ -97,10 +96,7 @@ int KSHARK_PLOT_PLUGIN_DEINITIALIZER(struct kshark_data_stream* stream) {
     int retval = 0;
 
     if (nb_ctx) {
-#ifndef _UNMODIFIED_KSHARK
-        //kshark_unregister_event_handler(stream, COUPLEBREAK_SST_ID, adjust_visiblity);
         kshark_unregister_event_handler(stream, COUPLEBREAK_SWT_ID, adjust_visiblity);
-#endif
         kshark_unregister_event_handler(stream, nb_ctx->kstack_event_id, adjust_visiblity);
 
         retval = 1;
