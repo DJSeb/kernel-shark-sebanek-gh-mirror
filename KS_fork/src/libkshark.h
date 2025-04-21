@@ -554,6 +554,10 @@ enum kshark_filter_masks {
 	/* The next 3 bits are reserved for more KS_X_VIEW_FILTER_MASKs. */
 	
 	//NOTE: Changed here. (NOBOXES) (2025-04-20)
+	/**
+	 * Use this mask to set whether to partake in the drawing of taskboxes in
+	 * the graphs as a bin.
+	 */
 	KS_DRAW_TASKBOX_MASK	= 1 << 6,
 	// END of change
 	

@@ -1429,10 +1429,12 @@ void Graph::draw(float size)
 	}
 
 	//NOTE: Changed here. (NOBOXES) (2025-04-20)
+	// Taskbox won't be drawn if this is true. This variable is set
+	// in the loops below.
 	bool dont_draw = false;
 	// END of change
 
-	/* Draw as vartical lines all bins containing data. */
+	/* Draw as vertical lines all bins containing data. */
 	for (int i = 0; i < _size; ++i)
 		if (_bins[i]._idFront >= 0 || _bins[i]._idBack >= 0 ||
 		    _bins[i]._idFront == _idlePid || _bins[i]._idBack ==_idlePid)
@@ -1455,6 +1457,7 @@ void Graph::draw(float size)
 	for (; b < _size; ++b) {
 		if (lamCheckEnsblVal(_bins[b]._idBack)) {
 			//NOTE: Changed here. (NOBOXES) (2025-04-20)
+			// This bin has its mask set to 0, its taskbox won't be drawn.
 			dont_draw |= !(_bins[b]._visMask & KS_DRAW_TASKBOX_MASK);
 			// END of change
 
@@ -1490,9 +1493,9 @@ void Graph::draw(float size)
 			/* A new process starts here. */
 			if (b > 0 && lamCheckEnsblVal(lastPid)) {
 				//NOTE: Changed here. (NOBOXES) (2025-04-20)
+				// Skip this bin, it does not wish to be included
+				// in the taskbox as an end.
 				if (!(_bins[b]._visMask & KS_DRAW_TASKBOX_MASK)) {
-					// Skip this bin, it does not wish to help with the
-					// taskBox.
 					continue;
 				}
 				// END of change
@@ -1505,6 +1508,8 @@ void Graph::draw(float size)
 				taskBox.setPoint(2, _bins[b]._base.x() - 1,
 						_bins[b]._base.y());
 				//NOTE: Changed here. (NOBOXES) (2025-04-20)
+				// Draw the taskbox if allowed and make the condition false
+				// for another taskbox drawing.
 				if (!dont_draw)
 					taskBox.draw();
 				dont_draw = false;
@@ -1513,6 +1518,7 @@ void Graph::draw(float size)
 
 			if (lamCheckEnsblVal(_bins[b]._idBack)) {
 				//NOTE: Changed here. (NOBOXES) (2025-04-20)
+				// This bin has its mask set to 0, its taskbox won't be drawn. 
 				dont_draw |= !(_bins[b]._visMask & KS_DRAW_TASKBOX_MASK);
 				// END of change
 
@@ -1544,9 +1550,9 @@ void Graph::draw(float size)
 		taskBox.setPoint(2, _bins[_size - 1]._base.x(),
 				_bins[_size - 1]._base.y());
 		//NOTE: Changed here. (NOBOXES) (2025-04-20)
+		// Draw the taskbox if allowed.
 		if (!dont_draw)
 			taskBox.draw();
-		dont_draw = false;
 		// END of change
 	}
 }
