@@ -245,6 +245,14 @@ private:
 	/**
 	 * @brief What topology widgets KernelShark should display.
 	 * Key is the stream id, value is the topology widget.
+	 * 
+	 * @note This is a map of pointers - yet they aren't
+	 * explicitly deleted when this object is destroyed.
+	 * This is because the topology widgets are deleted
+	 * automatically when the parent widget is deleted, so
+	 * additionally deleting them would be redundant (and
+	 * produce faults). Every topology widget has a parent,
+	 * that being _topoSpace.
 	 */
 	std::map<int, KsStreamTopology*> _topoWidgets;
 	// END of change
