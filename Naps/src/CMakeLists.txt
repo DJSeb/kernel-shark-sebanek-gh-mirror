@@ -22,6 +22,18 @@ set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall -Wextra -pthread -fPIC -fno-common")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread -fPIC -fno-common")
 
 # Dependencies
+## Ensure existing trace-cmd and necessary components
+find_package(TraceEvent REQUIRED)
+
+## For customisability by the user
+if (NOT _TRACEEVENT_INCLUDE_DIR)
+  set(_TRACEEVENT_INCLUDE_DIR "/usr/include/traceevent")
+endif()
+## For customisability by the user
+if (NOT _TRACEEVENT_LIBS_DIR)
+  set(_TRACEEVENT_LIBS_DIR "/usr/lib64")
+endif()
+
 ## Ensure existing Qt6 and necessary components
 find_package(Qt6Widgets 6.3.0 REQUIRED)
 find_package(Qt6 COMPONENTS Network OpenGLWidgets StateMachine REQUIRED)
@@ -88,7 +100,7 @@ set_target_properties(${PLUGIN_NAME} PROPERTIES
 ## Include KernelShark headers
 target_include_directories(${PLUGIN_NAME} PRIVATE ${_KS_INCLUDE_DIR})
 ## Below are included as system header files in KShark, hence SYSTEM here
-target_include_directories(${PLUGIN_NAME} SYSTEM PRIVATE ${QT6_ALL_INCLUDES})
+target_include_directories(${PLUGIN_NAME} SYSTEM PRIVATE ${QT6_ALL_INCLUDES} ${_TRACEEVENT})
 
 ## Link KernelShark's shared libraries
 target_link_libraries(${PLUGIN_NAME} PRIVATE

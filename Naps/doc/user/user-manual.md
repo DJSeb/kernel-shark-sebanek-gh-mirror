@@ -37,9 +37,9 @@ No other dependencies are necessary, except the standard libraries of C and C++.
    valid location).
    - If using an unmodified KernelShark copy, add `-D_UNMODIFIED_KSHARK=1` to the command.
    - If **Doxygen documentation** is desired, include `-D_DOXYGEN_DOC=1` in the command.
-   - If **trace-cmd header files** aren't in `/usr/include`, specify so via `-D_TRACECMD_INCLUDE_DIR=[PATH]`, where
+   - If **traceevent header files** aren't in `/usr/include`, specify so via `-D_TRACEEVENT_INCLUDE_DIR=[PATH]`, where
     `[PATH]` is replaced by the path to the header files.
-   - If **trace-cmd shared libraries** aren't in `/usr/lib64`, specify so via `-D_TRACECMD_LIBS_DIR=[PATH]`, where
+   - If **traceevent shared libraries** aren't in `/usr/lib64`, specify so via `-D_TRACEEVENT_LIBS_DIR=[PATH]`, where
     `[PATH]` is replaced by the path to the shared libraries.
    - By default, the **build type** will be `RelWithDebInfo` - to change this, e.g. to `Release`, use the option 
      `-DCMAKE_BUILD_TYPE=Release`.
