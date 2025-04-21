@@ -13,6 +13,7 @@ Figure 1.
 - KernelShark and its dependencies
   - version *2.4.0-couplebreak* and higher for custom KernelShark
   - version *2.3.2* for unmodified KernelShark
+- Doxygen for documentation
 
 ## Compatibility
 
@@ -27,7 +28,7 @@ event's PID data during data stream loading, this plugin will be incompatible wi
 If using unmodified KernelShark, couplebreak cannot be turned on and nap rectangles will not have the option to
 have their outlines be the same color as the owner task of a sched/sched_switch event.
 
-No other dependencies are necessary, except the standard libraries of C and C++.
+No other dependencies are necessary, except the standard libraries of C and C++ and Doxygen for documentation.
 
 ## Build and install only this plugin
 
