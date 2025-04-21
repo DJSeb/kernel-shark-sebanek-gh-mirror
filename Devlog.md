@@ -950,7 +950,7 @@ prefixes.
 
 ...
 
-Colors in the topology wiget now (allegedly) correspond to colors of CPUs held
+Colors in the topology widget now (allegedly) correspond to colors of CPUs held
 by the GL widget. Cores use an average of their PUs' color, analogously for
 NUMA nodes. Each part of the topology block-tree now has a 1px solid black
 border around itself, which makes it a little prettier + it highlights
@@ -1069,3 +1069,28 @@ taskboxes, if the bin's visMask has it unset. The behaviour intself is a little
 janky, but it works most of the time, which is the important part. Too bad, but
 this is what we have, plus it's not a part of the specification, so further
 requirements can be left as an extension.
+
+There have been some changes to the meta README, Tracker, this Devlog, names of
+modifications - all to start converging on the final part of the bachelor thesis
+software work, that being the documentation.
+
+_Author's note: Creative juices are starting to run out, so this is a welcome step._
+
+...
+
+Doxygen documentation is finished! Thank you Copilot, you have done a good job
+this time, a lot of hints were actually what I needed.
+
+After NUMA TV documentation is finished and approved, survey paper work can
+begin. Actually, that and all design documentations for NUMA TV, Stacklook,
+Naps and maybe an improvement to Couplebreak. At the very least some diagrams
+will be needed.
+
+Goals:
+
+- Document it all
+  - Design docs
+  - Pretty pictures
+  - NUMA TV modification documentation
+- Survey paper
+
