@@ -1,4 +1,4 @@
-build_both.sh
+build_plug.sh
 build
 unmodif_build
 .vscode
