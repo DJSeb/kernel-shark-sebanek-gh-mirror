@@ -68,8 +68,23 @@ used before this modification (and can be achieved still).
 *Wrapper topology widget* - Shown to the left of KernelShark's GL widget (with the classic KernelShark
 graphs), contains topology widgets in a vertical top-down layout.
 
-# Main design objectives
+# Design
 
+## Main design objectives
+
+## Design overview (more in *Solution*)
+
+## "Why is NUMATVContext a singleton?"
+
+## "Why are topology widgets stored as pointers?"
+
+## "Why not use more of hwloc's topology data?"
+
+## "Why are there no other views?"
+
+Time.
+
+## "Why aren't topology views more interactive?"
 
 # Solution
 
