@@ -553,7 +553,7 @@ enum kshark_filter_masks {
 	
 	/* The next 3 bits are reserved for more KS_X_VIEW_FILTER_MASKs. */
 	
-	//NOTE: Changed here. (COUPLEBREAK) (2025-04-20)
+	//NOTE: Changed here. (NOBOXES) (2025-04-20)
 	KS_DRAW_TASKBOX_MASK	= 1 << 6,
 	// END of change
 	

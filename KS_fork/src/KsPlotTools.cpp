@@ -1428,7 +1428,7 @@ void Graph::draw(float size)
 		drawLine(_bins[0]._base, _bins[_size - 1]._base, {}, size);
 	}
 
-	//NOTE: Changed here. (NO BOXES) (2025-04-20)
+	//NOTE: Changed here. (NOBOXES) (2025-04-20)
 	bool dont_draw = false;
 	// END of change
 
@@ -1454,7 +1454,7 @@ void Graph::draw(float size)
 	 */
 	for (; b < _size; ++b) {
 		if (lamCheckEnsblVal(_bins[b]._idBack)) {
-			//NOTE: Changed here. (NO BOXES) (2025-04-20)
+			//NOTE: Changed here. (NOBOXES) (2025-04-20)
 			dont_draw |= !(_bins[b]._visMask & KS_DRAW_TASKBOX_MASK);
 			// END of change
 
@@ -1489,7 +1489,7 @@ void Graph::draw(float size)
 		    _bins[b]._idBack  != lastPid) {
 			/* A new process starts here. */
 			if (b > 0 && lamCheckEnsblVal(lastPid)) {
-				//NOTE: Changed here. (NO BOXES) (2025-04-20)
+				//NOTE: Changed here. (NOBOXES) (2025-04-20)
 				if (!(_bins[b]._visMask & KS_DRAW_TASKBOX_MASK)) {
 					// Skip this bin, it does not wish to help with the
 					// taskBox.
@@ -1504,7 +1504,7 @@ void Graph::draw(float size)
 						_bins[b]._base.y() - boxH);
 				taskBox.setPoint(2, _bins[b]._base.x() - 1,
 						_bins[b]._base.y());
-				//NOTE: Changed here. (NO BOXES) (2025-04-20)
+				//NOTE: Changed here. (NOBOXES) (2025-04-20)
 				if (!dont_draw)
 					taskBox.draw();
 				dont_draw = false;
@@ -1512,7 +1512,7 @@ void Graph::draw(float size)
 			}
 
 			if (lamCheckEnsblVal(_bins[b]._idBack)) {
-				//NOTE: Changed here. (NO BOXES) (2025-04-20)
+				//NOTE: Changed here. (NOBOXES) (2025-04-20)
 				dont_draw |= !(_bins[b]._visMask & KS_DRAW_TASKBOX_MASK);
 				// END of change
 
@@ -1543,7 +1543,7 @@ void Graph::draw(float size)
 				_bins[_size - 1]._base.y() - boxH);
 		taskBox.setPoint(2, _bins[_size - 1]._base.x(),
 				_bins[_size - 1]._base.y());
-		//NOTE: Changed here. (NO BOXES) (2025-04-20)
+		//NOTE: Changed here. (NOBOXES) (2025-04-20)
 		if (!dont_draw)
 			taskBox.draw();
 		dont_draw = false;
