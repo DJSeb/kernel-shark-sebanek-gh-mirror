@@ -792,16 +792,8 @@ void KsSession::loadTopology(KsTraceGraph* graph, NUMATVContext& numatv_ctx) {
 		}
 
 		hide_topo_button &= !numatv_stream_wants_topology_widget(stream_id, numatv_ctx);
-		
-		// Free the json objects
-		free(jtopo);
-		free(jstream_id);
-		free(jview);
-		free(jtopo_fpath);
 	}
 
 	graph->numatvHideTopologyWidget(hide_topo_button);
-
-	free(jtopologies);
 }
 // END of change
