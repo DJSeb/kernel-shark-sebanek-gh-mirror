@@ -52,10 +52,15 @@ find_package(TraceCmd   REQUIRED)
 
 find_package(JSONC      REQUIRED)
 #NOTE: Changed here. (NUMA TV) (2025-04-08)
+## Finds hwloc dependency with pkg-config and 
+## outputs variables given by hwloc.
+## This particular build instruction chain was found on the
+## internet in hwloc's documentation at
+## https://www.open-mpi.org/projects/hwloc/doc/v2.11.2/a00343.php
 include(FindPkgConfig)
 if(PKG_CONFIG_EXECUTABLE)
   unset(HWLOC_FOUND CACHE)
-  pkg_search_module(HWLOC hwloc)
+  pkg_search_module(HWLOC REQUIRED hwloc)
   if(HWLOC_FOUND)
     message(STATUS "HWLOC_LIBRARIES=${HWLOC_LIBRARIES}")
     message(STATUS "HWLOC_LINK_LIBRARIES=${HWLOC_LINK_LIBRARIES}")

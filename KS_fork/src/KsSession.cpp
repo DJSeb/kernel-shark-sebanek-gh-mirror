@@ -712,6 +712,14 @@ void KsSession::loadUserPlugins(kshark_context *kshark_ctx, KsPluginManager *pm)
 }
 
 //NOTE: Changed here. (NUMA TV) (2025-04-20)
+/**
+ * @brief Saves the NUMA TV configurations of all streams.
+ * 
+ * @param n_streams How many streams are open in a session.
+ * @param numatv_ctx Reference to the NUMA TV singleton to load information from.
+ * This is done to have an obvious dependency on the configuraton, instead of hiding
+ * it in code's implementation - otherwise, it could just be inside the function.
+ */
 void KsSession::saveTopology(int n_streams, const NUMATVContext& numatv_ctx) {
 	kshark_config_doc *topology =
 		kshark_config_new("kshark.config.topology", KS_CONFIG_JSON);
@@ -746,6 +754,15 @@ void KsSession::saveTopology(int n_streams, const NUMATVContext& numatv_ctx) {
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-20)
+/**
+ * @brief Loads the NUMA TV configurations of all streams.
+ * 
+ * @param graph Pointer to the KsTraceGraph object, so that if no
+ * non-DEFAULT topology views are used, the topology widget can be hidden.
+ * @param numatv_ctx Reference to the NUMA TV singleton to load indormation into.
+ * This is done to have an obvious dependency on the configuraton, instead of hiding
+ * it in code's implementation - otherwise, it could just be inside the function.
+ */
 void KsSession::loadTopology(KsTraceGraph* graph, NUMATVContext& numatv_ctx) {
 	kshark_config_doc *topology = kshark_config_alloc(KS_CONFIG_JSON);
 
@@ -774,8 +791,7 @@ void KsSession::loadTopology(KsTraceGraph* graph, NUMATVContext& numatv_ctx) {
 			numatv_ctx.add_config(stream_id, view, topo_fpath);
 		}
 
-		hide_topo_button &= !numatv_stream_wants_topology_widget(stream_id,
-			view, numatv_ctx);
+		hide_topo_button &= !numatv_stream_wants_topology_widget(stream_id, numatv_ctx);
 		
 		// Free the json objects
 		free(jtopo);

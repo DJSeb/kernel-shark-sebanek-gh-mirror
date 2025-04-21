@@ -625,6 +625,9 @@ void KsMainWindow::_open()
 
 	if (!fileName.isEmpty()) {
 		//NOTE: Changed here. (NUMA TV) (2025-04-16)
+		// This clears existing NUMA topology configurations, hides their
+		// containing widget and clears NUMA topology widgets.
+		// This puts the topology widgets into a clean state.
 		NUMATVContext::get_instance().clear();
 		graphPtr()->numatvHideTopologyWidget(true);
 		graphPtr()->numatvClearTopologyWidgets();
@@ -1519,6 +1522,8 @@ void KsMainWindow::loadSession(const QString &fileName)
 	pb.setValue(180);
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-20)
+	// Topology configurations have to be loaded before the graphs, otherwise
+	// we miss a cpuRedraw, which would show the topology widgets for each stream.
 	_session.loadTopology(&_graph, NUMATVContext::get_instance());
 	pb.setValue(185);
 	// END of change
@@ -1794,7 +1799,13 @@ void KsMainWindow::_updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_
 }
 // END of change
 
-//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
+/**
+ * @brief Function will show the NUMA TV configuration
+ * dialog, but only if some KernelShark session is found and
+ * there is at least one stream loaded. After showing the dialog,
+ * KernelShark graphs in the main window are updated.
+ */
 void KsMainWindow::_showNUMATVConfig() {
 	KsNUMATVDialog *dialog;
 	kshark_context *kshark_ctx(nullptr);
@@ -1818,13 +1829,35 @@ void KsMainWindow::_showNUMATVConfig() {
 
 	dialog->show();
 	
-	// Just update the graph an redraw CPUs, since it contains all the things we'll be changing, inner data
-	// are not affected.
+	// Just update the graph an redraw CPUs, since it contains all the things
+	// we'll be changing, inner data are not affected.
 	_graph.update(&_data);
 }
 // END of change
 
-//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-16)
+//NOTE: Changed here. (NUMA TV) (2025-04-16)
+/**
+ * @brief Function will attempt to update a topology configuration
+ * for the stream from the argument. If it succeeds, the topology widget
+ * will be updated and the graphs will be redrawn.
+ * 
+ * If there is CPU count mismatch between the topology file and the stream,
+ * the topology configuration will not be updated, a message will be printed
+ * out on standard output and the graphs will not be redrawn.
+ * 
+ * If the previous topology configuration was not found or if the KernelShark
+ * context can't be found, an error message will be printed out on standard
+ * output and the graph will not be redrawn.
+ * Same goes for any other unknown error.
+ * 
+ * @param stream_id Identifier of the stream to which the topology
+ * configuration is applied.
+ * @param view Type of the view to be applied to the stream.
+ * @param topology_file Path to the topology file.
+ * @param numatv_ctx NUMA TV context, containing the topology configurations.
+ * @param graph Pointer to the graph object, used to redraw the CPU and task
+ * graphs & in turn the topology widget with it.
+ */
 static void apply_numatv_update(int stream_id, ViewType view, 
 	QString topology_file, NUMATVContext& numatv_ctx,
 	KsTraceGraph* graph)
@@ -1837,28 +1870,51 @@ static void apply_numatv_update(int stream_id, ViewType view,
 		// Nothing changed - no need to redraw
 		break;
 	case 0:
-		// File or view changed (or were created) - redraw
+		// File or view changed - redraw
 		graph->cpuReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList);
 		graph->taskReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._taskList);
 		break;
 	case -1:
-		// Couldn't find previous configuration - no need to redraw
+		// Topology was not created due to a CPU count mismatch - no need to redraw
+		printf("[INFO] Topology file '%s' doesn't have the same amount "
+			"of CPUs as stream '%d', topology configuration was not updated.\n",
+			topology_file.toStdString().c_str(), stream_id);
 		break;
 	case -2:
 		// Couldn't get Kshark context - no need to redraw
 		printf("[ERROR] Couldn't get Kshark context during topology update for stream '%d'\n",
 			stream_id);
 		break;
+	case -3:
+		// Couldn't find previous configuration - no need to redraw
+		printf("[ERROR] Couldn't find previous topology configuration for stream '%d', "
+			"topology configuration was not updated.\n", stream_id);
+		break;
 	default:
 		// Unknown error - no need to redraw
 		printf("[ERROR] Unknown error during topology update for stream '%d'\n", stream_id);
-		// This should maybe throw an exception, but the question would be which one.
 		break;
 	}
 }
 // END of change
 
-//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-17)
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+/**
+ * @brief Function will attempt to remove a topology configuration
+ * for the stream from the argument. If it succeeds, the topology widget
+ * will be updated and the graphs will be redrawn.
+ * 
+ * If no configuration was removed, no redraw will be called.
+ * 
+ * If an unknown error occurs, a message will be printed out on
+ * standard output and the graphs will not be redrawn.
+ * 
+ * @param stream_id Identifier of the stream to which the topology
+ * configuration is applied.
+ * @param numatv_ctx NUMA TV context, containing the topology configurations.
+ * @param graph Pointer to the graph object, used to redraw the CPU and task
+ * graphs & in turn the topology widget with it.
+ */
 static void apply_numatv_remove(int stream_id, NUMATVContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
@@ -1877,19 +1933,40 @@ static void apply_numatv_remove(int stream_id, NUMATVContext& numatv_ctx,
 		// Unknown error - no need to redraw
 		printf("[ERROR] Unknown error during topology removal for stream '%d'\n",
 			stream_id);
-		// This should maybe throw an exception, but the question would be which one.
 		break;
 	}
 }
 // END of change
 
-//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-16)
+//NOTE: Changed here. (NUMA TV) (2025-04-16)
+/**
+ * @brief Function will attempt to create a new topology configuration
+ * for the stream from the argument. If it succeeds, the topology widget
+ * will be updated and the graph will be redrawn.
+ * 
+ * If there is CPU count mismatch between the topology file and the stream,
+ * the topology configuration will not be created, a message will be printed
+ * out on standard output and the graph will not be redrawn.
+ * 
+ * If the KernelShark context can't be found, an error message will be printed
+ * out on standard output and the graph will not be redrawn. Same goes for
+ * any other unknown error.
+ * 
+ * @param stream_id Identifier of the stream to which the topology
+ * configuration is applied.
+ * @param view Type of the view to be applied to the stream.
+ * @param topology_file Path to the topology file.
+ * @param numatv_ctx NUMA TV context, containing the topology configurations.
+ * @param graph Pointer to the graph object, used to redraw the CPU and task
+ * graphs & in turn the topology widget with it.
+ */
 static void apply_numatv_new_topo(int stream_id, ViewType view,
 	QString topology_file, NUMATVContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
 	// Proper file was given + no config exists, applying means creating new topology
 	int result = numatv_ctx.add_config(stream_id, view, topology_file.toStdString());
+	QString err_msg;
 
 	switch (result) {
 	case 0:
@@ -1900,25 +1977,44 @@ static void apply_numatv_new_topo(int stream_id, ViewType view,
 		graph->taskReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._taskList);
 		break;
 	case -1:
-		// Topology was not created- no need to redraw
-		printf("[ERROR] Topology file '%s' doesn't have the same amount of CPUs as stream '%d'\n",
+		// Topology was not created due to a CPU count mismatch - no need to redraw
+		printf("[INFO] Topology file '%s' doesn't have the same amount "
+			"of CPUs as stream '%d', topology configuration was not created.\n",
 			topology_file.toStdString().c_str(), stream_id);
 		break;
 	case -2:
 		// Couldn't get Kshark context - no need to redraw
-		printf("[ERROR] Couldn't get Kshark context during topology creation for stream '%d'\n",
-			stream_id);
+		err_msg = QString{"[ERROR] Couldn't get Kshark context during topology "
+			"creation for stream '%1'"}.arg(stream_id);
+		printf(err_msg.toStdString().c_str());
 		break;
 	default:
 		// Unknown error - no need to redraw
-		printf("[ERROR] Unknown error during topology creation for stream '%d'\n", stream_id);
-		// This should maybe throw an exception, but the question would be which one.
+		err_msg = QString{"[ERROR] Unknown error during topology "
+			"creation for stream '%1'"}.arg(stream_id);
+		printf(err_msg.toStdString().c_str());
 		break;
 	}
 }
 // END of change
 
-//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-16)
+//NOTE: Changed here. (NUMA TV) (2025-04-16)
+/**
+ * @brief Actions to be taken when applying NUMA Topology View. Based
+ * on filepath validity and stream's view type, the function will either
+ * create a new topology, update the existing one or remove the topology
+ * configuration. Either way, a CPU and task redraw will be called, to
+ * update the topology widget and the GL widget graphs (e.g. CPUs must be
+ * reordered).
+ * 
+ * @param stream_id Identifier of the stream to which the topology
+ * configuration is applied.
+ * @param view Type of the view to be applied to the stream.
+ * @param topology_file Path to the topology file.
+ * @param numatv_ctx NUMA TV context, containing the topology configurations.
+ * @param graph Pointer to the graph object, used to redraw the CPU and task
+ * graphs & in turn the topology widget with it.
+ */
 static void apply_numatv(int stream_id, ViewType view,
 	QString topology_file, NUMATVContext& numatv_ctx,
 	KsTraceGraph* graph)
@@ -1948,7 +2044,16 @@ static void apply_numatv(int stream_id, ViewType view,
 }
 // END of change
 
-//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
+/**
+ * @brief Function will update configuration of NUMA Topology Views for
+ * each stream, both given in the argument. If no stream wishes to use a non-DEFAULT
+ * view, the topology widget will be hidden and a classic view of KernelShark (i.e. just
+ * the GL widget) will be shown.
+ * 
+ * @param stream_numa A vector of pairs, each pair containing a stream ID and
+ * a pair of view type and topology file name.
+ */
 void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 	NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
 	bool hide_topo_button = true;
@@ -1962,7 +2067,7 @@ void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 		apply_numatv(stream_id, view, topology_file, numatv_ctx, graphPtr());
 
 		// Hide or show the topology widget if a topology view is asked for
-		hide_topo_button &= !numatv_stream_wants_topology_widget(stream_id, view, numatv_ctx);
+		hide_topo_button &= !numatv_stream_wants_topology_widget(stream_id, numatv_ctx);
 	}
 	
 	graphPtr()->numatvHideTopologyWidget(hide_topo_button);

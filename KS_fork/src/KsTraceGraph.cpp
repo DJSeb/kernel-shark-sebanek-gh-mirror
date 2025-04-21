@@ -9,11 +9,6 @@
  *  @brief   KernelShark Trace Graph widget.
  */
 
-//NOTE: Changed here. (NUMA TV) (2025-04-15)
-// C++
-#include <map>
-// END of change
-
 // KernelShark
 #include "KsUtils.hpp"
 #include "KsDualMarker.hpp"
@@ -127,52 +122,10 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 		this,		&KsTraceGraph::_onCustomContextMenu);
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-12)
-	_topoGlWrapper.setContentsMargins(0, 0, 0, 0);
-	_topoGlWrapper.setLayout(&_topoGlLayout);
-
-	_topoGlLayout.setContentsMargins(0, 0, 0, 0);
-	_topoGlLayout.setSpacing(0);
-	_topoGlLayout.addWidget(&_hideTopoBtn);
-	_topoGlLayout.addWidget(&_topoScrollArea);
-	_topoGlLayout.addWidget(&_scrollArea);
-
-	_topoScrollArea.setContentsMargins(0, 0, 0, 0);
-	_topoScrollArea.setWidgetResizable(true);
-	_topoScrollArea.setHidden(true);
-	_topoScrollArea.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	_topoScrollArea.setWidget(&_topoSpace);
-
-	_hideTopoBtn.setFixedWidth(FONT_WIDTH * 3);
-	_hideTopoBtn.setFixedHeight(_topoScrollArea.height());
-	_hideTopoBtn.setHidden(true);
-	_hideTopoBtn.setStyleSheet("QPushButton {background-color : green;}");
-
-	_topoSpace.setStyleSheet("QWidget {background-color : white;}");
-	_topoSpace.setLayout(&_topoLayout);
-	
-	int v_margin = _glWindow.vMargin();
-	int v_spacing = _glWindow.vSpacing();
-	_topoLayout.setAlignment(Qt::AlignTop);
-	_topoLayout.setContentsMargins(0, 2*v_margin, 0, v_spacing);
-	_topoLayout.setSpacing(v_spacing);
-
-	// Connections
-	connect(&_hideTopoBtn, &QPushButton::pressed,
-		this,	[this]() {
-			if (_topoScrollArea.isHidden()) {
-				_topoScrollArea.show();
-				_hideTopoBtn.setText("<");
-			} else {
-				_topoScrollArea.hide();
-				_topoScrollArea.setFixedWidth(0);
-				_hideTopoBtn.setText(">");
-			}
-			updateGeom();
-		}
-	);
-	
-	connect(_scrollArea.verticalScrollBar(), &QScrollBar::valueChanged,
-		_topoScrollArea.verticalScrollBar(), &QScrollBar::setValue);
+	// To not bloat this constructor definition as it is
+	// already long, NUMA TV-related construction is moved
+	// to a separate setup function :)
+	_setup_numatv_topo_widget();
 	// END of change
 	
 	_scrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -207,11 +160,70 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
 	_layout.addWidget(&_pointerBar);
 	_layout.addWidget(&_navigationBar);
 	//NOTE: Changed here. (NUMA TV) (2025-04-19)
+	// To preserve the original layout, we add the topology widget
+	// now wrapping both the GL widget and the topology widget.
 	_layout.addWidget(&_topoGlWrapper);
 	// END of change
 	this->setLayout(&_layout);
 	updateGeom();
 }
+
+//NOTE: Changed here. (NUMA TV) (2025-04-21)
+/**
+ * @brief Wrapper for construction of NUMA TV-related widgets and
+ * layouts in the constructor.
+ */
+void KsTraceGraph::_setup_numatv_topo_widget() {
+	_topoGlWrapper.setContentsMargins(0, 0, 0, 0);
+	_topoGlWrapper.setLayout(&_topoGlLayout);
+
+	_topoGlLayout.setContentsMargins(0, 0, 0, 0);
+	_topoGlLayout.setSpacing(0);
+	_topoGlLayout.addWidget(&_hideTopoBtn);
+	_topoGlLayout.addWidget(&_topoScrollArea);
+	_topoGlLayout.addWidget(&_scrollArea);
+
+	_topoScrollArea.setContentsMargins(0, 0, 0, 0);
+	_topoScrollArea.setWidgetResizable(true);
+	_topoScrollArea.setHidden(true);
+	_topoScrollArea.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_topoScrollArea.setWidget(&_topoSpace);
+
+	_hideTopoBtn.setFixedWidth(FONT_WIDTH * 3);
+	_hideTopoBtn.setFixedHeight(_topoScrollArea.height());
+	_hideTopoBtn.setHidden(true);
+	_hideTopoBtn.setStyleSheet("QPushButton {background-color : green;}");
+
+	_topoSpace.setStyleSheet("QWidget {background-color : white;}");
+	_topoSpace.setLayout(&_topoLayout);
+	
+	int v_margin = _glWindow.vMargin();
+	int v_spacing = _glWindow.vSpacing();
+	_topoLayout.setAlignment(Qt::AlignTop);
+	// Interestingly the bottom margin is actually just a
+	// the spacing between graphs.
+	_topoLayout.setContentsMargins(0, 2*v_margin, 0, v_spacing);
+	_topoLayout.setSpacing(v_spacing);
+
+	// Connections
+	connect(&_hideTopoBtn, &QPushButton::pressed,
+		this,	[this]() {
+			if (_topoScrollArea.isHidden()) {
+				_topoScrollArea.show();
+				_hideTopoBtn.setText("<");
+			} else {
+				_topoScrollArea.hide();
+				_topoScrollArea.setFixedWidth(0);
+				_hideTopoBtn.setText(">");
+			}
+			updateGeom();
+		}
+	);
+	
+	connect(_scrollArea.verticalScrollBar(), &QScrollBar::valueChanged,
+		_topoScrollArea.verticalScrollBar(), &QScrollBar::setValue);
+}
+// END of change
 
 /**
  * @brief Load and show trace data.
@@ -495,6 +507,10 @@ void KsTraceGraph::cpuReDraw(int sd, QVector<int> v)
 	startOfWork(KsWidgetsLib::KsDataWork::EditPlotList);
 	if (_glWindow._streamPlots.contains(sd)) {
 		//NOTE: Changed here. (NUMA TV) (2025-04-18)
+		// CPUs being redrawn goes hand in hand with redrawing
+		// the topology widget, as CPUs may need to be reordered,
+		// or some CPUs were hidden and the topology wiget must adjust
+		// its own parts.
 		_numatv_redraw_topo_widgets(sd, v);
 		// END of change
 		_glWindow._streamPlots[sd]._cpuList = v;
@@ -516,6 +532,9 @@ void KsTraceGraph::taskReDraw(int sd, QVector<int> v)
 	if (_glWindow._streamPlots.contains(sd)) {
 		_glWindow._streamPlots[sd]._taskList = v;
 		//NOTE: Changed here. (NUMA TV) (2025-04-18)
+		// Task redraw means that the topology widget needs padding
+		// at the bottom, so that the topology widget of another stream
+		// below does not overlap with the task graph of the current stream.
 		_numatv_adjust_topo_task_padding(sd);
 		// END of change
 	}
@@ -652,19 +671,30 @@ void KsTraceGraph::updateGeom()
 			      _layout.contentsMargins().bottom();
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-16)
+	// Resize the wrapper for wrapper topology widget and the GL widget
+	// to be the size of the GL scroll area if NUMA TV was disabled.
 	_topoGlWrapper.resize(saWidth, saHeight);
 	// END of change
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-15)
+	// If the hide button is shown, set the width of the scroll area
+	// to be the width of the scroll area minus the width of the
+	// hide button, to allow both to be shown.
 	int hideBtnCorrection = _hideTopoBtn.isHidden() ?
 		0 : _hideTopoBtn.width();
 	// END of change
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-15)
+	// Shorten the width of the scroll area by the width of the
+	// hide button, if it is shown.
 	saWidth -= hideBtnCorrection;
 	// END of change
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-15)
+	// If the wrapper topology widget is NOT hidden, set it to be a fifth
+	// of the width of the scroll area otherwise shown. Make the scroll
+	// area to be 4/5 of the width of itself to make space for the
+	// topology scroll area as well.
 	if (!_topoScrollArea.isHidden()) {
 		_topoScrollArea.setFixedWidth(saWidth / 5);
 		saWidth -= _topoScrollArea.width();
@@ -673,6 +703,8 @@ void KsTraceGraph::updateGeom()
 
 	_scrollArea.resize(saWidth, saHeight);
 	//NOTE: Changed here. (NUMA TV) (2025-04-15)
+	// Synchronize the height of the hide button and the scroll area
+	// with the other GL widget's scroll area.
 	_hideTopoBtn.setFixedHeight(std::max(saHeight, 0));
 	_topoScrollArea.setFixedHeight(std::max(saHeight, 0));
 	// END of change
@@ -688,6 +720,8 @@ void KsTraceGraph::updateGeom()
 
 	_glWindow.resize(dwWidth, _glWindow.height());
 	//NOTE: Changed here. (NUMA TV) (2025-04-15)
+	// Synchronize the height of the wrapper topology widget with the height of the
+	// GL widget.
 	_topoSpace.setFixedHeight(std::max(0, _glWindow.height()));
 	// END of change
 
@@ -950,6 +984,17 @@ void KsTraceGraph::setPreviewLabels(const QString& label1,
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-20)
+/**
+ * @brief Clears a QLayout by removing all items from it. This function
+ * is used to clear the topology layout before reinserting items into it
+ * for it to be sorted.
+ * 
+ * If the item to be removed is a widget, it is detached from the layout,
+ * but not deleted. This is to avoid deleting the widget while it is
+ * still in use. Other items are deleted.
+ * 
+ * @param layout The layout to be cleared.
+ */
 static void clear_topo_layout(QLayout* layout) {
     QLayoutItem* item;
     while ((item = layout->takeAt(0)) != nullptr) {
@@ -962,6 +1007,12 @@ static void clear_topo_layout(QLayout* layout) {
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-15)
+/**
+ * @brief Hides or shows the wrapper topology widget (specifically its owner,
+ * the scroll area) and hide button.
+ * 
+ * @param hide Whether to hide the wrapper topology widget and hide button.
+ */
 void KsTraceGraph::numatvHideTopologyWidget(bool hide) {
 	_hideTopoBtn.setHidden(hide);
 	_topoScrollArea.setHidden(hide);
@@ -969,7 +1020,10 @@ void KsTraceGraph::numatvHideTopologyWidget(bool hide) {
 }
 // END of change
 
-//NOTE: Changed here. !!!! (NUMA TV) (2025-04-17)
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+/**
+ * @brief Removes and deletes all topology widgets from the trace graph.
+ */
 void KsTraceGraph::numatvClearTopologyWidgets() {
 	for (auto&& [stream_id, widget] : _topoWidgets) {
 		if (widget) {
@@ -981,7 +1035,16 @@ void KsTraceGraph::numatvClearTopologyWidgets() {
 }
 // END of change
 
-//NOTE: Changed here. !!!! (NUMA TV) (2025-04-17)
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+/**
+ * @brief Inserts a topology widget for a stream into the trace graph's
+ * topology map. If a topology widget already exists for the stream, it is
+ * removed first.
+ * 
+ * @param sd Identifier of the stream.
+ * @param brief_topo Brief topology of the stream from which the stream's
+ * topology widget is created.
+ */
 void KsTraceGraph::_numatv_insert_topology_widget(int sd, const NodeCorePU& brief_topo)
 {
 	bool exists_for_stream = _topoWidgets.count(sd);
@@ -996,7 +1059,12 @@ void KsTraceGraph::_numatv_insert_topology_widget(int sd, const NodeCorePU& brie
 }
 // END of change
 
-//NOTE: Changed here. !!!!! (NUMA TV) (2025-04-17)
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+/**
+ * @brief Removes and deletes a topology widget of a stream.
+ * 
+ * @param stream_id Identifier of the stream.
+ */
 void KsTraceGraph::_numatv_remove_topology_widget(int stream_id) {
 	KsStreamTopology* topoWidget = _topoWidgets[stream_id];
 	delete topoWidget;
@@ -1004,15 +1072,31 @@ void KsTraceGraph::_numatv_remove_topology_widget(int stream_id) {
 }
 // END of change
 
-//NOTE: Changed here. !!!!! (NUMA TV) (2025-04-18)
+//NOTE: Changed here. (NUMA TV) (2025-04-18)
+/**
+ * @brief Hides or shows a topology widget of a stream.
+ * 
+ * @param stream_id Identifier of the stream.
+ * @param hide Whether to hide or show the topology widget.
+ */
 void KsTraceGraph::_numatv_hide_stream_topo(int stream_id, bool hide)
 { _topoWidgets[stream_id]->hide_topology(hide); }
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-18)
+/**
+ * @brief Action to be taken when a topology widget already exists.
+ * If the view requested is a NUMA tree, topology tree is created from
+ * the brief topology in the stream's configuration. On default view,
+ * the topology widget is still created, but the tree is empty and the
+ * topology tree's widget is hidden to be extra safe it won't show up.
+ * 
+ * @param stream_id Identifier of the stream.
+ * @param cpusToDraw CPUs to be drawn in the topology widget.
+ * @param numa_ctx NUMA TV configuration singleton.
+ */
 void KsTraceGraph::_numatv_existing_topology_action(int stream_id,
-	QVector<int>& cpusToDraw,
-	const NUMATVContext& numa_ctx)
+	QVector<int>& cpusToDraw, const NUMATVContext& numa_ctx)
 {
 	auto stream_cfg = numa_ctx.observe_cfg(stream_id);
 	ViewType stream_view = stream_cfg->get_view_type();
@@ -1033,6 +1117,14 @@ void KsTraceGraph::_numatv_existing_topology_action(int stream_id,
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-18)
+/**
+ * @brief Redraws the topology widgets for the given stream ID.
+ * During this, the layout housing all stream topology widgets is
+ * refilled with items to keep them sorted.
+ * 
+ * @param stream_id Identifier of the stream.
+ * @param cpusToDraw CPUs to be drawn in the stream's topology widgets.
+ */
 void KsTraceGraph::_numatv_redraw_topo_widgets(int stream_id,
 	QVector<int>& cpusToDraw)
 {
@@ -1057,6 +1149,12 @@ void KsTraceGraph::_numatv_redraw_topo_widgets(int stream_id,
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-20)
+/**
+ * @brief Resizes stream's topology widget to fit the number of graphs
+ * the stream has in the GL widget.
+ * 
+ * @param stream_id Identifier of the stream.
+ */
 void KsTraceGraph::_numatv_adjust_topo_task_padding(int stream_id) {
 	if (_topoWidgets.count(stream_id)) {
 		KsStreamTopology* topo_widget = _topoWidgets[stream_id];
@@ -1073,13 +1171,66 @@ void KsTraceGraph::_numatv_adjust_topo_task_padding(int stream_id) {
 
 // KsStreamTopology
 
-//NOTE: Changed here. (NUMA TV) (2025-04-20)
-void KsStreamTopology::resize_topology_widget(int new_height) {
-	this->setFixedHeight(std::max(new_height, 0));
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+/**
+ * @brief Explicit constructor for the stream topology widget.
+ * 
+ * @param stream_id Identifier of the stream.
+ * @param brief_topo Brief topology necessary for creation of the
+ * topology widget.
+ * @param trace_graph Pointer to the trace graph.
+ * @param parent Parent widget.
+ */
+KsStreamTopology::KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
+	const KsTraceGraph* trace_graph, QWidget* parent)
+: QWidget(parent),
+  _main_layout(this),
+  _topo(this),
+  _topo_layout(&_topo),
+  _machine(&_topo),
+  _nodes(&_topo),
+  _nodes_layout(&_nodes),
+  _cores(&_topo),
+  _cores_layout(&_cores)
+{
+	KsGLWidget* gl_widget = const_cast<KsTraceGraph *>(trace_graph)->glPtr();
+	int v_spacing = gl_widget->vSpacing();
+	this->setContentsMargins(0, 0, 0, 0);
+	
+	_setup_widget_structure(v_spacing);
+	_setup_widget_layouts();
+	_setup_topology_tree(stream_id, v_spacing, brief_topo, gl_widget);
 }
 // END of change
 
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
+/**
+ * @brief Hides or shows the topology widget.
+ * 
+ * @param hide Whether to hide or show the topology widget.
+ */
+void KsStreamTopology::hide_topology(bool hide)
+{ _topo.setHidden(hide); }
+// END of change
+
+//NOTE: Changed here. (NUMA TV) (2025-04-20)
+/**
+ * @brief Resizes the topology widget to a new fixed height.
+ * 
+ * @param new_height The new height for the topology widget.
+ */
+void KsStreamTopology::resize_topology_widget(int new_height)
+{ this->setFixedHeight(std::max(new_height, 0)); }
+// END of change
+
 //NOTE: Changed here. (NUMA TV) (2025-04-19)
+/**
+ * @brief Sets up Spacings, margins and alignements for the
+ * wiget an its layouts.
+ * 
+ * @param v_spacing Vertical spacing between the widgets used in
+ * KernelShark's GL widget.
+ */
 void KsStreamTopology::_setup_widget_structure(int v_spacing) {
 	_main_layout.setContentsMargins(0, 0, 0, 0);
 	_main_layout.setSpacing(0);
@@ -1101,8 +1252,12 @@ void KsStreamTopology::_setup_widget_structure(int v_spacing) {
 	_cores_layout.setContentsMargins(0, 0, 0, 0);
 	_cores_layout.setSpacing(v_spacing);
 }
+// END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-19)
+/**
+ * @brief Sets up layouts and their items for the topology widget.
+ */
 void KsStreamTopology::_setup_widget_layouts() {
 	this->setLayout(&_main_layout);
 	_topo.setLayout(&_topo_layout);
@@ -1118,6 +1273,16 @@ void KsStreamTopology::_setup_widget_layouts() {
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-19)
+/**
+ * @brief Creates a stylesheet for the topology tree items.
+ * Expected stylesheet is an item with a black 1px solid border,
+ * a background color specified in the argument and a text color
+ * which is determined by the background color to be black or white
+ * for readability.
+ * 
+ * @param color The color to be used in the stylesheet.
+ * @return The stylesheet as a QString.
+ */
 static QString make_topo_item_stylesheet(const KsPlot::Color& color) {
 	QString bg_color_str = QString{"%1, %2, %3"}
 		.arg(color.r())
@@ -1143,6 +1308,25 @@ static QString make_topo_item_stylesheet(const KsPlot::Color& color) {
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-19)
+/**
+ * @brief Sets up a Core node of the topology tree - its height,
+ * its color, its text, its tooltip and puts it in the cores' layout.
+ * 
+ * @param core_lid Logical index of the core in the topology.
+ * @param node_lid Logical index of the owner node in the topology.
+ * @param v_spacing Spacing between the graphs in KernelShark's GL widget.
+ * @param PUs Collection of PUs in the core.
+ * @param gl_widget Pointer to the GL widget from which to get
+ * CPU colors.
+ * @param node_parent Parent widget of the core node.
+ * @param node_reds Output accumulator for the red color component
+ * of core's PUs.
+ * @param node_greens Output accumulator for the green color component
+ * of core's PUs.
+ * @param node_blues Output accumulator for the blue color component
+ * of core's PUs.
+ * @return Height of the created core node.
+ */
 int KsStreamTopology::_setup_topology_tree_core(int core_lid, int node_lid,
 	int v_spacing, const PUIds& PUs, const KsGLWidget* gl_widget,
 	QLabel* node_parent, unsigned int& node_reds, unsigned int& node_greens,
@@ -1192,6 +1376,17 @@ int KsStreamTopology::_setup_topology_tree_core(int core_lid, int node_lid,
 
 
 //NOTE: Changed here. (NUMA TV) (2025-04-19)
+/**
+ * @brief Sets up a Node node of the topology tree - its height,
+ * its color, its text, its tooltip and puts it in the nodes' layout.
+ * 
+ * @param node_lid Logical index of the node in the topology.
+ * @param v_spacing Spacing between the graphs in KernelShark's GL widget.
+ * @param cores Collection of cores in the node.
+ * @param gl_widget Pointer to the GL widget from which to get
+ * CPU colors.
+ * @return Height of the created Node node. 
+ */
 int KsStreamTopology::_setup_topology_tree_node(int node_lid, int v_spacing,
 	const CorePU& cores, const KsGLWidget* gl_widget)
 {
@@ -1231,6 +1426,19 @@ int KsStreamTopology::_setup_topology_tree_node(int node_lid, int v_spacing,
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-19)
+/**
+ * @brief Sets up the topology tree - the machine node (tree root), its
+ * color, its text, its tooltip and also the nodes under it. Also sets
+ * a fixed height for the topology tree's owning widget, the KsStreamTopology
+ * object.
+ * 
+ * @param stream_id Identifier of the stream.
+ * @param v_spacing Spacing between the graphs in KernelShark's GL widget.
+ * @param brief_topo Brief topology necessary for creation of the
+ * topology tree.
+ * @param gl_widget Pointer to the GL widget from which to get
+ * stream colors for the machine node. 
+ */
 void KsStreamTopology::_setup_topology_tree(int stream_id, int v_spacing, 
 	const NodeCorePU& brief_topo, KsGLWidget* gl_widget)
 {
@@ -1263,32 +1471,4 @@ void KsStreamTopology::_setup_topology_tree(int stream_id, int v_spacing,
 		all_graphs_height + all_graphs_spacings);
 	resize_topology_widget(machine_height_or_gl_height);
 }
-// END of change
-
-//NOTE: Changed here. (NUMA TV) (2025-04-17)
-KsStreamTopology::KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
-	const KsTraceGraph* trace_graph, QWidget* parent)
-: QWidget(parent),
-  _main_layout(this),
-  _topo(this),
-  _topo_layout(&_topo),
-  _machine(&_topo),
-  _nodes(&_topo),
-  _nodes_layout(&_nodes),
-  _cores(&_topo),
-  _cores_layout(&_cores)
-{
-	KsGLWidget* gl_widget = const_cast<KsTraceGraph *>(trace_graph)->glPtr();
-	int v_spacing = gl_widget->vSpacing();
-	this->setContentsMargins(0, 0, 0, 0);
-	
-	_setup_widget_structure(v_spacing);
-	_setup_widget_layouts();
-	_setup_topology_tree(stream_id, v_spacing, brief_topo, gl_widget);
-}
-// END of change
-
-//NOTE: Changed here. (NUMA TV) (2025-04-17)
-void KsStreamTopology::hide_topology(bool hide)
-{ _topo.setHidden(hide); }
 // END of change

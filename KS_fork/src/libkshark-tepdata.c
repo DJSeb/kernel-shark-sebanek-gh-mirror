@@ -416,6 +416,7 @@ static struct kshark_entry *couplebreak_create_swt(struct kshark_data_stream *st
 
 	return entry;
 }
+// END of change
 
 //NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 /**
@@ -567,6 +568,7 @@ static inline void fill_sorted_entries(struct kshark_data_stream *stream,
 		}
 	}
 }
+// END of change
 
 //NOTE: Changed here. (COUPLEBREAK) (2025-03-29)
 /**
@@ -1694,6 +1696,7 @@ static int couplebreak_find_event_id(struct kshark_data_stream *stream,
 
 	return result;
 }
+// END of change
 
 static int tepdata_find_event_id(struct kshark_data_stream *stream,
 				 const char *event_name)
@@ -1906,6 +1909,7 @@ static int *couplebreak_get_all_ids(struct kshark_data_stream *stream)
 	}
 	return ids;
 }
+// END of change
 
 /** Initialize all methods used by a stream of FTRACE data. */
 static void kshark_tep_init_methods(struct kshark_generic_stream_interface *interface)

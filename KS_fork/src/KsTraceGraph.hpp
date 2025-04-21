@@ -43,17 +43,36 @@ public:
 	}
 };
 
-//NOTE: Changed here. !!!!!!! (NUMA TV) (2025-04-15)
+//NOTE: Changed here. (NUMA TV) (2025-04-15)
+/**
+ * @brief Reimplemented scroll area for topology view,
+ * so that mouse wheel events are completely ignored.
+ * 
+ */
 class KsTopologyScrollArea : public QScrollArea {
 public:
+	/**
+	 * @brief Construct a new Ks Topology Scroll Area object, just
+	 * like a normal scroll area.
+	 * 
+	 * @param parent Parent widget.
+	 */
 	explicit KsTopologyScrollArea(QWidget *parent = nullptr)
 	: QScrollArea(parent) {}
 
+	/**
+	 * @brief Reimplemented handler for mouse wheel events. All mouse wheel
+	 * events will be ignored.
+	 * 
+	 * @param evt Event to (not) handle.
+	 */
 	void wheelEvent([[maybe_unused]] QWheelEvent *evt) override {}
 };
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-17)
+// Forward declaration of the KsStreamTopology class, so
+// that it can be used in the KsTraceGraph class.
 class KsStreamTopology;
 // END of change
 
@@ -153,6 +172,9 @@ private:
 	void _onCustomContextMenu(const QPoint &point);
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-18)
+	
+	void _setup_numatv_topo_widget();
+
 	void _numatv_insert_topology_widget(int stream_id,
 		const NodeCorePU& brief_topo);
 
@@ -182,18 +204,48 @@ private:
 		_labelI1, _labelI2, _labelI3, _labelI4, _labelI5; // Proc. info
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-12)
+	/**
+	 * @brief Wrapper for the topology widget and the GL widget.
+	 */
 	QWidget _topoGlWrapper;
 
+	/**
+	 * @brief Layout for the topology widget and the GL widget.
+	 */
 	QHBoxLayout _topoGlLayout;
 
+	/**
+	 * @brief Scroll area for the wrapper topology widget.
+	 * 
+	 * This scroll area is used to allow scrolling of the topology
+	 * widget when it is larger than the available space and to
+	 * be synchronised with the GL widget's scroll area.
+	 * 
+	 * It itself cannot be scrolled, except horizontally.
+	 */
 	KsTopologyScrollArea _topoScrollArea;
 	
+	/**
+	 * @brief Button to hide/show the wrapper topology widget.
+	 */
 	QPushButton _hideTopoBtn;
 	
+	/**
+	 * @brief Widget which is the parent to all topology widgets
+	 * belonging to streams. It is used as the space where they will
+	 * be displayed - the wrapper topology widget.
+	 */
 	QWidget	_topoSpace;
 	
+	/**
+	 * @brief Layout for KsStreamTopology widgets.
+	 */
 	QVBoxLayout _topoLayout;
 
+	/**
+	 * @brief What topology widgets KernelShark should display.
+	 * Key is the stream id, value is the topology widget.
+	 */
 	std::map<int, KsStreamTopology*> _topoWidgets;
 	// END of change
 
@@ -211,72 +263,30 @@ private:
 };
 
 //NOTE: Changed here. (NUMA TV) (2025-04-17)
-/*
-Tree-like layout of the topology view with NUMA nodes.
-It shall be constructed right to left, first matching CPUs
-in KernelShark's GL window to PUs in the topology.
-NUMA TV rearranges the CPUs, which allows construction of
-such UI, that nodes and cores can be sorted by their logical
-indices, as specified by hwloc. By creating the rightmost
-column first, the core column can then create cores with the
-height of the CPU(s) it owns - analogously for NUMA nodes.
-By doing this, if some cores have more or less PUs, their
-height will adjust accordingly. Similarly for NUMA nodes
-and their cores. It also comes with a bonus reactivity to 
-hidden & visible CPUs as specified by KernelShark - construction
-right to left also allows to show only the relevant parts of the
-topology.
-
-Total height is then used for the machine column, which
-also denotes the height of the stream's graph. It shall use
-the stream's color (if there are more streams open).
-
-Each tree node will have a tooltip to display less compact
-information (useful if losing track of the label's text).
-
-Caveats: Some exotic topologies won't work, e.g. nested NUMA nodes,
-PUs shared across cores or cores shared across NUMA nodes.
-
-Technically, it should be a visualisation of the NodeCorePU
-mappings.
-
-To take task graphs into account, spacing is added at the bottom of
-the topology 
-
-Example look:
-```
-__________________________________________________
-|-----------------------------------------------|| KS GL graphs
-||              |               |               ||  CPU 1
-||              |               |    core L1    ||----------
-||              |               |               ||  CPU 8
-||              |   Nnode L1    |---------------||----------
-||              |               |               ||  CPU 2
-||              |               |    core L2    ||----------
-||              |               |               ||  CPU 7
-||   machine    |---------------|---------------||----------
-||  (stream) X  |               |               ||  CPU 3
-||              |               |    core L3    ||----------
-||              |               |               ||  CPU 6
-||              |   Nnode L2    |---------------||----------
-||              |               |               ||  CPU 4
-||              |               |    core L4    ||----------
-||              |               |               ||  CPU 5
-|------------------------------------------------|----------
-|[                  SPACING                     ]|  taskXYZ
---------------------------------------------------
-```
-*/
+/**
+ * @brief Widget for displaying a topology of a stream as
+ * a block tree. While any kind of Node-Core-PU topology can be
+ * displayed, where Core holds PUs (CPUs in KShark) and Node
+ * holds Cores, currently only NUMA topology is supported.
+ */
 class KsStreamTopology : public QWidget {
-	Q_OBJECT
 private: // Qt parts
+	/// @brief Main layout of the widget.
 	QVBoxLayout _main_layout;
+	/// @brief Container of the topology tree.
 	QWidget _topo;
+	/// @brief Layout of the topology tree.
 	QHBoxLayout _topo_layout;
+	/// @brief Label for the machine (stream) name and a root
+	/// of the topology tree.
 	QLabel _machine;
+	/// @brief Container of the nodes.
 	QWidget _nodes;
+	/// @brief Layout of the nodes.
 	QVBoxLayout _nodes_layout;
+	/// @brief Container of the cores.
 	QWidget _cores;
+	/// @brief Layout of the cores.
 	QVBoxLayout _cores_layout;
 public:
 	explicit KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,

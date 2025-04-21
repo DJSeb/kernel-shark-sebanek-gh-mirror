@@ -5,13 +5,20 @@ changes there. They should be divided into:
 
 - **Record Kstack** - "Record" functionality enhanced with allowing the user to just tick a
   single checkbox to also record kernel stack traces after each event.
-- **Mouse Hover Plot Objects** - added feature to bring more reactivity to the user (and options for a
-  plugin developer)
-- **Preview Labels Changeable** - added function to be utilised by plugins, allows one to change the preview label in
-  the main window
+- **Mouse Hover Plot Objects** - added feature to bring more reactivity to the user (and options
+  for a plugin developer)
+- **Preview Labels Changeable** - added function to be utilised by plugins, allows one to change
+  the preview label in the main window
 - **Couplebreak** - splitting events belonging to two processes (=: couple)
-- **Get PID Colors** - function which allows access to KernelShark's color table of tasks
+- **Get Colors** - functions which allow access to KernelShark's GL widget's color table of tasks,
+  CPUs and streams
 - **NUMA Topology Views** - viewing CPU plots with respect to NUMA topology
+- **No Boxes** - introduces API & behaviour to disallow KernelShark from drawing taskboxes between
+  bins of some events in its graphs.
+
+A little update to KernelShark's code regarding checkboxes has also been made, to use newer and
+recommended Qt APIs for checking checked state. To see where this has happened, look for comments
+with `UPDATE CBOX STATES`.
 
 # KernelShark official README
 KernelShark is a front-end reader of tracing data.

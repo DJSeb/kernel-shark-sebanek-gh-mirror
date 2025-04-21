@@ -709,7 +709,6 @@ public:
 //NOTE: Changed here. (NUMA TV) (2025-04-06)
 /**
  * @brief Configuration window for NUMA Topology Views.
- * 
  */
 class KsNUMATVDialog: public QDialog {
 	Q_OBJECT
@@ -761,7 +760,7 @@ private:
 	void _setup_explanation();
 	void _setup_endstage();
 	void _setup_stream_header(int stream_id, QVBoxLayout* parent_layout);
-	void _setup_load_button_per_stream(QPushButton* load_btn, QLabel* topo_file_loc, QString last_fpath) ;
+	QPushButton* _setup_load_button_per_stream(QLabel* topo_file_loc, QString last_fpath) ;
 	QLabel* _setup_status_per_stream(QVBoxLayout* parent_layout, int stream_id);
 	QButtonGroup* _setup_radios_per_stream(QVBoxLayout* parent_layout, int stream_id);
 	void _setup_streams_scroll_area(kshark_context *kshark_ctx);

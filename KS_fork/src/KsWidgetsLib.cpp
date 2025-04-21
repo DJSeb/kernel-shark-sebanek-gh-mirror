@@ -21,6 +21,26 @@
 namespace KsWidgetsLib
 {
 
+//NOTE: Changed here. ("NUMA TV") (2025-04-06)
+/**
+ * @brief Creates a horizontal line to be used in a widget as
+ * a dividing element.
+ * 
+ * @param parent: Qt object which will own the created line 
+ * 
+ * @returns Pointer to the line object.
+ */
+static QFrame* get_hline(QWidget* parent) {
+    // Lines are just special QFrames.
+
+    auto line = new QFrame(parent);
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+
+    return line;
+}
+// END of change
+
 /**
  * @brief Create KsProgressBar.
  *
@@ -1537,6 +1557,7 @@ void KsCouplebreakDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx)
 	list_container->setLayout(list_layout);
 	_scroll_area.setWidget(list_container);
 }
+// END of change
 
 //NOTE: Changed here. (COUPLEBREAK) (2025-03-29)
 /**
@@ -1607,37 +1628,27 @@ void KsCouplebreakDialog::_apply_action()
 }
 // END of change
 
-//NOTE: Changed here. ("NUMA TV") (2025-04-06)
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
 /**
- * @brief Creates a horizontal line to be used in a widget as
- * a dividing element.
- * 
- * @param parent: Qt object which will own the created line 
- * 
- * @returns Pointer to the line object.
- */
-static QFrame* _get_hline(QWidget* parent) {
-    // Lines are just special QFrames.
-
-    auto line = new QFrame(parent);
-    line->setFrameShape(QFrame::HLine);
-    line->setFrameShadow(QFrame::Sunken);
-
-    return line;
-}
-// END of change
-
-//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
-/**
- * @brief Set up the couplebreak explanation text for the dialog.
+ * @brief Set up the NUMA Topology Views explanation text for the dialog.
  * 
  */
 void KsNUMATVDialog::_setup_explanation() {
 	// Static constants
 	static const QString EXPLANATION_TEXT = QString{
-		"NUMA TV ( not television :( )."
+		"NUMA Topology Views (NUMA TV for short) "
+		"feature allows KernelShark to show NUMA topology of a system "
+		"with the help of hwloc's topology exported to XML files."
+		"\n\nSelect a NUMA topology XML file to be loaded to prepare the "
+		"configuration and select the 'NUMA Tree view' to show a widget to "
+		"the left of the events plot. If all streams wish to use the default "
+		"view, this widget will be hidden, as if this feature never existed. "
+		"The widget can be close by the green button in its left."
+		"\n\nDo beware that the topology file must have the same amount of CPUs "
+		"as the stream for which it is loaded, otherwise the file will not be used."
+		"\n\nClick 'Apply' to apply the changes, click 'Close' to close the dialog "
+		"without applying any changes."
 		"\n\nThis feature is experimental and not fully tested through. "
-		"Plugins usually expect classical event ordering. "
 		"Please use with caution and report any issues you encounter."
 		"\n\nNUMA Topology Views settings:"
 	};
@@ -1651,7 +1662,6 @@ void KsNUMATVDialog::_setup_explanation() {
 //NOTE: Changed here. (NUMA TV) (2025-04-06)
 /**
  * @brief Sets up "Apply" and "Close" buttons for the dialog.
- * 
  */
 void KsNUMATVDialog::_setup_endstage() {
 	// Setup visuals and do not use auto defaults.
@@ -1675,7 +1685,13 @@ void KsNUMATVDialog::_setup_endstage() {
 }
 // END of change
 
-//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
+/**
+ * @brief Sets up the header for a stream NUMA TV configuration status.
+ * 
+ * @param stream_id Identifier of the stream.
+ * @param parent_layout Parent layout to add a header to.
+ */
 void KsNUMATVDialog::_setup_stream_header(int stream_id, QVBoxLayout* parent_layout) {
 	QHBoxLayout* stream_name_layout = new QHBoxLayout{};
 	QLabel* stream_name = new QLabel{"Stream #" + QString::number(stream_id)};
@@ -1687,7 +1703,14 @@ void KsNUMATVDialog::_setup_stream_header(int stream_id, QVBoxLayout* parent_lay
 }
 // END of change
 
-//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
+/**
+ * @brief Sets up radio buttons for the view type the stream will use.
+ * 
+ * @param parent_layout Parent layout to add a button group to.
+ * @param stream_id Identifier of the stream.
+ * @return Button group for a stream, from which view type will be deduced.
+ */
 QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(QVBoxLayout* parent_layout, int stream_id) {
 	const NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
 	bool a_topo_exists = numatv_ctx.exists_for(stream_id);
@@ -1702,15 +1725,14 @@ QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(QVBoxLayout* parent_layou
 	QButtonGroup* applied_view_grp = new QButtonGroup{};
 	QRadioButton* default_view = new QRadioButton{"Default"};
 	QRadioButton* tree_view = new QRadioButton{"NUMA tree view"};
-	//
+
 	applied_view_grp->addButton(default_view,
 		static_cast<int>(ViewType::DEFAULT));
 	applied_view_grp->addButton(tree_view,
 		static_cast<int>(ViewType::NUMATREE));
 	applied_view_grp->setParent(radio_btns_layout);
-	//
 	applied_view_grp->button(static_cast<int>(applied_view))->setChecked(true);
-	//
+
 	radio_btns_layout->addWidget(default_view);
 	radio_btns_layout->addStretch();
 	radio_btns_layout->addWidget(tree_view);
@@ -1722,11 +1744,21 @@ QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(QVBoxLayout* parent_layou
 }
 // END of change
 
-//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
-void KsNUMATVDialog::_setup_load_button_per_stream(QPushButton* load_btn,
-	QLabel* topo_file_location, QString last_fpath) {
-	
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
+/**
+ * @brief Sets up a load button for a stream in the dialog along with its
+ * file dialog action.
+ * 
+ * @param topo_file_location Label with the topology file location.
+ * @param last_fpath Last used file path.
+ * 
+ * @return Pointer to the load button to add to the stream's configuration layotut.
+ */
+QPushButton* KsNUMATVDialog::_setup_load_button_per_stream(QLabel* topo_file_location,
+	QString last_fpath)
+{	
 	// Load button
+	QPushButton* load_btn = new QPushButton{"Load ..."};
 	load_btn->setFixedWidth(STRING_WIDTH("---Load ...---"));
 	load_btn->setAutoDefault(false);
 
@@ -1760,10 +1792,20 @@ void KsNUMATVDialog::_setup_load_button_per_stream(QPushButton* load_btn,
 	};
 
 	connect(load_btn, &QPushButton::pressed, lamFileDialogAction);
+
+	return load_btn;
 }
 // END of change
 
-//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
+/**
+ * @brief Sets up file loaded status, filepath and view type status and the
+ * clear and load buttons for a stream in the dialog.
+ * 
+ * @param parent_layout Parent layout to add a status layout to.
+ * @param stream_id Identifier of the stream.
+ * @return Label with the topology file location.
+ */
 QLabel* KsNUMATVDialog::_setup_status_per_stream(QVBoxLayout* parent_layout, int stream_id) {
 	const NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
 
@@ -1801,8 +1843,7 @@ QLabel* KsNUMATVDialog::_setup_status_per_stream(QVBoxLayout* parent_layout, int
 		status->setStyleSheet("QLabel { color : red; }");
 	});
 
-	QPushButton* load_btn = new QPushButton{"Load ..."};
-	_setup_load_button_per_stream(load_btn, topo_file_location, topo_fpath);
+	QPushButton* load_btn = _setup_load_button_per_stream(topo_file_location, topo_fpath);
 
 	stat_topo_load_layout->addLayout(status_topofile_layout);
 	stat_topo_load_layout->addStretch();
@@ -1816,7 +1857,7 @@ QLabel* KsNUMATVDialog::_setup_status_per_stream(QVBoxLayout* parent_layout, int
 }
 // END of change
 
-//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
 /**
  * @brief Sets up the scroll area with streams and their NUMA Topology Views settings.
  * 
@@ -1845,7 +1886,7 @@ void KsNUMATVDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx) {
 		++streams_processed;
 		if (kshark_ctx->n_streams != streams_processed) {
 			// Divide streams with a horizontal line, except the last one
-			list_layout->addWidget(_get_hline(list_container));
+			list_layout->addWidget(get_hline(list_container));
 		}
 	}
 
@@ -1858,7 +1899,6 @@ void KsNUMATVDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx) {
 //NOTE: Changed here. (NUMA TV) (2025-04-06)
 /**
  * @brief Set up the main layout of the dialog.
- * 
  */
 void KsNUMATVDialog::_setup_layout() {
 	_main_layout.setContentsMargins(5, 5, 5, 5);
@@ -1873,7 +1913,13 @@ void KsNUMATVDialog::_setup_layout() {
 }
 // END of change
 
-//NOTE: Changed here. !!!!!!!!!! (NUMA TV) (2025-04-06)
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
+/**
+ * @brief Constructor for a NUMA TV configuration dialog.
+ * 
+ * @param kshark_ctx KernelShark context from which to pull stream data
+ * @param parent Parent widget.
+ */
 KsNUMATVDialog::KsNUMATVDialog(kshark_context* kshark_ctx,
 	QWidget* parent)
 	: QDialog(parent),
@@ -1895,9 +1941,8 @@ KsNUMATVDialog::KsNUMATVDialog(kshark_context* kshark_ctx,
 
 //NOTE: Changed here. (NUMA TV) (2025-04-06)
 /**
- * @brief Emit a signal to Qt and create stream + topology filepath
+ * @brief Emit a signal to Qt and create stream + NUMA TV settings
  * pairs vector to use in apply action.
- * 
  */
 void KsNUMATVDialog::_apply_action()
 {
