@@ -54,9 +54,8 @@ PROJECT_NUMBER         = "1.0.0"
 # for a project that appears at the top of each page and should give viewer a
 # quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          = "Plugin for KernelShark, which adjusts visibility \
-                          fields of events, which should not have an impact on \
-                          drawing boxes between bins."
+PROJECT_BRIEF          = "Plugin for KernelShark to disable drawing of taskboxes from \
+                          certain events' bins or ending at certain bins."
 
 # With the PROJECT_LOGO tag one can specify a logo or an icon that is included
 # in the documentation. The maximum height of the logo should not exceed 55
