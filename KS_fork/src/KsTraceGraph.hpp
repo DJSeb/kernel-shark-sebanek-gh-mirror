@@ -97,10 +97,7 @@ public:
 
 	void markEntry(size_t);
 
-	//NOTE: Changed here. (NUMA TV) (2025-04-22)
-	void cpuTopoReDraw(int sd, QVector<int> cpus,
-		const KsNUMATVContext& numa_ctx);
-	// END of change
+	void cpuReDraw(int sd, QVector<int> cpus);
 
 	void taskReDraw(int sd, QVector<int> pids);
 
@@ -131,7 +128,15 @@ public:
 						  const QString& label5 = "");
 	// END of change
 	
-	//NOTE: Changed here. (NUMA TV) (2025-04-15)
+	//NOTE: Changed here. (NUMA TV) (2025-04-22)
+	/**
+	 * @brief Getter of the streams' topology configrations' context.
+	 * 
+	 * @return Reference to the NUMA TV context.
+	 */
+	KsNUMATVContext& getNUMATVContext() { return _numaTvCtx; }
+	// END of change
+
 	void numatvHideTopologyWidget(bool hide);
 
 	void numatvClearTopologyWidgets();
@@ -183,10 +188,10 @@ private:
 	void _numatv_remove_topology_widget(int stream_id);
 
 	void _numatv_existing_topology_action(int stream_id,
-		QVector<int>& cpusToDraw, const KsNUMATVContext& numa_ctx);
+		QVector<int>& cpusToDraw);
 
 	void _numatv_redraw_topo_widgets(int stream_id,
-		QVector<int>& cpusToDraw, const KsNUMATVContext& numa_ctx);
+		QVector<int>& cpusToDraw);
 	
 	void _numatv_adjust_topo_task_padding(int stream_id);
 
@@ -207,6 +212,11 @@ private:
 		_labelI1, _labelI2, _labelI3, _labelI4, _labelI5; // Proc. info
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-12)
+	/**
+	 * @brief Configuration object for topology data of all streams. 
+	 */
+	KsNUMATVContext _numaTvCtx;
+
 	/**
 	 * @brief Wrapper for the topology widget and the GL widget.
 	 */

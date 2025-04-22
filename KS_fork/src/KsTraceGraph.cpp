@@ -38,6 +38,7 @@ KsTraceGraph::KsTraceGraph(QWidget *parent)
   _labelI4("", this),
   _labelI5("", this),
 //NOTE: Changed here. (NUMA TV) (2025-04-16)
+  _numaTvCtx(),
   _topoGlWrapper(this),
   _topoGlLayout(&_topoGlWrapper),
   _topoScrollArea(&_topoGlWrapper),
@@ -496,17 +497,14 @@ void KsTraceGraph::_markerReDraw()
 	}
 }
 
-//NOTE: Changed here. (NUMA TV) (2025-04-22)
 // Function was renamed to match the new API and functionality.
 /**
  * @brief Redraw all CPU graphs & redraw topology widgets.
  *
  * @param sd: Data stream identifier.
  * @param v: CPU ids to be plotted.
- * @param numa_ctx: NUMA TV context.
  */
-void KsTraceGraph::cpuTopoReDraw(int sd, QVector<int> v,
-	const KsNUMATVContext& numa_ctx)
+void KsTraceGraph::cpuReDraw(int sd, QVector<int> v)
 {
 	startOfWork(KsWidgetsLib::KsDataWork::EditPlotList);
 	if (_glWindow._streamPlots.contains(sd)) {
@@ -515,7 +513,7 @@ void KsTraceGraph::cpuTopoReDraw(int sd, QVector<int> v,
 		// the topology widget, as CPUs may need to be reordered,
 		// or some CPUs were hidden and the topology wiget must adjust
 		// its own parts.
-		_numatv_redraw_topo_widgets(sd, v, numa_ctx);
+		_numatv_redraw_topo_widgets(sd, v);
 		// END of change
 		_glWindow._streamPlots[sd]._cpuList = v;
 	}
@@ -523,7 +521,6 @@ void KsTraceGraph::cpuTopoReDraw(int sd, QVector<int> v,
 	_selfUpdate();
 	endOfWork(KsWidgetsLib::KsDataWork::EditPlotList);
 }
-// END of change
 
 /**
  * @brief Redreaw all Task graphs.
@@ -1099,12 +1096,11 @@ void KsTraceGraph::_numatv_hide_stream_topo(int stream_id, bool hide)
  * @param stream_id Identifier of the stream.
  * @param cpusToDraw CPUs to be drawn in the topology widget.
  * The list may be rearranged to match the topology tree.
- * @param numa_ctx NUMA TV configuration singleton.
  */
 void KsTraceGraph::_numatv_existing_topology_action(int stream_id,
-	QVector<int>& cpusToDraw, const KsNUMATVContext& numa_ctx)
+	QVector<int>& cpusToDraw)
 {
-	auto stream_cfg = numa_ctx.observe_cfg(stream_id);
+	auto stream_cfg = _numaTvCtx.observe_cfg(stream_id);
 	ViewType stream_view = stream_cfg->get_view_type();
 	NodeCorePU brief_topo = {};
 	bool hide_topo = true;
@@ -1131,16 +1127,15 @@ void KsTraceGraph::_numatv_existing_topology_action(int stream_id,
  * @param stream_id Identifier of the stream.
  * @param cpusToDraw CPUs to be drawn in the stream's topology widgets.
  * The list may be rearranged to match the topology tree.
- * @param numa_ctx NUMA TV configuration.
  */
 void KsTraceGraph::_numatv_redraw_topo_widgets(int stream_id,
-	QVector<int>& cpusToDraw, const KsNUMATVContext& numa_ctx)
+	QVector<int>& cpusToDraw)
 {
-	bool topology_exists = numa_ctx.exists_for(stream_id);
+	bool topology_exists = _numaTvCtx.exists_for(stream_id);
 
 	if (topology_exists) {
 		_numatv_existing_topology_action(stream_id,
-			cpusToDraw, numa_ctx);
+			cpusToDraw);
 	} else {
 		_numatv_insert_topology_widget(stream_id, {});
 		_numatv_hide_stream_topo(stream_id, true);

@@ -55,12 +55,8 @@ public:
 	void saveGraphs(kshark_context *kshark_ctx,
 			KsTraceGraph &graphs);
 
-	//NOTE: Changed here. (NUMA TV) (2025-04-22)
-	// Updated API to work with NUMA TV widgets.
 	void loadGraphs(kshark_context *kshark_ctx,
-			KsTraceGraph &graphs,
-			const KsNUMATVContext& numatv_ctx);
-	// END of change
+			KsTraceGraph &graphs);
 
 	void saveDataStreams(kshark_context *kshark_ctx);
 

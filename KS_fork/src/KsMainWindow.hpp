@@ -140,11 +140,6 @@ private:
 	/** Plugin manager. */
 	KsPluginManager	_plugins;
 
-	//NOTE: Changed here. !!!!!!! (NUMA TV) (2025-04-22)
-	/** Configuration object for topology data of all streams. */
-	KsNUMATVContext _numaTvCtx;
-	// END of change
-
 	/** The process used to record trace data. */
 	QProcess	_capture;
 

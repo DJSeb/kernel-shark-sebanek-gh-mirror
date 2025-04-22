@@ -322,31 +322,21 @@ void KsSession::saveGraphs(kshark_context *kshark_ctx,
 	_saveComboPlots(graphs.glPtr());
 }
 
-//NOTE: Changed here. (NUMA TV) (2025-04-22)
-// API here has been change so that NUMA TV topology widgets are
-// redrawn as well.
 /**
  * @brief Load the list of the graphs and plot.
  *
  * @param kshark_ctx: Input location for context pointer.
  * @param graphs: Input location for the KsTraceGraph widget.
- * @param numatv_ctx: Input location for the NUMA TV context.
  */
 void KsSession::loadGraphs(kshark_context *kshark_ctx,
-			   KsTraceGraph &graphs,
-			   //NOTE: Changed here. (NUMA TV) (2025-04-22)
-			   const KsNUMATVContext& numatv_ctx
-			   // END of change
-			   )
+			   KsTraceGraph &graphs)
 {
 	QVector<int> combos, streamIds;
 	int nCombos;
 
 	streamIds = KsUtils::getStreamIdList(kshark_ctx);
 	for (auto const &sd: streamIds) {
-		//NOTE: Changed here. (NUMA TV) (2025-04-22)
-		graphs.cpuTopoReDraw(sd, _getCPUPlots(sd), numatv_ctx);
-		// END of change
+		graphs.cpuReDraw(sd, _getCPUPlots(sd));
 		graphs.taskReDraw(sd, _getTaskPlots(sd));
 	}
 
@@ -354,7 +344,6 @@ void KsSession::loadGraphs(kshark_context *kshark_ctx,
 	if (nCombos > 0)
 		graphs.comboReDraw(nCombos, combos);
 }
-// END of change
 
 void KsSession::_savePlots(int sd, KsGLWidget *glw, bool cpu)
 {
@@ -727,7 +716,7 @@ void KsSession::loadUserPlugins(kshark_context *kshark_ctx, KsPluginManager *pm)
  * @brief Saves the NUMA TV configurations of all streams.
  * 
  * @param n_streams How many streams are open in a session.
- * @param numatv_ctx Reference to the NUMA TV singleton to load information from.
+ * @param numatv_ctx Reference to the NUMA TV context to load information from.
  * This is done to have an obvious dependency on the configuraton, instead of hiding
  * it in code's implementation - otherwise, it could just be inside the function.
  */
@@ -770,7 +759,7 @@ void KsSession::saveTopology(int n_streams, const KsNUMATVContext& numatv_ctx) {
  * 
  * @param graph Pointer to the KsTraceGraph object, so that if no
  * non-DEFAULT topology views are used, the topology widget can be hidden.
- * @param numatv_ctx Reference to the NUMA TV singleton to load information into.
+ * @param numatv_ctx Reference to the NUMA TV context to load information into.
  * This is done to have an obvious dependency on the configuraton, instead of hiding
  * it in code's implementation - otherwise, it could just be inside the function.
  */
