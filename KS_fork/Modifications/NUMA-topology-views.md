@@ -74,8 +74,6 @@ graphs), contains topology widgets in a vertical top-down layout.
 
 ## Design overview (more in *Solution*)
 
-## "Why is NUMATVContext a singleton?"
-
 ## "Why are topology widgets stored as pointers?"
 
 ## "Why not use more of hwloc's topology data?"

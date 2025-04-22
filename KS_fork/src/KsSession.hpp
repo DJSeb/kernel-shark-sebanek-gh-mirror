@@ -55,8 +55,12 @@ public:
 	void saveGraphs(kshark_context *kshark_ctx,
 			KsTraceGraph &graphs);
 
+	//NOTE: Changed here. (NUMA TV) (2025-04-22)
+	// Updated API to work with NUMA TV widgets.
 	void loadGraphs(kshark_context *kshark_ctx,
-			KsTraceGraph &graphs);
+			KsTraceGraph &graphs,
+			const KsNUMATVContext& numatv_ctx);
+	// END of change
 
 	void saveDataStreams(kshark_context *kshark_ctx);
 
@@ -88,9 +92,9 @@ public:
 	float getColorScheme();
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-20)
-	void saveTopology(int n_streams, const NUMATVContext& numatv_ctx);
+	void saveTopology(int n_streams, const KsNUMATVContext& numatv_ctx);
 
-	void loadTopology(KsTraceGraph* graph, NUMATVContext& numatv_ctx);
+	void loadTopology(KsTraceGraph* graph, KsNUMATVContext& numatv_ctx);
 	// END of change
 
 private:

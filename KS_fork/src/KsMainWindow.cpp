@@ -45,6 +45,7 @@ KsMainWindow::KsMainWindow(QWidget *parent)
   _graph(this),
   _mState(this),
   _plugins(this),
+  _numaTvCtx(),
   _capture(this),
   _captureLocalServer(this),
   _openAction("Open Trace File", this),
@@ -209,6 +210,12 @@ KsMainWindow::~KsMainWindow()
 	 */
 	_graph.glPtr()->freePluginShapes();
 
+	//NOTE: Changed here. (NUMA TV) (2025-04-22)
+	// Explicit deletion of NUMA TV data.
+	_numaTvCtx.clear();
+	_graph.numatvClearTopologyWidgets();
+	// END of change
+
 	if (kshark_instance(&kshark_ctx))
 		kshark_free(kshark_ctx);
 }
@@ -240,13 +247,8 @@ void KsMainWindow::setCPUPlots(int sd, QVector<int> cpus)
 		   cpus.end());
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-18)
-	// CPUs being redrawn goes hand in hand with redrawing
-	// the topology widget, as CPUs may need to be reordered,
-	// or some CPUs were hidden and the topology wiget must adjust
-	// its own parts.
-	cpus = _graph.numatvRedrawTopoWidgets(sd, cpus, _numaTvCtx);
+	_graph.cpuTopoReDraw(sd, cpus, _numaTvCtx);
 	// END of change
-	_graph.cpuReDraw(sd, cpus);
 }
 
 /** Set the list ot tasks (pids) to be plotted. */
@@ -635,7 +637,7 @@ void KsMainWindow::_open()
 		// This clears existing NUMA topology configurations, hides their
 		// containing widget and clears NUMA topology widgets.
 		// This puts the topology widgets into a clean state.
-		NUMATVContext::get_instance().clear();
+		_numaTvCtx.clear();
 		graphPtr()->numatvHideTopologyWidget(true);
 		graphPtr()->numatvClearTopologyWidgets();
 		// END of change
@@ -745,7 +747,7 @@ void KsMainWindow::_updateSession()
 	_session.saveVisModel(_graph.glPtr()->model()->histo());
 	_session.saveDataStreams(kshark_ctx);
 	//NOTE: Changed here. (NUMA TV) (2025-04-20)
-	_session.saveTopology(kshark_ctx->n_streams, NUMATVContext::get_instance());
+	_session.saveTopology(kshark_ctx->n_streams, _numaTvCtx);
 	// END of change
 	_session.saveGraphs(kshark_ctx, _graph);
 	_session.saveDualMarker(&_mState);
@@ -1071,9 +1073,11 @@ void KsMainWindow::_cpuSelect()
 
 	connect(dialog,		&KsCheckBoxDialog::apply,
 		//NOTE: Changed here. (NUMA TV) (2025-04-22)
+		// To work with the newer UI, we need to pass the
+		// topology context to the graph, but keep the
+		// original slot signature - lambda function.
 		[this] (int sd, QVector<int> cpusToShow) {
-			cpusToShow = _graph.numatvRedrawTopoWidgets(sd, cpusToShow, _numaTvCtx);
-			_graph.cpuReDraw(sd, cpusToShow);
+			_graph.cpuTopoReDraw(sd, cpusToShow, _numaTvCtx);
 		});
 		// END of change
 
@@ -1401,13 +1405,10 @@ void KsMainWindow::_load(const QString& fileName, bool append)
 	pb.setValue(175);
 
 	_graph.loadData(&_data, !append);
-	if (append) {
+	if (append)
 		//NOTE: Changed here. (NUMA TV) (2025-04-22)
-		QVector<int> cpuList = KsUtils::getCPUList(sd);
-		cpuList = _graph.numatvRedrawTopoWidgets(sd, cpuList, _numaTvCtx);
-		_graph.cpuReDraw(sd, KsUtils::getCPUList(cpuList));
+		_graph.cpuTopoReDraw(sd, KsUtils::getCPUList(sd), _numaTvCtx);
 		// END of change
-	}
 
 	pb.setValue(195);
 }
@@ -1540,7 +1541,7 @@ void KsMainWindow::loadSession(const QString &fileName)
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-20)
 	// Topology configurations have to be loaded before the graphs, otherwise
-	// we miss a cpuRedraw, which would show the topology widgets for each stream.
+	// we miss a cpuTopoReDraw, which would show the topology widgets for each stream.
 	_session.loadTopology(&_graph, _numaTvCtx);
 	pb.setValue(185);
 	// END of change
@@ -1548,7 +1549,7 @@ void KsMainWindow::loadSession(const QString &fileName)
 	_session.loadDualMarker(&_mState, &_graph);
 	_session.loadVisModel(_graph.glPtr()->model());
 	_mState.updateMarkers(_data, _graph.glPtr());
-	_session.loadGraphs(kshark_ctx, _graph);
+	_session.loadGraphs(kshark_ctx, _graph, _numaTvCtx);
 	pb.setValue(190);
 
 	_session.loadTable(&_view);
@@ -1840,8 +1841,7 @@ void KsMainWindow::_showNUMATVConfig() {
 		return;
 	}
 	
-	const NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
-	dialog = new KsNUMATVDialog{kshark_ctx, numatv_ctx, this};
+	dialog = new KsNUMATVDialog{kshark_ctx, _numaTvCtx, this};
 	connect(dialog, &KsNUMATVDialog::apply, // Actor + action on actor
 		this, &KsMainWindow::_updateNUMATVs); // Reactor + action on reactor
 
@@ -1877,7 +1877,7 @@ void KsMainWindow::_showNUMATVConfig() {
  * graphs & in turn the topology widget with it.
  */
 static void apply_numatv_update(int stream_id, ViewType view, 
-	QString topology_file, NUMATVContext& numatv_ctx,
+	QString topology_file, KsNUMATVContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
 	// Proper file was given + config exists, applying means updating the configuration
@@ -1889,8 +1889,7 @@ static void apply_numatv_update(int stream_id, ViewType view,
 		break;
 	case 0:
 		// File or view changed - redraw
-
-		graph->cpuReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList);
+		graph->cpuTopoReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList, numatv_ctx);
 		graph->taskReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._taskList);
 		break;
 	case -1:
@@ -1934,7 +1933,7 @@ static void apply_numatv_update(int stream_id, ViewType view,
  * @param graph Pointer to the graph object, used to redraw the CPU and task
  * graphs & in turn the topology widget with it.
  */
-static void apply_numatv_remove(int stream_id, NUMATVContext& numatv_ctx,
+static void apply_numatv_remove(int stream_id, KsNUMATVContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
 	int result = numatv_ctx.delete_cfg(stream_id);
@@ -1942,7 +1941,7 @@ static void apply_numatv_remove(int stream_id, NUMATVContext& numatv_ctx,
 	switch (result) {
 	case 1:
 		// Topology was removed - redraw
-		graph->cpuReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList);
+		graph->cpuTopoReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList, numatv_ctx);
 		graph->taskReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._taskList);
 		break;
 	case 0:
@@ -1980,7 +1979,7 @@ static void apply_numatv_remove(int stream_id, NUMATVContext& numatv_ctx,
  * graphs & in turn the topology widget with it.
  */
 static void apply_numatv_new_topo(int stream_id, ViewType view,
-	QString topology_file, NUMATVContext& numatv_ctx,
+	QString topology_file, KsNUMATVContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
 	// Proper file was given + no config exists, applying means creating new topology
@@ -1992,7 +1991,7 @@ static void apply_numatv_new_topo(int stream_id, ViewType view,
 		// New topology made - redraw
 		// Redraw will be applied to the stream's graph - new topology will
 		// be automatically created there.
-		graph->cpuReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList);
+		graph->cpuTopoReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList, numatv_ctx);
 		graph->taskReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._taskList);
 		break;
 	case -1:
@@ -2035,7 +2034,7 @@ static void apply_numatv_new_topo(int stream_id, ViewType view,
  * graphs & in turn the topology widget with it.
  */
 static void apply_numatv(int stream_id, ViewType view,
-	QString topology_file, NUMATVContext& numatv_ctx,
+	QString topology_file, KsNUMATVContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
 	bool topology_exists = numatv_ctx.exists_for(stream_id);
@@ -2056,7 +2055,7 @@ static void apply_numatv(int stream_id, ViewType view,
 			// Just redraw
 			// This will also add a widget to the topology widgets, but it will be empty,
 			// ensuring that there is some topology widget to put into the layout.
-			graph->cpuReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList);
+			graph->cpuTopoReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList, numatv_ctx);
 			graph->taskReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._taskList);
 		}
 	}
@@ -2074,7 +2073,6 @@ static void apply_numatv(int stream_id, ViewType view,
  * a pair of view type and topology file name.
  */
 void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
-	NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
 	bool hide_topo_button = true;
 
 	for (int i = 0; i < stream_numa.size(); i++) {
@@ -2083,10 +2081,10 @@ void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 		ViewType view = stream_numa[i].second.first;
 		QString topology_file = stream_numa[i].second.second;
 
-		apply_numatv(stream_id, view, topology_file, numatv_ctx, graphPtr());
+		apply_numatv(stream_id, view, topology_file, _numaTvCtx, graphPtr());
 
 		// Hide or show the topology widget if a topology view is asked for
-		hide_topo_button &= !numatv_stream_wants_topology_widget(stream_id, numatv_ctx);
+		hide_topo_button &= !numatv_stream_wants_topology_widget(stream_id, _numaTvCtx);
 	}
 	
 	graphPtr()->numatvHideTopologyWidget(hide_topo_button);

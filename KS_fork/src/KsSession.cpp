@@ -322,22 +322,31 @@ void KsSession::saveGraphs(kshark_context *kshark_ctx,
 	_saveComboPlots(graphs.glPtr());
 }
 
+//NOTE: Changed here. (NUMA TV) (2025-04-22)
+// API here has been change so that NUMA TV topology widgets are
+// redrawn as well.
 /**
  * @brief Load the list of the graphs and plot.
  *
  * @param kshark_ctx: Input location for context pointer.
  * @param graphs: Input location for the KsTraceGraph widget.
+ * @param numatv_ctx: Input location for the NUMA TV context.
  */
 void KsSession::loadGraphs(kshark_context *kshark_ctx,
-			   KsTraceGraph &graphs)
+			   KsTraceGraph &graphs,
+			   //NOTE: Changed here. (NUMA TV) (2025-04-22)
+			   const KsNUMATVContext& numatv_ctx
+			   // END of change
+			   )
 {
 	QVector<int> combos, streamIds;
 	int nCombos;
 
 	streamIds = KsUtils::getStreamIdList(kshark_ctx);
 	for (auto const &sd: streamIds) {
-		graphs.cpuReDraw(sd, _getCPUPlots(sd));
-		graphs.numatvRedrawTopoWidgets(sd, _getCPUPlots(sd), _numaTvCtx);
+		//NOTE: Changed here. (NUMA TV) (2025-04-22)
+		graphs.cpuTopoReDraw(sd, _getCPUPlots(sd), numatv_ctx);
+		// END of change
 		graphs.taskReDraw(sd, _getTaskPlots(sd));
 	}
 
@@ -345,6 +354,7 @@ void KsSession::loadGraphs(kshark_context *kshark_ctx,
 	if (nCombos > 0)
 		graphs.comboReDraw(nCombos, combos);
 }
+// END of change
 
 void KsSession::_savePlots(int sd, KsGLWidget *glw, bool cpu)
 {
@@ -721,7 +731,7 @@ void KsSession::loadUserPlugins(kshark_context *kshark_ctx, KsPluginManager *pm)
  * This is done to have an obvious dependency on the configuraton, instead of hiding
  * it in code's implementation - otherwise, it could just be inside the function.
  */
-void KsSession::saveTopology(int n_streams, const NUMATVContext& numatv_ctx) {
+void KsSession::saveTopology(int n_streams, const KsNUMATVContext& numatv_ctx) {
 	kshark_config_doc *topology =
 		kshark_config_new("kshark.config.topology", KS_CONFIG_JSON);
 	json_object *jtopology = KS_JSON_CAST(topology->conf_doc);
@@ -764,7 +774,7 @@ void KsSession::saveTopology(int n_streams, const NUMATVContext& numatv_ctx) {
  * This is done to have an obvious dependency on the configuraton, instead of hiding
  * it in code's implementation - otherwise, it could just be inside the function.
  */
-void KsSession::loadTopology(KsTraceGraph* graph, NUMATVContext& numatv_ctx) {
+void KsSession::loadTopology(KsTraceGraph* graph, KsNUMATVContext& numatv_ctx) {
 	kshark_config_doc *topology = kshark_config_alloc(KS_CONFIG_JSON);
 
 	if (!kshark_config_doc_get(_config, "NUMA TV", topology)) {

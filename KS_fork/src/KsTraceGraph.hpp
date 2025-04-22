@@ -97,7 +97,10 @@ public:
 
 	void markEntry(size_t);
 
-	void cpuReDraw(int sd, QVector<int> cpus);
+	//NOTE: Changed here. (NUMA TV) (2025-04-22)
+	void cpuTopoReDraw(int sd, QVector<int> cpus,
+		const KsNUMATVContext& numa_ctx);
+	// END of change
 
 	void taskReDraw(int sd, QVector<int> pids);
 
@@ -130,9 +133,6 @@ public:
 	
 	//NOTE: Changed here. (NUMA TV) (2025-04-15)
 	void numatvHideTopologyWidget(bool hide);
-	
-	QVector<int> numatvRedrawTopoWidgets(int stream_id,
-		const QVector<int>& cpusToDraw, const NUMATVContext& numa_ctx);
 
 	void numatvClearTopologyWidgets();
 	// END of change
@@ -182,12 +182,15 @@ private:
 
 	void _numatv_remove_topology_widget(int stream_id);
 
-	QVector<int> _numatv_existing_topology_action(int stream_id,
-		const QVector<int>& cpusToDraw, const NUMATVContext& numa_ctx);
-	
-	void _numatv_hide_stream_topo(int stream_id, bool hide);
+	void _numatv_existing_topology_action(int stream_id,
+		QVector<int>& cpusToDraw, const KsNUMATVContext& numa_ctx);
 
+	void _numatv_redraw_topo_widgets(int stream_id,
+		QVector<int>& cpusToDraw, const KsNUMATVContext& numa_ctx);
+	
 	void _numatv_adjust_topo_task_padding(int stream_id);
+
+	void _numatv_hide_stream_topo(int stream_id, bool hide);
 	// END of change
 
 	QString _t2str(uint64_t sec, uint64_t usec);
@@ -281,35 +284,49 @@ class KsStreamTopology : public QWidget {
 private: // Qt parts
 	/// @brief Main layout of the widget.
 	QVBoxLayout _main_layout;
+
 	/// @brief Container of the topology tree.
 	QWidget _topo;
+	
 	/// @brief Layout of the topology tree.
 	QHBoxLayout _topo_layout;
+
 	/// @brief Label for the machine (stream) name and a root
 	/// of the topology tree.
 	QLabel _machine;
+
 	/// @brief Container of the nodes.
 	QWidget _nodes;
+
 	/// @brief Layout of the nodes.
 	QVBoxLayout _nodes_layout;
+
 	/// @brief Container of the cores.
 	QWidget _cores;
+
 	/// @brief Layout of the cores.
 	QVBoxLayout _cores_layout;
 public:
 	explicit KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
 		const KsTraceGraph* trace_graph, QWidget* parent = nullptr);
+
 	void hide_topology(bool hide);
+
 	void resize_topology_widget(int new_height);
+
 private:
 	void _setup_widget_structure(int v_spacing);
+
 	void _setup_widget_layouts();
+
 	int _setup_topology_tree_core(int core_lid, int node_lid,
 		int v_spacing, const PUIds& PUs, const KsGLWidget* gl_widget,
 		QLabel* node_parent, unsigned int& node_reds,
 		unsigned int& node_greens, unsigned int& node_blues);
+
 	int _setup_topology_tree_node(int node_lid, int v_spacing,
 		const CorePU& cores, const KsGLWidget* gl_widget);
+
 	void _setup_topology_tree(int stream_id, int v_spacing,
 		const NodeCorePU& brief_topo, KsGLWidget* gl_widget);
 };

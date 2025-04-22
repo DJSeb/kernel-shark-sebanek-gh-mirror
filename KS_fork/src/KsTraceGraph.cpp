@@ -496,25 +496,37 @@ void KsTraceGraph::_markerReDraw()
 	}
 }
 
+//NOTE: Changed here. (NUMA TV) (2025-04-22)
+// Function was renamed to match the new API and functionality.
 /**
- * @brief Redraw all CPU graphs.
+ * @brief Redraw all CPU graphs & redraw topology widgets.
  *
  * @param sd: Data stream identifier.
  * @param v: CPU ids to be plotted.
+ * @param numa_ctx: NUMA TV context.
  */
-void KsTraceGraph::cpuReDraw(int sd, QVector<int> v)
+void KsTraceGraph::cpuTopoReDraw(int sd, QVector<int> v,
+	const KsNUMATVContext& numa_ctx)
 {
 	startOfWork(KsWidgetsLib::KsDataWork::EditPlotList);
 	if (_glWindow._streamPlots.contains(sd)) {
+		//NOTE: Changed here. (NUMA TV) (2025-04-18)
+		// CPUs being redrawn goes hand in hand with redrawing
+		// the topology widget, as CPUs may need to be reordered,
+		// or some CPUs were hidden and the topology wiget must adjust
+		// its own parts.
+		_numatv_redraw_topo_widgets(sd, v, numa_ctx);
+		// END of change
 		_glWindow._streamPlots[sd]._cpuList = v;
 	}
 
 	_selfUpdate();
 	endOfWork(KsWidgetsLib::KsDataWork::EditPlotList);
 }
+// END of change
 
 /**
- * @brief Redraw all Task graphs.
+ * @brief Redreaw all Task graphs.
  *
  * @param sd: Data stream identifier.
  * @param v: Process ids of the tasks to be plotted.
@@ -524,6 +536,12 @@ void KsTraceGraph::taskReDraw(int sd, QVector<int> v)
 	startOfWork(KsWidgetsLib::KsDataWork::EditPlotList);
 	if (_glWindow._streamPlots.contains(sd)) {
 		_glWindow._streamPlots[sd]._taskList = v;
+		//NOTE: Changed here. (NUMA TV) (2025-04-18)
+		// Task redraw means that the topology widget needs padding
+		// at the bottom, so that the topology widget of another stream
+		// below does not overlap with the task graph of the current stream.
+		_numatv_adjust_topo_task_padding(sd);
+		// END of change
 	}
 
 	_selfUpdate();
@@ -1080,29 +1098,27 @@ void KsTraceGraph::_numatv_hide_stream_topo(int stream_id, bool hide)
  * 
  * @param stream_id Identifier of the stream.
  * @param cpusToDraw CPUs to be drawn in the topology widget.
+ * The list may be rearranged to match the topology tree.
  * @param numa_ctx NUMA TV configuration singleton.
  */
-QVector<int> KsTraceGraph::_numatv_existing_topology_action(int stream_id,
-	const QVector<int>& cpusToDraw, const NUMATVContext& numa_ctx)
+void KsTraceGraph::_numatv_existing_topology_action(int stream_id,
+	QVector<int>& cpusToDraw, const KsNUMATVContext& numa_ctx)
 {
 	auto stream_cfg = numa_ctx.observe_cfg(stream_id);
 	ViewType stream_view = stream_cfg->get_view_type();
 	NodeCorePU brief_topo = {};
 	bool hide_topo = true;
-	QVector<int> cpus = cpusToDraw;
 	
 	if (stream_view == ViewType::NUMATREE) {
 		brief_topo = stream_cfg->get_brief_topo();
 		brief_topo = numatv_filter_by_PUs(brief_topo, cpusToDraw);
-		cpus = stream_cfg->rearrangeCPUsWithBriefTopo(cpusToDraw,
+		cpusToDraw = stream_cfg->rearrangeCPUsWithBriefTopo(cpusToDraw,
 			brief_topo);
 		hide_topo = cpusToDraw.isEmpty();
 	}
 
 	_numatv_insert_topology_widget(stream_id, brief_topo);
 	_numatv_hide_stream_topo(stream_id, hide_topo);
-
-	return cpus;
 }
 // END of change
 
@@ -1114,35 +1130,28 @@ QVector<int> KsTraceGraph::_numatv_existing_topology_action(int stream_id,
  * 
  * @param stream_id Identifier of the stream.
  * @param cpusToDraw CPUs to be drawn in the stream's topology widgets.
- * @param numa_ctx NUMA TV configuration singleton.
- * 
- * @return The CPUs to be drawn in the topology widget. May be
- * rearranged to match the topology of the stream.
+ * The list may be rearranged to match the topology tree.
+ * @param numa_ctx NUMA TV configuration.
  */
-QVector<int> KsTraceGraph::numatvRedrawTopoWidgets(int stream_id,
-	const QVector<int>& cpusToDraw, const NUMATVContext& numa_ctx)
+void KsTraceGraph::_numatv_redraw_topo_widgets(int stream_id,
+	QVector<int>& cpusToDraw, const KsNUMATVContext& numa_ctx)
 {
-	QVector<int> cpus = cpusToDraw;
-	if (_glWindow._streamPlots.contains(stream_id)) {
-		bool topology_exists = numa_ctx.exists_for(stream_id);
+	bool topology_exists = numa_ctx.exists_for(stream_id);
 
-		if (topology_exists) {
-			cpus = _numatv_existing_topology_action(stream_id,
-				cpusToDraw, numa_ctx);
-		} else {
-			_numatv_insert_topology_widget(stream_id, {});
-			_numatv_hide_stream_topo(stream_id, true);
-		}
-
-		clear_topo_layout(&_topoLayout);
-
-		for (auto&& [sd, topo_widget] : _topoWidgets) {
-			topo_widget->setParent(&_topoSpace);
-			_topoLayout.addWidget(topo_widget);
-		}
+	if (topology_exists) {
+		_numatv_existing_topology_action(stream_id,
+			cpusToDraw, numa_ctx);
+	} else {
+		_numatv_insert_topology_widget(stream_id, {});
+		_numatv_hide_stream_topo(stream_id, true);
 	}
 
-	return cpus;
+	clear_topo_layout(&_topoLayout);
+
+	for (auto&& [sd, topo_widget] : _topoWidgets) {
+		topo_widget->setParent(&_topoSpace);
+		_topoLayout.addWidget(topo_widget);
+	}
 }
 // END of change
 

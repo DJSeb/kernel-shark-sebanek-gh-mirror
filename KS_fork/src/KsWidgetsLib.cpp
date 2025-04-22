@@ -1713,7 +1713,7 @@ void KsNUMATVDialog::_setup_stream_header(int stream_id, QVBoxLayout* parent_lay
  * @return Button group for a stream, from which view type will be deduced.
  */
 QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(int stream_id,
-	QVBoxLayout* parent_layout, const NUMATVContext& numatv_ctx)
+	QVBoxLayout* parent_layout, const KsNUMATVContext& numatv_ctx)
 {
 	bool a_topo_exists = numatv_ctx.exists_for(stream_id);
 
@@ -1810,7 +1810,7 @@ QPushButton* KsNUMATVDialog::_setup_load_button_per_stream(QString last_fpath,
  * @return Label with the topology file location.
  */
 QLabel* KsNUMATVDialog::_setup_status_per_stream(int stream_id,
-	QVBoxLayout* parent_layout, const NUMATVContext& numatv_ctx)
+	QVBoxLayout* parent_layout, const KsNUMATVContext& numatv_ctx)
 {
 	// Status, topology file and load button for file dialog setups
 	QHBoxLayout* stat_topo_load_layout = new QHBoxLayout{};
@@ -1868,7 +1868,7 @@ QLabel* KsNUMATVDialog::_setup_status_per_stream(int stream_id,
  * @param numatv_ctx NUMA TV context to get the streams| topology configurations.
  */
 void KsNUMATVDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx,
-	const NUMATVContext& numatv_ctx)
+	const KsNUMATVContext& numatv_ctx)
 {
 	// Allow the scroll area to be resized.
 	_scroll_area.setWidgetResizable(true);
@@ -1925,11 +1925,12 @@ void KsNUMATVDialog::_setup_layout() {
 /**
  * @brief Constructor for a NUMA TV configuration dialog.
  * 
- * @param kshark_ctx KernelShark context from which to pull stream data
+ * @param kshark_ctx KernelShark context from which to pull stream data.
+ * @param numatv_ctx NUMA TV context to get topology view configurations.
  * @param parent Parent widget.
  */
 KsNUMATVDialog::KsNUMATVDialog(kshark_context* kshark_ctx,
-	const NUMATVContext& numatv_ctx, QWidget* parent)
+	const KsNUMATVContext& numatv_ctx, QWidget* parent)
 	: QDialog(parent),
 	_main_layout{this},
 	_explanation{this},
