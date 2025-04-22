@@ -1926,6 +1926,7 @@ void KsNUMATVDialog::_setup_layout() {
  * @brief Constructor for a NUMA TV configuration dialog.
  * 
  * @param kshark_ctx KernelShark context from which to pull stream data
+ * @param numatv_ctx NUMA TV context for streams' topology configurations.
  * @param parent Parent widget.
  */
 KsNUMATVDialog::KsNUMATVDialog(kshark_context* kshark_ctx,
