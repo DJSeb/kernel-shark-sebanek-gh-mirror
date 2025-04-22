@@ -169,7 +169,7 @@ _Non-software goal - write survey paper:_
     - [ ] What are the limitations?
       - I.e. why make the project in the first place?
     - [ ] What is the job of plugins? / Removing limitations
-  - [ ] Theoretical part of Stacklook, Naps & KShark modifications
+  - [ ] Theoretical part of Stacklook, Naps, NoBoxes & KShark modifications
     - [ ] Overview of piece of SW's design
       - Should be included in the documentation
     - [ ] Purpose & limits
