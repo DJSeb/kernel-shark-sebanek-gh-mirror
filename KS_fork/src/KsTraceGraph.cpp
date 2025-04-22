@@ -1047,7 +1047,7 @@ void KsTraceGraph::numatvClearTopologyWidgets() {
  * @param brief_topo Brief topology of the stream from which the stream's
  * topology widget is created.
  */
-void KsTraceGraph::_numatv_insert_topology_widget(int sd, const NodeCorePU& brief_topo)
+void KsTraceGraph::_numatv_insert_topology_widget(int sd, const TopoNodeCorePU& brief_topo)
 {
 	bool exists_for_stream = _topoWidgets.count(sd);
 	if (exists_for_stream) {
@@ -1102,7 +1102,7 @@ void KsTraceGraph::_numatv_existing_topology_action(int stream_id,
 {
 	auto stream_cfg = _numaTvCtx.observe_cfg(stream_id);
 	TopoViewType stream_view = stream_cfg->get_view_type();
-	NodeCorePU brief_topo = {};
+	TopoNodeCorePU brief_topo = {};
 	bool hide_topo = true;
 	
 	if (stream_view == TopoViewType::NUMATREE) {
@@ -1183,7 +1183,7 @@ void KsTraceGraph::_numatv_adjust_topo_task_padding(int stream_id) {
  * @param trace_graph Pointer to the trace graph.
  * @param parent Parent widget.
  */
-KsStreamTopology::KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
+KsStreamTopology::KsStreamTopology(int stream_id, const TopoNodeCorePU& brief_topo,
 	const KsTraceGraph* trace_graph, QWidget* parent)
 : QWidget(parent),
   _main_layout(this),
@@ -1330,7 +1330,7 @@ static QString make_topo_item_stylesheet(const KsPlot::Color& color) {
  * @return Height of the created core node.
  */
 int KsStreamTopology::_setup_topology_tree_core(int core_lid, int node_lid,
-	int v_spacing, const PUIds& PUs, const KsGLWidget* gl_widget,
+	int v_spacing, const TopoPUIds& PUs, const KsGLWidget* gl_widget,
 	QLabel* node_parent, unsigned int& node_reds, unsigned int& node_greens,
 	unsigned int& node_blues)
 {
@@ -1390,7 +1390,7 @@ int KsStreamTopology::_setup_topology_tree_core(int core_lid, int node_lid,
  * @return Height of the created Node node. 
  */
 int KsStreamTopology::_setup_topology_tree_node(int node_lid, int v_spacing,
-	const CorePU& cores, const KsGLWidget* gl_widget)
+	const TopoCorePU& cores, const KsGLWidget* gl_widget)
 {
 	
 	QLabel* node = new QLabel(&_nodes);
@@ -1442,7 +1442,7 @@ int KsStreamTopology::_setup_topology_tree_node(int node_lid, int v_spacing,
  * stream colors for the machine node. 
  */
 void KsStreamTopology::_setup_topology_tree(int stream_id, int v_spacing, 
-	const NodeCorePU& brief_topo, KsGLWidget* gl_widget)
+	const TopoNodeCorePU& brief_topo, KsGLWidget* gl_widget)
 {
 	QString machine_name = QString("M %1").arg(stream_id);
 	_machine.setText(machine_name);

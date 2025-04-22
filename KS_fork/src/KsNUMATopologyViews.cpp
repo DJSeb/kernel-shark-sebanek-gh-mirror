@@ -302,7 +302,7 @@ void StreamNUMATopologyConfig::set_view_type(TopoViewType new_view)
  * @return Map of nodes (their logical IDs) to their cores (map of their logical IDs
  * to their PUs (map of their logical IDs to their OS IDs)).
  */
-const NodeCorePU& StreamNUMATopologyConfig::get_brief_topo() const
+const TopoNodeCorePU& StreamNUMATopologyConfig::get_brief_topo() const
 { return _brief_topo; }
 
 /**
@@ -326,7 +326,7 @@ QVector<int> StreamNUMATopologyConfig::rearrangeCPUs(const QVector<int>& cpu_ids
  * @return Rearranged vector of CPU IDs.
  */
 QVector<int> StreamNUMATopologyConfig::rearrangeCPUsWithBriefTopo
-(const QVector<int>& cpu_ids, const NodeCorePU& brief_topo) const {
+(const QVector<int>& cpu_ids, const TopoNodeCorePU& brief_topo) const {
     QVector<int> rearranged{};
 
     // Since maps are sorted, the resulting vector will be sorted as well
@@ -369,7 +369,7 @@ int StreamNUMATopologyConfig::get_topo_npus() const {
  * @param brief_topo Brief topology to count the PUs in.
  * @return Number of PUs in the brief topology.
  */
-int numatv_count_PUs(const NodeCorePU& brief_topo) {
+int numatv_count_PUs(const TopoNodeCorePU& brief_topo) {
     int count = 0;
     for (const auto& [node_lid, cores]: brief_topo) {
         for (const auto& [core_lid, PUs]: cores) {
@@ -385,7 +385,7 @@ int numatv_count_PUs(const NodeCorePU& brief_topo) {
  * @param brief_topo Brief topology to count the cores in.
  * @return Number of cores in the brief topology.
  */
-int numatv_count_cores(const NodeCorePU& brief_topo) {
+int numatv_count_cores(const TopoNodeCorePU& brief_topo) {
     int count = 0;
     for (const auto& [node_lid, cores]: brief_topo) {
         count += cores.size();
@@ -401,8 +401,8 @@ int numatv_count_cores(const NodeCorePU& brief_topo) {
  * @param PUs List of PUs to filter the brief topology by.
  * @return New brief topology containing only the PUs that are present in the given list.
  */
-NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo, const QVector<int>& PUs) {
-    NodeCorePU filtered_topo{};
+TopoNodeCorePU numatv_filter_by_PUs(const TopoNodeCorePU& brief_topo, const QVector<int>& PUs) {
+    TopoNodeCorePU filtered_topo{};
 
     for (const auto& [node_lid, cores]: brief_topo) {
         for (const auto& [core_lid, PUs_map]: cores) {

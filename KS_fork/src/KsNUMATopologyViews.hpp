@@ -31,11 +31,11 @@ enum class TopoViewType { DEFAULT = 0, NUMATREE };
 using ViewTopologyPair = std::pair<TopoViewType, QString>;
 
 /// @brief Mapping of PU logical IDs to their OS IDs.
-using PUIds = std::map<int, int>;
+using TopoPUIds = std::map<int, int>;
 /// @brief Mapping of core logical IDs to their owned PUs.
-using CorePU = std::map<int, PUIds>;
+using TopoCorePU = std::map<int, TopoPUIds>;
 /// @brief Mapping of node logical IDs to their owned cores.
-using NodeCorePU = std::map<int, CorePU>;
+using TopoNodeCorePU = std::map<int, TopoCorePU>;
 
 // Classes
 
@@ -54,7 +54,7 @@ private:
     /// @brief Mapping of node logical IDs to their owned cores and PUs.
     /// Instead of holding a pointer to the full hwloc topology,
     /// the maps are used to store the topology in a more compact way.
-    NodeCorePU _brief_topo;
+    TopoNodeCorePU _brief_topo;
 public: // Creation, destruction, assigns
     explicit StreamNUMATopologyConfig(TopoViewType view, const std::string& fpath);
     StreamNUMATopologyConfig();
@@ -70,12 +70,12 @@ public: // Business
     
     void set_view_type(TopoViewType new_view);
     
-    const NodeCorePU& get_brief_topo() const;
+    const TopoNodeCorePU& get_brief_topo() const;
     
     QVector<int> rearrangeCPUs(const QVector<int>& cpu_ids) const;
     
     QVector<int> rearrangeCPUsWithBriefTopo(const QVector<int>& cpu_ids,
-        const NodeCorePU& brief_topo) const;
+        const TopoNodeCorePU& brief_topo) const;
     
     int get_topo_npus() const;
 };
@@ -108,11 +108,11 @@ public:
 
 // Global functions
 
-int numatv_count_PUs(const NodeCorePU& brief_topo);
+int numatv_count_PUs(const TopoNodeCorePU& brief_topo);
 
-int numatv_count_cores(const NodeCorePU& brief_topo);
+int numatv_count_cores(const TopoNodeCorePU& brief_topo);
 
-NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo,
+TopoNodeCorePU numatv_filter_by_PUs(const TopoNodeCorePU& brief_topo,
     const QVector<int>& PUs);
 
 bool numatv_stream_wants_topology_widget(int stream_id,

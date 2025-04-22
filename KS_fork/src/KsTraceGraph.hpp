@@ -183,7 +183,7 @@ private:
 	void _setup_numatv_topo_widget();
 
 	void _numatv_insert_topology_widget(int stream_id,
-		const NodeCorePU& brief_topo);
+		const TopoNodeCorePU& brief_topo);
 
 	void _numatv_remove_topology_widget(int stream_id);
 
@@ -317,7 +317,7 @@ private: // Qt parts
 	/// @brief Layout of the cores.
 	QVBoxLayout _cores_layout;
 public:
-	explicit KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
+	explicit KsStreamTopology(int stream_id, const TopoNodeCorePU& brief_topo,
 		const KsTraceGraph* trace_graph, QWidget* parent = nullptr);
 
 	void hide_topology(bool hide);
@@ -330,15 +330,15 @@ private:
 	void _setup_widget_layouts();
 
 	int _setup_topology_tree_core(int core_lid, int node_lid,
-		int v_spacing, const PUIds& PUs, const KsGLWidget* gl_widget,
+		int v_spacing, const TopoPUIds& PUs, const KsGLWidget* gl_widget,
 		QLabel* node_parent, unsigned int& node_reds,
 		unsigned int& node_greens, unsigned int& node_blues);
 
 	int _setup_topology_tree_node(int node_lid, int v_spacing,
-		const CorePU& cores, const KsGLWidget* gl_widget);
+		const TopoCorePU& cores, const KsGLWidget* gl_widget);
 
 	void _setup_topology_tree(int stream_id, int v_spacing,
-		const NodeCorePU& brief_topo, KsGLWidget* gl_widget);
+		const TopoNodeCorePU& brief_topo, KsGLWidget* gl_widget);
 };
 // END of change
 
