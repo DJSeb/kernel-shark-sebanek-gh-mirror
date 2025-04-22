@@ -163,7 +163,9 @@ private:
 
 	void _maxLineNumber(const QString &test);
 
-	void _readOnly(int);
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+	void _readOnly(Qt::CheckState);
+// END of change
 
 	void _argVModified();
 
@@ -206,7 +208,9 @@ private:
 
 	void _capture();
 
-	void _setChannelMode(int state);
+//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+	void _setChannelMode(Qt::CheckState state);
+// END of change
 
 	void _sendOpenReq(const QString &fileName);
 };

@@ -1,0 +1,7 @@
+build_plug.sh
+build
+unmodif_build
+.vscode
+doc/technical/**
+doc/docs_build.log
+doc/user/user-manual_tmp.html

@@ -710,3 +710,90 @@ void KsSession::loadUserPlugins(kshark_context *kshark_ctx, KsPluginManager *pm)
 	for (last = &kshark_ctx->plugins; *last != list; last = &(*last)->next)
 		pm->addUserPluginToList(*last);
 }
+
+//NOTE: Changed here. (NUMA TV) (2025-04-20)
+/**
+ * @brief Saves the NUMA TV configurations of all streams.
+ * 
+ * @param n_streams How many streams are open in a session.
+ * @param numatv_ctx Reference to the NUMA TV context to load information from.
+ * This is done to have an obvious dependency on the configuraton, instead of hiding
+ * it in code's implementation - otherwise, it could just be inside the function.
+ */
+void KsSession::saveTopology(int n_streams, const KsNUMATVContext& numatv_ctx) {
+	kshark_config_doc *topology =
+		kshark_config_new("kshark.config.topology", KS_CONFIG_JSON);
+	json_object *jtopology = KS_JSON_CAST(topology->conf_doc);
+	json_object *jlist = json_object_new_array();
+	json_object *jtopo;
+
+	for (int i = 0; i < n_streams; ++i) {
+		jtopo = json_object_new_object();
+		json_object_object_add(jtopo, "stream_id",
+			json_object_new_int(i));
+		TopoViewType view = TopoViewType::DEFAULT;
+		std::string topo_fpath = "";
+
+		if (numatv_ctx.exists_for(i)) {
+			const StreamNUMATopologyConfig* stream_cfg = numatv_ctx.observe_cfg(i);
+			view = stream_cfg->get_view_type();
+			topo_fpath = stream_cfg->get_topo_fpath();
+		}
+
+		json_object_object_add(jtopo, "view",
+			json_object_new_int(int(view)));
+		json_object_object_add(jtopo, "topology_xml_fpath",
+			json_object_new_string(topo_fpath.c_str()));
+
+		json_object_array_add(jlist, jtopo);
+	}
+
+	json_object_object_add(jtopology, "topologies", jlist);
+	kshark_config_doc_add(_config, "NUMA TV", topology);
+}
+// END of change
+
+//NOTE: Changed here. (NUMA TV) (2025-04-20)
+/**
+ * @brief Loads the NUMA TV configurations of all streams.
+ * 
+ * @param graph Pointer to the KsTraceGraph object, so that if no
+ * non-DEFAULT topology views are used, the topology widget can be hidden.
+ * @param numatv_ctx Reference to the NUMA TV context to load information into.
+ * This is done to have an obvious dependency on the configuraton, instead of hiding
+ * it in code's implementation - otherwise, it could just be inside the function.
+ */
+void KsSession::loadTopology(KsTraceGraph* graph, KsNUMATVContext& numatv_ctx) {
+	kshark_config_doc *topology = kshark_config_alloc(KS_CONFIG_JSON);
+
+	if (!kshark_config_doc_get(_config, "NUMA TV", topology)) {
+		return;
+	}
+	
+	bool hide_topo_button = true;
+	json_object *jtopologies;
+	json_object_object_get_ex(KS_JSON_CAST(topology->conf_doc), "topologies", &jtopologies);
+
+	size_t numatvs = json_object_array_length(jtopologies);
+	for (size_t i = 0; i < numatvs; ++i) {
+		json_object *jtopo = json_object_array_get_idx(jtopologies, i);
+		json_object *jstream_id, *jview, *jtopo_fpath;
+
+		json_object_object_get_ex(jtopo, "stream_id", &jstream_id);
+		json_object_object_get_ex(jtopo, "view", &jview);
+		json_object_object_get_ex(jtopo, "topology_xml_fpath", &jtopo_fpath);
+		
+		int stream_id = json_object_get_int(jstream_id);
+		TopoViewType view = TopoViewType(json_object_get_int(jview));
+		std::string topo_fpath = json_object_get_string(jtopo_fpath);
+		
+		if (QFile::exists(QString::fromStdString(topo_fpath))) {
+			numatv_ctx.add_config(stream_id, view, topo_fpath);
+		}
+
+		hide_topo_button &= !numatv_stream_wants_topology_widget(stream_id, numatv_ctx);
+	}
+
+	graph->numatvHideTopologyWidget(hide_topo_button);
+}
+// END of change

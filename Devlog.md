@@ -1,86 +1,9 @@
-Purpose of this is simply to jot down progress (self-motivation)
-and keep track of noticed issues and possibly great ideas (tracker),
-as well as quetions arisen during development (design decisions & encountered challenges).
+Purpose of this is simply to jot down progress (self-motivation).
 
 Can be informally written, but better keep it neutral most of the time for any potential
 viewers in the future.
 
 Parts may be published later on in documentation.
-
-# Tracker
-
-(Bugs moved to [buglog](./Buglog.md)).
-
-## Performance concerns
-
-If any performance is deemed suspiciously low, note it here.
-If a concern is either solved or dismissed, write an explanation.
-
-1. Stacklook performed too badly when loading a trace without kernel stack.
-
-- **Solution**: check if the trace includes kernel stack trace events +
-  perform a on-load search of kernel stack entries, so that further searches are unnecessary.
-
-2. Explore optimizations to mouse hover detection
-
-- Note: Worth to meddle with KernelShark's insides, since that will be inevitable now anyway
-- **Solution**: Ignored, KernelShark behaves perfectly well with many entries and mouse hover over
-  plot objects implemented as is.
-
-## QnInA - Questions & Ideas & Answers
-
-Questions are the main points, ideas are prefixed via `I:`, answers via `A:`.
-Each idea may contain debate (pros and cons) and each answer should contain a reason.
-This is noted mostly as a journal to not attempt some approaches again and as design decisions
-documentation.
-
-- How to achieve better cohesion and less coupling between `Stacklook` and `sched_events`?
-
-  - **A**: Implement the splitting of events and work from there - sched_events and stacklook
-    then shouldn't interfere with each other.
-    - PRO - this will have to happen anyway, might as well leverage the feature
-    - CON - will require at least some rewrites to make both plugins behave nicely
-  - \[REJECTED\] I: Implement a "record changes history" to easily find out original values before modification
-    - PRO - easily finds any historical change
-    - PRO - a pretty lightweight and future-proof solution
-    - CON - changes all of KernelShark's plugins behaviour, i.e. breaking change
-    - CON - requires a lot of rewriting
-    - CON - would need a history data structure implementation
-    - CON - rare use case, since plugins shouldn't need to peek like that usually
-      - If a plugin needs some other plugin, they make a list of depenencies by design.
-        Plugins looking for original data should be able to read tep data themselves.
-        Linked list would only prove useful if it was impossible to read original data
-        for an intended functionality.
-    - Verdict: An option for sure.
-  - \[REJECTED\] I: Find out if it is possible to load original data and use them even after KernelShark
-    let other plugins do their work.
-    - CON - might need to store copies of a whole file, i.e. memory-unfriendly
-    - CON - semester project showed that this is most probably tedious work and either not directly
-      supported by KShark or not at all
-    - PRO - less rewrites of existing code
-    - PRO - separated only into plugin's code, i.e. no SRP violation
-
-- How to enable NUMA visualization support?
-
-  - **A**: Simply put, KernelShark's source code will be dissected and the visualization abilities
-    written by hand.
-    - Reason: KernelShark does not directly support reordering of CPUs in the graph, hence that
-      ability will need to be implemented. KernelShark also doesn't support different visualization
-      options, so that will also be added.
-
-- How to split events from trace-cmd to target and initiator where applicable?
-  - **A**: Try to intercept the incoming stream of files and add target's (initiators are the ones that are
-    collected by default) 'fake' event.
-    - Reason: Most straightforward, perfect place for implementation, simple integration with existing modules.
-  - \[REJECTED\] I: Don't add any events, but create a special filter through which normal events go through without a
-    hitch, but splittable events are drawn as if they were in the data.
-    - PRO: Less memory used by KernelShark holding real events.
-    - PRO: Consistency with trace-cmd output.
-    - CON: Cannot manipulate the drawn fake events, since they wouldn't hold data.
-      - Unless they were pointing to the initiator event and would change relevant fields -> seems to be a lot
-        of work for little benefit.
-    - Verdict: Dismissed, while a nice idea on paper, it is most likely too much work for the memory benefit
-      (abstract cost/value ratio isn't favourable).
 
 # History
 
@@ -696,3 +619,478 @@ Next goals (in priority order):
 - Revise Naps' design document
 - Write Stacklook's design document
 - Write survey paper
+
+## 2025-04-04
+
+_Author note: Back from vacation._
+NUMA work starts (-ed a little earlier with "thinking about it").
+Currently the main goal is designing some sort of Qt window, which
+will be the main interface for users.
+
+The feature will most likely work per-stream, as streams can be any
+set of traces for some CPUs and tasks, but multiple traces can
+be opend via "Append traces". It definitely will require some sort
+of stream-NUMA connection, either in streams directly (not the best
+choice, doesn't feel like it's right) or via some sort of hash map
+kept by the feature (which will require more work on managing which
+stream closed and which stream is up, but hopefully nothing major).
+
+## 2025-04-05
+
+Deliberations are continuing. Quite a lot to think about with this
+modification. Design is starting from the GUI. The window for the
+modification will look like this:
+
+```
+-----------------------------------------------------
+|                   HEADER                          |
+-----------------------------------------------------
+|                                                   |
+|                   EXPLANATION                     |
+|                                                   |
+|---------------------------------------------------|
+||  Stream #1             ____________             ||
+||  STATUS                | LOAD BTN |             ||
+||                        ------------             ||
+||  0 Default   O Tree ...[more radio options]     ||
+||-------------------------------------------------||
+||  Stream #2             ------------             ||
+||  STATUS                | LOAD BTN |             ||
+||                        ------------             ||
+||  O Default   0 Tree ...[more radio options]     ||
+||-------------------------------------------------||
+.....................................................
+||-------------------------------------------------||
+|       _____________           ______________      |
+|       | APPLY BTN |           | CANCEL BTN |      |
+|       -------------           --------------      |
+-----------------------------------------------------
+```
+
+Similar in nature to couplebreak's dialog (maybe a
+generalisation of that could help here, retooling it
+into a "KsPerStreamFeatureDialog" or similar).
+
+Apply would obviosly apply changes and make the graph (and
+any of its drawn parts) to be redrawn, CPUs hidden or shown, etc.
+Cancel would close the dialog and cancel any temporary changes.
+Header is the standard header with an X button, which will do the
+same as Cancel probably.
+
+The radio buttons for each stream would determine which kind of
+view is to be shown for each stream's CPU plot part. Tree would
+be the one showing off the NUMA topology. Default is what KernelShark
+uses currently. Load button will open a file dialog window, which
+will allow only an XML file of a topology to be loaded.
+
+There should probably be validation of the number of PUs and CPUs in
+a stream. Anything else would be difficult to verify, so that won't
+be done. Status field would probably show something as "LOADED \[FILE\]",
+"NO TOPOLOGY", "BAD TOPOLOGY". There should be some space for more
+radio buttons/options later.
+
+The other design decisions are about how to connect the topology with
+KernelShark's visualisation. There'll firstly need to be some sort of
+a data structure representing a machine (a stream for KernelShark),
+which means tracking the nodes, cores and PUs (CPUs for KShark).
+Additionally, groups and packages should be tracked too, for completeness
+(and possible future extensions, though they won't be used, most likely, in
+this project). Cores will probably hold its PUs and memberships, but some
+parts might be shaved if proven to be unnecessarily complex. This part isn't
+fully fleshed out yet.
+
+Next problem is, how do we keep this for a stream to be drawn and redrawn?
+An obvious possibility is giving streams some sort of pointer to the C++
+structures, but this feels incorrect though possible. Another possibility is
+keeping a map of loaded topologies and give streams the means to ask about them.
+This should work nicely, as unordered_map in C++'s STL would be a good fit and
+memory could be efficiently kept. Only question is where to store the map -
+for that, the best place is probably some sort of static data or a class member.
+Another possiblity is a singleton, as this would technically hold configurations
+and a "lot" of data, which singletons are good for. Either way, the map has to
+be widely accessible to other KernelShark modules, so maybe a special class for
+access could be made as well. This will be subject to further deliberation.
+
+Another question is how to parse the XML file. There "could" be a custom XML
+parsing code... but that is a lot of work for not as much profit. A better
+solution would be some XML parsing library for C++. Rapid XML seems rather
+widespread, but no exact library was chosen yet. It would also introduce
+another dependency to KernelShark, which might be less favourable, but then
+again, it is just an XML parsing library, which shouldn't be that heavy.
+
+Penultimate decisions lie in control on the graph. The tree view would be best
+collapsible, it is a really user-friendly feature for this kind of view. This
+does mean introducing even more Qt objects into the graph area though and worse,
+connecting actions to them.
+
+Lastly, session support. It WOULD be nice to keep data in sessions. This is not
+something outlined in the specification, but it seems like a natural thing to
+include, as many per-stream settings are included. There would have to be the
+whole topology and which layers are shown and which are hidden. It wouldn't be
+impossible (nothing really ever is), but it would be a bit of work. Probably the
+last thing to be done, if to be done.
+
+Sidenote, naming can sometimes be nicely shortened. Henceforth, NUMA Topology Views
+will be also referred to as NUMA TV, which is slightly funny and unintentionally so.
+
+NUMA TV goals:
+
+- Create configuration window (maybe reuse couplebreak's)
+- Create a data structure for a machine in topology's eyes
+- Parse XML data into the data structure
+- Create a connection between streams and topologies
+- Figure out control elements of the tree view, create more space in the graph
+- Figure out session support
+
+## 2025-04-07
+
+A little bit of work done on the NUMA TV config window, nothing too difficult.
+More importantly, the annoying warnings about deprecated stateChanged function
+have been resolved by just updating code with adjustments to the new function
+(which really just changes a state being represented by an int into an enum).
+Rejoice, for no more annoying warnings about things that should never have been
+present to begin with happen now.
+
+XML topology file examinations are underway. Because the XML is large and
+custom XML parsing seems like far too much work, external XML library will be
+used. For being light, fast and time-proven, [pugixml](https://pugixml.org) was
+ultimately chosen. This does mean KernelShark will gain a new dependency, but
+it's better than toiling with XML parsing, which has been solved N times over,
+instead of focusing on the actual project contents.
+
+...
+
+Scrath the previous paragraph altogether (but it is kept as something that
+happened). [Hwloc](https://www.open-mpi.org/projects/hwloc/), which produces
+the XML file, can also load the topology from it, so no XML parsing will be
+done, just operations with the hwloc library.
+
+It was added to CMake as a dependency, although how it works with it is not
+made clear on the internet.
+
+...
+
+One thing is clear though, the data structure seems too "rich" with data, so
+either some sort of slimming down via hwloc's API will be necessary or a custom
+class will store what's necessary for displaying the topology (which currently
+means nodes, their cores and the cores' physical units).
+
+Packages and groups won't be supported just yet, as they will be more of a
+completeness feature, not a necessity, since they are not outlined in the
+specification. There's also the question of nested NUMA nodes in NUMA nodes
+(which, sadly for the author, is possible), but let's focus on the easy
+situation first.
+
+## 2025-04-08 - 2025-04-09
+
+NUMA TV GUI work, its reactivity to the user, hwloc topologies and all that was
+worked on. Not much to say, as it was mostly trial and error regarding restricted
+pointers, lifetimes and expected behaviours and nothing too interesting except
+endless debugging took place.
+
+## 2025-04-10
+
+Supervisor sent review of couplebreak and co., only real bug is that the CPU
+runtime rectangles shouldn't appear after sched_switch's stacktrace and after
+sched_waking target event. Will investigate later, after NUMA most likely, to
+search for a fix of these. Otherwise, it was apparently very good, which is
+great to read, after so much work.
+
+## 2025-04-11 - 2025-04-13
+
+Lot of experimentation with how to draw the topology - most unsuccessful.
+Anchoring some drawing to another inside the GL widget is simple enough, but
+the biggest problem currently is creating space for the topology part. The idea
+was either to make some Qt thing or creating it inside the GL canvas itself.
+
+Both Qt and GL approaches have resulted in failure. Qt moreso, as it completely
+cut off the graph on the left, making everything on that side useless. The GL
+approach was a little better, but shifting every drawing proved to be not enough
+as the drawing's positions are not shifted, leading into inconsistencies with
+what's displayed and where it is in terms of coordinates. The right part of the
+graph also keeps getting cut off, with no obvious fix.
+
+However, the GL approach will most likely be chosen, as it contains the necessary
+contexts for the tree view and makes visualisation less confusing, albeit a
+massive chore, because a lot of positioning will now have to somehow get a
+"topology correction offset".
+
+...
+
+Actually, this approach also seems to have some inherent problems, like there
+just not existing any way to sanely reposition everything. It truly feels like
+nothing works.
+
+Really unfun to be stuck. It feels like being trapped in a never-resolving hell.
+
+...
+
+Honestly, no idea this will be solved. Praying for a miracle, currently.
+
+## 2025-04-14 - 2025-04-15
+
+Time management on this is horrible, first of all.
+
+Second of all, Qt-based approach was chosen. It does have better separation of
+concerns and is much more flexible. All that is missing currently is somehow
+intertwining the graph with whatever will display the topology, at least in that
+visualisation department.
+
+The approach gave way to a button to dynamically hide or show the topology
+view portion and a dynamic resizing of the contents of the topology widget.
+It is also much simpler to use in code.
+
+Goals:
+
+- Reorder CPUs based on topology
+- Pick a visualisation of the topology
+  - Qt tree (basic, most likely won't work)
+  - Own grid-based widget
+  - Amalgamation of labels and lines and spacings
+  - Note: collapsibility is an important factor here
+- Session support maybe
+- Clean up after yourself
+- Document it all
+- Maybe package tree view as well
+
+## 2025-04-16
+
+Today, it was first cleaner code in the KsTraceGraph constructor, some stylisation
+if the toggle button for the topology view and then the first big job: reordering
+CPUs based on topology. It took a while to find the best suitable candidate, but
+we managed to do so - find number of numa nodes, index from zero to the count (which
+counts as logical indices), find PU from the given CPU (which is a physical/OS index,
+according to hwloc (sidenote, pronouncing it as \[have lock\] or as a name Havelock
+makes it sound pretty cool), find the ancestor core of the PU (which should be just
+one level higher), put them in a map (which is sorted and can keep more maps
+as values) of maps of maps, with the structure
+{numa:{core:{PU-logical:PU-physical}}}. Then just reiterate through this fully
+sorted collection and have the CPUs display in a sorted manner. It currently
+ignores what PUs were supposed to be hidden, but that will be ironed out, maybe
+with a search through the vector upon each attempted adition of a PU to the sorted
+collection (though that could take a while - on the other hand, CPU draw is a
+blocking function called rarely, design helps us in ignoring this currently).
+
+...
+
+Actually, it was really easy to just go through the vector and check if it
+contains a CPU number.
+
+...
+
+And now a file with a different amount of cpus cannot be a topology for a
+stream with a set amount of CPUs. Lastly, applying a NUMA topology will also
+redraw the CPUs. It will force to show all of them (which makes sense, since
+we now want to see a topology, it only makes sense (to the author) that the
+full scope of the topology be shown).
+
+...
+
+Topology configs are now destroyed upon opening a new trace file (which is
+the only way to destroy data streams except exiting).
+
+...
+
+Absolutely final work today was cleaning up some code, introducing static
+functions and a few member functions, etc. and deleting NUMA TV's presence
+from the GL Widget, which has been declared as forbidden grounds, as its
+behaviour is far too unpredictable.
+
+Goals:
+
+- Pick a visualisation of the topology
+  - Qt tree (basic, most likely won't work)
+  - Own grid-based widget
+  - Amalgamation of labels and lines and spacings
+  - Note: collapsibility is an important factor here
+- Session support maybe
+- Clean up after yourself
+- Document it all
+- Maybe package tree view as well
+
+## 2025-04-17 (and a bit of 2025-04-18)
+
+Visualisation of NUMA topology works! Rather splendidly as well.
+
+Only problem now is a weird segmentation fault bug upon trace append, but
+it otherwise works great! It is a blocky-tree, but it gets the job done well.
+
+_Author's note: Writing this at 3AM, so not a lot to say in this state of mind._
+
+- Fix bugs, polish
+- Session support maybe
+- Clean up after yourself
+- Document it all
+- Maybe package tree view as well
+
+## 2025-04-18
+
+So, in regards to that bug found "today" - it seems that histogram's data pointer
+cannot be accessed for unknown reasons. Best theory from testing though is
+that since the CPUs have been reordered, the histogram gets very confused
+and somewhere along the line, the data pointer becomes crazy.
+
+With more experimentation, the fault seems entirely situated in a single state
+of the graph: one trace is opened && it has a topology view, which rearranges
+its CPUs && that topology is used && task redraw has never been called.
+
+It's super-situational and likely smell of something else than just rearrangement
+of CPUs being a big bad change. Either way, since it actually nicely coincided
+with needing to redraw tasks to adjust task padding, just calling task redraw
+each time NUMA TV calls cpu redraw seems to have fixed it.
+
+...
+
+Fixed scaling bug of topologz views (who would have thought that the bottom
+space is not margin, but one additional spacing), added some stream identification
+to the topology constructor.
+
+API of KsTraceGraph was also privatized more and explicitly named with "numatv"
+prefixes.
+
+...
+
+Colors in the topology widget now (allegedly) correspond to colors of CPUs held
+by the GL widget. Cores use an average of their PUs' color, analogously for
+NUMA nodes. Each part of the topology block-tree now has a 1px solid black
+border around itself, which makes it a little prettier + it highlights
+connections between the children and parent (2px solid black line naturally
+forms).
+
+KsPlotTools also got new tools, getting color intensity (courtesy of Stacklook),
+and black or white color based on intensity (again, thank you Stacklook).
+It felt more natural to put these two tools there, as they popped up thrice
+by now in the project and seem rather useful.
+
+Overall, a good day.
+
+Goals:
+
+- Fix bugs, polish
+- Session support maybe
+- Clean up after yourself
+- Document it all
+
+Package tree view will be left as something for extensions.
+Session support most likely will happen.
+Everything else is necessary and required.
+
+## 2025-04-19
+
+Today was mostly spent on code decomposition and bug fixes.
+KsStreamTopology's monster-constructor was broken up into setup functions
+and some helper static functions were also created, namely for creating
+stylesheets for topology items.
+
+Coloring looks quite random, which is a sad sight to see, but there that is
+a consequence of using KernelShark's colors. Not much to do about that.
+A possible change would be somehow choosing colors independently. But that
+loses a connection to already existing context. Another change is using
+lines instead of blocks, but that loses "quick" check of what is currently
+visible (not as quick, unless one is good at remembering colors). Maybe
+instead of repeating "PU P#X L#Y", it could say "N#A-C#B-P#X" or similar.
+It would make the information clearer. It is not necessary to specify machine,
+since those are represented by color in KernelShark already and aren't really
+as important as a topology of a stream - which also means there isn't THAT
+big of a reason to display a machine column, though it is done for completeness.
+
+...
+
+Well, names were shortened to M, NN, C, PU for machine, NUMA node, core and
+processing unit respectively. This will be easy to understand and convey in
+the documentation anyway. PU tree leaves will have a prefix of '(NN X, C Y) ',
+cores will have a prefix of '(NN ) '. This is done to quicken lookup. Machines
+are, again, differentiable easily by color and most likely don't need to be
+included (might even be unnecessary as is).
+
+To be fair, maybe even the PU column is a little redundant - it's already
+connecting to the CPUs, so maybe all of this is unnecessary. the information is
+already there.
+
+...
+
+PU column was commented out after some deliberation if it is actually useful.
+Removing it brought more space and less color chaos to the topology widget.
+The machine column will stay - while not super useful, it is better to show off
+the topology as an actual tree and not a forest implictly connected.
+
+...
+
+Session support will actually be postponed until specifically request - current
+implementation might be problematic due to the static data of KsNUMATVContext, it
+being a singleton. They would logically belong to streams, but those their
+destruction code is hard to find.
+
+It might be worth just "exporting" stream topology configuration data into
+a stream and work from there. Issue for tomorrow I suppose.
+
+Goals:
+
+- Fix bugs, polish
+- Clean up after yourself
+- Document it all
+
+## 2025-04-20
+
+Nevermind, session support exists after it was determined that markers are saved,
+so other C++ parts have to be saved, that also aren't a part of the stream.
+
+What's more worrying is that loading a topology for stream #1, while having
+none for stream #1, assigns the topologyt tree to stream #0 in the visual model.
+That's REALLY bad. They are supposed to be at their stream's position, this
+is a huge inconsistence.
+
+...
+
+OK, big rewrite, but it was fixed. We've come to ALWAYS make a topology
+widget if the Apply button is clicked, which can be reasoned about, but
+the main need was to allow "gaps" in the topology layout. It shouln't
+slow down things much though, since this will happen literally only if
+a CPU redraw is called (which is not often) or by NUMA TV dalog (still not
+often). It's fine.
+
+But this SHOULD mean all bugs found in this are fixed. There are sometimes
+segmentation faults or json faults, but they are random and hard to pinpoint.
+Probably nothing major though.
+
+Now just the couplebreak and kernelstack bugs need fixing, along with
+documentation of NUMA TV.
+
+Goals:
+
+- Fix bugs, polish
+- Clean up after yourself
+- Document it all
+
+## 2025-04-21
+
+NoBoxes plugin now exists. It only enables behaviour of not drawing some
+taskboxes, if the bin's visMask has it unset. The behaviour intself is a little
+janky, but it works most of the time, which is the important part. Too bad, but
+this is what we have, plus it's not a part of the specification, so further
+requirements can be left as an extension.
+
+There have been some changes to the meta README, Tracker, this Devlog, names of
+modifications - all to start converging on the final part of the bachelor thesis
+software work, that being the documentation.
+
+_Author's note: Creative juices are starting to run out, so this is a welcome step._
+
+...
+
+Doxygen documentation is finished! Thank you Copilot, you have done a good job
+this time, a lot of hints were actually what I needed.
+
+After NUMA TV documentation is finished and approved, survey paper work can
+begin. Actually, that and all design documentations for NUMA TV, Stacklook,
+Naps and maybe an improvement to Couplebreak. At the very least some diagrams
+will be needed.
+
+Goals:
+
+- Document it all
+  - Design docs
+  - Pretty pictures
+  - NUMA TV modification documentation
+- Survey paper
+

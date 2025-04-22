@@ -16,7 +16,9 @@
 #include "libkshark-plot.h"
 #include "libkshark-plugin.h"
 #include "libkshark-tepdata.h"
+#ifndef _UNMODIFIED_KSHARK
 #include "libkshark-couplebreak.h"
+#endif
 
 // Plugin header
 #include "naps.h"

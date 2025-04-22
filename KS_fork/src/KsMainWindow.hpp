@@ -23,6 +23,9 @@
 #include "KsPlugins.hpp"
 #include "KsSession.hpp"
 #include "KsUtils.hpp"
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
+#include "KsNUMATopologyViews.hpp"
+// END of change
 
 /**
  * The KsMainWindow class provides Main window for the KernelShark GUI.
@@ -189,6 +192,10 @@ private:
 	QAction		_couplebreakAction;
 	// END of change
 
+	//NOTE: Changed here. (NUMA TV) (2025-04-06)
+	QAction		_numaTVAction;
+	// END of change
+
 	QWidgetAction	_colorAction;
 
 	QWidget		_colSlider;
@@ -229,9 +236,11 @@ private:
 
 	void _exportSession();
 
-	void _listFilterSync(int state);
+	//NOTE: Changed here. (UPDATE CBOX STATES) (2025-04-07)
+	void _listFilterSync(Qt::CheckState state);
 
-	void _graphFilterSync(int state);
+	void _graphFilterSync(Qt::CheckState state);
+	// END of change
 
 	void _presetCBWidget(kshark_hash_id *showFilter,
 			     kshark_hash_id *hideFilter,
@@ -322,6 +331,17 @@ private:
 	using StreamCouplebreakSetting = std::pair<int, bool>;
 
 	void _updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_couplebreaks);
+	// END of change
+
+	//NOTE: Changed here. (NUMA TV) (2025-04-06)
+	
+	void _showNUMATVConfig();
+
+	/// @brief Simpler type name for representing a stream (by its Id) and
+	/// its chosen view and a NUMA TV topology file path.
+	using StreamNUMATVSettings = std::pair<int, ViewTopologyPair>;
+
+	void _updateNUMATVs(QVector<StreamNUMATVSettings> topo_files);
 	// END of change
 
 private slots:

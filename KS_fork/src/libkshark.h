@@ -550,14 +550,23 @@ enum kshark_filter_masks {
 
 	/** Special mask used whene filtering events. */
 	KS_EVENT_VIEW_FILTER_MASK	= 1 << 2,
-
-	/* The next 4 bits are reserved for more KS_X_VIEW_FILTER_MASKs. */
-
+	
+	/* The next 3 bits are reserved for more KS_X_VIEW_FILTER_MASKs. */
+	
+	//NOTE: Changed here. (NOBOXES) (2025-04-20)
+	/**
+	 * Use this mask to set whether to partake in the drawing of taskboxes in
+	 * the graphs as a bin.
+	 */
+	KS_DRAW_TASKBOX_MASK	= 1 << 6,
+	// END of change
+	
 	/**
 	 * Use this mask to check if the content of the entry has been accessed
 	 * by a plugin-defined function.
 	 */
 	KS_PLUGIN_UNTOUCHED_MASK	= 1 << 7
+
 };
 
 /** Filter type identifier. */
@@ -680,19 +689,76 @@ ssize_t kshark_find_entry_by_time(int64_t time,
 				  struct kshark_entry **data_rows,
 				  size_t l, size_t h);
 
+/**
+ * @brief Simple Pid matching function to be user for data requests.
+ *
+ * @param kshark_ctx: Input location for the session context pointer.
+ * @param e: kshark_entry to be checked.
+ * @param sd: Data stream identifier.
+ * @param pid: Matching condition value.
+ *
+ * @returns True if the Pid of the entry matches the value of "pid".
+ *	    Else false.
+ */
 bool kshark_match_pid(struct kshark_context *kshark_ctx,
 		      struct kshark_entry *e, int sd, int *pid);
 
+/**
+ * @brief Simple Cpu matching function to be user for data requests.
+ *
+ * @param kshark_ctx: Input location for the session context pointer.
+ * @param e: kshark_entry to be checked.
+ * @param sd: Data stream identifier.
+ * @param cpu: Matching condition value.
+ *
+ * @returns True if the Cpu of the entry matches the value of "cpu".
+ *	    Else false.
+ */
 bool kshark_match_cpu(struct kshark_context *kshark_ctx,
 		      struct kshark_entry *e, int sd, int *cpu);
 
+/**
+ * @brief Simple event Id matching function to be user for data requests.
+ *
+ * @param kshark_ctx: Input location for the session context pointer.
+ * @param e: kshark_entry to be checked.
+ * @param sd: Data stream identifier.
+ * @param event_id: Matching condition value.
+ *
+ * @returns True if the event Id of the entry matches the value of "event_id".
+ *	    Else false.
+ */
 bool kshark_match_event_id(struct kshark_context *kshark_ctx,
 			   struct kshark_entry *e, int sd, int *event_id);
 
+/**
+ * @brief Simple Event Id and PID matching function to be user for data requests.
+ *
+ * @param kshark_ctx: Input location for the session context pointer.
+ * @param e: kshark_entry to be checked.
+ * @param sd: Data stream identifier.
+ * @param values: An array of matching condition value.
+ *	  values[0] is the matches PID and values[1] is the matches event Id.
+ *
+ * @returns True if the event Id of the entry matches the values.
+ *	    Else false.
+ */
 bool kshark_match_event_and_pid(struct kshark_context *kshark_ctx,
 				struct kshark_entry *e,
 				int sd, int *values);
 
+/**
+ * @brief Simple Event Id and CPU matching function to be user for data requests.
+ *
+ * @param kshark_ctx: Input location for the session context pointer.
+ * @param e: kshark_entry to be checked.
+ * @param sd: Data stream identifier.
+ * @param values: An array of matching condition value.
+ *	  values[0] is the matches PID and values[1] is the matches event Id.
+ *
+ * @returns True if the event Id of the entry matches the values.
+ *	    Else false.
+ */
 bool kshark_match_event_and_cpu(struct kshark_context *kshark_ctx,
 				struct kshark_entry *e,
 				int sd, int *values);

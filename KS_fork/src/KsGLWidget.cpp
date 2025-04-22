@@ -166,7 +166,6 @@ void KsGLWidget::render()
 {
 	/* Process and draw all graphs by using the built-in logic. */
 	_makeGraphs();
-
 	/* Process and draw all plugin-specific shapes. */
 	_makePluginShapes();
 };

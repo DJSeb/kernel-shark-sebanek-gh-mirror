@@ -19,6 +19,9 @@
 
 // KernelShark
 #include "KsPlotTools.hpp"
+//NOTE: Changed here. (COUPLEBREAK) (2025-04-20)
+#include "libkshark-couplebreak.h"
+// END of change 
 
 namespace KsPlot
 {
@@ -1425,7 +1428,13 @@ void Graph::draw(float size)
 		drawLine(_bins[0]._base, _bins[_size - 1]._base, {}, size);
 	}
 
-	/* Draw as vartical lines all bins containing data. */
+	//NOTE: Changed here. (NOBOXES) (2025-04-20)
+	// Taskbox won't be drawn if this is true. This variable is set
+	// in the loops below.
+	bool dont_draw = false;
+	// END of change
+
+	/* Draw as vertical lines all bins containing data. */
 	for (int i = 0; i < _size; ++i)
 		if (_bins[i]._idFront >= 0 || _bins[i]._idBack >= 0 ||
 		    _bins[i]._idFront == _idlePid || _bins[i]._idBack ==_idlePid)
@@ -1447,12 +1456,18 @@ void Graph::draw(float size)
 	 */
 	for (; b < _size; ++b) {
 		if (lamCheckEnsblVal(_bins[b]._idBack)) {
+			//NOTE: Changed here. (NOBOXES) (2025-04-20)
+			// This bin has its mask set to 0, its taskbox won't be drawn.
+			dont_draw |= !(_bins[b]._visMask & KS_DRAW_TASKBOX_MASK);
+			// END of change
+
 			lastPid = _bins[b]._idFront;
 			/*
 			 * Initialize a box starting from this bin.
 			 * The color of the taskBox corresponds to the Pid
 			 * of the process.
 			 */
+
 			taskBox._color = getColor(_ensembleColors, lastPid);
 			taskBox.setPoint(0, _bins[b]._base.x(),
 					_bins[b]._base.y() - boxH);
@@ -1477,6 +1492,13 @@ void Graph::draw(float size)
 		    _bins[b]._idBack  != lastPid) {
 			/* A new process starts here. */
 			if (b > 0 && lamCheckEnsblVal(lastPid)) {
+				//NOTE: Changed here. (NOBOXES) (2025-04-20)
+				// Skip this bin, it does not wish to be included
+				// in the taskbox as an end.
+				if (!(_bins[b]._visMask & KS_DRAW_TASKBOX_MASK)) {
+					continue;
+				}
+				// END of change
 				/*
 				 * There is another process running up to this
 				 * point. Close its colored box here and draw.
@@ -1485,10 +1507,21 @@ void Graph::draw(float size)
 						_bins[b]._base.y() - boxH);
 				taskBox.setPoint(2, _bins[b]._base.x() - 1,
 						_bins[b]._base.y());
-				taskBox.draw();
+				//NOTE: Changed here. (NOBOXES) (2025-04-20)
+				// Draw the taskbox if allowed and make the condition false
+				// for another taskbox drawing.
+				if (!dont_draw)
+					taskBox.draw();
+				dont_draw = false;
+				// END of change
 			}
 
 			if (lamCheckEnsblVal(_bins[b]._idBack)) {
+				//NOTE: Changed here. (NOBOXES) (2025-04-20)
+				// This bin has its mask set to 0, its taskbox won't be drawn. 
+				dont_draw |= !(_bins[b]._visMask & KS_DRAW_TASKBOX_MASK);
+				// END of change
+
 				/*
 				 * This is a regular process. Initialize
 				 * colored box starting from this bin.
@@ -1511,11 +1544,16 @@ void Graph::draw(float size)
 		 * This is the end of the Graph and we have a process running.
 		 * Close its colored box and draw.
 		 */
+
 		taskBox.setPoint(3, _bins[_size - 1]._base.x(),
 				_bins[_size - 1]._base.y() - boxH);
 		taskBox.setPoint(2, _bins[_size - 1]._base.x(),
 				_bins[_size - 1]._base.y());
-		taskBox.draw();
+		//NOTE: Changed here. (NOBOXES) (2025-04-20)
+		// Draw the taskbox if allowed.
+		if (!dont_draw)
+			taskBox.draw();
+		// END of change
 	}
 }
 
@@ -1541,5 +1579,23 @@ void VirtGap::_draw([[maybe_unused]]const Color &col,
 	g.setFill(false);
 	g.draw();
 }
+
+//NOTE: Changed here. ("NUMA TV") (2025-04-18)
+Color black_or_white(float color_intensity, float limit) {
+    const static Color WHITE {0xFF, 0xFF, 0xFF};
+    const static Color BLACK {0, 0, 0};
+
+    return (color_intensity > limit) ? BLACK : WHITE;
+}
+// END of change
+
+//NOTE: Changed here. ("NUMA TV") (2025-04-18)
+float get_color_intensity(const Color& c) {
+    // Color multipliers are chosen the way they are based on human
+    // eye's receptiveness to each color (green being the color human
+    // eyes focus on the most).
+    return (c.b() * 0.114f) + (c.g() * 0.587f) + (c.r() * 0.299f);
+}
+// END of change
 
 } // KsPlot

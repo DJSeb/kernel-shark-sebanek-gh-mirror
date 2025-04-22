@@ -91,7 +91,7 @@ data record finding and also drawing user interface objects, like buttons.
 
 ### Bachelor thesis extensions
 
-Using formatted data (e.g. XML format) from Istopo program, KernelShark shall be able to visualize
+Using formatted data (e.g. XML format) from hwloc' lstopo program, KernelShark shall be able to visualize
 NUMA topology and hyperthread sibling relationships in its graph.
 
 - If KernelShark does NOT receive such a file, it shall not be able to create such a graph form and

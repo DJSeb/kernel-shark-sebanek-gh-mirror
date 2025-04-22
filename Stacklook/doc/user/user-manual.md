@@ -13,6 +13,7 @@ Figure 1.
 - KernelShark and its dependencies
   - version *2.4.0-couplebreak* and higher for custom KernelShark
   - version *2.3.2* for unmodified KernelShark
+- Doxygen for documentation
 
 ## Compatibility
 
@@ -22,7 +23,7 @@ these features from the plugin:
 - Buttons optionally being the same color as the task is in the graph
 - Mouse hover showing a preview of the kernel stack with an adjustable stack offset for it in the configuration
 
-No other dependencies are necessary, except maybe the standard libraries of C and C++.
+No other dependencies are necessary, except maybe the standard libraries of C and C++ and Doxygen for documentation. 
 
 ## Build and install only this plugin
 

@@ -1,0 +1,17 @@
+/**
+ * @file design.doxygen
+ * @date 2025-04-20
+ * @version 1.0
+ * @copyright Copyright (C) 2025, David Jaromír Šebánek <djsebofficial@gmail.com>
+ * 
+ * @page design Design
+ * The plugin is not designed in any somplicated way. All it does is adjust the visiblity of KernelShark entries
+ * by using the NO BOXES modification's new visibility mask. The plugin really only introduces event handlers
+ * that do exactly that - its plugin context contains only a single integer, which holds ID of `ftrace/kernel_stack`
+ * events in the trace file. It also uses COUPLEBREAK modification's waking target event ID, but doesn't store it in
+ * the context, as that one has a macro-defne constant value.
+ * 
+ * The design therefore boils down to functions and plugin context, whose purposes are shared by all KernelShark plugins,
+ * and a single static function, which serves as an event handler - its only purpose being a single bitwise AND operation
+ * on the visibility of an entry.
+ */

@@ -1,0 +1,19 @@
+/*!
+ * @file mainpage.doxygen
+ * @date 2025-03-25
+ * @version 1.0
+ * @copyright Copyright (C) 2025, David Jaromír Šebánek <djsebofficial@gmail.com>
+ * 
+ * @mainpage
+ * @section about About
+ *
+ * This is the API documentation for the NoBoxes plugin. For user documentation, seek out "user-manual" markdown or PDF
+ * document elsewhere. If **design documentation** is desired, navigate to it via the navigation menu.
+ *
+ * Plugin was designed as a standalone shared library and not as a library to use in other projects. As such
+ * this kind of use of this plugin is discouraged, but not banned - after all, if someone is brave enough, they can
+ * utilise anything.
+ * 
+ * For this plugin, there isn't any other API than its context with a singular integer, so the library use
+ * is very limited, since the API is basically non-existent.
+ */
