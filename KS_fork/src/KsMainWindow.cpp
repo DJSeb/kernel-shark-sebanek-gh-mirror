@@ -1823,7 +1823,8 @@ void KsMainWindow::_showNUMATVConfig() {
 		return;
 	}
 	
-	dialog = new KsNUMATVDialog{kshark_ctx, this};
+	NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
+	dialog = new KsNUMATVDialog{kshark_ctx, numatv_ctx, this};
 	connect(dialog, &KsNUMATVDialog::apply, // Actor + action on actor
 		this, &KsMainWindow::_updateNUMATVs); // Reactor + action on reactor
 
