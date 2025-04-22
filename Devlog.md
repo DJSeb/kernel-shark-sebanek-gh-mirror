@@ -1017,7 +1017,7 @@ the topology as an actual tree and not a forest implictly connected.
 ...
 
 Session support will actually be postponed until specifically request - current
-implementation might be problematic due to the static data of NUMATVContextl, it
+implementation might be problematic due to the static data of KsNUMATVContext, it
 being a singleton. They would logically belong to streams, but those their
 destruction code is hard to find.
 

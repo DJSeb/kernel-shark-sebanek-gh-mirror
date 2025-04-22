@@ -1096,7 +1096,7 @@ void KsTraceGraph::_numatv_hide_stream_topo(int stream_id, bool hide)
  * @param numa_ctx NUMA TV configuration singleton.
  */
 void KsTraceGraph::_numatv_existing_topology_action(int stream_id,
-	QVector<int>& cpusToDraw, const NUMATVContext& numa_ctx)
+	QVector<int>& cpusToDraw, const KsNUMATVContext& numa_ctx)
 {
 	auto stream_cfg = numa_ctx.observe_cfg(stream_id);
 	ViewType stream_view = stream_cfg->get_view_type();
@@ -1128,7 +1128,7 @@ void KsTraceGraph::_numatv_existing_topology_action(int stream_id,
 void KsTraceGraph::_numatv_redraw_topo_widgets(int stream_id,
 	QVector<int>& cpusToDraw)
 {
-	const NUMATVContext& numa_ctx = NUMATVContext::get_instance();
+	const KsNUMATVContext& numa_ctx = KsNUMATVContext::get_instance();
 	bool topology_exists = numa_ctx.exists_for(stream_id);
 
 	if (topology_exists) {

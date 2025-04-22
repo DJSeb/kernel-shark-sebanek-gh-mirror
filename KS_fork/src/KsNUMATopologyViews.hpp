@@ -79,9 +79,9 @@ public: // Business
  * configuration for all streams. Through it, topology configurations
  * can be added, updated, observed, deleted and cleared (delete all).
  */
-class NUMATVContext {
+class KsNUMATVContext {
 public:
-    static NUMATVContext& get_instance();
+    static KsNUMATVContext& get_instance();
 private:
     /**
      * @brief Unordered map of stream IDs to their topology configurations.
@@ -96,21 +96,21 @@ public:
     int delete_cfg(int stream_id);
     void clear();
 private:
-    NUMATVContext();
+    KsNUMATVContext();
     /// @brief Function deleted, as the singleton should not be copied. 
-    NUMATVContext(const NUMATVContext&) = delete;
+    KsNUMATVContext(const KsNUMATVContext&) = delete;
     /// @brief Function deleted, as the singleton should not be copied.
-    NUMATVContext& operator=(const NUMATVContext&) = delete;
+    KsNUMATVContext& operator=(const KsNUMATVContext&) = delete;
     /// @brief Function deleted, as the singleton should not be moved.
-    NUMATVContext(NUMATVContext&&) = delete;
+    KsNUMATVContext(KsNUMATVContext&&) = delete;
     /// @brief Function deleted, as the singleton should not be moved.
-    NUMATVContext& operator=(NUMATVContext&&) = delete;
+    KsNUMATVContext& operator=(KsNUMATVContext&&) = delete;
     /// @brief Default destructor for the singleton.
     // It is enough, as the singleton doesn't own anything that would pose
     // a problem to normal destruction, e.g. pointers to heap-allocated objects.
     // All items in its unordered_map are have their own destructors, which
     // correctly destroy them.
-    ~NUMATVContext() = default;
+    ~KsNUMATVContext() = default;
 };
 
 // Global functions
@@ -120,7 +120,7 @@ int numatv_count_cores(const NodeCorePU& brief_topo);
 NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo,
     QVector<int> PUs);
 bool numatv_stream_wants_topology_widget(int stream_id,
-    const NUMATVContext& numatv_ctx);
+    const KsNUMATVContext& numatv_ctx);
 
 #endif // _KS_NUMA_TV_HPP
 // END of change

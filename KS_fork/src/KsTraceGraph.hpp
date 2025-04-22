@@ -181,7 +181,7 @@ private:
 	void _numatv_remove_topology_widget(int stream_id);
 
 	void _numatv_existing_topology_action(int stream_id,
-		QVector<int>& cpusToDraw, const NUMATVContext& numa_ctx);
+		QVector<int>& cpusToDraw, const KsNUMATVContext& numa_ctx);
 	
 	void _numatv_hide_stream_topo(int stream_id, bool hide);
 

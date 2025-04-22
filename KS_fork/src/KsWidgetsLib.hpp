@@ -763,17 +763,17 @@ private:
 	QPushButton* _setup_load_button_per_stream(QString last_fpath,
 		QLabel* topo_file_location);
 	QLabel* _setup_status_per_stream(int stream_id, QVBoxLayout* parent_layout,
-		const NUMATVContext& numatv_ctx);
+		const KsNUMATVContext& numatv_ctx);
 	QButtonGroup* _setup_radios_per_stream(int stream_id,
-		QVBoxLayout* parent_layout, const NUMATVContext& numatv_ctx);
+		QVBoxLayout* parent_layout, const KsNUMATVContext& numatv_ctx);
 	void _setup_streams_scroll_area(kshark_context *kshark_ctx,
-		const NUMATVContext& numatv_ctx);
+		const KsNUMATVContext& numatv_ctx);
 	void _setup_layout();
 public:
 	// Don't allow default constructor, it would contain invalid values.
 	KsNUMATVDialog() = delete;
 	explicit KsNUMATVDialog(kshark_context *kshark_ctx,
-		const NUMATVContext& numatv_ctx, QWidget *parent = nullptr);
+		const KsNUMATVContext& numatv_ctx, QWidget *parent = nullptr);
 };
 // END of change
 

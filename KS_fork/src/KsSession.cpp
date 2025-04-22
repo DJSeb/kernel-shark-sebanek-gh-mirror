@@ -720,7 +720,7 @@ void KsSession::loadUserPlugins(kshark_context *kshark_ctx, KsPluginManager *pm)
  * This is done to have an obvious dependency on the configuraton, instead of hiding
  * it in code's implementation - otherwise, it could just be inside the function.
  */
-void KsSession::saveTopology(int n_streams, const NUMATVContext& numatv_ctx) {
+void KsSession::saveTopology(int n_streams, const KsNUMATVContext& numatv_ctx) {
 	kshark_config_doc *topology =
 		kshark_config_new("kshark.config.topology", KS_CONFIG_JSON);
 	json_object *jtopology = KS_JSON_CAST(topology->conf_doc);
@@ -763,7 +763,7 @@ void KsSession::saveTopology(int n_streams, const NUMATVContext& numatv_ctx) {
  * This is done to have an obvious dependency on the configuraton, instead of hiding
  * it in code's implementation - otherwise, it could just be inside the function.
  */
-void KsSession::loadTopology(KsTraceGraph* graph, NUMATVContext& numatv_ctx) {
+void KsSession::loadTopology(KsTraceGraph* graph, KsNUMATVContext& numatv_ctx) {
 	kshark_config_doc *topology = kshark_config_alloc(KS_CONFIG_JSON);
 
 	if (!kshark_config_doc_get(_config, "NUMA TV", topology)) {
