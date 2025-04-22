@@ -90,6 +90,8 @@ Time.
 
 ## "Why aren't topology views more interactive?"
 
+## "Why the divide the topology widgets from configuratons?"
+
 # Solution
 
 ## How configuration is solved
