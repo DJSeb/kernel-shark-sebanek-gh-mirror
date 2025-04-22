@@ -128,9 +128,16 @@ public:
 						  const QString& label5 = "");
 	// END of change
 	
-	//NOTE: Changed here. (NUMA TV) (2025-04-15)
-	void numatvHideTopologyWidget(bool hide);
+	//NOTE: Changed here. (NUMA TV) (2025-04-22)
+	/**
+	 * @brief Getter of the streams' topology configrations' context.
+	 * 
+	 * @return Reference to the NUMA TV context.
+	 */
+	KsNUMATVContext& getNUMATVContext() { return _numaTvCtx; }
 	// END of change
+
+	void numatvHideTopologyWidget(bool hide);
 
 	void numatvClearTopologyWidgets();
 	// END of change
@@ -181,13 +188,14 @@ private:
 	void _numatv_remove_topology_widget(int stream_id);
 
 	void _numatv_existing_topology_action(int stream_id,
-		QVector<int>& cpusToDraw, const KsNUMATVContext& numa_ctx);
+		QVector<int>& cpusToDraw);
+
+	void _numatv_redraw_topo_widgets(int stream_id,
+		QVector<int>& cpusToDraw);
 	
-	void _numatv_hide_stream_topo(int stream_id, bool hide);
-
-	void _numatv_redraw_topo_widgets(int stream_id, QVector<int>& cpusToDraw);
-
 	void _numatv_adjust_topo_task_padding(int stream_id);
+
+	void _numatv_hide_stream_topo(int stream_id, bool hide);
 	// END of change
 
 	QString _t2str(uint64_t sec, uint64_t usec);
@@ -204,6 +212,11 @@ private:
 		_labelI1, _labelI2, _labelI3, _labelI4, _labelI5; // Proc. info
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-12)
+	/**
+	 * @brief Configuration object for topology data of all streams. 
+	 */
+	KsNUMATVContext _numaTvCtx;
+
 	/**
 	 * @brief Wrapper for the topology widget and the GL widget.
 	 */
@@ -281,35 +294,49 @@ class KsStreamTopology : public QWidget {
 private: // Qt parts
 	/// @brief Main layout of the widget.
 	QVBoxLayout _main_layout;
+
 	/// @brief Container of the topology tree.
 	QWidget _topo;
+	
 	/// @brief Layout of the topology tree.
 	QHBoxLayout _topo_layout;
+
 	/// @brief Label for the machine (stream) name and a root
 	/// of the topology tree.
 	QLabel _machine;
+
 	/// @brief Container of the nodes.
 	QWidget _nodes;
+
 	/// @brief Layout of the nodes.
 	QVBoxLayout _nodes_layout;
+
 	/// @brief Container of the cores.
 	QWidget _cores;
+
 	/// @brief Layout of the cores.
 	QVBoxLayout _cores_layout;
 public:
 	explicit KsStreamTopology(int stream_id, const NodeCorePU& brief_topo,
 		const KsTraceGraph* trace_graph, QWidget* parent = nullptr);
+
 	void hide_topology(bool hide);
+
 	void resize_topology_widget(int new_height);
+
 private:
 	void _setup_widget_structure(int v_spacing);
+
 	void _setup_widget_layouts();
+
 	int _setup_topology_tree_core(int core_lid, int node_lid,
 		int v_spacing, const PUIds& PUs, const KsGLWidget* gl_widget,
 		QLabel* node_parent, unsigned int& node_reds,
 		unsigned int& node_greens, unsigned int& node_blues);
+
 	int _setup_topology_tree_node(int node_lid, int v_spacing,
 		const CorePU& cores, const KsGLWidget* gl_widget);
+
 	void _setup_topology_tree(int stream_id, int v_spacing,
 		const NodeCorePU& brief_topo, KsGLWidget* gl_widget);
 };

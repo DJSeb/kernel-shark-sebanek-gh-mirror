@@ -123,21 +123,6 @@ static hwloc_topology_t get_hwloc_topology(const std::string& topo_fpath) {
 // KsNUMATVContext
 
 /**
- * @brief Getter for the KsNUMATVContext Meyers singleton.
- * 
- * @return Reference to the KsNUMATVContext instance.
- */
-KsNUMATVContext& KsNUMATVContext::get_instance() {
-    static KsNUMATVContext instance;
-    return instance;
-}
-
-/**
- * @brief Empty constructor for the KsNUMATVContext.
- */
-KsNUMATVContext::KsNUMATVContext() : _active_numatvs({}) {}
-
-/**
  * @brief Checks for existence of a topology configuration for a given stream ID.
  * 
  * @param stream_id ID of the stream to check for.
@@ -455,7 +440,7 @@ int numatv_count_cores(const NodeCorePU& brief_topo) {
  * @param PUs List of PUs to filter the brief topology by.
  * @return New brief topology containing only the PUs that are present in the given list.
  */
-NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo, QVector<int> PUs) {
+NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo, const QVector<int>& PUs) {
     NodeCorePU filtered_topo{};
 
     for (const auto& [node_lid, cores]: brief_topo) {

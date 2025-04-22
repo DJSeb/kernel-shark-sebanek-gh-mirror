@@ -80,32 +80,6 @@ graphs), contains topology widgets in a vertical top-down layout.
 
 ## Design overview (more in *Solution*)
 
-## "Why is KsNUMATVContext a singleton?"
-
-This a good question, the honest answer is that it was the most convenient during design
-and development. It has not produced any issues during normal operations
-of KernelShark and access in code is limited to KsMainWindow and KsTraceGraph.
-As a configuration, using a singleton also made sense, because we really only need one
-NUMA TV configuration for a process.
-
-That is not to say this cannot be changed. One could make KsNUMATVContext singleton into a member of
-KsMainWindow and change when or how KsTraceGraph will redraw topology widgets. As it stands, topology
-widget redraws happen on each cpuRedraw or the widgets are adjusted with taskRedraw. Both of which
-make sense, as the topology widgets need to be closely synchronised with the GL widget's graphs.
-
-Changes to the redraw functions would also necesitate changes to KsSession, as topology widgets are
-loaded before all graphs and drawn by the redraw functions.
-
-Approach without the singleton pattern approach has been attempted in the "de_singletoning" branch of
-the project repository. It all works like the singleton implementation, there have been few API changes
-and singleton is no more. However, main developer felt uneasy changing an estabilished KShark API and
-decided that the singleton implementation will be used in the end.
-
-The only issues with the singleton pattern being used was "maybe the staticness of it could cause
-problems" and "it kind of stands alone, not fully connected to the main window". First issue hasn't
-been proven true druing normal operations. Second issue is a design characteristic, but the NUMA TV
-context is a part of the kshark-gui component, meaning it does live with the main window
-
 ## "Why are topology widgets stored as pointers?"
 
 ## "Why not use more of hwloc's topology data?"

@@ -209,6 +209,12 @@ KsMainWindow::~KsMainWindow()
 	 */
 	_graph.glPtr()->freePluginShapes();
 
+	//NOTE: Changed here. (NUMA TV) (2025-04-22)
+	// Explicit deletion of NUMA TV data and widgets, to be safe.
+	_graph.getNUMATVContext().clear();
+	_graph.numatvClearTopologyWidgets();
+	// END of change
+
 	if (kshark_instance(&kshark_ctx))
 		kshark_free(kshark_ctx);
 }
@@ -628,9 +634,9 @@ void KsMainWindow::_open()
 		// This clears existing NUMA topology configurations, hides their
 		// containing widget and clears NUMA topology widgets.
 		// This puts the topology widgets into a clean state.
-		KsNUMATVContext::get_instance().clear();
-		graphPtr()->numatvHideTopologyWidget(true);
-		graphPtr()->numatvClearTopologyWidgets();
+		_graph.getNUMATVContext().clear();
+		_graph.numatvHideTopologyWidget(true);
+		_graph.numatvClearTopologyWidgets();
 		// END of change
 		loadDataFile(fileName);
 	}
@@ -738,7 +744,7 @@ void KsMainWindow::_updateSession()
 	_session.saveVisModel(_graph.glPtr()->model()->histo());
 	_session.saveDataStreams(kshark_ctx);
 	//NOTE: Changed here. (NUMA TV) (2025-04-20)
-	_session.saveTopology(kshark_ctx->n_streams, KsNUMATVContext::get_instance());
+	_session.saveTopology(kshark_ctx->n_streams, _graph.getNUMATVContext());
 	// END of change
 	_session.saveGraphs(kshark_ctx, _graph);
 	_session.saveDualMarker(&_mState);
@@ -1523,8 +1529,8 @@ void KsMainWindow::loadSession(const QString &fileName)
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-20)
 	// Topology configurations have to be loaded before the graphs, otherwise
-	// we miss a cpuRedraw, which would show the topology widgets for each stream.
-	_session.loadTopology(&_graph, KsNUMATVContext::get_instance());
+	// we miss a cpuTopoReDraw, which would show the topology widgets for each stream.
+	_session.loadTopology(&_graph, _graph.getNUMATVContext());
 	pb.setValue(185);
 	// END of change
 
@@ -1823,8 +1829,7 @@ void KsMainWindow::_showNUMATVConfig() {
 		return;
 	}
 	
-	KsNUMATVContext& numatv_ctx = KsNUMATVContext::get_instance();
-	dialog = new KsNUMATVDialog{kshark_ctx, numatv_ctx, this};
+	dialog = new KsNUMATVDialog{kshark_ctx, _graph.getNUMATVContext(), this};
 	connect(dialog, &KsNUMATVDialog::apply, // Actor + action on actor
 		this, &KsMainWindow::_updateNUMATVs); // Reactor + action on reactor
 
@@ -2056,9 +2061,9 @@ static void apply_numatv(int stream_id, ViewType view,
  * a pair of view type and topology file name.
  */
 void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
-	KsNUMATVContext& numatv_ctx = KsNUMATVContext::get_instance();
 	bool hide_topo_button = true;
 
+	KsNUMATVContext& numatv_ctx = _graph.getNUMATVContext();
 	for (int i = 0; i < stream_numa.size(); i++) {
 		// Unpack the vector's items
 		int stream_id = stream_numa[i].first;

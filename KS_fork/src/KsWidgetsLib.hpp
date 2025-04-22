@@ -274,6 +274,7 @@ protected:
 	}
 
 protected:
+	/** Toolbar for the checkbox wiget. */
 	QToolBar _tb;
 
 	/** Identifier of the Data stream for which the selection applies. */

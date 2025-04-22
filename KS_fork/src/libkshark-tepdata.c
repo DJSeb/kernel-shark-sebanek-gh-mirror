@@ -2468,6 +2468,11 @@ char **kshark_tracecmd_local_plugins()
 	return tracefs_tracers(tracefs_tracing_dir());
 }
 
+/**
+ * @brief Frees tracecmd plugins, specified by a list of names.
+ * 
+ * @param list List of plugin names to be freed.
+ */
 void kshark_tracecmd_plugin_list_free(char **list)
 {
 	tracefs_list_free(list);

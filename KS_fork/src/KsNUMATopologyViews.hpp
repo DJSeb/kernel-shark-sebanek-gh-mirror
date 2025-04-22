@@ -75,13 +75,11 @@ public: // Business
 };
 
 /**
- * @brief Meyers singleton class that manages the NUMA Topology Views
+ * @brief Class that manages the NUMA Topology Views
  * configuration for all streams. Through it, topology configurations
  * can be added, updated, observed, deleted and cleared (delete all).
  */
 class KsNUMATVContext {
-public:
-    static KsNUMATVContext& get_instance();
 private:
     /**
      * @brief Unordered map of stream IDs to their topology configurations.
@@ -95,22 +93,6 @@ public:
     const StreamTopologyConfig* observe_cfg(int stream_id) const;
     int delete_cfg(int stream_id);
     void clear();
-private:
-    KsNUMATVContext();
-    /// @brief Function deleted, as the singleton should not be copied. 
-    KsNUMATVContext(const KsNUMATVContext&) = delete;
-    /// @brief Function deleted, as the singleton should not be copied.
-    KsNUMATVContext& operator=(const KsNUMATVContext&) = delete;
-    /// @brief Function deleted, as the singleton should not be moved.
-    KsNUMATVContext(KsNUMATVContext&&) = delete;
-    /// @brief Function deleted, as the singleton should not be moved.
-    KsNUMATVContext& operator=(KsNUMATVContext&&) = delete;
-    /// @brief Default destructor for the singleton.
-    // It is enough, as the singleton doesn't own anything that would pose
-    // a problem to normal destruction, e.g. pointers to heap-allocated objects.
-    // All items in its unordered_map are have their own destructors, which
-    // correctly destroy them.
-    ~KsNUMATVContext() = default;
 };
 
 // Global functions
@@ -118,7 +100,7 @@ private:
 int numatv_count_PUs(const NodeCorePU& brief_topo);
 int numatv_count_cores(const NodeCorePU& brief_topo);
 NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo,
-    QVector<int> PUs);
+    const QVector<int>& PUs);
 bool numatv_stream_wants_topology_widget(int stream_id,
     const KsNUMATVContext& numatv_ctx);
 
