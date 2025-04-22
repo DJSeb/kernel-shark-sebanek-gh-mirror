@@ -34,6 +34,7 @@ paired with their PUs, which are represented by their logical indices paired wit
 *C* - Label noting a core node in the topology tree. Usually followed by a number of its logical index.
 *Core* - Structure containing one or more PUs in a hwloc topology. On systems with only one 1 PU per
 core, e.g. where hyperthreading is disabled, they are interchangeable.
+*GL widget* - OpenGL widget used by KernelShark to plot its CPU and task graphs.
 *Logical index* - Index given to a part of the topology by hwloc during topology discovery. Together
 with object type (i.e. core, NUMA node, PU), they form a unique identifier of a component in a given
 topology.
@@ -63,6 +64,7 @@ children are Node nodes and cores are tree's leaves. For a NUMA topology, Node n
 *Topology visualisation* - Interchangeable with topology tree.
 *Topology widget* - Qt widget with a topology tree and possibly task padding, shown in the wrapper topology
 widget.
+*Trace graph* - Qt widget housing GL widget, wrapper topology widget and controls for the GL widget.
 *View/view type* - Enumerated option of how to display topology of a stream. Default view is what KernelShark
 used before this modification (and can be achieved still).
 *Wrapper topology widget* - Shown to the left of KernelShark's GL widget (with the classic KernelShark
@@ -71,6 +73,10 @@ graphs), contains topology widgets in a vertical top-down layout.
 # Design
 
 ## Main design objectives
+
+- Keep existing KShark API
+- Configuration-visualisation layers
+- Synchronisation with GL widget's graphs
 
 ## Design overview (more in *Solution*)
 
@@ -90,11 +96,15 @@ make sense, as the topology widgets need to be closely synchronised with the GL 
 Changes to the redraw functions would also necesitate changes to KsSession, as topology widgets are
 loaded before all graphs and drawn by the redraw functions.
 
-This approach has been attempted in the "de_singletoning" branch of the project repository. It all
-works like the singleton implementation, there have been few API changes and singleton is no more.
-However, main developer felt uneasy changing an estabilished KShark API and decided that the singleton
-implementation will be used in the end (do not worry, main developer spent a good few hours thinking
-about what to use in the main build, it is not a simple choice based on emotions).
+Approach without the singleton pattern approach has been attempted in the "de_singletoning" branch of
+the project repository. It all works like the singleton implementation, there have been few API changes
+and singleton is no more. However, main developer felt uneasy changing an estabilished KShark API and
+decided that the singleton implementation will be used in the end.
+
+The only issues with the singleton pattern being used was "maybe the staticness of it could cause
+problems" and "it kind of stands alone, not fully connected to the main window". First issue hasn't
+been proven true druing normal operations. Second issue is a design characteristic, but the NUMA TV
+context is a part of the kshark-gui component, meaning it does live with the main window
 
 ## "Why are topology widgets stored as pointers?"
 
