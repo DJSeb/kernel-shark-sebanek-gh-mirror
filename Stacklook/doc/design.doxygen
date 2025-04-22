@@ -7,7 +7,81 @@
  * 
  * @page design Design
  * @section structure Structure
- * Below is a description of the design of the Stacklook plugin.
+ * Below is a description of the design of the Stacklook plugin, described in short
+ * paragraphs concerning themselves with each logic part of the plugin. These can be a
+ * collection of functions, classes or some variables.
  * 
- * TODO: This document.
+ * @subsection context Plugin context
+ * Plugin context serves as a place for plugin-wise global variables. Such variables
+ * are IDs of events interesting for the plugin, collection of entries of interesting
+ * events, whether a certain event exists etc. This structure is created before KernelShark
+ * loads a stream (this is when event and draw handlers are also registered). It is filled
+ * with data during a stream's load. Context is then used in the plugin throughout its
+ * lifetime and not modified further (except when first pass through sorted event entries
+ * detects whether any kernel stack entries exist or not).
+ * 
+ * @subsection evt_handlers Event handlers
+ * These functions only add certain event entries to the plugin context's collection of
+ * interesting entries. Their functionality beyond that is minimal.
+ * 
+ * @subsection stacklookhub "Stacklook.cpp" - the hub of the plugin
+ * This file is mainly composed of static functions, which are called by the draw handlers
+ * for interesting event entries. Creation of buttons, checking whether to draw them, colors
+ * of them and data they will use - all is determined here. This file is the center of the
+ * whole plugin, where other types are used. Few functions from the C part of the plugin are
+ * also defined here, to make use of C++'s features, but allow usage in C as well.
+ * 
+ * It also connects the plugin's configuration window with the main window of
+ * KernelShark.
+ * 
+ * @subsection prev_state Previous state
+ * A small section of the plugin also includes API for getting the previous state of
+ * a task. This is just mapping of task state abbreviations to their full names and API
+ * for getting the previous state of a task.
+ * 
+ * @subsection config Configuration
+ * Configuration of the plugin is managed by a singleton object (as the plugin needs only one
+ * configuration and it is useful for it to be globally accessible). This configuration
+ * object shares its current data with the configruation window, which is the only way
+ * how to change the configuration in the GUI. The configuration window is a
+ * `QWidget` object, which styles itself as a QDialog. It is accessible from the Tools menu
+ * in the toolbar of the main window for easy user access.
+ * 
+ * Configuration controls colors of buttons, offsets into the kernel stack,
+ * what supported events are allowed to show buttons and at what maximum amount of
+ * entries shown should the buttons be drawn. It is used throughout the plugin's code,
+ * many times without the need to pass it as a parameter, meaning it is hidden.
+ * 
+ * Such are the design pitfalls of using a singleton pattern.
+ * 
+ * @subsection buttons Buttons
+ * Stacklook buttons are an upside down triangle with a text box inside, always having the
+ * word "STACK" in it. If they are above a `sched/sched_switch` event, the text box will
+ * also include the previous state of the task. Buttons also have an outline, to better ditinguish
+ * them in the graph plot. They are to be created on demand if certain conditions are met.
+ * Double clicking on them opens a dialog with a more detailed view of the stack trace, hovering
+ * over them shows three stack items from the top of the kernel stack taken after the event the
+ * buttons are rawn above (there is a configuration option of how many items from the top to skip
+ * for each event type, as sometimes there are more interesting items below the ones at the very top).
+ * Buttons also hold pointers to event entries to pull kernel stack data from.
+ * 
+ * @subsection detailed_view Detailed view
+ * Detailed views are Qt widgets, which show the full stack trace taken after an event. They allow
+ * two views - a raw view, which shows the stack trace as it is and a list view, which shows
+ * the stack trace in a list form, with the top of the stack being at the bottom of the list.
+ * The list view is the default one. The detailed view is created on demand when a button is
+ * double clicked. It is dependent on the main window of KernelShark, so it will be closed
+ * when the main window is closed, same goes for destruction. There can be multiple
+ * detailed views of the same event open at the same time, as they cache the data during
+ * their construction to show them. They persist even if the original stream has been
+ * closed, allowing the user to view stack traces of different streams' events.
+ * 
+ * They will always include information on what task's stack trace is being viewed and if
+ * it has been woken up or what its previous state was.
+ * 
+ * @section unmodified_build Unmodified build
+ * Plugin necessitated a few changes to KernelShark's source code, namely the ability to
+ * do an action upon mouse hover over a plot object or allow task coloring to be used for
+ * button's backgrounds. But if the user doesn't wish to use these features, the plugin
+ * can be built without them. Other functionalities remain intact and working.
 */
