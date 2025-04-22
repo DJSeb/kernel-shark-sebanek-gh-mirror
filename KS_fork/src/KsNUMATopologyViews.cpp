@@ -21,63 +21,6 @@
 #include "KsNUMATopologyViews.hpp"
 #include "libkshark.h"
 
-
-// Exceptions
-
-/**
- * @brief Exception class for errors when asking hwloc to
- * load topology from an XML file.
- */
-class CannotSetXMLTopology : public std::exception {
-public:
-    /**
-     * @brief Constructor for the exception class.
-     * 
-     * @param msg Message of the exception.
-     */
-    CannotSetXMLTopology(const std::string& msg) : _msg(msg) {}
-    /**
-     * @brief Overriden what() method to return the exception message.
-     * 
-     * @return Message of the exception.
-     */
-    virtual const char* what() const noexcept override {
-        return _msg.c_str();
-    }
-private:
-    /**
-     * @brief Message of the exception.
-     */
-    std::string _msg;
-};
-
-/**
- * @brief Exception class for errors when hwloc cannot load
- * a machine's topology.
- */
-class CannotLoadHwlocTopology : public std::exception {
-public:
-    /**
-     * @brief Constructor for the exception class.
-     * 
-     * @param msg Message of the exception.
-     */
-    CannotLoadHwlocTopology(const std::string& msg) : _msg(msg) {}
-    /**
-     * @brief Overriden what() method to return the exception message.
-     * 
-     * @return Message of the exception.
-     */
-    virtual const char* what() const noexcept override {
-        return _msg.c_str();
-    }
-private:
-    /**
-     * @brief Message of the exception.
-     */
-    std::string _msg;
-};
-
 // Statics
 
 /**
@@ -87,35 +30,36 @@ private:
  * 
  * @param topo_fpath File path to the topology XML file.
  * @return Pointer to the hwloc topology object loaded from the XML file.
- * @throws std::bad_alloc if memory allocation fails.
- * @throws CannotLoadXMLTopology if the topology cannot be set to be loaed
- * from the XML file.
- * @throws std::runtime_error if loading the topology fails.
+ * If a problem occured during allocation or loading, nullptr is returned
+ * and an error message is printed to the standard error output.
  */
 static hwloc_topology_t get_hwloc_topology(const std::string& topo_fpath) {
     int hwloc_load_result;
     hwloc_topology_t topology;
     hwloc_load_result = hwloc_topology_init(&topology);
     if (hwloc_load_result != 0) {
-        std::cerr << "[FAIL] Not enough memory for allocation of topology...\n";
+        std::cerr << "[FAIL] Not enough memory for allocation of topology..."
+            << std::endl;
         topology = nullptr;
-        throw std::bad_alloc();
+        return nullptr;
     }
     
     hwloc_load_result = hwloc_topology_set_xml(topology, topo_fpath.c_str());
     if (hwloc_load_result != 0) {
+        std::cerr << "[FAIL] Couldn't set topology to be loaded by XML file..."
+            << std::endl;
         hwloc_topology_destroy(topology);
         topology = nullptr;
-        throw CannotSetXMLTopology("[FAIL] Couldn't set topology to be "
-            "loaded by XML file...");
+        return nullptr;
     }
 
     hwloc_load_result = hwloc_topology_load(topology);
     if (hwloc_load_result != 0) {
+        std::cerr << "[FAIL] Couldn't load topology of file '"+ topo_fpath +"'..."
+            << std::endl;
         hwloc_topology_destroy(topology);
         topology = nullptr;
-        throw CannotLoadHwlocTopology("[FAIL] Couldn't load topology of file '" +
-            topo_fpath + "'...");
+        return nullptr;
     }
     return topology;
 }
@@ -143,7 +87,7 @@ bool KsNUMATVContext::exists_for(int stream_id) const
  * `-1` if the topology file is not valid or
  * `0` if the configuration was added successfully.
  */
-int KsNUMATVContext::add_config(int stream_id, ViewType view, const std::string& topology_file) {
+int KsNUMATVContext::add_config(int stream_id, TopoViewType view, const std::string& topology_file) {
     kshark_context *kshark_ctx(nullptr);
     int retval = -1;
     
@@ -181,7 +125,7 @@ int KsNUMATVContext::add_config(int stream_id, ViewType view, const std::string&
  * `0` if the configuration was updated successfully or
  * `1` if the configuration was not changed (success).
  */
-int KsNUMATVContext::update_cfg(int stream_id, ViewType view, const std::string& topology_file) {
+int KsNUMATVContext::update_cfg(int stream_id, TopoViewType view, const std::string& topology_file) {
     bool retval = -3;
     
     if (exists_for(stream_id)) {
@@ -251,9 +195,15 @@ void KsNUMATVContext::clear()
  * @param view Type of view to be used for the topology configuration.
  * @param fpath Path to the topology file to be used for the configuration.
  */
-StreamNUMATopologyConfig::StreamNUMATopologyConfig(ViewType view, const std::string& fpath)
+StreamNUMATopologyConfig::StreamNUMATopologyConfig(TopoViewType view, const std::string& fpath)
 : _applied_view(view), _topo_fpath(fpath), _brief_topo({}) {
     hwloc_topology_t topology = get_hwloc_topology(_topo_fpath);
+    
+    if (topology == nullptr) {
+        // Cannot load topology to fill out the brief topology
+        return;
+    }
+
     int n_numa_nodes = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE);
 	for (unsigned int i = 0; i < (unsigned int)n_numa_nodes; i++) {
 		hwloc_obj_t node = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, i);
@@ -273,7 +223,7 @@ StreamNUMATopologyConfig::StreamNUMATopologyConfig(ViewType view, const std::str
  * @brief Empty constructor for a stream's topology configuration.
  */
 StreamNUMATopologyConfig::StreamNUMATopologyConfig()
-: _applied_view(ViewType::DEFAULT), _topo_fpath(""), _brief_topo({}) {}
+: _applied_view(TopoViewType::DEFAULT), _topo_fpath(""), _brief_topo({}) {}
 
 /**
  * @brief Copy constructor for a stream's topology configuration.
@@ -336,7 +286,7 @@ const std::string& StreamNUMATopologyConfig::get_topo_fpath() const
  * @return Type of the view to be used when visualising the stream's
  * topology.
  */
-ViewType StreamNUMATopologyConfig::get_view_type() const
+TopoViewType StreamNUMATopologyConfig::get_view_type() const
 { return _applied_view; }
 
 /**
@@ -344,7 +294,7 @@ ViewType StreamNUMATopologyConfig::get_view_type() const
  * 
  * @param new_view New view type to be used.
  */
-void StreamNUMATopologyConfig::set_view_type(ViewType new_view)
+void StreamNUMATopologyConfig::set_view_type(TopoViewType new_view)
 { _applied_view = new_view; }
 /**
  * @brief Getter for the brief topology from hwloc.
@@ -396,10 +346,14 @@ QVector<int> StreamNUMATopologyConfig::rearrangeCPUsWithBriefTopo
 /**
  * @brief Gets the number of PUs in the topology.
  * 
- * @return Number of PUs in the topology.
+ * @return Number of PUs in the topology or
+ * -1 if the topology could not be loaded.
  */
 int StreamNUMATopologyConfig::get_topo_npus() const {
     hwloc_topology_t topology = get_hwloc_topology(_topo_fpath);
+    if (topology == nullptr) {
+        return -1;
+    }
     int topo_npus = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PU);
     hwloc_topology_destroy(topology);
     topology = nullptr;
@@ -476,7 +430,7 @@ bool numatv_stream_wants_topology_widget(int stream_id, const KsNUMATVContext& n
 	bool show_this_topo = false;
 	if (numatv_ctx.exists_for(stream_id)) {
 		const StreamNUMATopologyConfig* cfg_observer = numatv_ctx.observe_cfg(stream_id);
-		show_this_topo = (cfg_observer->get_view_type() != ViewType::DEFAULT);
+		show_this_topo = (cfg_observer->get_view_type() != TopoViewType::DEFAULT);
 	}
 		
 	return show_this_topo;
