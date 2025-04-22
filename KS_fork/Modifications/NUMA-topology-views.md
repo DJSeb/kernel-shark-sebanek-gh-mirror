@@ -64,7 +64,8 @@ children are Node nodes and cores are tree's leaves. For a NUMA topology, Node n
 *Topology visualisation* - Interchangeable with topology tree.
 *Topology widget* - Qt widget with a topology tree and possibly task padding, shown in the wrapper topology
 widget.
-*Trace graph* - Qt widget housing GL widget, wrapper topology widget and controls for the GL widget.
+*Trace graph* - Qt widget housing GL widget, wrapper topology widget and controls for the GL widget, class
+KsTraceGraph.
 *View/view type* - Enumerated option of how to display topology of a stream. Default view is what KernelShark
 used before this modification (and can be achieved still).
 *Wrapper topology widget* - Shown to the left of KernelShark's GL widget (with the classic KernelShark
@@ -76,21 +77,89 @@ graphs), contains topology widgets in a vertical top-down layout.
 
 - Keep existing KShark API
 - Configuration-visualisation layers
+- Don't change data, only visualisation
+- Opt-in usage
 - Synchronisation with GL widget's graphs
+- Qt utilisation
 
 ## Design overview (more in *Solution*)
 
-## "Why are topology widgets stored as pointers?"
+Modification can be broadly divided into two communicating components - configuration & visualisation.
 
-## "Why not use more of hwloc's topology data?"
+Configuration component keeps topolgy and view data data for each stream (or lack thereof).
+Visualisation component uses configuration's data and GL widget's data to show, change, delete or hide
+topology information to relevant CPU graphs in the GL widget.
 
-## "Why are there no other views?"
+Each stream may own (0-1) configurations and (0-1) visualisation at a time.
 
-Time.
+Visualisation never changes data of configuration.
 
-## "Why aren't topology views more interactive?"
+Configuration is the only component to use hwloc.
 
-## "Why the divide the topology widgets from configuratons?"
+Both components are owned by the trace graph of KernelShark.
+
+Configuration of a stream can be queried and potentially changed via public API, visualisations can
+only be hidden or emptied out by public API.
+
+## Questions and answers
+
+Below are questions that may arise upon inspection of the modification.
+
+### "Why are topology widgets stored as pointers?"
+
+Qt disables copying of widgets, which proved troublesome during development.
+
+But Qt handles pointers well, as long as every pointed to object has a parent,
+which is the case for this modifcation. When a parent is destroyed, so are
+its alive children.
+
+### "Why not use more of hwloc's topology data?"
+
+It is unnecessary to load a lot of data for the goal of this modification,
+which is only concerned with grouping of PUs, cores and NUMA nodes.
+
+### "Why are there no other views?"
+
+Frankly, because the modification was on a tight schedule. It is possible to
+make more views, with changes:
+
+1. Subclass StreamNUMATopologyConfig as a child of some abstract class,
+   from which more StreamXYZTopologyConfigs would arise. Add a new class
+   for the view.
+2. Add a new item into the ViewType enumeration class specifying a view.
+3. Add a radio button to KsNUMATVDialog.
+4. Subclass KsStreamTopology as a child of some abstract class, which would be
+   held by KsTraceGraph. Add a new class for the view.
+
+Not too much work, would be great for an extension of this modification.
+
+### "Why aren't topology views more interactive?"
+
+There were ideas about clicking on tree nodes and them hiding CPU graphs that belonged
+to them. This would be rather easy to implement, but there is no reason to not do
+that through KShark's existing GUI.
+
+Adding more information to e.g. the tooltips would require more information from
+hwloc to be passed, which was not necessary per specification.
+
+### "Why divide the topology widgets from configuratons?"
+
+To separate concerns. Widgets are only for displaying and can exist without a
+configuration. Configurations change under different circumstances and exist to
+inform topology widgets about how they should be drawn.
+
+It would be possible to group them together in code as a pair under one
+stream ID key, but the concerns would be less delimited. Price to pay
+for the division is negligible.
+
+### "Why use block trees?"
+
+Block trees ensure that the tree node, which is a parent of another,
+is always visible, whether you're scrolled all the way up or in the center or
+all the way down. It makes hierarchy more explicit, improving information given
+to the user.
+
+It is also easier to create in Qt, which is a welcome bonus.
 
 # Solution
 
@@ -202,7 +271,16 @@ Source code change tag: `NUMA TV`.
 
 ## Session support
 
+NUMA Topology Views configuration can be saved in a session using new API of KsSession. Each stream has their view and
+topology file path saved. A simple session import takes care of using such session ata.
+
 ## API
+
+Any API that got introduced is either explicitly labeled with "numatv" ot "topology" or "topo"
+somewhere (letters can be uppercase). If not, it belongs to a type with that label or a header
+file with that label.
+
+Use carefully.
 
 # Bugs
 
@@ -215,4 +293,4 @@ went wrong in secret.
   and many re-reads had to be done. If any Ds are missing, let the main eveloper know.
 - Main developer's quirk is that projects should have slightly quirky names - it helps marketability and breathes some life into them.
   NUMA topology views sounds boring, but it's abbreviation, NUMA TV, is a rather fitting one - just like a television, the modification
-  displays information to the user via a screen. Rather weak, but a connection nonetheless, boosting development morale. 
+  displays information to the user via a screen. Rather weak, but a connection nonetheless, boosting development morale.
