@@ -20,8 +20,6 @@
 #include "libkshark-tepdata.h"
 #include "libkshark-couplebreak.h"
 
-
-// Possible (EXTENSION)
 /**
  * @brief Function serves as a mapping between the event Id of an
  * origin event (e.g. "sched/sched_switch") and a flag position
@@ -51,7 +49,6 @@ int couplebreak_origin_id_to_flag_pos(struct kshark_data_stream *stream,
 		return -1;
 }
 
-// Possible (EXTENSION)
 /**
  * @brief Function serves as a mapping between the event Id of a
  * couplebreak vent and its flag position.
@@ -77,7 +74,6 @@ int couplebreak_id_to_flag_pos(int event_id) {
 	}
 }
 
-// Possible (EXTENSION)
 /**
  * @brief Function serves as a mapping between the flag position
  * of a couplebreak event (e.g. "couplebreak/sched_switch[target]")
@@ -104,7 +100,6 @@ int flag_pos_to_couplebreak_id(int flag_pos) {
 	}
 }
 
-// Possible (EXTENSION)
 /**
  * @brief Checks if the event Id is a couplebreak event.
  * 
@@ -118,7 +113,6 @@ bool is_couplebreak_event(int event_id) {
 	return (is_couplebreak_sst || is_couplebreak_swt);
 }
 
-// Possible (EXTENSION)
 /**
  * @brief Get the couplebreak event name as a string.
  * 

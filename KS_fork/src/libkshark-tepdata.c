@@ -309,7 +309,6 @@ static void record_new_couplebreak_event_type(struct kshark_data_stream *stream,
 
 //NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 // Copy of missed_events_action, basically
-// Possible (EXTENSION) - more functions if more events get couplebreak support.
 /**
  * @brief Makes a new "couplebreak/sched_switch[target]" entry with data from
  * the tracing record and the origin entry. The entry is taken from the 
@@ -621,7 +620,7 @@ static void correct_couplebreak_cpus_inner(struct kshark_entry **sorted_entries,
 // END of change
 
 //NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
-// Possible (EXTENSION) - this function and all that it entails could be refactored to a plugin,
+// Possible extension - this function and all that it entails could be refactored to a plugin,
 // where this correction is also possible. There was no strong reason to split couplebreak
 // and how it should work from its main working environment though, hence this implementation.
 /**
@@ -663,7 +662,7 @@ static int correct_couplebreak_cpus(struct kshark_data_stream *stream,
 	// While it may look a little reckless to just allocate memory like this,
 	// the sorted_entries' space will actually be needed later in the load functions
 	// which called the get_records function - so this space won't be really wasted.
-	// This does pose a possible (EXTENSION), where if couplebreak is enabled, the
+	// This does pose a possible extension, where if couplebreak is enabled, the
 	// sorted_entries array could be used later instead of freed, to skip the double
 	// time sorting this currently creates.
 	free(temp_list);
@@ -1641,7 +1640,6 @@ static char *tepdata_dump_entry(struct kshark_data_stream *stream,
 }
 
 //NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
-// Possible (EXTENSION)
 /**
  * @brief Finds the event ID of a couplebreak event based on the name given
  * in the argument. Function checks for existence of a couplebreak event in

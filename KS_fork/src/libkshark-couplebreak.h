@@ -17,7 +17,6 @@ extern "C" {
 #endif
 
 //NOTE: Changed here. (COUPLEBREAK) (2025-03-30)
-// Possible (EXTENSION)
 // Listed below are event Ids supported by couplebreak.
 ///@brief Event Id for "couplebreak/sched_switch[target]" event.
 #define COUPLEBREAK_SST_ID -10000
@@ -25,7 +24,6 @@ extern "C" {
 #define COUPLEBREAK_SWT_ID -10001
 // END of change
 
-// Possible (EXTENSION)
 /* Below are constants used to index bits/flags in the
  * couplebreak_evts_flags bitmask of a stream.
 */
