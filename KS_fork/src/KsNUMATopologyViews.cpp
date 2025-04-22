@@ -114,7 +114,7 @@ static hwloc_topology_t get_hwloc_topology(const std::string& topo_fpath) {
     if (hwloc_load_result != 0) {
         hwloc_topology_destroy(topology);
         topology = nullptr;
-        throw std::runtime_error("[FAIL] Couldn't load topology of file '" +
+        throw CannotLoadHwlocTopology("[FAIL] Couldn't load topology of file '" +
             topo_fpath + "'...");
     }
     return topology;
@@ -154,7 +154,7 @@ int KsNUMATVContext::add_config(int stream_id, ViewType view, const std::string&
     kshark_data_stream* stream = kshark_get_data_stream(kshark_ctx, stream_id);
     int stream_ncpus = stream->n_cpus;
     
-    auto new_topo_cfg = StreamTopologyConfig(view, topology_file);
+    auto new_topo_cfg = StreamNUMATopologyConfig(view, topology_file);
     int topo_npus = new_topo_cfg.get_topo_npus();
     
     if (topo_npus == stream_ncpus) {
@@ -186,15 +186,15 @@ int KsNUMATVContext::update_cfg(int stream_id, ViewType view, const std::string&
     
     if (exists_for(stream_id)) {
         // Get old configuration
-        StreamTopologyConfig& topo_cfg = _active_numatvs.at(stream_id);
+        StreamNUMATopologyConfig& topo_cfg = _active_numatvs.at(stream_id);
 
-        if (topology_file != topo_cfg.topo_fpath) {
+        if (topology_file != topo_cfg.get_topo_fpath()) {
             // Topology file changed - create new topology
             retval = add_config(stream_id, view, topology_file);    
         } else if (topo_cfg.get_view_type() != view) {
             // View type changed, but not the topology file
             // Just update the view type and request redraw
-            topo_cfg.applied_view = view;
+            topo_cfg.set_view_type(view);
             retval = 0;
         } else {
             // Nothing changed, request no action to be taken
@@ -215,9 +215,9 @@ int KsNUMATVContext::update_cfg(int stream_id, ViewType view, const std::string&
  * @param stream_id ID of the stream to get the configuration for.
  * @return Observer pointer to the topology configuration or nullptr if it doesn't exist.
  */
-const StreamTopologyConfig* KsNUMATVContext::observe_cfg(int stream_id) const {
+const StreamNUMATopologyConfig* KsNUMATVContext::observe_cfg(int stream_id) const {
     if (exists_for(stream_id)) {
-        const StreamTopologyConfig* topo_cfg = &(_active_numatvs.at(stream_id));
+        const StreamNUMATopologyConfig* topo_cfg = &(_active_numatvs.at(stream_id));
         return topo_cfg;
     }
     return nullptr;
@@ -238,7 +238,7 @@ int KsNUMATVContext::delete_cfg(int stream_id)
 void KsNUMATVContext::clear()
 { _active_numatvs.clear(); }
 
-// StreamTopologyConfig
+// StreamNUMATopologyConfig
 
 /**
  * @brief Explicit constructor for a stream's topology configuration. Loads
@@ -251,9 +251,9 @@ void KsNUMATVContext::clear()
  * @param view Type of view to be used for the topology configuration.
  * @param fpath Path to the topology file to be used for the configuration.
  */
-StreamTopologyConfig::StreamTopologyConfig(ViewType view, const std::string& fpath)
-: applied_view(view), topo_fpath(fpath), _brief_topo({}) {
-    hwloc_topology_t topology = get_hwloc_topology(topo_fpath);
+StreamNUMATopologyConfig::StreamNUMATopologyConfig(ViewType view, const std::string& fpath)
+: _applied_view(view), _topo_fpath(fpath), _brief_topo({}) {
+    hwloc_topology_t topology = get_hwloc_topology(_topo_fpath);
     int n_numa_nodes = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE);
 	for (unsigned int i = 0; i < (unsigned int)n_numa_nodes; i++) {
 		hwloc_obj_t node = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, i);
@@ -272,16 +272,16 @@ StreamTopologyConfig::StreamTopologyConfig(ViewType view, const std::string& fpa
 /**
  * @brief Empty constructor for a stream's topology configuration.
  */
-StreamTopologyConfig::StreamTopologyConfig()
-: applied_view(ViewType::DEFAULT), topo_fpath(""), _brief_topo({}) {}
+StreamNUMATopologyConfig::StreamNUMATopologyConfig()
+: _applied_view(ViewType::DEFAULT), _topo_fpath(""), _brief_topo({}) {}
 
 /**
  * @brief Copy constructor for a stream's topology configuration.
  * 
  * @param other Other stream's topology configuration to copy from.
  */
-StreamTopologyConfig::StreamTopologyConfig(const StreamTopologyConfig& other)
-: applied_view(other.applied_view), topo_fpath(other.topo_fpath), _brief_topo(other._brief_topo) {}
+StreamNUMATopologyConfig::StreamNUMATopologyConfig(const StreamNUMATopologyConfig& other)
+: _applied_view(other._applied_view), _topo_fpath(other._topo_fpath), _brief_topo(other._brief_topo) {}
 
 /**
  * @brief Copy assignment operator for a stream's topology configuration.
@@ -289,10 +289,10 @@ StreamTopologyConfig::StreamTopologyConfig(const StreamTopologyConfig& other)
  * @param other Other stream's topology configuration to copy from.
  * @return Reference to the current object.
  */
-StreamTopologyConfig& StreamTopologyConfig::operator=(const StreamTopologyConfig& other) {
+StreamNUMATopologyConfig& StreamNUMATopologyConfig::operator=(const StreamNUMATopologyConfig& other) {
     if (this != &other) {
-        applied_view = other.applied_view;
-        topo_fpath = other.topo_fpath;
+        _applied_view = other._applied_view;
+        _topo_fpath = other._topo_fpath;
         _brief_topo = other._brief_topo;
     }
     return *this;
@@ -303,8 +303,8 @@ StreamTopologyConfig& StreamTopologyConfig::operator=(const StreamTopologyConfig
  * 
  * @param other Other stream's topology configuration to move data from.
  */
-StreamTopologyConfig::StreamTopologyConfig(StreamTopologyConfig&& other) noexcept
-: applied_view(other.applied_view), topo_fpath(std::move(other.topo_fpath)),
+StreamNUMATopologyConfig::StreamNUMATopologyConfig(StreamNUMATopologyConfig&& other) noexcept
+: _applied_view(other._applied_view), _topo_fpath(std::move(other._topo_fpath)),
   _brief_topo(std::move(other._brief_topo)) {}
 
 /**
@@ -313,10 +313,10 @@ StreamTopologyConfig::StreamTopologyConfig(StreamTopologyConfig&& other) noexcep
  * @param other Other stream's topology configuration to move data from.
  * @return Reference to the current object.
  */
-StreamTopologyConfig& StreamTopologyConfig::operator=(StreamTopologyConfig&& other) noexcept {
+StreamNUMATopologyConfig& StreamNUMATopologyConfig::operator=(StreamNUMATopologyConfig&& other) noexcept {
     if (this != &other) {
-        applied_view = other.applied_view;
-        topo_fpath = std::move(other.topo_fpath);
+        _applied_view = other._applied_view;
+        _topo_fpath = std::move(other._topo_fpath);
         _brief_topo = std::move(other._brief_topo);
     }
     return *this;
@@ -327,8 +327,8 @@ StreamTopologyConfig& StreamTopologyConfig::operator=(StreamTopologyConfig&& oth
  * 
  * @return File path to the topology file.
  */
-const std::string& StreamTopologyConfig::get_topo_fpath() const
-{ return topo_fpath; }
+const std::string& StreamNUMATopologyConfig::get_topo_fpath() const
+{ return _topo_fpath; }
 
 /**
  * @brief Getter for the view type.
@@ -336,16 +336,23 @@ const std::string& StreamTopologyConfig::get_topo_fpath() const
  * @return Type of the view to be used when visualising the stream's
  * topology.
  */
-ViewType StreamTopologyConfig::get_view_type() const
-{ return applied_view; }
+ViewType StreamNUMATopologyConfig::get_view_type() const
+{ return _applied_view; }
 
+/**
+ * @brief Sets a new view type for the configuration.
+ * 
+ * @param new_view New view type to be used.
+ */
+void StreamNUMATopologyConfig::set_view_type(ViewType new_view)
+{ _applied_view = new_view; }
 /**
  * @brief Getter for the brief topology from hwloc.
  * 
  * @return Map of nodes (their logical IDs) to their cores (map of their logical IDs
  * to their PUs (map of their logical IDs to their OS IDs)).
  */
-const NodeCorePU& StreamTopologyConfig::get_brief_topo() const
+const NodeCorePU& StreamNUMATopologyConfig::get_brief_topo() const
 { return _brief_topo; }
 
 /**
@@ -356,7 +363,7 @@ const NodeCorePU& StreamTopologyConfig::get_brief_topo() const
  * @param cpu_ids Vector of CPU IDs to be rearranged.
  * @return Rearranged vector of CPU IDs.
  */
-QVector<int> StreamTopologyConfig::rearrangeCPUs(const QVector<int>& cpu_ids) const
+QVector<int> StreamNUMATopologyConfig::rearrangeCPUs(const QVector<int>& cpu_ids) const
 { return rearrangeCPUsWithBriefTopo(cpu_ids, _brief_topo); }
 
 /**
@@ -368,7 +375,7 @@ QVector<int> StreamTopologyConfig::rearrangeCPUs(const QVector<int>& cpu_ids) co
  * @param brief_topo Brief topology to be used for rearranging the CPU IDs.
  * @return Rearranged vector of CPU IDs.
  */
-QVector<int> StreamTopologyConfig::rearrangeCPUsWithBriefTopo
+QVector<int> StreamNUMATopologyConfig::rearrangeCPUsWithBriefTopo
 (const QVector<int>& cpu_ids, const NodeCorePU& brief_topo) const {
     QVector<int> rearranged{};
 
@@ -391,8 +398,8 @@ QVector<int> StreamTopologyConfig::rearrangeCPUsWithBriefTopo
  * 
  * @return Number of PUs in the topology.
  */
-int StreamTopologyConfig::get_topo_npus() const {
-    hwloc_topology_t topology = get_hwloc_topology(topo_fpath);
+int StreamNUMATopologyConfig::get_topo_npus() const {
+    hwloc_topology_t topology = get_hwloc_topology(_topo_fpath);
     int topo_npus = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PU);
     hwloc_topology_destroy(topology);
     topology = nullptr;
@@ -468,7 +475,7 @@ bool numatv_stream_wants_topology_widget(int stream_id, const KsNUMATVContext& n
 {
 	bool show_this_topo = false;
 	if (numatv_ctx.exists_for(stream_id)) {
-		const StreamTopologyConfig* cfg_observer = numatv_ctx.observe_cfg(stream_id);
+		const StreamNUMATopologyConfig* cfg_observer = numatv_ctx.observe_cfg(stream_id);
 		show_this_topo = (cfg_observer->get_view_type() != ViewType::DEFAULT);
 	}
 		

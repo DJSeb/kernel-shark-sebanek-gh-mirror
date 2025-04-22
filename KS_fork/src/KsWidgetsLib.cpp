@@ -1824,7 +1824,7 @@ QLabel* KsNUMATVDialog::_setup_status_per_stream(int stream_id,
 		status_text = "LOADED";
 		status_txt_color = "green";
 
-		const StreamTopologyConfig* s_topo_cfg = numatv_ctx.observe_cfg(stream_id);
+		const StreamNUMATopologyConfig* s_topo_cfg = numatv_ctx.observe_cfg(stream_id);
 		const std::string& topol_fpath = s_topo_cfg->get_topo_fpath();
 		topo_fpath = QString::fromStdString(topol_fpath);
 	}

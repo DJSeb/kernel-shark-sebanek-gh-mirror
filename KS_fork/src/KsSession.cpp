@@ -735,9 +735,9 @@ void KsSession::saveTopology(int n_streams, const KsNUMATVContext& numatv_ctx) {
 		std::string topo_fpath = "";
 
 		if (numatv_ctx.exists_for(i)) {
-			const StreamTopologyConfig* stream_cfg = numatv_ctx.observe_cfg(i);
+			const StreamNUMATopologyConfig* stream_cfg = numatv_ctx.observe_cfg(i);
 			view = stream_cfg->get_view_type();
-			topo_fpath = stream_cfg->topo_fpath;
+			topo_fpath = stream_cfg->get_topo_fpath();
 		}
 
 		json_object_object_add(jtopo, "view",
