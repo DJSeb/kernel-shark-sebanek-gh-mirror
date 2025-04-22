@@ -337,6 +337,7 @@ void KsSession::loadGraphs(kshark_context *kshark_ctx,
 	streamIds = KsUtils::getStreamIdList(kshark_ctx);
 	for (auto const &sd: streamIds) {
 		graphs.cpuReDraw(sd, _getCPUPlots(sd));
+		graphs.numatvRedrawTopoWidgets(sd, _getCPUPlots(sd), _numaTvCtx);
 		graphs.taskReDraw(sd, _getTaskPlots(sd));
 	}
 

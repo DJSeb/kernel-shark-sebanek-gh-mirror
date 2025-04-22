@@ -239,6 +239,13 @@ void KsMainWindow::setCPUPlots(int sd, QVector<int> cpus)
 	cpus.erase(std::remove_if(cpus.begin(), cpus.end(), lamCPUCheck),
 		   cpus.end());
 
+	//NOTE: Changed here. (NUMA TV) (2025-04-18)
+	// CPUs being redrawn goes hand in hand with redrawing
+	// the topology widget, as CPUs may need to be reordered,
+	// or some CPUs were hidden and the topology wiget must adjust
+	// its own parts.
+	cpus = _graph.numatvRedrawTopoWidgets(sd, cpus, _numaTvCtx);
+	// END of change
 	_graph.cpuReDraw(sd, cpus);
 }
 
@@ -1063,7 +1070,12 @@ void KsMainWindow::_cpuSelect()
 	dialog = new KsCheckBoxDialog(cbws, this);
 
 	connect(dialog,		&KsCheckBoxDialog::apply,
-		&_graph,	&KsTraceGraph::cpuReDraw);
+		//NOTE: Changed here. (NUMA TV) (2025-04-22)
+		[this] (int sd, QVector<int> cpusToShow) {
+			cpusToShow = _graph.numatvRedrawTopoWidgets(sd, cpusToShow, _numaTvCtx);
+			_graph.cpuReDraw(sd, cpusToShow);
+		});
+		// END of change
 
 	dialog->show();
 }
@@ -1389,8 +1401,13 @@ void KsMainWindow::_load(const QString& fileName, bool append)
 	pb.setValue(175);
 
 	_graph.loadData(&_data, !append);
-	if (append)
-		_graph.cpuReDraw(sd, KsUtils::getCPUList(sd));
+	if (append) {
+		//NOTE: Changed here. (NUMA TV) (2025-04-22)
+		QVector<int> cpuList = KsUtils::getCPUList(sd);
+		cpuList = _graph.numatvRedrawTopoWidgets(sd, cpuList, _numaTvCtx);
+		_graph.cpuReDraw(sd, KsUtils::getCPUList(cpuList));
+		// END of change
+	}
 
 	pb.setValue(195);
 }
@@ -1524,7 +1541,7 @@ void KsMainWindow::loadSession(const QString &fileName)
 	//NOTE: Changed here. (NUMA TV) (2025-04-20)
 	// Topology configurations have to be loaded before the graphs, otherwise
 	// we miss a cpuRedraw, which would show the topology widgets for each stream.
-	_session.loadTopology(&_graph, NUMATVContext::get_instance());
+	_session.loadTopology(&_graph, _numaTvCtx);
 	pb.setValue(185);
 	// END of change
 
@@ -1823,7 +1840,8 @@ void KsMainWindow::_showNUMATVConfig() {
 		return;
 	}
 	
-	dialog = new KsNUMATVDialog{kshark_ctx, this};
+	const NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
+	dialog = new KsNUMATVDialog{kshark_ctx, numatv_ctx, this};
 	connect(dialog, &KsNUMATVDialog::apply, // Actor + action on actor
 		this, &KsMainWindow::_updateNUMATVs); // Reactor + action on reactor
 
@@ -1871,6 +1889,7 @@ static void apply_numatv_update(int stream_id, ViewType view,
 		break;
 	case 0:
 		// File or view changed - redraw
+
 		graph->cpuReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._cpuList);
 		graph->taskReDraw(stream_id, graph->glPtr()->_streamPlots[stream_id]._taskList);
 		break;

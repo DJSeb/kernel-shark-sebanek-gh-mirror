@@ -118,7 +118,7 @@ private:
 int numatv_count_PUs(const NodeCorePU& brief_topo);
 int numatv_count_cores(const NodeCorePU& brief_topo);
 NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo,
-    QVector<int> PUs);
+    const QVector<int>& PUs);
 bool numatv_stream_wants_topology_widget(int stream_id,
     const NUMATVContext& numatv_ctx);
 

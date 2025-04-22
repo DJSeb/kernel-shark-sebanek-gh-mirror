@@ -455,7 +455,7 @@ int numatv_count_cores(const NodeCorePU& brief_topo) {
  * @param PUs List of PUs to filter the brief topology by.
  * @return New brief topology containing only the PUs that are present in the given list.
  */
-NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo, QVector<int> PUs) {
+NodeCorePU numatv_filter_by_PUs(const NodeCorePU& brief_topo, const QVector<int>& PUs) {
     NodeCorePU filtered_topo{};
 
     for (const auto& [node_lid, cores]: brief_topo) {

@@ -130,7 +130,9 @@ public:
 	
 	//NOTE: Changed here. (NUMA TV) (2025-04-15)
 	void numatvHideTopologyWidget(bool hide);
-	// END of change
+	
+	QVector<int> numatvRedrawTopoWidgets(int stream_id,
+		const QVector<int>& cpusToDraw, const NUMATVContext& numa_ctx);
 
 	void numatvClearTopologyWidgets();
 	// END of change
@@ -180,12 +182,10 @@ private:
 
 	void _numatv_remove_topology_widget(int stream_id);
 
-	void _numatv_existing_topology_action(int stream_id,
-		QVector<int>& cpusToDraw, const NUMATVContext& numa_ctx);
+	QVector<int> _numatv_existing_topology_action(int stream_id,
+		const QVector<int>& cpusToDraw, const NUMATVContext& numa_ctx);
 	
 	void _numatv_hide_stream_topo(int stream_id, bool hide);
-
-	void _numatv_redraw_topo_widgets(int stream_id, QVector<int>& cpusToDraw);
 
 	void _numatv_adjust_topo_task_padding(int stream_id);
 	// END of change

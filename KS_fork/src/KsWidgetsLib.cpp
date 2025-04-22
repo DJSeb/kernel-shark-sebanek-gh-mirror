@@ -1707,12 +1707,14 @@ void KsNUMATVDialog::_setup_stream_header(int stream_id, QVBoxLayout* parent_lay
 /**
  * @brief Sets up radio buttons for the view type the stream will use.
  * 
- * @param parent_layout Parent layout to add a button group to.
  * @param stream_id Identifier of the stream.
+ * @param parent_layout Parent layout to add a button group to.
+ * @param numatv_ctx NUMA TV context to get the stream's topology configuration.
  * @return Button group for a stream, from which view type will be deduced.
  */
-QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(QVBoxLayout* parent_layout, int stream_id) {
-	const NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
+QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(int stream_id,
+	QVBoxLayout* parent_layout, const NUMATVContext& numatv_ctx)
+{
 	bool a_topo_exists = numatv_ctx.exists_for(stream_id);
 
 	ViewType applied_view = (a_topo_exists) ?
@@ -1749,13 +1751,13 @@ QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(QVBoxLayout* parent_layou
  * @brief Sets up a load button for a stream in the dialog along with its
  * file dialog action.
  * 
- * @param topo_file_location Label with the topology file location.
  * @param last_fpath Last used file path.
+ * @param topo_file_location Label with the topology file location.
  * 
  * @return Pointer to the load button to add to the stream's configuration layotut.
  */
-QPushButton* KsNUMATVDialog::_setup_load_button_per_stream(QLabel* topo_file_location,
-	QString last_fpath)
+QPushButton* KsNUMATVDialog::_setup_load_button_per_stream(QString last_fpath,
+	QLabel* topo_file_location)
 {	
 	// Load button
 	QPushButton* load_btn = new QPushButton{"Load ..."};
@@ -1802,13 +1804,14 @@ QPushButton* KsNUMATVDialog::_setup_load_button_per_stream(QLabel* topo_file_loc
  * @brief Sets up file loaded status, filepath and view type status and the
  * clear and load buttons for a stream in the dialog.
  * 
- * @param parent_layout Parent layout to add a status layout to.
  * @param stream_id Identifier of the stream.
+ * @param parent_layout Parent layout to add a status layout to.
+ * @param numatv_ctx NUMA TV context to get the stream's topology configuration.
  * @return Label with the topology file location.
  */
-QLabel* KsNUMATVDialog::_setup_status_per_stream(QVBoxLayout* parent_layout, int stream_id) {
-	const NUMATVContext& numatv_ctx = NUMATVContext::get_instance();
-
+QLabel* KsNUMATVDialog::_setup_status_per_stream(int stream_id,
+	QVBoxLayout* parent_layout, const NUMATVContext& numatv_ctx)
+{
 	// Status, topology file and load button for file dialog setups
 	QHBoxLayout* stat_topo_load_layout = new QHBoxLayout{};
 	QVBoxLayout* status_topofile_layout = new QVBoxLayout{};
@@ -1843,7 +1846,7 @@ QLabel* KsNUMATVDialog::_setup_status_per_stream(QVBoxLayout* parent_layout, int
 		status->setStyleSheet("QLabel { color : red; }");
 	});
 
-	QPushButton* load_btn = _setup_load_button_per_stream(topo_file_location, topo_fpath);
+	QPushButton* load_btn = _setup_load_button_per_stream(topo_fpath, topo_file_location);
 
 	stat_topo_load_layout->addLayout(status_topofile_layout);
 	stat_topo_load_layout->addStretch();
@@ -1862,8 +1865,11 @@ QLabel* KsNUMATVDialog::_setup_status_per_stream(QVBoxLayout* parent_layout, int
  * @brief Sets up the scroll area with streams and their NUMA Topology Views settings.
  * 
  * @param kshark_ctx KernelShark context to get all streams.
+ * @param numatv_ctx NUMA TV context to get the streams| topology configurations.
  */
-void KsNUMATVDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx) {
+void KsNUMATVDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx,
+	const NUMATVContext& numatv_ctx)
+{
 	// Allow the scroll area to be resized.
 	_scroll_area.setWidgetResizable(true);
 
@@ -1876,8 +1882,10 @@ void KsNUMATVDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx) {
 	QVector<int> stream_ids = KsUtils::getStreamIdList(kshark_ctx);
 	for (auto const &sd: stream_ids) {
 		_setup_stream_header(sd, list_layout);
-		QLabel* topo_file_location = _setup_status_per_stream(list_layout, sd);
-		QButtonGroup* radio_btn_grp = _setup_radios_per_stream(list_layout, sd);
+		QLabel* topo_file_location = _setup_status_per_stream(sd, list_layout,
+			numatv_ctx);
+		QButtonGroup* radio_btn_grp = _setup_radios_per_stream(sd, list_layout,
+			numatv_ctx);
 		
 		// Add NUMA TV settings to inner vector
 		ViewTopologyGUIPair view_file_pair{radio_btn_grp, topo_file_location};
@@ -1921,7 +1929,7 @@ void KsNUMATVDialog::_setup_layout() {
  * @param parent Parent widget.
  */
 KsNUMATVDialog::KsNUMATVDialog(kshark_context* kshark_ctx,
-	QWidget* parent)
+	const NUMATVContext& numatv_ctx, QWidget* parent)
 	: QDialog(parent),
 	_main_layout{this},
 	_explanation{this},
@@ -1933,7 +1941,7 @@ KsNUMATVDialog::KsNUMATVDialog(kshark_context* kshark_ctx,
 	setWindowTitle("NUMA Topology Views");
 
 	_setup_explanation();
-	_setup_streams_scroll_area(kshark_ctx);
+	_setup_streams_scroll_area(kshark_ctx, numatv_ctx);
 	_setup_endstage();
 	_setup_layout();	
 }
