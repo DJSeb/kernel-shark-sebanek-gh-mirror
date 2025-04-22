@@ -1101,11 +1101,11 @@ void KsTraceGraph::_numatv_existing_topology_action(int stream_id,
 	QVector<int>& cpusToDraw)
 {
 	auto stream_cfg = _numaTvCtx.observe_cfg(stream_id);
-	ViewType stream_view = stream_cfg->get_view_type();
+	TopoViewType stream_view = stream_cfg->get_view_type();
 	NodeCorePU brief_topo = {};
 	bool hide_topo = true;
 	
-	if (stream_view == ViewType::NUMATREE) {
+	if (stream_view == TopoViewType::NUMATREE) {
 		brief_topo = stream_cfg->get_brief_topo();
 		brief_topo = numatv_filter_by_PUs(brief_topo, cpusToDraw);
 		cpusToDraw = stream_cfg->rearrangeCPUsWithBriefTopo(cpusToDraw,

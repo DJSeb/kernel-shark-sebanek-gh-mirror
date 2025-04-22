@@ -731,7 +731,7 @@ void KsSession::saveTopology(int n_streams, const KsNUMATVContext& numatv_ctx) {
 		jtopo = json_object_new_object();
 		json_object_object_add(jtopo, "stream_id",
 			json_object_new_int(i));
-		ViewType view = ViewType::DEFAULT;
+		TopoViewType view = TopoViewType::DEFAULT;
 		std::string topo_fpath = "";
 
 		if (numatv_ctx.exists_for(i)) {
@@ -784,7 +784,7 @@ void KsSession::loadTopology(KsTraceGraph* graph, KsNUMATVContext& numatv_ctx) {
 		json_object_object_get_ex(jtopo, "topology_xml_fpath", &jtopo_fpath);
 		
 		int stream_id = json_object_get_int(jstream_id);
-		ViewType view = ViewType(json_object_get_int(jview));
+		TopoViewType view = TopoViewType(json_object_get_int(jview));
 		std::string topo_fpath = json_object_get_string(jtopo_fpath);
 		
 		if (QFile::exists(QString::fromStdString(topo_fpath))) {

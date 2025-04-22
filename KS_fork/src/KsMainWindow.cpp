@@ -1864,7 +1864,7 @@ void KsMainWindow::_showNUMATVConfig() {
  * @param graph Pointer to the graph object, used to redraw the CPU and task
  * graphs & in turn the topology widget with it.
  */
-static void apply_numatv_update(int stream_id, ViewType view, 
+static void apply_numatv_update(int stream_id, TopoViewType view, 
 	QString topology_file, KsNUMATVContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
@@ -1966,7 +1966,7 @@ static void apply_numatv_remove(int stream_id, KsNUMATVContext& numatv_ctx,
  * @param graph Pointer to the graph object, used to redraw the CPU and task
  * graphs & in turn the topology widget with it.
  */
-static void apply_numatv_new_topo(int stream_id, ViewType view,
+static void apply_numatv_new_topo(int stream_id, TopoViewType view,
 	QString topology_file, KsNUMATVContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
@@ -2021,7 +2021,7 @@ static void apply_numatv_new_topo(int stream_id, ViewType view,
  * @param graph Pointer to the graph object, used to redraw the CPU and task
  * graphs & in turn the topology widget with it.
  */
-static void apply_numatv(int stream_id, ViewType view,
+static void apply_numatv(int stream_id, TopoViewType view,
 	QString topology_file, KsNUMATVContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
@@ -2067,7 +2067,7 @@ void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 	for (int i = 0; i < stream_numa.size(); i++) {
 		// Unpack the vector's items
 		int stream_id = stream_numa[i].first;
-		ViewType view = stream_numa[i].second.first;
+		TopoViewType view = stream_numa[i].second.first;
 		QString topology_file = stream_numa[i].second.second;
 
 		apply_numatv(stream_id, view, topology_file, numatv_ctx, graphPtr());

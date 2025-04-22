@@ -1717,9 +1717,9 @@ QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(int stream_id,
 {
 	bool a_topo_exists = numatv_ctx.exists_for(stream_id);
 
-	ViewType applied_view = (a_topo_exists) ?
+	TopoViewType applied_view = (a_topo_exists) ?
 		numatv_ctx.observe_cfg(stream_id)->get_view_type() :
-		ViewType::DEFAULT;
+		TopoViewType::DEFAULT;
 
 	// Radio buttons
 	QLabel* views_header = new QLabel{"Choose view to use in CPU plots:"};
@@ -1729,9 +1729,9 @@ QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(int stream_id,
 	QRadioButton* tree_view = new QRadioButton{"NUMA tree view"};
 
 	applied_view_grp->addButton(default_view,
-		static_cast<int>(ViewType::DEFAULT));
+		static_cast<int>(TopoViewType::DEFAULT));
 	applied_view_grp->addButton(tree_view,
-		static_cast<int>(ViewType::NUMATREE));
+		static_cast<int>(TopoViewType::NUMATREE));
 	applied_view_grp->setParent(radio_btns_layout);
 	applied_view_grp->button(static_cast<int>(applied_view))->setChecked(true);
 
@@ -1964,7 +1964,7 @@ void KsNUMATVDialog::_apply_action()
 	for (auto const &stream_topos: _topology_choice) {
 		int sd = stream_topos.first;
 
-		ViewType view_type = static_cast<ViewType>(stream_topos.second.first->checkedId());
+		TopoViewType view_type = static_cast<TopoViewType>(stream_topos.second.first->checkedId());
 		const QString topo_fpath = stream_topos.second.second->text();
 		ViewTopologyPair view_topo = {view_type, topo_fpath};
 		StreamNUMATVSettings numatv_stream_settings = {sd, view_topo};

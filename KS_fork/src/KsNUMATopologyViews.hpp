@@ -23,12 +23,12 @@
 
 /// @brief Differentiable view types, mainly used by the radio buttons per each stream.
 // (Possible EXTENSION)
-enum class ViewType { DEFAULT = 0, NUMATREE };
+enum class TopoViewType { DEFAULT = 0, NUMATREE };
 
 // Usings
 
 /// @brief Simpler name to package a view type and chosen topology file.
-using ViewTopologyPair = std::pair<ViewType, QString>;
+using ViewTopologyPair = std::pair<TopoViewType, QString>;
 
 /// @brief Mapping of PU logical IDs to their OS IDs.
 using PUIds = std::map<int, int>;
@@ -47,7 +47,7 @@ using NodeCorePU = std::map<int, CorePU>;
 class StreamNUMATopologyConfig {
 private:
     /// @brief Type of the view to be used in KernelShark's main window.
-    ViewType _applied_view;
+    TopoViewType _applied_view;
     /// @brief Path to the topology file describing a topology as determined by hwloc.
     // Currently only XML files are supported.
     std::string _topo_fpath;
@@ -56,7 +56,7 @@ private:
     /// the maps are used to store the topology in a more compact way.
     NodeCorePU _brief_topo;
 public: // Creation, destruction, assigns
-    explicit StreamNUMATopologyConfig(ViewType view, const std::string& fpath);
+    explicit StreamNUMATopologyConfig(TopoViewType view, const std::string& fpath);
     StreamNUMATopologyConfig();
     StreamNUMATopologyConfig(const StreamNUMATopologyConfig&);
     StreamNUMATopologyConfig& operator=(const StreamNUMATopologyConfig&);
@@ -66,9 +66,9 @@ public: // Creation, destruction, assigns
 public: // Business
     const std::string& get_topo_fpath() const;
 
-    ViewType get_view_type() const;
+    TopoViewType get_view_type() const;
     
-    void set_view_type(ViewType new_view);
+    void set_view_type(TopoViewType new_view);
     
     const NodeCorePU& get_brief_topo() const;
     
@@ -95,9 +95,9 @@ private:
 public:
     bool exists_for(int stream_id) const;
 
-    int add_config(int stream_id, ViewType view, const std::string& topology_file);
+    int add_config(int stream_id, TopoViewType view, const std::string& topology_file);
     
-    int update_cfg(int stream_id, ViewType view, const std::string& topology_file);
+    int update_cfg(int stream_id, TopoViewType view, const std::string& topology_file);
     
     const StreamNUMATopologyConfig* observe_cfg(int stream_id) const;
     
