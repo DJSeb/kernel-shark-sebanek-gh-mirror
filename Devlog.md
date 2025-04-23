@@ -1094,3 +1094,23 @@ Goals:
   - NUMA TV modification documentation
 - Survey paper
 
+## 2025-04-22
+
+Today was pretty fast. NUMA TV context type was de-singletoned,
+NUMA TV modification documentation was written and some sort
+of Stacklook design document was also written.
+
+Some names in the code were made more explicit, some comments
+removed or adjusted. A fix for Naps plugin's dependency on
+traceevents was made, though a pretty poor one, just
+copying KernelShark's FindTraceEvent.cmake file. Weirdly, it
+seems that Qt is the odd one out when it comes to being easily
+found by CMake as a package.
+
+Current work was sent to the project's supervisor and is
+awaiting evaluation. It is time for another recuperation.
+
+Goals:
+
+- Fix whatever the supervisor deems to be in need of a change.
+- Survey paper

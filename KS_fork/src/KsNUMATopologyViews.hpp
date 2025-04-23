@@ -22,7 +22,6 @@
 // Enum classes
 
 /// @brief Differentiable view types, mainly used by the radio buttons per each stream.
-// (Possible EXTENSION)
 enum class TopoViewType { DEFAULT = 0, NUMATREE };
 
 // Usings

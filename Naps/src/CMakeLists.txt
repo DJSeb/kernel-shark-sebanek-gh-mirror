@@ -22,8 +22,12 @@ set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall -Wextra -pthread -fPIC -fno-common")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread -fPIC -fno-common")
 
 # Dependencies
-## Ensure existing trace-cmd and necessary components
+## Ensure existing traceevent
+set(OLD_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
 find_package(TraceEvent REQUIRED)
+## Restore the old CMAKE_MODULE_PATH
+set(CMAKE_MODULE_PATH ${OLD_CMAKE_MODULE_PATH})
 
 ## For customisability by the user
 if (NOT _TRACEEVENT_INCLUDE_DIR)

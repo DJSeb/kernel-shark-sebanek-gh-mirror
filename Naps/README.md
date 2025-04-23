@@ -62,6 +62,7 @@ sched_events plugin, which only visualises switch-to-switch or waking-to-switch 
     - *CMakeLists.txt* (Further CMake instructions for building the binary)
     - **source files of the plugin**
   - *CMakeLists.txt* (Main build file)
+  - *FindTraceEvent.cmake* (finds traceevent during plugin's build)
   - *README.md* (what you're reading currently)
   - *LICENSE*
 
