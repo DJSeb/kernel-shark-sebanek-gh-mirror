@@ -24,61 +24,68 @@ gs8*88**
 Struktura implementační práce:
 abstrakt - úvod - stať (příbuzné práce, analýza řešení, vývojová dokumentace, uživatelská dokumentace) - závěr
 
-Obecně když něco tvrdíme, musíme položit správnost.
+Obecně když něco tvrdíme, musíme podložit správnost.
 
-implementační bakalářka - jenom o tom, co se dělalo na softwaru (týkat se jen toho)
-			- proč je to navržené/naprogramované tak, jak to je
-			- proč ne jinak
+Implementační bakalářka:
+	- jenom o tom, co se dělalo na softwaru (týkat se jen toho)
+	- proč je to navržené/naprogramované tak, jak to je
+	- proč ne jinak
 
-*Abstrakt* - abstrakce z celé práce (NENÍ to alternativní úvod)
-           - "z každé sekce jedna věta": jaký je problém, jak se na něj šlo, co se udělalo (i jak se to testovalo), k čemu to je
-	   - musí dát konkrétní ideu práce, klíčové myšlenky
-	   - nesmí být moc dlouhý
-	   - abstrakt a úvod se čtou nejvíc - nutno velmi pozorně upravovat
+Abstrakt
+	- abstrakce z celé práce (NENÍ to alternativní úvod)
+	- "z každé sekce jedna věta": jaký je problém, jak se na něj šlo, co se udělalo (i jak se to testovalo), k čemu to je
+	- musí dát konkrétní ideu práce, klíčové myšlenky
+	- nesmí být moc dlouhý
+	- abstrakt a úvod se čtou nejvíc - nutno velmi pozorně upravovat
 
-Úvod - krátce na 1-4 strany; představuje jazykem pro "lidi z oboru" problematiku a právě cíl práce jak část problému vyřešit
+Úvod
+	- krátce na 1-4 strany; představuje jazykem pro "lidi z oboru" problematiku a právě cíl práce, aka jak část problematiky vyřešit
      - Úvod by někde měl obsahovat "Cílem této práce je:"
-     - lze dodat požadavky na SW sem
-     - u implementační jsou zde i vyextrahované uživatelské požadavky na sw z problematiky
-	* různí uživatelé
-	* dobré je rozpracovat tak, aby i někdo jiný dokázal naprogramovat aplikaci podobnou, která požadavky splní
-	* dobré na odkazování později
-	* jeden z design dokumentů (požadavky)
-	* zamyšlení nad interpretací požadavků, zvolení správných a důvody
+     - lze dodat požadavky na výsledný SW sem
+     - u implementační jsou zde i vyextrahované uživatelské požadavky na výsledný SW
+		* různí uživatelé
+		* dobré je rozpracovat tak, aby i někdo jiný dokázal naprogramovat aplikaci podobnou, která požadavky splní
+		* dobré na odkazování později
+		* jeden z design dokumentů (požadavky)
+		* zamyšlení nad interpretací požadavků, zvolení správných a důvody
 
-Příbuzné práce - ne vždy potřeba, podrobnější popis problematiky, popis světa okolo práce
-               - pokud někdo problém řešil, tak mít - pro srovnání, vypíchnutí, co chybí, apod.
-               - vztahujeme tím naši práci a příbuznou práci k cíli
-	       - (např. kshark umí spoustu věcí, ale ne topologii)
+Příbuzné práce
+	- ne vždy potřeba, podrobnější popis problematiky, popis světa okolo práce
+    - pokud někdo problém řešil, tak mít - pro srovnání, vypíchnutí, co chybí, apod.
+    - vztahujeme tím naši práci a příbuznou práci k cíli
+	- (např. kshark umí spoustu věcí, ale ne topologii)
 
-Analýza - několik částí
+Analýza
+	- několik částí
 	- řešení:
 		* popis cesty, co se muselo udát, aby se vytvořila práce - co a proč se v práci udělalo
 		* veledůležité
-		* např.: z čeho se vycházelo, jaký software byl zamítnut jako součást řešení,
-		         slepé uličky, postřehy
+		* např.: z čeho se vycházelo, jaký software byl zamítnut jako součást řešení, slepé uličky, postřehy
 		* musí se vztahovat k cíli
 		* představa i alternativních cest a důvod zvolení své
 		* popis všech netriviálních rozhodnutí
 
-Vývojová dokumentace - NE dokumentační komentáře
-		     - nějaká základní architektura té věci (moduly, jejich části, jejich komunikace, proudění dat)
-			* tutoriál ke zdrojákům (k orientaci v nich)
-		     - jaké jsou moduly => co každý z nich dělá
-		     - k pochopení struktury práce
-		     - ne nutně každá třída, funkce, k tomu jsou zdrojáky
+Vývojová dokumentace:
+	- NE dokumentační komentáře
+	- nějaká základní architektura té věci (moduly, jejich části, jejich komunikace, proudění dat)
+		* tutoriál ke zdrojákům (k orientaci v nich)
+	- jaké jsou moduly => co každý z nich dělá
+	- k pochopení struktury práce
+	- ne nutně každá třída, funkce, k tomu jsou zdrojáky
 
-Uživatelská dokumentace - jak se SW instaluje, spouští, používá
-			- dobré ve formě tutoriálu
-			- vícero dokumentací pro vícero uživatelů
-				* uživatel, programátor, admin, různé speciální typy uživatelů
-			- součástí mohou být i multimédia jako videa a obrázky
-			- lze i in-game tutoriál; knihovny potřebují věci k ověření funkčnosti (nějaké demo)
-			- vlastní datové formáty - jejich dokumentace
+Uživatelská dokumentace:
+	- jak se SW instaluje, spouští, používá
+	- dobré ve formě tutoriálu
+	- vícero dokumentací pro vícero uživatelů
+		* uživatel, programátor, admin, různé speciální typy uživatelů
+	- součástí mohou být i multimédia jako videa a obrázky
+	- lze i in-game tutoriál; knihovny potřebují věci k ověření funkčnosti (nějaké demo)
+	- vlastní datové formáty - jejich dokumentace
 
-Závěr - ne tak krátké, jak se může zdát
-      - nutno říct, co jsme splnili, ať už přímo z cíle, nebo i lehce vedle (v tom případě proč)
-      - součástí je diskuze k tomu, co by mohlo být uděláno lépe a k čemu je řešení dobré
+Závěr
+	- ne tak krátké, jak se může zdát
+    - nutno říct, co jsme splnili, ať už přímo z cíle, nebo i lehce vedle (v tom případě proč)
+	- součástí je diskuze k tomu, co by mohlo být uděláno lépe a k čemu je řešení dobré
 	- dá se i udělat jako vlastní část "future work"
 
 
@@ -111,22 +118,22 @@ Co se děje:
 _-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 
 Jak psát (i v latexové šabloně):
-- vyhýbat se czenglish a hyperkorektnosti
-- spisovný a přesný jazyk
-- správné slovosledy
-- pravopis a syntaxe
-- v 1. osobě množného čísla
-- vyhýbat se dlouhým souvětím, odstavcům, spoustě závorek
-- jednotně, neměnit styl
-- nedělat detektivky, psát přímo a "hned"
-- Dopředné odkazy raději ne, rozmyslet se na pořadím
-- zamyslet se, pro koho píšeme
-- stručně
-- zkusit číst nahlas
-- testovat na lidech (test "jak to chci napsat" vs "jak je to napsané")
-- kouknout, jak píšou jiní, ale nekopírovat
-- bitmapy jen ve vysoké kvalitě
-- přílohy jen v povolených formátech, soubor příloh do ZIPu
+	- vyhýbat se czenglish a hyperkorektnosti
+	- spisovný a přesný jazyk
+	- správné slovosledy
+	- pravopis a syntaxe
+	- v 1. osobě množného čísla
+	- vyhýbat se dlouhým souvětím, odstavcům, spoustě závorek
+	- jednotně, neměnit styl
+	- nedělat detektivky, psát přímo a "hned"
+	- Dopředné odkazy raději ne, rozmyslet se na pořadím
+	- zamyslet se, pro koho píšeme
+	- stručně
+	- zkusit číst nahlas
+	- testovat na lidech (test "jak to chci napsat" vs "jak je to napsané")
+	- kouknout, jak píšou jiní, ale nekopírovat
+	- bitmapy jen ve vysoké kvalitě
+	- přílohy jen v povolených formátech, soubor příloh do ZIPu
 
 Citace:
 	- pokud se cituje, tak pořádně vyznačit

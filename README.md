@@ -157,7 +157,7 @@ _General SW goal:_
 
 _Non-software goal - write survey paper:_
 
-- [ ] Survey paper
+- [ ] Survey paper (in Czech, but for the sake of this file's consistency, list is in English)
   - [ ] Stack tracing (in Linux)
     - Mostly basics, some more info about KernelShark's stack tracer
     - Mainly to set context for the project
