@@ -667,25 +667,25 @@ class KsCouplebreakDialog: public QDialog {
 	using StreamCouplebreakSetting = std::pair<int, bool>;
 private: // Qt objects
 	/// @brief Layout containing other layouts (top-down ordering of other layouts).
-	QVBoxLayout		_main_layout;
+	QVBoxLayout		_mainLayout;
 	
 	/// @brief Explains what changing this setting does.
 	QLabel			_explanation;
 
 	/// @brief Scroll area for the stream scheckboxes.
-	QScrollArea		_scroll_area;
+	QScrollArea		_scrollArea;
 	
 	/// @brief Layout for the Apply and Close buttons.
-	QHBoxLayout     _endstage_btns_layout;
+	QHBoxLayout     _endstageBtnsLayout;
 
     /// @brief Close button for the widget.
-    QPushButton     _close_button;
+    QPushButton     _closeBtn;
 
     /// @brief Button applies changes to every stream.
-    QPushButton     _apply_button;
+    QPushButton     _applyBtn;
 
 	/// @brief Apply action connection to the apply button.
-	QMetaObject::Connection _apply_button_connection;
+	QMetaObject::Connection _applyBtnConnection;
 signals:
 	/// @brief Signal emitted when the "Apply" button is pressed.
 	void apply(QVector<StreamCouplebreakSetting> settings);
@@ -694,11 +694,11 @@ private: // Non-GUI objects
 	QVector<StreamCboxes> _couplebreak_settings;
 private:
 	// Reaction to a clicked apply button
-	void _apply_action();
-	void _setup_explanation();
-	void _setup_endstage();
-	void _setup_streams_scroll_area(kshark_context *kshark_ctx);
-	void _setup_layout();
+	void _applyAction();
+	void _setupExplanation();
+	void _setupEndstage();
+	void _setupStreamsScrollArea(kshark_context *kshark_ctx);
+	void _setupLayout();
 public:
 	// Don't allow default constructor, it would contain invalid values.
 	KsCouplebreakDialog() = delete;
@@ -729,47 +729,47 @@ private: // Usings
 	using StreamNUMATVSettings = std::pair<int, ViewTopologyPair>;
 private: // Qt objects
 	/// @brief Layout containing other layouts (top-down ordering of other layouts).
-	QVBoxLayout		_main_layout;
+	QVBoxLayout		_mainLayout;
 	
 	/// @brief Explains what changing this setting does.
 	QLabel			_explanation;
 
 	/// @brief Scroll area for the stream scheckboxes.
-	QScrollArea		_scroll_area;
+	QScrollArea		_scrollArea;
 	
 	/// @brief Layout for the Apply and Close buttons.
-	QHBoxLayout     _endstage_btns_layout;
+	QHBoxLayout     _endstageBtnsLayout;
 
     /// @brief Close button for the widget.
-    QPushButton     _close_button;
+    QPushButton     _closeBtn;
 
     /// @brief Button applies changes to every stream.
-    QPushButton     _apply_button;
+    QPushButton     _applyBtn;
 
 	/// @brief Apply action connection to the apply button.
-	QMetaObject::Connection _apply_button_connection;
+	QMetaObject::Connection _applyBtnConnection;
 signals:
 	/// @brief Signal emitted when the "Apply" button is pressed.
 	void apply(QVector<StreamNUMATVSettings> topo_files);
 private: // Non-GUI objects
 	/// @brief Vector of pairs of stream id and NUMA topology
 	/// file locations.
-	QVector<StreamRadiosLabels> _topology_choice;
+	QVector<StreamRadiosLabels> _topologyChoice;
 private:
 	// Reaction to a clicked apply button
-	void _apply_action();
-	void _setup_explanation();
-	void _setup_endstage();
-	void _setup_stream_header(int stream_id, QVBoxLayout* parent_layout);
-	QPushButton* _setup_load_button_per_stream(QString last_fpath,
+	void _applyAction();
+	void _setupExplanation();
+	void _setupEndstage();
+	void _setupStreamHeader(int stream_id, QVBoxLayout* parent_layout);
+	QPushButton* _setupLoadBtnPerStream(QString last_fpath,
 		QLabel* topo_file_location);
-	QLabel* _setup_status_per_stream(int stream_id, QVBoxLayout* parent_layout,
+	QLabel* _setupStatusPerStream(int stream_id, QVBoxLayout* parent_layout,
 		const KsNUMATVContext& numatv_ctx);
-	QButtonGroup* _setup_radios_per_stream(int stream_id,
+	QButtonGroup* _setupRadiosPerStream(int stream_id,
 		QVBoxLayout* parent_layout, const KsNUMATVContext& numatv_ctx);
-	void _setup_streams_scroll_area(kshark_context *kshark_ctx,
+	void _setupStreamsScrollArea(kshark_context *kshark_ctx,
 		const KsNUMATVContext& numatv_ctx);
-	void _setup_layout();
+	void _setupLayout();
 public:
 	// Don't allow default constructor, it would contain invalid values.
 	KsNUMATVDialog() = delete;

@@ -1462,7 +1462,7 @@ void KsEventFieldSelectWidget::_eventChanged(int)
  * @brief Set up the couplebreak explanation text for the dialog.
  * 
  */
-void KsCouplebreakDialog::_setup_explanation() {
+void KsCouplebreakDialog::_setupExplanation() {
 	// Static constants
 	static const QString EXPLANATION_TEXT = QString{
 		"Couplebreak functionality has KernelShark split (break up) "
@@ -1492,25 +1492,25 @@ void KsCouplebreakDialog::_setup_explanation() {
  * @brief Sets up "Apply" and "Close" buttons for the dialog.
  * 
  */
-void KsCouplebreakDialog::_setup_endstage() {
+void KsCouplebreakDialog::_setupEndstage() {
 	// Setup visuals and do not use auto defaults.
 	int buttonWidth = STRING_WIDTH("--Close--");
-	_apply_button.setFixedWidth(buttonWidth);
-	_apply_button.setAutoDefault(false);
-	_close_button.setFixedWidth(buttonWidth);
-	_close_button.setAutoDefault(false);
+	_applyBtn.setFixedWidth(buttonWidth);
+	_applyBtn.setAutoDefault(false);
+	_closeBtn.setFixedWidth(buttonWidth);
+	_closeBtn.setAutoDefault(false);
 	
 	// Connect the buttons to actions, store apply button's connection
 	// for manipulation on signal emission.
-	_apply_button_connection = connect(
-		&_apply_button, &QPushButton::pressed, // Actor + action
-		this, &KsCouplebreakDialog::_apply_action); // Reactor + reaction
-	connect(&_apply_button, &QPushButton::pressed, this, &QWidget::close);
-	connect(&_close_button, &QPushButton::pressed, this, &QWidget::close);
+	_applyBtnConnection = connect(
+		&_applyBtn, &QPushButton::pressed, // Actor + action
+		this, &KsCouplebreakDialog::_applyAction); // Reactor + reaction
+	connect(&_applyBtn, &QPushButton::pressed, this, &QWidget::close);
+	connect(&_closeBtn, &QPushButton::pressed, this, &QWidget::close);
 
 	// Add the buttons to their layout.
-	_endstage_btns_layout.addWidget(&_apply_button);
-	_endstage_btns_layout.addWidget(&_close_button);
+	_endstageBtnsLayout.addWidget(&_applyBtn);
+	_endstageBtnsLayout.addWidget(&_closeBtn);
 }
 // END of change
 
@@ -1520,12 +1520,12 @@ void KsCouplebreakDialog::_setup_endstage() {
  * 
  * @param kshark_ctx KernelShark context to get all streams.
  */
-void KsCouplebreakDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx) {
+void KsCouplebreakDialog::_setupStreamsScrollArea(kshark_context *kshark_ctx) {
 	// Allow the scroll area to be resized.
-	_scroll_area.setWidgetResizable(true);
+	_scrollArea.setWidgetResizable(true);
 
 	// Create a container widget for all streams (aesthetics).
-	QWidget *list_container = new QWidget{&_scroll_area};
+	QWidget *list_container = new QWidget{&_scrollArea};
     QVBoxLayout *list_layout = new QVBoxLayout{list_container};
 
 	// Setup stream couplebreak settings and checkboxes
@@ -1555,7 +1555,7 @@ void KsCouplebreakDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx)
 
 	// Create bonds for scroll area
 	list_container->setLayout(list_layout);
-	_scroll_area.setWidget(list_container);
+	_scrollArea.setWidget(list_container);
 }
 // END of change
 
@@ -1564,16 +1564,16 @@ void KsCouplebreakDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx)
  * @brief Set up the main layout of the dialog.
  * 
  */
-void KsCouplebreakDialog::_setup_layout() {
-	_main_layout.setContentsMargins(5, 5, 5, 5);
+void KsCouplebreakDialog::_setupLayout() {
+	_mainLayout.setContentsMargins(5, 5, 5, 5);
 
-	_main_layout.addWidget(&_explanation);
-	_main_layout.addStretch();
-	_main_layout.addWidget(&_scroll_area);
-	_main_layout.addStretch();
-	_main_layout.addLayout(&_endstage_btns_layout);
+	_mainLayout.addWidget(&_explanation);
+	_mainLayout.addStretch();
+	_mainLayout.addWidget(&_scrollArea);
+	_mainLayout.addStretch();
+	_mainLayout.addLayout(&_endstageBtnsLayout);
 
-	setLayout(&_main_layout);
+	setLayout(&_mainLayout);
 }
 
 // END of change
@@ -1588,19 +1588,19 @@ void KsCouplebreakDialog::_setup_layout() {
 KsCouplebreakDialog::KsCouplebreakDialog(kshark_context *kshark_ctx,
 	QWidget *parent)
 	: QDialog(parent),
-	_main_layout{this},
+	_mainLayout{this},
 	_explanation{this},
-	_scroll_area{this},
-	_close_button{"Close", this},
-    _apply_button{"Apply", this}
+	_scrollArea{this},
+	_closeBtn{"Close", this},
+    _applyBtn{"Apply", this}
 {
 	// Dialog setup
 	setWindowTitle("Couplebreak Settings");
 
-    _setup_explanation();
-	_setup_streams_scroll_area(kshark_ctx);
-	_setup_endstage();
-	_setup_layout();	
+    _setupExplanation();
+	_setupStreamsScrollArea(kshark_ctx);
+	_setupEndstage();
+	_setupLayout();	
 }
 // END of change
 
@@ -1610,13 +1610,13 @@ KsCouplebreakDialog::KsCouplebreakDialog(kshark_context *kshark_ctx,
  * pairs vector to use in apply action.
  * 
  */
-void KsCouplebreakDialog::_apply_action()
+void KsCouplebreakDialog::_applyAction()
 {
 	QVector<StreamCouplebreakSetting> settings;
 
-	// Disconnect _apply_button. This is done in order to protect
+	// Disconnect _applyBtn. This is done in order to protect
 	// against multiple clicks.
-	disconnect(_apply_button_connection);
+	disconnect(_applyBtnConnection);
 
 	for (auto const &setting: _couplebreak_settings) {
 		int sd = setting.first;
@@ -1633,7 +1633,7 @@ void KsCouplebreakDialog::_apply_action()
  * @brief Set up the NUMA Topology Views explanation text for the dialog.
  * 
  */
-void KsNUMATVDialog::_setup_explanation() {
+void KsNUMATVDialog::_setupExplanation() {
 	// Static constants
 	static const QString EXPLANATION_TEXT = QString{
 		"NUMA Topology Views (NUMA TV for short) "
@@ -1663,25 +1663,25 @@ void KsNUMATVDialog::_setup_explanation() {
 /**
  * @brief Sets up "Apply" and "Close" buttons for the dialog.
  */
-void KsNUMATVDialog::_setup_endstage() {
+void KsNUMATVDialog::_setupEndstage() {
 	// Setup visuals and do not use auto defaults.
 	int buttonWidth = STRING_WIDTH("--Close--");
-	_apply_button.setFixedWidth(buttonWidth);
-	_apply_button.setAutoDefault(false);
-	_close_button.setFixedWidth(buttonWidth);
-	_close_button.setAutoDefault(false);
+	_applyBtn.setFixedWidth(buttonWidth);
+	_applyBtn.setAutoDefault(false);
+	_closeBtn.setFixedWidth(buttonWidth);
+	_closeBtn.setAutoDefault(false);
 	
 	// Connect the buttons to actions, store apply button's connection
 	// for manipulation on signal emission.
-	_apply_button_connection = connect(
-		&_apply_button, &QPushButton::pressed, // Actor + action
-		this, &KsNUMATVDialog::_apply_action); // Reactor + reaction
-	connect(&_apply_button, &QPushButton::pressed, this, &QWidget::close);
-	connect(&_close_button, &QPushButton::pressed, this, &QWidget::close);
+	_applyBtnConnection = connect(
+		&_applyBtn, &QPushButton::pressed, // Actor + action
+		this, &KsNUMATVDialog::_applyAction); // Reactor + reaction
+	connect(&_applyBtn, &QPushButton::pressed, this, &QWidget::close);
+	connect(&_closeBtn, &QPushButton::pressed, this, &QWidget::close);
 
 	// Add the buttons to their layout.
-	_endstage_btns_layout.addWidget(&_apply_button);
-	_endstage_btns_layout.addWidget(&_close_button);
+	_endstageBtnsLayout.addWidget(&_applyBtn);
+	_endstageBtnsLayout.addWidget(&_closeBtn);
 }
 // END of change
 
@@ -1692,7 +1692,7 @@ void KsNUMATVDialog::_setup_endstage() {
  * @param stream_id Identifier of the stream.
  * @param parent_layout Parent layout to add a header to.
  */
-void KsNUMATVDialog::_setup_stream_header(int stream_id, QVBoxLayout* parent_layout) {
+void KsNUMATVDialog::_setupStreamHeader(int stream_id, QVBoxLayout* parent_layout) {
 	QHBoxLayout* stream_name_layout = new QHBoxLayout{};
 	QLabel* stream_name = new QLabel{"Stream #" + QString::number(stream_id)};
 	stream_name_layout->addWidget(stream_name);
@@ -1712,13 +1712,13 @@ void KsNUMATVDialog::_setup_stream_header(int stream_id, QVBoxLayout* parent_lay
  * @param numatv_ctx NUMA TV context to get the stream's topology configuration.
  * @return Button group for a stream, from which view type will be deduced.
  */
-QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(int stream_id,
+QButtonGroup* KsNUMATVDialog::_setupRadiosPerStream(int stream_id,
 	QVBoxLayout* parent_layout, const KsNUMATVContext& numatv_ctx)
 {
-	bool a_topo_exists = numatv_ctx.exists_for(stream_id);
+	bool a_topo_exists = numatv_ctx.existsFor(stream_id);
 
 	TopoViewType applied_view = (a_topo_exists) ?
-		numatv_ctx.observe_cfg(stream_id)->get_view_type() :
+		numatv_ctx.observeConfig(stream_id)->getViewType() :
 		TopoViewType::DEFAULT;
 
 	// Radio buttons
@@ -1756,7 +1756,7 @@ QButtonGroup* KsNUMATVDialog::_setup_radios_per_stream(int stream_id,
  * 
  * @return Pointer to the load button to add to the stream's configuration layotut.
  */
-QPushButton* KsNUMATVDialog::_setup_load_button_per_stream(QString last_fpath,
+QPushButton* KsNUMATVDialog::_setupLoadBtnPerStream(QString last_fpath,
 	QLabel* topo_file_location)
 {	
 	// Load button
@@ -1809,7 +1809,7 @@ QPushButton* KsNUMATVDialog::_setup_load_button_per_stream(QString last_fpath,
  * @param numatv_ctx NUMA TV context to get the stream's topology configuration.
  * @return Label with the topology file location.
  */
-QLabel* KsNUMATVDialog::_setup_status_per_stream(int stream_id,
+QLabel* KsNUMATVDialog::_setupStatusPerStream(int stream_id,
 	QVBoxLayout* parent_layout, const KsNUMATVContext& numatv_ctx)
 {
 	// Status, topology file and load button for file dialog setups
@@ -1820,12 +1820,12 @@ QLabel* KsNUMATVDialog::_setup_status_per_stream(int stream_id,
 	QString status_text{"NOT LOADED"};
 	QString status_txt_color{"red"};
 
-	if (numatv_ctx.exists_for(stream_id)) {
+	if (numatv_ctx.existsFor(stream_id)) {
 		status_text = "LOADED";
 		status_txt_color = "green";
 
-		const StreamNUMATopologyConfig* s_topo_cfg = numatv_ctx.observe_cfg(stream_id);
-		const std::string& topol_fpath = s_topo_cfg->get_topo_fpath();
+		const StreamNUMATopologyConfig* s_topo_cfg = numatv_ctx.observeConfig(stream_id);
+		const std::string& topol_fpath = s_topo_cfg->getTopoFilepath();
 		topo_fpath = QString::fromStdString(topol_fpath);
 	}
 
@@ -1846,7 +1846,7 @@ QLabel* KsNUMATVDialog::_setup_status_per_stream(int stream_id,
 		status->setStyleSheet("QLabel { color : red; }");
 	});
 
-	QPushButton* load_btn = _setup_load_button_per_stream(topo_fpath, topo_file_location);
+	QPushButton* load_btn = _setupLoadBtnPerStream(topo_fpath, topo_file_location);
 
 	stat_topo_load_layout->addLayout(status_topofile_layout);
 	stat_topo_load_layout->addStretch();
@@ -1867,29 +1867,29 @@ QLabel* KsNUMATVDialog::_setup_status_per_stream(int stream_id,
  * @param kshark_ctx KernelShark context to get all streams.
  * @param numatv_ctx NUMA TV context to get the streams| topology configurations.
  */
-void KsNUMATVDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx,
+void KsNUMATVDialog::_setupStreamsScrollArea(kshark_context *kshark_ctx,
 	const KsNUMATVContext& numatv_ctx)
 {
 	// Allow the scroll area to be resized.
-	_scroll_area.setWidgetResizable(true);
+	_scrollArea.setWidgetResizable(true);
 
 	// Create a container widget for all streams (aesthetics).
-	QWidget *list_container = new QWidget{&_scroll_area};
+	QWidget *list_container = new QWidget{&_scrollArea};
     QVBoxLayout *list_layout = new QVBoxLayout{list_container};
 
 	// Setup stream NUMA TV settings and checkboxes
 	int streams_processed = 0;
 	QVector<int> stream_ids = KsUtils::getStreamIdList(kshark_ctx);
 	for (auto const &sd: stream_ids) {
-		_setup_stream_header(sd, list_layout);
-		QLabel* topo_file_location = _setup_status_per_stream(sd, list_layout,
+		_setupStreamHeader(sd, list_layout);
+		QLabel* topo_file_location = _setupStatusPerStream(sd, list_layout,
 			numatv_ctx);
-		QButtonGroup* radio_btn_grp = _setup_radios_per_stream(sd, list_layout,
+		QButtonGroup* radio_btn_grp = _setupRadiosPerStream(sd, list_layout,
 			numatv_ctx);
 		
 		// Add NUMA TV settings to inner vector
 		ViewTopologyGUIPair view_file_pair{radio_btn_grp, topo_file_location};
-		_topology_choice.append(StreamRadiosLabels{sd, view_file_pair});
+		_topologyChoice.append(StreamRadiosLabels{sd, view_file_pair});
 		
 		++streams_processed;
 		if (kshark_ctx->n_streams != streams_processed) {
@@ -1900,7 +1900,7 @@ void KsNUMATVDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx,
 
 	// Create bonds for scroll area
 	list_container->setLayout(list_layout);
-	_scroll_area.setWidget(list_container);
+	_scrollArea.setWidget(list_container);
 }
 // END of change
 
@@ -1908,16 +1908,16 @@ void KsNUMATVDialog::_setup_streams_scroll_area(kshark_context *kshark_ctx,
 /**
  * @brief Set up the main layout of the dialog.
  */
-void KsNUMATVDialog::_setup_layout() {
-	_main_layout.setContentsMargins(5, 5, 5, 5);
+void KsNUMATVDialog::_setupLayout() {
+	_mainLayout.setContentsMargins(5, 5, 5, 5);
 	
-	_main_layout.addWidget(&_explanation);
-	_main_layout.addStretch();
-	_main_layout.addWidget(&_scroll_area);
-	_main_layout.addStretch();
-	_main_layout.addLayout(&_endstage_btns_layout);
+	_mainLayout.addWidget(&_explanation);
+	_mainLayout.addStretch();
+	_mainLayout.addWidget(&_scrollArea);
+	_mainLayout.addStretch();
+	_mainLayout.addLayout(&_endstageBtnsLayout);
 	
-	setLayout(&_main_layout);
+	setLayout(&_mainLayout);
 }
 // END of change
 
@@ -1932,19 +1932,19 @@ void KsNUMATVDialog::_setup_layout() {
 KsNUMATVDialog::KsNUMATVDialog(kshark_context* kshark_ctx,
 	const KsNUMATVContext& numatv_ctx, QWidget* parent)
 	: QDialog(parent),
-	_main_layout{this},
+	_mainLayout{this},
 	_explanation{this},
-	_scroll_area{this},
-	_close_button{"Close", this},
-	_apply_button{"Apply", this}
+	_scrollArea{this},
+	_closeBtn{"Close", this},
+	_applyBtn{"Apply", this}
 {
 	// Dialog setup
 	setWindowTitle("NUMA Topology Views");
 
-	_setup_explanation();
-	_setup_streams_scroll_area(kshark_ctx, numatv_ctx);
-	_setup_endstage();
-	_setup_layout();	
+	_setupExplanation();
+	_setupStreamsScrollArea(kshark_ctx, numatv_ctx);
+	_setupEndstage();
+	_setupLayout();	
 }
 // END of change
 
@@ -1953,15 +1953,15 @@ KsNUMATVDialog::KsNUMATVDialog(kshark_context* kshark_ctx,
  * @brief Emit a signal to Qt and create stream + NUMA TV settings
  * pairs vector to use in apply action.
  */
-void KsNUMATVDialog::_apply_action()
+void KsNUMATVDialog::_applyAction()
 {
 	QVector<StreamNUMATVSettings> settings;
 
-	// Disconnect _apply_button. This is done in order to protect
+	// Disconnect _applyBtn. This is done in order to protect
 	// against multiple clicks.
-	disconnect(_apply_button_connection);
+	disconnect(_applyBtnConnection);
 
-	for (auto const &stream_topos: _topology_choice) {
+	for (auto const &stream_topos: _topologyChoice) {
 		int sd = stream_topos.first;
 
 		TopoViewType view_type = static_cast<TopoViewType>(stream_topos.second.first->checkedId());

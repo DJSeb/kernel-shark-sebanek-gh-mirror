@@ -1869,7 +1869,7 @@ static void apply_numatv_update(int stream_id, TopoViewType view,
 	KsTraceGraph* graph)
 {
 	// Proper file was given + config exists, applying means updating the configuration
-	int result = numatv_ctx.update_cfg(stream_id, view, topology_file.toStdString());
+	int result = numatv_ctx.updateConfig(stream_id, view, topology_file.toStdString());
 	
 	switch (result) {
 	case 1:
@@ -1924,7 +1924,7 @@ static void apply_numatv_update(int stream_id, TopoViewType view,
 static void apply_numatv_remove(int stream_id, KsNUMATVContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
-	int result = numatv_ctx.delete_cfg(stream_id);
+	int result = numatv_ctx.deleteConfig(stream_id);
 	
 	switch (result) {
 	case 1:
@@ -1971,7 +1971,7 @@ static void apply_numatv_new_topo(int stream_id, TopoViewType view,
 	KsTraceGraph* graph)
 {
 	// Proper file was given + no config exists, applying means creating new topology
-	int result = numatv_ctx.add_config(stream_id, view, topology_file.toStdString());
+	int result = numatv_ctx.addConfig(stream_id, view, topology_file.toStdString());
 	QString err_msg;
 
 	switch (result) {
@@ -2025,7 +2025,7 @@ static void apply_numatv(int stream_id, TopoViewType view,
 	QString topology_file, KsNUMATVContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
-	bool topology_exists = numatv_ctx.exists_for(stream_id);
+	bool topology_exists = numatv_ctx.existsFor(stream_id);
 	bool file_exists = QFile(topology_file).exists();
 
 	if (topology_exists) {

@@ -696,7 +696,7 @@ private:
  * 
  * @returns Black on high intensity, white otheriwse.
 */
-Color black_or_white(float color_intensity, float limit = 128.f);
+Color blackOrWhite(float color_intensity, float limit = 128.f);
 
 /**
  * @brief Gets the color intensity using the formula
@@ -706,7 +706,7 @@ Color black_or_white(float color_intensity, float limit = 128.f);
  * 
  * @returns Color intensity as floating-point value.
 */
-float get_color_intensity(const Color& c);
+float getColorIntensity(const Color& c);
 // END of change
 
 }; // KsPlot

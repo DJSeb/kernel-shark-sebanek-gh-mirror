@@ -63,20 +63,20 @@ public: // Creation, destruction, assigns
     StreamNUMATopologyConfig& operator=(StreamNUMATopologyConfig&&) noexcept;
     ~StreamNUMATopologyConfig() = default;
 public: // Business
-    const std::string& get_topo_fpath() const;
+    const std::string& getTopoFilepath() const;
 
-    TopoViewType get_view_type() const;
+    TopoViewType getViewType() const;
     
-    void set_view_type(TopoViewType new_view);
+    void setViewType(TopoViewType new_view);
     
-    const TopoNodeCorePU& get_brief_topo() const;
+    const TopoNodeCorePU& getBriefTopology() const;
     
     QVector<int> rearrangeCPUs(const QVector<int>& cpu_ids) const;
     
     QVector<int> rearrangeCPUsWithBriefTopo(const QVector<int>& cpu_ids,
         const TopoNodeCorePU& brief_topo) const;
     
-    int get_topo_npus() const;
+    int getTopologyNPUs() const;
 };
 
 /**
@@ -92,15 +92,15 @@ private:
      */
     std::unordered_map<int, StreamNUMATopologyConfig> _active_numatvs;
 public:
-    bool exists_for(int stream_id) const;
+    bool existsFor(int stream_id) const;
 
-    int add_config(int stream_id, TopoViewType view, const std::string& topology_file);
+    int addConfig(int stream_id, TopoViewType view, const std::string& topology_file);
     
-    int update_cfg(int stream_id, TopoViewType view, const std::string& topology_file);
+    int updateConfig(int stream_id, TopoViewType view, const std::string& topology_file);
     
-    const StreamNUMATopologyConfig* observe_cfg(int stream_id) const;
+    const StreamNUMATopologyConfig* observeConfig(int stream_id) const;
     
-    int delete_cfg(int stream_id);
+    int deleteConfig(int stream_id);
     
     void clear();
 };
