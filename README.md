@@ -27,8 +27,8 @@ It is composed of four main directories, each representing a portion of the thes
 - **KS_fork** - modified copy of KernelShark's source code with multiple additions, what many parts across different
   documentations will call "custom KernelShark"
   - _Couplebreak_ functionality is a new ability of KernelShark to split some events (chosen in code) into two
-  - _NUMA Topology Views_ functionality gives KernelShark the ability to show CPU plots with respect to the NUMA
-    topology given by the user to the program
+  - _Topology Views_ functionality gives KernelShark the ability to show CPU plots with respect to a topology
+    topology given by the user to the program (currently supports only NUMA topology)
   - _Other smaller additions to KernelShark's abilities_
 - **SurveyPaper** - directory containing the survey paper **in Czech** about the plugins & enhancements above, along
   with `ExamplePrograms` directory in which traces of simple programs showcasing above's abilities may be found.
@@ -57,7 +57,7 @@ Semester project part is finished.
 
 Bachelor thesis project part WIP.
 
-(Stacklook revision, Naps plugin, Couplebreak, NUMA Topology Views.)
+(Stacklook revision, Naps plugin, Couplebreak, Topology Views.)
 
 - [x] Brief project descrption
 - [x] Specification
@@ -137,8 +137,8 @@ _Demonstration:_
 
 - [ ] Create example trace files for demonstration
   - [ ] Write a program that will do something with the kernel stack to see it with Stacklook.
-  - [ ] Create a trace file without kernel stack entries to show off inacting Stacklook.
-  - [x] Create/get a trace file to show off NUMA topology views
+  - [x] Create a trace file without kernel stack entries to show off inacting Stacklook.
+  - [x] Create/get a trace file to show off topology views
     - \[NOTE\] This might be just a matter of implementation of said feature and previous trace files might be reused.
 
 _General SW goal:_
@@ -150,7 +150,7 @@ _General SW goal:_
   - [x] Preview labels changeable
   - [x] Mouse hover plot objects
   - [x] Couplebreak
-  - [x] NUMA Topology Views
+  - [x] Topology Views
 - [x] Revise README and other non-code parts of repository to reflect project extensions
 - [ ] _("Optional")_ Create proper design documents
   - Would be quite good to include in technical documentation

@@ -711,16 +711,14 @@ void KsSession::loadUserPlugins(kshark_context *kshark_ctx, KsPluginManager *pm)
 		pm->addUserPluginToList(*last);
 }
 
-//NOTE: Changed here. (NUMA TV) (2025-04-20)
+//NOTE: Changed here. (TOPOVIEWS) (2025-04-20)
 /**
- * @brief Saves the NUMA TV configurations of all streams.
+ * @brief Saves the Topology Views configurations of all streams.
  * 
  * @param n_streams How many streams are open in a session.
- * @param numatv_ctx Reference to the NUMA TV context to load information from.
- * This is done to have an obvious dependency on the configuraton, instead of hiding
- * it in code's implementation - otherwise, it could just be inside the function.
+ * @param topoviews_ctx Reference to the Topology Views context to load information from.
  */
-void KsSession::saveTopology(int n_streams, const KsTopoViewsContext& numatv_ctx) {
+void KsSession::saveTopology(int n_streams, const KsTopoViewsContext& topoviews_ctx) {
 	kshark_config_doc *topology =
 		kshark_config_new("kshark.config.topology", KS_CONFIG_JSON);
 	json_object *jtopology = KS_JSON_CAST(topology->conf_doc);
@@ -734,8 +732,8 @@ void KsSession::saveTopology(int n_streams, const KsTopoViewsContext& numatv_ctx
 		TopoViewType view = TopoViewType::DEFAULT;
 		std::string topo_fpath = "";
 
-		if (numatv_ctx.existsFor(i)) {
-			const StreamNUMATopologyConfig* stream_cfg = numatv_ctx.observeConfig(i);
+		if (topoviews_ctx.existsFor(i)) {
+			const TopoViewConfig* stream_cfg = topoviews_ctx.observeConfig(i);
 			view = stream_cfg->getViewType();
 			topo_fpath = stream_cfg->getTopoFilepath();
 		}
@@ -749,24 +747,22 @@ void KsSession::saveTopology(int n_streams, const KsTopoViewsContext& numatv_ctx
 	}
 
 	json_object_object_add(jtopology, "topologies", jlist);
-	kshark_config_doc_add(_config, "NUMA TV", topology);
+	kshark_config_doc_add(_config, "TopoViews", topology);
 }
 // END of change
 
-//NOTE: Changed here. (NUMA TV) (2025-04-20)
+//NOTE: Changed here. (TOPOVIEWS) (2025-04-20)
 /**
- * @brief Loads the NUMA TV configurations of all streams.
+ * @brief Loads the Topology Views configurations of all streams.
  * 
  * @param graph Pointer to the KsTraceGraph object, so that if no
  * non-DEFAULT topology views are used, the topology widget can be hidden.
- * @param numatv_ctx Reference to the NUMA TV context to load information into.
- * This is done to have an obvious dependency on the configuraton, instead of hiding
- * it in code's implementation - otherwise, it could just be inside the function.
+ * @param topoviews_ctx Reference to the Topology Views context to load information into
  */
-void KsSession::loadTopology(KsTraceGraph* graph, KsTopoViewsContext& numatv_ctx) {
+void KsSession::loadTopology(KsTraceGraph* graph, KsTopoViewsContext& topoviews_ctx) {
 	kshark_config_doc *topology = kshark_config_alloc(KS_CONFIG_JSON);
 
-	if (!kshark_config_doc_get(_config, "NUMA TV", topology)) {
+	if (!kshark_config_doc_get(_config, "TopoViews", topology)) {
 		return;
 	}
 	
@@ -774,8 +770,8 @@ void KsSession::loadTopology(KsTraceGraph* graph, KsTopoViewsContext& numatv_ctx
 	json_object *jtopologies;
 	json_object_object_get_ex(KS_JSON_CAST(topology->conf_doc), "topologies", &jtopologies);
 
-	size_t numatvs = json_object_array_length(jtopologies);
-	for (size_t i = 0; i < numatvs; ++i) {
+	size_t topoviews = json_object_array_length(jtopologies);
+	for (size_t i = 0; i < topoviews; ++i) {
 		json_object *jtopo = json_object_array_get_idx(jtopologies, i);
 		json_object *jstream_id, *jview, *jtopo_fpath;
 
@@ -788,12 +784,12 @@ void KsSession::loadTopology(KsTraceGraph* graph, KsTopoViewsContext& numatv_ctx
 		std::string topo_fpath = json_object_get_string(jtopo_fpath);
 		
 		if (QFile::exists(QString::fromStdString(topo_fpath))) {
-			numatv_ctx.addConfig(stream_id, view, topo_fpath);
+			topoviews_ctx.addConfig(stream_id, view, topo_fpath);
 		}
 
-		hide_topo_button &= !numatv_stream_wants_topology_widget(stream_id, numatv_ctx);
+		hide_topo_button &= !stream_wants_topology_widget(stream_id, topoviews_ctx);
 	}
 
-	graph->numatvHideTopologyWidget(hide_topo_button);
+	graph->hideTopologyWidget(hide_topo_button);
 }
 // END of change

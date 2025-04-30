@@ -1,9 +1,12 @@
 # Purpose
 
-Visualise topology of a stream, from which we are reading trace data to get more information where a
+Visualise NUMA topology of a stream, from which we are reading trace data to get more information where a
 task ran or which CPU and therefore NUMA node was working more than others. Visualisation should
 not battle with other parts of KernelShark's visualisations, at best rearrange some graphs, but
 not their data.
+
+Keep the modification extensible so that more than just
+NUMA topologies can be created.
 
 # Terms
 Below are terms introduced with this modification. Other KernelShark terms, e.g. stream, will not be
@@ -45,10 +48,11 @@ in a given session.
 colors of its cores.
 *Node* - Refers to either a structure containing cores in a topology (group, package or a NUMA node)
 or a topology tree node, explained below.
-*Node node* - Type of item at the layer below the root and above the core level. For NUMA TV, they
+Only relevant structures are currently NUMA nodes.
+*Node node* - Type of item at the layer below the root and above the core level. For TopoViews, they
 are currently interchangeable for NUMA node nodes.
-*NUMA TV* - NUMA Topology Views, shortened.
-*NUMA TV Context* - Configuration object for a KernelShark process, which manages per stream
+*TopoViews* - Topology Views, shortened.
+*Topology Views context* - Configuration object for a KernelShark process, which manages per stream
 configurations of which topologies are loaded, if any, and what view a stream is requesting to be
 used during topology visualisation.
 *OS index*
@@ -66,7 +70,7 @@ Topology trees are always a part of a topology widget.
 *Topology tree node* - Node of a block tree visualising a brief topology.
 *Topology visualisation* - Interchangeable with topology tree.
 *Topology widget* - Qt widget with a topology tree and possibly task padding, shown in the wrapper topology
-widget, class KsStreamNUMATopology.
+widget, currently only class KsStreamNUMATopology.
 *Trace graph* - Qt widget housing GL widget, wrapper topology widget and controls for the GL widget, class
 KsTraceGraph.
 *View/view type* - Enumerated option of how to display topology of a stream. Default view is what KernelShark
@@ -132,7 +136,7 @@ lose meaning if there is nothing to hide to begin with.
 For most of the development, topology configurations were stored in a singleton.
 This allowed easy access all across the code and a single instance of configurations.
 Even this document was almost finished defending it - but then the thought of a plugin
-using NUMA TV configurations formed. Essentially, as static data, the topology
+using TopoViews configurations formed. Essentially, as static data, the topology
 configurations would exist for each shared object independently, breaking
 singleton's use as a single instance of a class in the full KernelShark context.
 
@@ -179,7 +183,7 @@ to create some sort of communication between the two languages.
 
 Final decision was made when the semantics of the data stream struct were
 considered - it is about trace data that KernelShark will be visualising.
-On the other hand, NUMA TV is about visualising topologies and has no relation
+On the other hand, TopoViews is about visualising topologies and has no relation
 to data otherwise.
 
 As such, maps with stream IDs as keys and configurations or widgets as values
@@ -191,8 +195,8 @@ This is still a possibility and with a simple change in current source code,
 would be achievable as well. Only the label on NUMA node nodes in the topology
 tree and type of items hwloc should search for would have to change.
 
-It is left as an extension, as this was not part of the specification (and
-the project is pressed for time).
+It is left as an extension, as this was not part of the specification and
+implementation should be easily copyable from NUMA topologies.
 
 ## Questions and answers
 
@@ -221,13 +225,9 @@ which is only concerned with grouping of PUs, cores and NUMA nodes.
 Frankly, because the modification was on a tight schedule. It is possible to
 make more views, with changes:
 
-1. Subclass StreamNUMATopologyConfig as a child of some abstract class,
-   from which more StreamXYZTopologyConfigs would arise. Add a new class
-   for the view.
-2. Add a new item into the TopoViewType enumeration class specifying a view.
-3. Add a radio button to KsNUMATVDialog.
-4. Subclass KsStreamNUMATopology as a child of some abstract class, which would be
-   held by KsTraceGraph. Add a new class for the view.
+1. Add a new item into the TopoViewType enumeration class specifying a view type.
+2. Add new subclasses of TopoViewsConfig & KsStreamTopology.
+3. Add a radio button to KsTopoViewsDialog.
 
 Not too much work, would be great for an extension of this modification.
 
@@ -268,13 +268,11 @@ easily distinguishable by their color alone).
 Of course, averages can make some colors duplicated by sheer coincidence, but
 there would need to be many colors for that to happen.
 
-### "Why aren't topologies with nested NUMA nodes supported?"
+### "Why aren't more exotic topologies, e.g. NUMA nodes sharing cores supported?"
 
 In short, they were deemed to exotic. Modification could be extended to
 take care of these topologies as well though, with new topology configuration
-types or more detailed definition of the existing configuration class (e.g.
-each level could be an abstract data type, which either holds another mapping
-to a topology item or a leaf mapping of PU logical indices to their OS indices).
+types and topology widgets.
 
 Refactoring the code like this is left as an extension.
 
@@ -284,7 +282,7 @@ A little more technical explanation of how things work instead of how they're us
 
 ## Configuration
 
-Each stream's configuration is stored by the NUMA TV context object
+Each stream's configuration is stored by the Topology Views context object
 in the trace graph in an unordered map. This context is to be used
 when asking for adding a new configuration, deleting an old configuration
 or updating an existing configuration. It can also be queried for an
@@ -293,7 +291,7 @@ configuration.
 
 ### Observing a topology configuration
 
-As the main owner of topology configurations, the NUMA TV context
+As the main owner of topology configurations, the Topology Views context
 does not wish to expose unwanted API that could delete the configurations.
 Instead of a reference getter, the observer pattern is applied and an
 observer pointer is given to anyone wishing to observe a stream's topology.
@@ -303,7 +301,7 @@ reading data.
 
 ### Creating a topology configuration
 
-NUMA TV introduces a new widget in KernelShark's widgets library, which
+TopoViews introduces a new widget in KernelShark's widgets library, which
 is a dialog window, where view type and topology file path may be specified.
 
 If changes are applied through this dialog, the context is asked to add a
@@ -312,12 +310,12 @@ be valid at least until the configuration application is finished, or no
 new configuration will be created - with a really unlucky timing, it could
 produce an error and crash the program.
 
-Topology configuration will ask hwloc to interpret its XML topology file
-and then cherry picks only NUMA nodes, their cores and PUs, compacting them
-into a briefer topology, with only index mappings of these objects.
+Topology configuration for NUMA topology will ask hwloc to interpret its XML
+topology file and then cherry picks only NUMA nodes, their cores and PUs,
+compacting them into a brief topology, with only index mappings of these objects.
 
 If this cannot be done, for whatever reason, the brief topology will be empty
-and visualisation will never show anything. An error message will pop on the
+and visualisation will not show anything. An error message will pop on the
 standard error output though.
 
 ### Updating a topology configuration
@@ -326,8 +324,8 @@ When a new and valid topology file path is given to update a configuration,
 it is instead created anew, as most previous data are invalid, and inserted
 into the place of the old configuration.
 
-If just the requested view of a stream is changed, only this value changes
-in the currently applied topology and nothing new is created.
+If the view type changes, the topology configuration is created anew as well,
+as it's a new configuration in the eyes of the modification.
 
 ### Removal of topology configuration
 
@@ -363,13 +361,17 @@ through it.
 ### Location of wrapper topology widget
 
 Wrapper topology widget is situated on the left of the GL widget. It is either
-completely or hidden by the topology button. This way, the topology tree will
+visible or hidden by the topology button. This way, the topology tree will
 perfectly match with (possibly rearranged) CPU graphs of a stream.
 
 ### Creating a topology widget
 
-Topology widgets are created from a stream's topology configuration, namely
-from its brief topology data. Giving these to the constructor of a topology
+Topology widgets are created from a stream's topology configuration. Every
+topology widget should have a corresponding toplogy confguration and vice-versa,
+which it can communicate with. E.g. HwlocNUMATopologyConfig use KsStreamNUMATopology.
+As only Hwloc's NUMA topology is supported, only its creation will be explained.
+KsStreamNUMATopology needs a brief topology to be created, which only
+HwlocNUMATopologyConfig can provide. Giving these to the constructor of the topology
 widget will then construct the topology tree, first layer being the root with
 a machine node (which also represents the stream, but uses hwloc terminology,
 hence "machine"), then construction is something like depth-first search:
@@ -384,17 +386,17 @@ hence "machine"), then construction is something like depth-first search:
 
 Constructor of the topology widget also uses data from the GL widget, mainly
 the value of spacing between graphs in it and number of graphs. The topology
-widgets height is equal to the amount of graphs times their height + the amount
+widget's height is equal to the amount of graphs times their height + the amount
 of spacing between graphs times spacing value. In contrast, the machine node's
 height is the computed height of machine nodes + spacings between them.
 NUMA node nodes' and cores nodes' heights are computed similarly as heights
-of their children (for cores, heights of the CPU graphs an spacings between them)
+of their children (for cores, heights of the CPU graphs and spacings between them)
 plus spacings between the children.
 
 ### Updating topology widgets
 
 This doesn't really happen. What actually happens is the old widget, if
-it exists, is removed, a new topology widget is created and inserted
+it exists, is removed, and a new topology widget is created and inserted
 into its place.
 
 Then, all topology widgets are removed from the wrapper topology widget's
@@ -404,8 +406,9 @@ and vice versa.
 
 As this update is pretty rare, always triggered either by a redraw of
 CPU graphs (which happens on new stream load, session load, on hiding
-CPU graphs or on applying NUMA TV configurations), it being a rare
-occurence in itself.
+CPU graphs or on applying TopoViews configurations, it being a rare
+occurence in itself), memory isn't too stressed and we can allow this
+kind of object swap instead of modifications.
 
 Exception to this is when task graphs are being redrawn - then the
 topology widget's height is changed, but the widget lives on.
@@ -456,8 +459,8 @@ vertical margin is multiplied by 2 for perfect positioning.
 
 ## Source code tag
 
-Source code change tag: `NUMA TV`. Changes done during NUMA TV so that it would work, but which
-are more general in nature are labeled `"NUMA TV"`
+Source code change tag: `TOPOVIEWS`. Changes done during TopoViews' development so that it would work, but which
+are more general in nature are labeled `"TOPOVIEWS"`
 
 # Usage
 
@@ -465,13 +468,13 @@ A little more user-friendly explanation of how things are used instead of how th
 
 ## Stream confgurations
 
-To access NUMA TV's confguration, navigate to `Tools > NUMA Topology Views`
+To access Topology Views's configuration, navigate to `Tools > NUMA Topology Views`
 button in the toolbar. If no stream was loaded, an error pop-up will be shown
 and nothing will happen otherwise.
 
-With a loaded stream, the NUMA TV configuration dialog will be shown,
+With a loaded stream, the Topology Views configuration dialog will be shown,
 with a brief explanation of what to do in this window and in the lower half will be
-a list of opened streams' NUMA TV configurations, namely what topology file to
+a list of opened streams' Topology Views configurations, namely what topology file to
 load data from and what type of topology view should be used for this stream.
 There are also two buttons, "Clear" and "Load...". Clear clears current
 configuration's selected topology file (just the filepath to it, not the file
@@ -489,10 +492,11 @@ KernelShark detected CPUs in its trace file, creation or update of this topology
 configuration is ignored (old values remain or the default choice of no topology
 file and DEFAULT view). Topology configuration changes will also be ignored if
 no actual topology file was chosen (cleared the path or it has been deleted in
-between choosing it and applying the changes), yet the NUMA tree view was set.
+between choosing it and applying the changes), yet a non-DEFAULT view was set.
 
-Applying an empty filepath current configuration of a stream and program will
-default to using DEFAULT view with no topology file.
+Applying an empty filepath to the current configuration of a stream will delete
+the topology configuration and the program will default to using DEFAULT view with
+no topology file.
 
 Currently, only NUMA topology tree view is supported, along with the DEFAULT view,
 which does what KernelShark always has.
@@ -516,7 +520,7 @@ Figure 3.
 
 ### Main window integration
 
-NUMA Topology Views are at first glance not present in the program. This is by
+Topology Views are at first glance not present in the program. This is by
 design, as the modification is supposed to be hidden until needed. To see the
 modification in action, first open a stream. Then, open and use the configuration
 dialog as outlined above.
@@ -527,7 +531,9 @@ also be a topology tree present for the streams that requested a NUMA tree view.
 Streams configured to use the DEFAULT view only have blank spaces in as their
 topology widget. 
 
-The topology tree is a block tree, which is vertically starts at the top of the
+#### Topology tree
+
+The topology tree is a block tree, which vertically starts at the top of the
 start of CPU graphs in the GL widget and vertically ends at the last of those
 graphs. If there are only tasks being drawn, there will be blank white space
 instead. The topology tree will include only nodes relevant to the CPUs shown in
@@ -559,7 +565,7 @@ at that point, it is recommended to resize the main window of the program.
 ### CPU graph rearrangements
 
 If a topology determined that CPUs adhere to a different ordering than OS indices indicate,
-NUMA TV will rearrange the CPU graphs in the GL widget to properly connect to the topology tree
+Topology Views will rearrange the CPU graphs in the GL widget to properly connect to the topology tree
 of a stream. In DEFAULT view, KernelShark orders CPUs by their OS indices, with a NUMATREE view,
 they are ordered by their NUMA node's logical index, then their core's logical index and lastly
 by their logical index (i.e. a sorted sequence could look like (0, 0, 20), (0, 0, 60), (0, 1, 1),
@@ -583,15 +589,14 @@ Figure 5.
 ### Hide button
 
 Hide button is a green button on the left of the wrapper topology widget. Clicking on it
-hides the wrapper topology widget along with all topology trees (figure 6). Clicking on
-it again makes the wrapper topology widget and its trees visible again (figure 7).
-Accompanied with hidden/shown states are characters on the button: ">" for hidden
-and "<" for shown.
+hides the wrapper topology widget along with all stream topology widgets (figure 6).
+Clicking on it again makes the wrapper topology widget and topology widgets within visible
+again (figure 7). Accompanied with hidden/shown states are characters on the button: ">"
+for hidden and "<" for shown.
 
 This button is shown only if there's at least one stream requesting a non-DEFAULT topology view.
 Upon any load of topology requesting a non-DEFAULT view, the wrapper topology widget is not
 hidden (figure 7).
-
 
 ![Figure 6](./images/numatv-6.png)
 Figure 6.
@@ -613,22 +618,37 @@ Figure 8.
 
 ## Session support
 
-NUMA Topology Views configuration can be saved in a session using new API of KsSession. Each stream has their view and
+Topology Views configuration can be saved in a session using new API of KsSession. Each stream has their view and
 topology file path saved.
 
 Importing a session automatically draws topology widgets, if any are desired.
 
 ## API
 
-NUMA TV presents among new classes also four new global functions:
+Topology Views includes mainly new classes for topology configurations, widgets
+and dialogs. Configurations and widgets are made to be easily extended with new
+subclasses for new purposes. Common ancestor for configurations must be
+`TopoViewConfig`, common ancestor for widgets must be `KsStreamTopology`. While
+not strictly necessary, for each new topology to be displayed, a pair of 
+new configuration and new widgets classes should be made. Extending what
+topologies can be displayed also involves adding another member to the enum clas
+`TopoViewType` and a radio button to th TopoViews configuration dialog.
+
+Any new classes need only constructors and destructors defined, as no other API
+that isn't enforced is necessary.
+
+To create new topology configurations and widgets, feel free to check out
+the `HwlocNUMATopoViewConfig` class and `KsStreamNUMATopoogy` class.
+
+Topology Views presents among new classes also four new global functions:
 - `numatv_count_PUs`: This function counts the number of PUs in a brief topology.
 - `numatv_count_cores`: This function counts the number of cores in a brief topology.
 - `numatv_filter_by_PUs`: This functions returns a brief topology, where its members contain or
   are PUs given in a vector. This function is very useful when some CPU graphs are hidden - by
   filtering the brief topology, we get a brief topology where only the visible CPUs are present,
   same for their cores and NUMA nodes.
-- `numatv_stream_wants_topology_widget`: This function checks whether a stream is requesting a
-  non-DEFAULT view in its configuration in the given NUMA TV context
+- `stream_wants_topology_widget`: This function checks whether a stream is requesting a
+  non-DEFAULT view in its configuration in the given Topology Views context
 
 Any other API that got introduced is either explicitly labeled with "numatv" ot "topology" or "topo"
 somewhere (letters can be uppercase). If not, it belongs to a type with that label or a header
@@ -650,5 +670,5 @@ went wrong in secret.
 - This modification was particularly difficult to write, as the D key on main developer's keyboard randomly stopped working
   and many re-reads had to be done. If any Ds are missing, let the main eveloper know.
 - Main developer's quirk is that projects should have slightly quirky names - it helps marketability and breathes some life into them.
-  NUMA topology views sounds boring, but it's abbreviation, NUMA TV, is a rather fitting one - just like a television, the modification
+  Topology Views sounds boring, but it's abbreviation, TV, is a rather fitting one - just like a television, the modification
   displays information to the user via a screen. Rather weak, but a connection nonetheless, boosting development morale.

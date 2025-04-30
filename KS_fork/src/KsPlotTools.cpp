@@ -1580,7 +1580,7 @@ void VirtGap::_draw([[maybe_unused]]const Color &col,
 	g.draw();
 }
 
-//NOTE: Changed here. ("NUMA TV") (2025-04-18)
+//NOTE: Changed here. ("TOPOVIEWS") (2025-04-18)
 Color blackOrWhite(float color_intensity, float limit) {
     const static Color WHITE {0xFF, 0xFF, 0xFF};
     const static Color BLACK {0, 0, 0};
@@ -1589,7 +1589,7 @@ Color blackOrWhite(float color_intensity, float limit) {
 }
 // END of change
 
-//NOTE: Changed here. ("NUMA TV") (2025-04-18)
+//NOTE: Changed here. ("TOPOVIEWS") (2025-04-18)
 float getColorIntensity(const Color& c) {
     // Color multipliers are chosen the way they are based on human
     // eye's receptiveness to each color (green being the color human

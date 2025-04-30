@@ -18,8 +18,8 @@
 // KernelShark
 #include "libkshark.h"
 #include "KsUtils.hpp"
-//NOTE: Changed here. (NUMA TV) (2025-04-06)
-#include "KsNUMATopologyViews.hpp"
+//NOTE: Changed here. (TOPOVIEWS) (2025-04-06)
+#include "KsTopologyViews.hpp"
 // END of change
 
 namespace KsWidgetsLib
@@ -707,15 +707,15 @@ public:
 };
 // END of change
 
-//NOTE: Changed here. (NUMA TV) (2025-04-06)
+//NOTE: Changed here. (TOPOVIEWS) (2025-04-06)
 /**
- * @brief Configuration window for NUMA Topology Views.
+ * @brief Configuration window for Topology Views.
  */
-class KsNUMATVDialog: public QDialog {
+class KsTopoViewsDialog: public QDialog {
 	Q_OBJECT
 private: // Usings
 	/// @brief Simpler name to refer to the GUI elements representing
-	/// chosen configuration of NUMA Topology Views.
+	/// chosen configuration of Topology Views.
 	using ViewTopologyGUIPair = std::pair<QButtonGroup *, QLabel *>;
 
 	/// @brief Simpler name to refer to a stream (by its Id) per topology
@@ -725,8 +725,8 @@ private: // Usings
 	using StreamRadiosLabels = std::pair<int, ViewTopologyGUIPair>;
 	
 	/// @brief Simpler type name for representing a stream (by its Id) and
-	/// its chosen view and a NUMA TV topology file path.
-	using StreamNUMATVSettings = std::pair<int, ViewTopologyPair>;
+	/// its chosen view and a topology file path.
+	using StreamTopoViewsSettings = std::pair<int, ViewTopologyPair>;
 private: // Qt objects
 	/// @brief Layout containing other layouts (top-down ordering of other layouts).
 	QVBoxLayout		_mainLayout;
@@ -750,9 +750,9 @@ private: // Qt objects
 	QMetaObject::Connection _applyBtnConnection;
 signals:
 	/// @brief Signal emitted when the "Apply" button is pressed.
-	void apply(QVector<StreamNUMATVSettings> topo_files);
+	void apply(QVector<StreamTopoViewsSettings> topo_files);
 private: // Non-GUI objects
-	/// @brief Vector of pairs of stream id and NUMA topology
+	/// @brief Vector of pairs of stream id and topology
 	/// file locations.
 	QVector<StreamRadiosLabels> _topologyChoice;
 private:
@@ -764,17 +764,17 @@ private:
 	QPushButton* _setupLoadBtnPerStream(QString last_fpath,
 		QLabel* topo_file_location);
 	QLabel* _setupStatusPerStream(int stream_id, QVBoxLayout* parent_layout,
-		const KsTopoViewsContext& numatv_ctx);
+		const KsTopoViewsContext& topoviews_ctx);
 	QButtonGroup* _setupRadiosPerStream(int stream_id,
-		QVBoxLayout* parent_layout, const KsTopoViewsContext& numatv_ctx);
+		QVBoxLayout* parent_layout, const KsTopoViewsContext& topoviews_ctx);
 	void _setupStreamsScrollArea(kshark_context *kshark_ctx,
-		const KsTopoViewsContext& numatv_ctx);
+		const KsTopoViewsContext& topoviews_ctx);
 	void _setupLayout();
 public:
 	// Don't allow default constructor, it would contain invalid values.
-	KsNUMATVDialog() = delete;
-	explicit KsNUMATVDialog(kshark_context *kshark_ctx,
-		const KsTopoViewsContext& numatv_ctx, QWidget *parent = nullptr);
+	KsTopoViewsDialog() = delete;
+	explicit KsTopoViewsDialog(kshark_context *kshark_ctx,
+		const KsTopoViewsContext& topoviews_ctx, QWidget *parent = nullptr);
 };
 // END of change
 

@@ -23,8 +23,8 @@
 #include "KsPlugins.hpp"
 #include "KsSession.hpp"
 #include "KsUtils.hpp"
-//NOTE: Changed here. (NUMA TV) (2025-04-06)
-#include "KsNUMATopologyViews.hpp"
+//NOTE: Changed here. (TOPOVIEWS) (2025-04-06)
+#include "KsTopologyViews.hpp"
 // END of change
 
 /**
@@ -192,8 +192,8 @@ private:
 	QAction		_couplebreakAction;
 	// END of change
 
-	//NOTE: Changed here. (NUMA TV) (2025-04-06)
-	QAction		_numaTVAction;
+	//NOTE: Changed here. (TOPOVIEWS) (2025-04-06)
+	QAction		_topoViewAction;
 	// END of change
 
 	QWidgetAction	_colorAction;
@@ -333,15 +333,15 @@ private:
 	void _updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_couplebreaks);
 	// END of change
 
-	//NOTE: Changed here. (NUMA TV) (2025-04-06)
+	//NOTE: Changed here. (TOPOVIEWS) (2025-04-06)
 	
-	void _showNUMATVConfig();
+	void _showTopoViewConfig();
 
 	/// @brief Simpler type name for representing a stream (by its Id) and
-	/// its chosen view and a NUMA TV topology file path.
-	using StreamNUMATVSettings = std::pair<int, ViewTopologyPair>;
+	/// its chosen view and a topology file path.
+	using StreamTopoViewsSettings = std::pair<int, ViewTopologyPair>;
 
-	void _updateNUMATVs(QVector<StreamNUMATVSettings> topo_files);
+	void _updateTopoViews(QVector<StreamTopoViewsSettings> topo_files);
 	// END of change
 
 private slots:
