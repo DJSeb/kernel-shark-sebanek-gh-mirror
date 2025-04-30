@@ -84,7 +84,7 @@ public: // Business
  * configuration for all streams. Through it, topology configurations
  * can be added, updated, observed, deleted and cleared (delete all).
  */
-class KsNUMATVContext {
+class KsTopoViewsContext {
 private:
     /**
      * @brief Unordered map of stream IDs to their topology configurations.
@@ -115,7 +115,7 @@ TopoNodeCorePU numatv_filter_by_PUs(const TopoNodeCorePU& brief_topo,
     const QVector<int>& PUs);
 
 bool numatv_stream_wants_topology_widget(int stream_id,
-    const KsNUMATVContext& numatv_ctx);
+    const KsTopoViewsContext& numatv_ctx);
 
 #endif // _KS_NUMA_TV_HPP
 // END of change

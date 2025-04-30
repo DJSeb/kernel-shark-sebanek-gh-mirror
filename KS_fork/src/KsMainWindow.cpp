@@ -1865,7 +1865,7 @@ void KsMainWindow::_showNUMATVConfig() {
  * graphs & in turn the topology widget with it.
  */
 static void apply_numatv_update(int stream_id, TopoViewType view, 
-	QString topology_file, KsNUMATVContext& numatv_ctx,
+	QString topology_file, KsTopoViewsContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
 	// Proper file was given + config exists, applying means updating the configuration
@@ -1921,7 +1921,7 @@ static void apply_numatv_update(int stream_id, TopoViewType view,
  * @param graph Pointer to the graph object, used to redraw the CPU and task
  * graphs & in turn the topology widget with it.
  */
-static void apply_numatv_remove(int stream_id, KsNUMATVContext& numatv_ctx,
+static void apply_numatv_remove(int stream_id, KsTopoViewsContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
 	int result = numatv_ctx.deleteConfig(stream_id);
@@ -1967,7 +1967,7 @@ static void apply_numatv_remove(int stream_id, KsNUMATVContext& numatv_ctx,
  * graphs & in turn the topology widget with it.
  */
 static void apply_numatv_new_topo(int stream_id, TopoViewType view,
-	QString topology_file, KsNUMATVContext& numatv_ctx,
+	QString topology_file, KsTopoViewsContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
 	// Proper file was given + no config exists, applying means creating new topology
@@ -2022,7 +2022,7 @@ static void apply_numatv_new_topo(int stream_id, TopoViewType view,
  * graphs & in turn the topology widget with it.
  */
 static void apply_numatv(int stream_id, TopoViewType view,
-	QString topology_file, KsNUMATVContext& numatv_ctx,
+	QString topology_file, KsTopoViewsContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
 	bool topology_exists = numatv_ctx.existsFor(stream_id);
@@ -2063,7 +2063,7 @@ static void apply_numatv(int stream_id, TopoViewType view,
 void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 	bool hide_topo_button = true;
 
-	KsNUMATVContext& numatv_ctx = _graph.getNUMATVContext();
+	KsTopoViewsContext& numatv_ctx = _graph.getNUMATVContext();
 	for (int i = 0; i < stream_numa.size(); i++) {
 		// Unpack the vector's items
 		int stream_id = stream_numa[i].first;

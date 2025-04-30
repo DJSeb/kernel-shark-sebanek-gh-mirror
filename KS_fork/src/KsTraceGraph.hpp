@@ -71,9 +71,9 @@ public:
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-17)
-// Forward declaration of the KsStreamTopology class, so
+// Forward declaration of the KsStreamNUMATopology class, so
 // that it can be used in the KsTraceGraph class.
-class KsStreamTopology;
+class KsStreamNUMATopology;
 // END of change
 
 /**
@@ -134,7 +134,7 @@ public:
 	 * 
 	 * @return Reference to the NUMA TV context.
 	 */
-	KsNUMATVContext& getNUMATVContext() { return _numaTvCtx; }
+	KsTopoViewsContext& getNUMATVContext() { return _numaTvCtx; }
 	// END of change
 
 	void numatvHideTopologyWidget(bool hide);
@@ -215,7 +215,7 @@ private:
 	/**
 	 * @brief Configuration object for topology data of all streams. 
 	 */
-	KsNUMATVContext _numaTvCtx;
+	KsTopoViewsContext _numaTvCtx;
 
 	/**
 	 * @brief Wrapper for the topology widget and the GL widget.
@@ -251,7 +251,7 @@ private:
 	QWidget	_topoSpace;
 	
 	/**
-	 * @brief Layout for KsStreamTopology widgets.
+	 * @brief Layout for KsStreamNUMATopology widgets.
 	 */
 	QVBoxLayout _topoLayout;
 
@@ -267,7 +267,7 @@ private:
 	 * produce faults). Every topology widget has a parent,
 	 * that being _topoSpace.
 	 */
-	std::map<int, KsStreamTopology*> _topoWidgets;
+	std::map<int, KsStreamNUMATopology*> _topoWidgets;
 	// END of change
 
 	KsGraphScrollArea	_scrollArea;
@@ -285,12 +285,10 @@ private:
 
 //NOTE: Changed here. (NUMA TV) (2025-04-17)
 /**
- * @brief Widget for displaying a topology of a stream as
- * a block tree. While any kind of Node-Core-PU topology can be
- * displayed, where Core holds PUs (CPUs in KShark) and Node
- * holds Cores, currently only NUMA topology is supported.
+ * @brief Widget for displaying NUMA topology of a stream as
+ * a block tree.
  */
-class KsStreamTopology : public QWidget {
+class KsStreamNUMATopology : public QWidget {
 private: // Qt parts
 	/// @brief Main layout of the widget.
 	QVBoxLayout _mainLayout;
@@ -299,13 +297,13 @@ private: // Qt parts
 	QWidget _topo;
 	
 	/// @brief Layout of the topology tree.
-	QHBoxLayout _mainLayout;
+	QHBoxLayout _topoLayout;
 
 	/// @brief Label for the machine (stream) name and a root
 	/// of the topology tree.
 	QLabel _machine;
 
-	/// @brief Container of the nodes.
+	/// @brief Container of the nodes for NUMA nodes.
 	QWidget _nodes;
 
 	/// @brief Layout of the nodes.
@@ -317,7 +315,7 @@ private: // Qt parts
 	/// @brief Layout of the cores.
 	QVBoxLayout _coresLayout;
 public:
-	explicit KsStreamTopology(int stream_id, const TopoNodeCorePU& brief_topo,
+	explicit KsStreamNUMATopology(int stream_id, const TopoNodeCorePU& brief_topo,
 		const KsTraceGraph* trace_graph, QWidget* parent = nullptr);
 
 	void hideTopology(bool hide);

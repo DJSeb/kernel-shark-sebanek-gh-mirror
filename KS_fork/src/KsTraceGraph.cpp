@@ -1055,7 +1055,7 @@ void KsTraceGraph::_numatvInsertTopologyWidget(int sd, const TopoNodeCorePU& bri
 		_numatvRemoveTopologyWidget(sd);
 	}
 
-	auto new_widget = new KsStreamTopology{sd, brief_topo, this, &_topoSpace};
+	auto new_widget = new KsStreamNUMATopology{sd, brief_topo, this, &_topoSpace};
 
 	_topoWidgets[sd] = new_widget;
 }
@@ -1068,7 +1068,7 @@ void KsTraceGraph::_numatvInsertTopologyWidget(int sd, const TopoNodeCorePU& bri
  * @param stream_id Identifier of the stream.
  */
 void KsTraceGraph::_numatvRemoveTopologyWidget(int stream_id) {
-	KsStreamTopology* topoWidget = _topoWidgets[stream_id];
+	KsStreamNUMATopology* topoWidget = _topoWidgets[stream_id];
 	delete topoWidget;
 	_topoWidgets.erase(stream_id);
 }
@@ -1159,7 +1159,7 @@ void KsTraceGraph::_numatvRedrawTopoWidgets(int stream_id,
  */
 void KsTraceGraph::_numatvAdjustTopoTaskPadding(int stream_id) {
 	if (_topoWidgets.count(stream_id)) {
-		KsStreamTopology* topo_widget = _topoWidgets[stream_id];
+		KsStreamNUMATopology* topo_widget = _topoWidgets[stream_id];
 		int v_spacing = _glWindow.vSpacing();
 		int all_graphs = _glWindow.graphCount(stream_id);
 		int all_graphs_height = KS_GRAPH_HEIGHT * all_graphs;
@@ -1171,7 +1171,7 @@ void KsTraceGraph::_numatvAdjustTopoTaskPadding(int stream_id) {
 }
 // END of change
 
-// KsStreamTopology
+// KsStreamNUMATopology
 
 //NOTE: Changed here. (NUMA TV) (2025-04-17)
 /**
@@ -1183,12 +1183,12 @@ void KsTraceGraph::_numatvAdjustTopoTaskPadding(int stream_id) {
  * @param trace_graph Pointer to the trace graph.
  * @param parent Parent widget.
  */
-KsStreamTopology::KsStreamTopology(int stream_id, const TopoNodeCorePU& brief_topo,
+KsStreamNUMATopology::KsStreamNUMATopology(int stream_id, const TopoNodeCorePU& brief_topo,
 	const KsTraceGraph* trace_graph, QWidget* parent)
 : QWidget(parent),
   _mainLayout(this),
   _topo(this),
-  _mainLayout(&_topo),
+  _topoLayout(&_topo),
   _machine(&_topo),
   _nodes(&_topo),
   _nodesLayout(&_nodes),
@@ -1211,7 +1211,7 @@ KsStreamTopology::KsStreamTopology(int stream_id, const TopoNodeCorePU& brief_to
  * 
  * @param hide Whether to hide or show the topology widget.
  */
-void KsStreamTopology::hideTopology(bool hide)
+void KsStreamNUMATopology::hideTopology(bool hide)
 { _topo.setHidden(hide); }
 // END of change
 
@@ -1221,7 +1221,7 @@ void KsStreamTopology::hideTopology(bool hide)
  * 
  * @param new_height The new height for the topology widget.
  */
-void KsStreamTopology::resizeTopologyWidget(int new_height)
+void KsStreamNUMATopology::resizeTopologyWidget(int new_height)
 { this->setFixedHeight(std::max(new_height, 0)); }
 // END of change
 
@@ -1233,7 +1233,7 @@ void KsStreamTopology::resizeTopologyWidget(int new_height)
  * @param v_spacing Vertical spacing between the widgets used in
  * KernelShark's GL widget.
  */
-void KsStreamTopology::_setupWidgetStructure(int v_spacing) {
+void KsStreamNUMATopology::_setupWidgetStructure(int v_spacing) {
 	_mainLayout.setContentsMargins(0, 0, 0, 0);
 	_mainLayout.setSpacing(0);
 	_mainLayout.setAlignment(Qt::AlignTop);
@@ -1241,8 +1241,8 @@ void KsStreamTopology::_setupWidgetStructure(int v_spacing) {
 	_topo.setContentsMargins(0, 0, 0, 0);
 	_topo.setMinimumHeight(0);
 	
-	_mainLayout.setContentsMargins(0, 0, 0, 0);
-	_mainLayout.setSpacing(0);
+	_topoLayout.setContentsMargins(0, 0, 0, 0);
+	_topoLayout.setSpacing(0);
 	
 	_nodes.setContentsMargins(0, 0, 0, 0);
 	
@@ -1260,15 +1260,15 @@ void KsStreamTopology::_setupWidgetStructure(int v_spacing) {
 /**
  * @brief Sets up layouts and their items for the topology widget.
  */
-void KsStreamTopology::_setupWidgetLayouts() {
+void KsStreamNUMATopology::_setupWidgetLayouts() {
 	this->setLayout(&_mainLayout);
-	_topo.setLayout(&_mainLayout);
+	_topo.setLayout(&_topoLayout);
 	_nodes.setLayout(&_nodesLayout);
 	_cores.setLayout(&_coresLayout);
 
-	_mainLayout.addWidget(&_machine);
-	_mainLayout.addWidget(&_nodes);
-	_mainLayout.addWidget(&_cores);
+	_topoLayout.addWidget(&_machine);
+	_topoLayout.addWidget(&_nodes);
+	_topoLayout.addWidget(&_cores);
 
 	_mainLayout.addWidget(&_topo);
 }
@@ -1329,7 +1329,7 @@ static QString make_topo_item_stylesheet(const KsPlot::Color& color) {
  * of core's PUs.
  * @return Height of the created core node.
  */
-int KsStreamTopology::_setupTopologyTreeCore(int core_lid, int node_lid,
+int KsStreamNUMATopology::_setupTopologyTreeCore(int core_lid, int node_lid,
 	int v_spacing, const TopoPUIds& PUs, const KsGLWidget* gl_widget,
 	QLabel* node_parent, unsigned int& node_reds, unsigned int& node_greens,
 	unsigned int& node_blues)
@@ -1389,7 +1389,7 @@ int KsStreamTopology::_setupTopologyTreeCore(int core_lid, int node_lid,
  * CPU colors.
  * @return Height of the created Node node. 
  */
-int KsStreamTopology::_setupTopologyTreeNode(int node_lid, int v_spacing,
+int KsStreamNUMATopology::_setupTopologyTreeNode(int node_lid, int v_spacing,
 	const TopoCorePU& cores, const KsGLWidget* gl_widget)
 {
 	
@@ -1431,7 +1431,7 @@ int KsStreamTopology::_setupTopologyTreeNode(int node_lid, int v_spacing,
 /**
  * @brief Sets up the topology tree - the machine node (tree root), its
  * color, its text, its tooltip and also the nodes under it. Also sets
- * a fixed height for the topology tree's owning widget, the KsStreamTopology
+ * a fixed height for the topology tree's owning widget, the KsStreamNUMATopology
  * object.
  * 
  * @param stream_id Identifier of the stream.
@@ -1441,7 +1441,7 @@ int KsStreamTopology::_setupTopologyTreeNode(int node_lid, int v_spacing,
  * @param gl_widget Pointer to the GL widget from which to get
  * stream colors for the machine node. 
  */
-void KsStreamTopology::_setupTopologyTree(int stream_id, int v_spacing, 
+void KsStreamNUMATopology::_setupTopologyTree(int stream_id, int v_spacing, 
 	const TopoNodeCorePU& brief_topo, KsGLWidget* gl_widget)
 {
 	QString machine_name = QString("M %1").arg(stream_id);

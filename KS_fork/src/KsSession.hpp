@@ -88,9 +88,9 @@ public:
 	float getColorScheme();
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-20)
-	void saveTopology(int n_streams, const KsNUMATVContext& numatv_ctx);
+	void saveTopology(int n_streams, const KsTopoViewsContext& numatv_ctx);
 
-	void loadTopology(KsTraceGraph* graph, KsNUMATVContext& numatv_ctx);
+	void loadTopology(KsTraceGraph* graph, KsTopoViewsContext& numatv_ctx);
 	// END of change
 
 private:

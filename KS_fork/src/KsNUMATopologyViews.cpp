@@ -64,7 +64,7 @@ static hwloc_topology_t get_hwloc_topology(const std::string& topo_fpath) {
     return topology;
 }
 
-// KsNUMATVContext
+// KsTopoViewsContext
 
 /**
  * @brief Checks for existence of a topology configuration for a given stream ID.
@@ -72,7 +72,7 @@ static hwloc_topology_t get_hwloc_topology(const std::string& topo_fpath) {
  * @param stream_id ID of the stream to check for.
  * @return True if the topology configuration exists for the stream ID, false otherwise.
  */
-bool KsNUMATVContext::existsFor(int stream_id) const
+bool KsTopoViewsContext::existsFor(int stream_id) const
 { return _active_numatvs.count(stream_id) > 0; }
 
 /**
@@ -87,7 +87,7 @@ bool KsNUMATVContext::existsFor(int stream_id) const
  * `-1` if the topology file is not valid or
  * `0` if the configuration was added successfully.
  */
-int KsNUMATVContext::addConfig(int stream_id, TopoViewType view, const std::string& topology_file) {
+int KsTopoViewsContext::addConfig(int stream_id, TopoViewType view, const std::string& topology_file) {
     kshark_context *kshark_ctx(nullptr);
     int retval = -1;
     
@@ -125,7 +125,7 @@ int KsNUMATVContext::addConfig(int stream_id, TopoViewType view, const std::stri
  * `0` if the configuration was updated successfully or
  * `1` if the configuration was not changed (success).
  */
-int KsNUMATVContext::updateConfig(int stream_id, TopoViewType view, const std::string& topology_file) {
+int KsTopoViewsContext::updateConfig(int stream_id, TopoViewType view, const std::string& topology_file) {
     bool retval = -3;
     
     if (existsFor(stream_id)) {
@@ -159,7 +159,7 @@ int KsNUMATVContext::updateConfig(int stream_id, TopoViewType view, const std::s
  * @param stream_id ID of the stream to get the configuration for.
  * @return Observer pointer to the topology configuration or nullptr if it doesn't exist.
  */
-const StreamNUMATopologyConfig* KsNUMATVContext::observeConfig(int stream_id) const {
+const StreamNUMATopologyConfig* KsTopoViewsContext::observeConfig(int stream_id) const {
     if (existsFor(stream_id)) {
         const StreamNUMATopologyConfig* topo_cfg = &(_active_numatvs.at(stream_id));
         return topo_cfg;
@@ -173,13 +173,13 @@ const StreamNUMATopologyConfig* KsNUMATVContext::observeConfig(int stream_id) co
  * @param stream_id ID of the stream to delete the configuration for.
  * @return Number of configurations deleted (0 or 1).
  */
-int KsNUMATVContext::deleteConfig(int stream_id)
+int KsTopoViewsContext::deleteConfig(int stream_id)
 { return _active_numatvs.erase(stream_id); }
 
 /**
  * @brief Deletes all topology configurations from the context.
  */
-void KsNUMATVContext::clear()
+void KsTopoViewsContext::clear()
 { _active_numatvs.clear(); }
 
 // StreamNUMATopologyConfig
@@ -425,7 +425,7 @@ TopoNodeCorePU numatv_filter_by_PUs(const TopoNodeCorePU& brief_topo, const QVec
  * @param numatv_ctx NUMA TV context, containing the topology configurations.
  * @return True if the stream wants to show a topology widget, false otherwise.
  */
-bool numatv_stream_wants_topology_widget(int stream_id, const KsNUMATVContext& numatv_ctx)
+bool numatv_stream_wants_topology_widget(int stream_id, const KsTopoViewsContext& numatv_ctx)
 {
 	bool show_this_topo = false;
 	if (numatv_ctx.existsFor(stream_id)) {
