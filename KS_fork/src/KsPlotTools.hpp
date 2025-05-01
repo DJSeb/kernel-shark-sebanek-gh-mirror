@@ -685,7 +685,7 @@ private:
 	void _draw(const Color &col, float size) const override;
 };
 
-//NOTE: Changed here. ("TOPOVIEWS") (2025-04-18)
+//NOTE: Changed here. ("NUMA TV") (2025-04-18)
 /**
  * @brief Returns either black if the color intensity is too great,
  * otherwise returns white.

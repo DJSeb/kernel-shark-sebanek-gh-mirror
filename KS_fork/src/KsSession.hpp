@@ -19,8 +19,8 @@
 #include "KsDualMarker.hpp"
 #include "KsTraceGraph.hpp"
 #include "KsTraceViewer.hpp"
-//NOTE: Changed here. (TOPOVIEWS) (2025-04-20)
-#include "KsTopologyViews.hpp"
+//NOTE: Changed here. (NUMA TV) (2025-04-20)
+#include "KsNUMATopologyViews.hpp"
 // END of change
 
 class KsMainWindow;
@@ -87,10 +87,10 @@ public:
 
 	float getColorScheme();
 
-	//NOTE: Changed here. (TOPOVIEWS) (2025-04-20)
-	void saveTopology(int n_streams, const KsTopoViewsContext& topoviews_ctx);
+	//NOTE: Changed here. (NUMA TV) (2025-04-20)
+	void saveTopology(int n_streams, const KsTopoViewsContext& numatv_ctx);
 
-	void loadTopology(KsTraceGraph* graph, KsTopoViewsContext& topoviews_ctx);
+	void loadTopology(KsTraceGraph* graph, KsTopoViewsContext& numatv_ctx);
 	// END of change
 
 private:

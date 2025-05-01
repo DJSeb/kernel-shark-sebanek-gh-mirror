@@ -30,8 +30,8 @@
 #include "KsCmakeDef.hpp"
 #include "KsMainWindow.hpp"
 #include "KsAdvFilteringDialog.hpp"
-//NOTE: Changed here. (TOPOVIEWS) (2025-04-06)
-#include "KsTopologyViews.hpp"
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
+#include "KsNUMATopologyViews.hpp"
 // END of change
 
 using namespace KsWidgetsLib;
@@ -69,8 +69,8 @@ KsMainWindow::KsMainWindow(QWidget *parent)
   //NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
   _couplebreakAction("Couplebreak Settings", this),
   // END of change
-  //NOTE: Changed here. (TOPOVIEWS) (2025-04-06)
-  _topoViewAction("Topology Views", this),
+  //NOTE: Changed here. (NUMA TV) (2025-04-06)
+  _numaTVAction("NUMA Topology Views", this),
   // END of change
   _colorAction(this),
   _colSlider(this),
@@ -209,10 +209,10 @@ KsMainWindow::~KsMainWindow()
 	 */
 	_graph.glPtr()->freePluginShapes();
 
-	//NOTE: Changed here. (TOPOVIEWS) (2025-04-22)
-	// Explicit deletion of Topology Views data and widgets, to be safe.
-	_graph.getTopoViewsContext().clear();
-	_graph.clearTopologyWidgets();
+	//NOTE: Changed here. (NUMA TV) (2025-04-22)
+	// Explicit deletion of NUMA TV data and widgets, to be safe.
+	_graph.getNUMATVContext().clear();
+	_graph.numatvClearTopologyWidgets();
 	// END of change
 
 	if (kshark_instance(&kshark_ctx))
@@ -375,10 +375,10 @@ void KsMainWindow::_createActions()
 		this, &KsMainWindow::_showCouplebreakConfig); // Reactor + action on reactor
 	// END of change
 
-	//NOTE: Changed here. (TOPOVIEWS) (2025-04-06)
-	_topoViewAction.setStatusTip("Control topology views");
-	connect(&_topoViewAction, &QAction::triggered, // Actor + action on actor
-		this, &KsMainWindow::_showTopoViewConfig); // Reactor + action on reactor
+	//NOTE: Changed here. (NUMA TV) (2025-04-06)
+	_numaTVAction.setStatusTip("Control NUMA topology views");
+	connect(&_numaTVAction, &QAction::triggered, // Actor + action on actor
+		this, &KsMainWindow::_showNUMATVConfig); // Reactor + action on reactor
 	// END of change
 
 	_colorPhaseSlider.setMinimum(20);
@@ -535,8 +535,8 @@ void KsMainWindow::_createMenus()
 	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 	tools->addAction(&_couplebreakAction);
 	// END of change
-	//NOTE: Changed here. (TOPOVIEWS) (2025-04-06)
-	tools->addAction(&_topoViewAction);
+	//NOTE: Changed here. (NUMA TV) (2025-04-06)
+	tools->addAction(&_numaTVAction);
 	// END of change
 	tools->addAction(&_managePluginsAction);
 	tools->addAction(&_addPluginsAction);
@@ -630,13 +630,13 @@ void KsMainWindow::_open()
 				    _lastDataFilePath);
 
 	if (!fileName.isEmpty()) {
-		//NOTE: Changed here. (TOPOVIEWS) (2025-04-16)
-		// This clears existing topology configurations, hides their
-		// containing widget and clears topology widgets.
+		//NOTE: Changed here. (NUMA TV) (2025-04-16)
+		// This clears existing NUMA topology configurations, hides their
+		// containing widget and clears NUMA topology widgets.
 		// This puts the topology widgets into a clean state.
-		_graph.getTopoViewsContext().clear();
-		_graph.hideTopologyWidget(true);
-		_graph.clearTopologyWidgets();
+		_graph.getNUMATVContext().clear();
+		_graph.numatvHideTopologyWidget(true);
+		_graph.numatvClearTopologyWidgets();
 		// END of change
 		loadDataFile(fileName);
 	}
@@ -743,8 +743,8 @@ void KsMainWindow::_updateSession()
 
 	_session.saveVisModel(_graph.glPtr()->model()->histo());
 	_session.saveDataStreams(kshark_ctx);
-	//NOTE: Changed here. (TOPOVIEWS) (2025-04-20)
-	_session.saveTopology(kshark_ctx->n_streams, _graph.getTopoViewsContext());
+	//NOTE: Changed here. (NUMA TV) (2025-04-20)
+	_session.saveTopology(kshark_ctx->n_streams, _graph.getNUMATVContext());
 	// END of change
 	_session.saveGraphs(kshark_ctx, _graph);
 	_session.saveDualMarker(&_mState);
@@ -1527,10 +1527,10 @@ void KsMainWindow::loadSession(const QString &fileName)
 	_updateSessionSize = true;
 	pb.setValue(180);
 
-	//NOTE: Changed here. (TOPOVIEWS) (2025-04-20)
+	//NOTE: Changed here. (NUMA TV) (2025-04-20)
 	// Topology configurations have to be loaded before the graphs, otherwise
 	// we miss a cpuTopoReDraw, which would show the topology widgets for each stream.
-	_session.loadTopology(&_graph, _graph.getTopoViewsContext());
+	_session.loadTopology(&_graph, _graph.getNUMATVContext());
 	pb.setValue(185);
 	// END of change
 
@@ -1805,15 +1805,15 @@ void KsMainWindow::_updateCouplebreaks(QVector<StreamCouplebreakSetting> stream_
 }
 // END of change
 
-//NOTE: Changed here. (TOPOVIEWS) (2025-04-06)
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
 /**
- * @brief Function will show the Topology Views configuration
+ * @brief Function will show the NUMA TV configuration
  * dialog, but only if some KernelShark session is found and
  * there is at least one stream loaded. After showing the dialog,
  * KernelShark graphs in the main window are updated.
  */
-void KsMainWindow::_showTopoViewConfig() {
-	KsTopoViewsDialog *dialog;
+void KsMainWindow::_showNUMATVConfig() {
+	KsNUMATVDialog *dialog;
 	kshark_context *kshark_ctx(nullptr);
 
 	if (!kshark_instance(&kshark_ctx)) {
@@ -1829,9 +1829,9 @@ void KsMainWindow::_showTopoViewConfig() {
 		return;
 	}
 	
-	dialog = new KsTopoViewsDialog{kshark_ctx, _graph.getTopoViewsContext(), this};
-	connect(dialog, &KsTopoViewsDialog::apply, // Actor + action on actor
-		this, &KsMainWindow::_updateTopoViews); // Reactor + action on reactor
+	dialog = new KsNUMATVDialog{kshark_ctx, _graph.getNUMATVContext(), this};
+	connect(dialog, &KsNUMATVDialog::apply, // Actor + action on actor
+		this, &KsMainWindow::_updateNUMATVs); // Reactor + action on reactor
 
 	dialog->show();
 	
@@ -1841,7 +1841,7 @@ void KsMainWindow::_showTopoViewConfig() {
 }
 // END of change
 
-//NOTE: Changed here. (TOPOVIEWS) (2025-04-16)
+//NOTE: Changed here. (NUMA TV) (2025-04-16)
 /**
  * @brief Function will attempt to update a topology configuration
  * for the stream from the argument. If it succeeds, the topology widget
@@ -1860,16 +1860,16 @@ void KsMainWindow::_showTopoViewConfig() {
  * configuration is applied.
  * @param view Type of the view to be applied to the stream.
  * @param topology_file Path to the topology file.
- * @param topoviews_ctx Topology Views context, containing the topology configurations.
+ * @param numatv_ctx NUMA TV context, containing the topology configurations.
  * @param graph Pointer to the graph object, used to redraw the CPU and task
  * graphs & in turn the topology widget with it.
  */
-static void apply_topoview_update(int stream_id, TopoViewType view, 
-	QString topology_file, KsTopoViewsContext& topoviews_ctx,
+static void apply_numatv_update(int stream_id, TopoViewType view, 
+	QString topology_file, KsTopoViewsContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
 	// Proper file was given + config exists, applying means updating the configuration
-	int result = topoviews_ctx.updateConfig(stream_id, view, topology_file.toStdString());
+	int result = numatv_ctx.updateConfig(stream_id, view, topology_file.toStdString());
 	
 	switch (result) {
 	case 1:
@@ -1904,7 +1904,7 @@ static void apply_topoview_update(int stream_id, TopoViewType view,
 }
 // END of change
 
-//NOTE: Changed here. (TOPOVIEWS) (2025-04-17)
+//NOTE: Changed here. (NUMA TV) (2025-04-17)
 /**
  * @brief Function will attempt to remove a topology configuration
  * for the stream from the argument. If it succeeds, the topology widget
@@ -1917,14 +1917,14 @@ static void apply_topoview_update(int stream_id, TopoViewType view,
  * 
  * @param stream_id Identifier of the stream to which the topology
  * configuration is applied.
- * @param topoviews_ctx Topology Views context, containing the topology configurations.
+ * @param numatv_ctx NUMA TV context, containing the topology configurations.
  * @param graph Pointer to the graph object, used to redraw the CPU and task
  * graphs & in turn the topology widget with it.
  */
-static void apply_topoview_remove(int stream_id, KsTopoViewsContext& topoviews_ctx,
+static void apply_numatv_remove(int stream_id, KsTopoViewsContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
-	int result = topoviews_ctx.deleteConfig(stream_id);
+	int result = numatv_ctx.deleteConfig(stream_id);
 	
 	switch (result) {
 	case 1:
@@ -1944,7 +1944,7 @@ static void apply_topoview_remove(int stream_id, KsTopoViewsContext& topoviews_c
 }
 // END of change
 
-//NOTE: Changed here. (TOPOVIEWS) (2025-04-16)
+//NOTE: Changed here. (NUMA TV) (2025-04-16)
 /**
  * @brief Function will attempt to create a new topology configuration
  * for the stream from the argument. If it succeeds, the topology widget
@@ -1962,16 +1962,16 @@ static void apply_topoview_remove(int stream_id, KsTopoViewsContext& topoviews_c
  * configuration is applied.
  * @param view Type of the view to be applied to the stream.
  * @param topology_file Path to the topology file.
- * @param topoviews_ctx Topology Views context, containing the topology configurations.
+ * @param numatv_ctx NUMA TV context, containing the topology configurations.
  * @param graph Pointer to the graph object, used to redraw the CPU and task
  * graphs & in turn the topology widget with it.
  */
-static void apply_topoview_new_topo(int stream_id, TopoViewType view,
-	QString topology_file, KsTopoViewsContext& topoviews_ctx,
+static void apply_numatv_new_topo(int stream_id, TopoViewType view,
+	QString topology_file, KsTopoViewsContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
 	// Proper file was given + no config exists, applying means creating new topology
-	int result = topoviews_ctx.addConfig(stream_id, view, topology_file.toStdString());
+	int result = numatv_ctx.addConfig(stream_id, view, topology_file.toStdString());
 	QString err_msg;
 
 	switch (result) {
@@ -2004,7 +2004,7 @@ static void apply_topoview_new_topo(int stream_id, TopoViewType view,
 }
 // END of change
 
-//NOTE: Changed here. (TOPOVIEWS) (2025-04-16)
+//NOTE: Changed here. (NUMA TV) (2025-04-16)
 /**
  * @brief Actions to be taken when applying NUMA Topology View. Based
  * on filepath validity and stream's view type, the function will either
@@ -2017,28 +2017,28 @@ static void apply_topoview_new_topo(int stream_id, TopoViewType view,
  * configuration is applied.
  * @param view Type of the view to be applied to the stream.
  * @param topology_file Path to the topology file.
- * @param topoviews_ctx Topology Views context, containing the topology configurations.
+ * @param numatv_ctx NUMA TV context, containing the topology configurations.
  * @param graph Pointer to the graph object, used to redraw the CPU and task
  * graphs & in turn the topology widget with it.
  */
-static void apply_topoview(int stream_id, TopoViewType view,
-	QString topology_file, KsTopoViewsContext& topoviews_ctx,
+static void apply_numatv(int stream_id, TopoViewType view,
+	QString topology_file, KsTopoViewsContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
-	bool topology_exists = topoviews_ctx.existsFor(stream_id);
+	bool topology_exists = numatv_ctx.existsFor(stream_id);
 	bool file_exists = QFile(topology_file).exists();
 
 	if (topology_exists) {
 		if (file_exists) {
-			apply_topoview_update(stream_id, view, topology_file, topoviews_ctx, graph);
+			apply_numatv_update(stream_id, view, topology_file, numatv_ctx, graph);
 		} else {
 			// No proper file was given, applying means clear of the topology ("I apply nothing")
 			// Topology-less configuration cannot visualise it.
-			apply_topoview_remove(stream_id, topoviews_ctx, graph);
+			apply_numatv_remove(stream_id, numatv_ctx, graph);
 		}
 	} else {
 		if (file_exists) {
-			apply_topoview_new_topo(stream_id, view, topology_file, topoviews_ctx, graph);
+			apply_numatv_new_topo(stream_id, view, topology_file, numatv_ctx, graph);
 		} else {
 			// Just redraw
 			// This will also add a widget to the topology widgets, but it will be empty,
@@ -2050,9 +2050,9 @@ static void apply_topoview(int stream_id, TopoViewType view,
 }
 // END of change
 
-//NOTE: Changed here. (TOPOVIEWS) (2025-04-06)
+//NOTE: Changed here. (NUMA TV) (2025-04-06)
 /**
- * @brief Function will update configuration of Topology Views for
+ * @brief Function will update configuration of NUMA Topology Views for
  * each stream, both given in the argument. If no stream wishes to use a non-DEFAULT
  * view, the topology widget will be hidden and a classic view of KernelShark (i.e. just
  * the GL widget) will be shown.
@@ -2060,22 +2060,22 @@ static void apply_topoview(int stream_id, TopoViewType view,
  * @param stream_numa A vector of pairs, each pair containing a stream ID and
  * a pair of view type and topology file name.
  */
-void KsMainWindow::_updateTopoViews(QVector<StreamTopoViewsSettings> stream_numa) {
+void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 	bool hide_topo_button = true;
 
-	KsTopoViewsContext& topoviews_ctx = _graph.getTopoViewsContext();
+	KsTopoViewsContext& numatv_ctx = _graph.getNUMATVContext();
 	for (int i = 0; i < stream_numa.size(); i++) {
 		// Unpack the vector's items
 		int stream_id = stream_numa[i].first;
 		TopoViewType view = stream_numa[i].second.first;
 		QString topology_file = stream_numa[i].second.second;
 
-		apply_topoview(stream_id, view, topology_file, topoviews_ctx, graphPtr());
+		apply_numatv(stream_id, view, topology_file, numatv_ctx, graphPtr());
 
 		// Hide or show the topology widget if a topology view is asked for
-		hide_topo_button &= !stream_wants_topology_widget(stream_id, topoviews_ctx);
+		hide_topo_button &= !numatv_stream_wants_topology_widget(stream_id, numatv_ctx);
 	}
 	
-	graphPtr()->hideTopologyWidget(hide_topo_button);
+	graphPtr()->numatvHideTopologyWidget(hide_topo_button);
 }
 // END of change

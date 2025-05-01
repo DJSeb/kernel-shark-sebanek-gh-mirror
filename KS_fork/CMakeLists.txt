@@ -8,7 +8,7 @@ set(KS_APP_NAME "kernelshark")
 set(KS_VERSION_MAJOR 2)
 set(KS_VERSION_MINOR 6)
 set(KS_VERSION_PATCH 0)
-set(KS_VERSION_DESCRIPTOR "topoviews_ctx")
+set(KS_VERSION_DESCRIPTOR "numatv")
 set(KS_VERSION_STRING ${KS_VERSION_MAJOR}.${KS_VERSION_MINOR}.${KS_VERSION_PATCH}-${KS_VERSION_DESCRIPTOR})
 message("\n project: Kernel Shark: (version: ${KS_VERSION_STRING})\n")
 
@@ -51,7 +51,7 @@ find_package(TraceFS    REQUIRED)
 find_package(TraceCmd   REQUIRED)
 
 find_package(JSONC      REQUIRED)
-#NOTE: Changed here. (TOPOVIEWS) (2025-04-08)
+#NOTE: Changed here. (NUMA TV) (2025-04-08)
 ## Finds hwloc dependency with pkg-config and 
 ## outputs variables given by hwloc.
 ## This particular build instruction chain was found on the

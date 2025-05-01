@@ -12,7 +12,7 @@ changes there. They should be divided into:
 - **Couplebreak** - splitting events belonging to two processes (=: couple)
 - **Get Colors** - functions which allow access to KernelShark's GL widget's color table of tasks,
   CPUs and streams
-- **Topology Views** - viewing CPU plots with respect to a topology (currently only supports NUMA topologies)
+- **NUMA Topology Views** - viewing CPU plots with respect to NUMA topology
 - **No Boxes** - introduces API & behaviour to disallow KernelShark from drawing taskboxes between
   bins of some events in its graphs.
 

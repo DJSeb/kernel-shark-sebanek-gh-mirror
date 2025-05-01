@@ -98,8 +98,8 @@ if (Qt6Widgets_FOUND AND TT_FONT_FILE)
                         KsCaptureDialog.hpp
                         KsQuickContextMenu.hpp
                         KsAdvFilteringDialog.hpp
-                        #NOTE: Changed here. (TOPOVIEWS) (2025-04-06)
-                        KsTopologyViews.hpp
+                        #NOTE: Changed here. (NUMA TV) (2025-04-06)
+                        KsNUMATopologyViews.hpp
                         # END of change
                         )
 
@@ -119,8 +119,8 @@ if (Qt6Widgets_FOUND AND TT_FONT_FILE)
                                                             KsCaptureDialog.cpp
                                                             KsQuickContextMenu.cpp
                                                             KsAdvFilteringDialog.cpp
-                                                            #NOTE: Changed here. (TOPOVIEWS) (2025-04-06)
-                                                            KsTopologyViews.cpp
+                                                            #NOTE: Changed here. (NUMA TV) (2025-04-06)
+                                                            KsNUMATopologyViews.cpp
                                                             # END of change
                                                             )
 
@@ -130,7 +130,7 @@ if (Qt6Widgets_FOUND AND TT_FONT_FILE)
                                      Qt6::OpenGLWidgets
                                      Qt6::StateMachine)
 
-    #NOTE: Changed here. (TOPOVIEWS) (2025-04-08)
+    #NOTE: Changed here. (NUMA TV) (2025-04-08)
     ## Adds hwloc dependencies & other options to kshark-gui.
     target_link_libraries(kshark-gui ${HWLOC_LINK_LIBRARIES})
     target_include_directories(kshark-gui PRIVATE ${HWLOC_INCLUDE_DIRS})

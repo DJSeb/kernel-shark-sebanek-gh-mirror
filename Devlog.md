@@ -1114,18 +1114,3 @@ Goals:
 
 - Fix whatever the supervisor deems to be in need of a change.
 - Survey paper
-
-# 2025-04-29 - 2025-04-30
-
-Polishing of various parts of NUMA TV, including renaming parts to TopoViews (generalization) and NUMA Topology Views
-to just Topology Views or TopoViews.
-
-Not just that, but a complete refactoring has been done to allow
-topology widgets and topology configurations to be subclassed
-for any future topologies (including non-hwloc ones!) or any
-other shenanigans in the topology space. It isn't well-tested,
-bt it seems to work just like before.
-
-Sadly, renaming of NUMA TV means we lost the funny name, only
-TV is too short for any practical usage.
-

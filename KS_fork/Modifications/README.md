@@ -6,7 +6,7 @@ Each of the documents below serve as technical and user documentations for each 
 - *[Get  Colors](./get-colors.md)*
 - *[Mouse Hover Plot Objects](./mouse-hover-plot-objects.md)*
 - *[No Boxes](./no-boxes.md)*
-- *[Topology Views](./topology-views.md)*
+- *[NUMA Topology Views](./NUMA-topology-views.md)*
 - *[Preview Labels Changeable](./preview-labels-changeable.md)*
 - *[Record Kstack](./record-kstack.md)*
 
@@ -29,4 +29,4 @@ David Jaromír Šebánek (e-mail: `djsebofficial@gmail.com`). Direct all inquiri
   documentation pages for quick questions, e.g. what are restricted pointers in C. They also serve asa great listeners,
   when an idea needed to be said out loud, they were there to listen (and nod until the idea was proven futile).
 - **Hwloc**, specifically its documentation and impressive tools to capture systems' topologies. The documentation was
-  rich and full of useful knowledge, the tools already were prepared for all necessary operations needed by TopoViews modification.
+  rich and full of useful knowledge, the tools already were prepared for all necessary operations needed by NUMA TV modification.
