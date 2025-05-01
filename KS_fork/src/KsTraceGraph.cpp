@@ -516,7 +516,11 @@ void KsTraceGraph::cpuReDraw(int sd, QVector<int> v)
 		_numatvRedrawTopoWidgets(sd, v);
 		// END of change
 		_glWindow._streamPlots[sd]._cpuList = v;
+		//NOTE: Changed here. (NUMA TV) (2025-05-01)
+		// Height needs to be adjusted due to a different number of CPU graphs
+		// changing height of stream's graphs.
 		_numatvAdjustTopoWidgetHeight(sd);
+		// END of change
 	}
 
 	_selfUpdate();
