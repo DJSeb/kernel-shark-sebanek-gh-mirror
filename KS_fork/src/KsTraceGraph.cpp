@@ -1040,15 +1040,16 @@ void KsTraceGraph::numatvClearTopologyWidgets() {
 
 //NOTE: Changed here. (NUMA TV) (2025-04-17)
 /**
- * @brief Inserts a topology widget for a stream into the trace graph's
- * topology map. If a topology widget already exists for the stream, it is
+ * @brief Emplaces a topology widget for a stream into the trace graph's
+ * topology map with brief topology given in the argument.
+ * If a topology widget already exists for the stream, it is
  * removed first.
  * 
  * @param sd Identifier of the stream.
  * @param brief_topo Brief topology of the stream from which the stream's
  * topology widget is created.
  */
-void KsTraceGraph::_numatvInsertTopologyWidget(int sd, const TopoNodeCorePU& brief_topo)
+void KsTraceGraph::_numatvEmplaceTopologyWidget(int sd, const TopoNodeCorePU& brief_topo)
 {
 	bool existsFor_stream = _topoWidgets.count(sd);
 	if (existsFor_stream) {
@@ -1114,7 +1115,7 @@ void KsTraceGraph::_numatvExistingTopologyAction(int stream_id,
 		hide_topo = cpusToDraw.isEmpty();
 	}
 
-	_numatvInsertTopologyWidget(stream_id, brief_topo);
+	_numatvEmplaceTopologyWidget(stream_id, brief_topo);
 	_numatvHideStreamTopo(stream_id, hide_topo);
 }
 // END of change
@@ -1138,7 +1139,7 @@ void KsTraceGraph::_numatvRedrawTopoWidgets(int stream_id,
 		_numatvExistingTopologyAction(stream_id,
 			cpusToDraw);
 	} else {
-		_numatvInsertTopologyWidget(stream_id, {});
+		_numatvEmplaceTopologyWidget(stream_id, {});
 		_numatvHideStreamTopo(stream_id, true);
 	}
 

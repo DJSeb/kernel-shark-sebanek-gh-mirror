@@ -229,7 +229,10 @@ make more views, with changes:
 4. Subclass KsStreamNUMATopology as a child of some abstract class, which would be
    held by KsTraceGraph. Add a new class for the view.
 
-Not too much work, would be great for an extension of this modification.
+This sounds quick on paper, but it would take about an evening to properly implement
+currently. While that is not a lot of work still, it is a design change, as
+currently, the design fits only NUMA TV, no other topologies - hence it would
+need also documentation changes, API changes, context semantics and so on.
 
 ### "Why aren't topology views more interactive?"
 
@@ -412,7 +415,7 @@ topology widget's height is changed, but the widget lives on.
 
 ### Removal of topology widgets
 
-Topology widgets are removed only when a new one is to be inserted or
+Topology widgets are removed only when a new one is to be emplaced or
 when the trace graph holding them is to be destroyed. There are no
 other destruction instances.
 

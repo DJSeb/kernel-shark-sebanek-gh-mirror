@@ -182,7 +182,7 @@ private:
 	
 	void _setupNumatvTopoWidget();
 
-	void _numatvInsertTopologyWidget(int stream_id,
+	void _numatvEmplaceTopologyWidget(int stream_id,
 		const TopoNodeCorePU& brief_topo);
 
 	void _numatvRemoveTopologyWidget(int stream_id);
