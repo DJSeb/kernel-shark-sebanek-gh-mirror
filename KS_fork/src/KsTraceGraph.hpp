@@ -193,7 +193,7 @@ private:
 	void _numatvRedrawTopoWidgets(int stream_id,
 		QVector<int>& cpusToDraw);
 	
-	void _numatvAdjustTopoTaskPadding(int stream_id);
+	void _numatvAdjustTopoWidgetHeight(int stream_id);
 
 	void _numatvHideStreamTopo(int stream_id, bool hide);
 	// END of change

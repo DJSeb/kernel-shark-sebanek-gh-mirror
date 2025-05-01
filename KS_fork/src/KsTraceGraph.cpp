@@ -516,6 +516,7 @@ void KsTraceGraph::cpuReDraw(int sd, QVector<int> v)
 		_numatvRedrawTopoWidgets(sd, v);
 		// END of change
 		_glWindow._streamPlots[sd]._cpuList = v;
+		_numatvAdjustTopoWidgetHeight(sd);
 	}
 
 	_selfUpdate();
@@ -537,7 +538,7 @@ void KsTraceGraph::taskReDraw(int sd, QVector<int> v)
 		// Task redraw means that the topology widget needs padding
 		// at the bottom, so that the topology widget of another stream
 		// below does not overlap with the task graph of the current stream.
-		_numatvAdjustTopoTaskPadding(sd);
+		_numatvAdjustTopoWidgetHeight(sd);
 		// END of change
 	}
 
@@ -1157,7 +1158,7 @@ void KsTraceGraph::_numatvRedrawTopoWidgets(int stream_id,
  * 
  * @param stream_id Identifier of the stream.
  */
-void KsTraceGraph::_numatvAdjustTopoTaskPadding(int stream_id) {
+void KsTraceGraph::_numatvAdjustTopoWidgetHeight(int stream_id) {
 	if (_topoWidgets.count(stream_id)) {
 		KsStreamNUMATopology* topo_widget = _topoWidgets[stream_id];
 		int v_spacing = _glWindow.vSpacing();
