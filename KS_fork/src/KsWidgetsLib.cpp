@@ -1833,6 +1833,7 @@ QLabel* KsNUMATVDialog::_setupStatusPerStream(int stream_id,
 
 	QPushButton* select_btn = _setupSelectBtnPerStream(topo_fpath, topo_file_location);
 
+	topo_select_layout->addWidget(topo_file_location);
 	topo_select_layout->addStretch();
 	topo_select_layout->addWidget(clear_btn);
 	topo_select_layout->addWidget(select_btn);
