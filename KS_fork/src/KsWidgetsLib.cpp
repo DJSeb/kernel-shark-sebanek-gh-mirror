@@ -1748,23 +1748,23 @@ QButtonGroup* KsNUMATVDialog::_setupRadiosPerStream(int stream_id,
 
 //NOTE: Changed here. (NUMA TV) (2025-04-06)
 /**
- * @brief Sets up a load button for a stream in the dialog along with its
+ * @brief Sets up a select button for a stream in the dialog along with its
  * file dialog action.
  * 
  * @param last_fpath Last used file path.
  * @param topo_file_location Label with the topology file location.
  * 
- * @return Pointer to the load button to add to the stream's configuration layotut.
+ * @return Pointer to the select button to add to the stream's configuration layotut.
  */
-QPushButton* KsNUMATVDialog::_setupLoadBtnPerStream(QString last_fpath,
+QPushButton* KsNUMATVDialog::_setupSelectBtnPerStream(QString last_fpath,
 	QLabel* topo_file_location)
 {	
-	// Load button
-	QPushButton* load_btn = new QPushButton{"Load ..."};
-	load_btn->setFixedWidth(STRING_WIDTH("---Load ...---"));
-	load_btn->setAutoDefault(false);
+	// Select button
+	QPushButton* select_btn = new QPushButton{"Select ..."};
+	select_btn->setFixedWidth(STRING_WIDTH("---Select ...---"));
+	select_btn->setAutoDefault(false);
 
-	QFileDialog* file_dialog = new QFileDialog{load_btn};
+	QFileDialog* file_dialog = new QFileDialog{select_btn};
 	file_dialog->setFileMode(QFileDialog::ExistingFiles);
 	file_dialog->setNameFilter("*.xml");
 	file_dialog->setAcceptMode(QFileDialog::AcceptOpen);
@@ -1793,67 +1793,51 @@ QPushButton* KsNUMATVDialog::_setupLoadBtnPerStream(QString last_fpath,
 		}
 	};
 
-	connect(load_btn, &QPushButton::pressed, lamFileDialogAction);
+	connect(select_btn, &QPushButton::pressed, lamFileDialogAction);
 
-	return load_btn;
+	return select_btn;
 }
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-06)
 /**
- * @brief Sets up file loaded status, filepath and view type status and the
- * clear and load buttons for a stream in the dialog.
+ * @brief Sets up filepath label and the
+ * clear and select buttons for a stream in the dialog.
  * 
  * @param stream_id Identifier of the stream.
- * @param parent_layout Parent layout to add a status layout to.
+ * @param parent_layout Parent layout to add a status section to.
  * @param numatv_ctx NUMA TV context to get the stream's topology configuration.
  * @return Label with the topology file location.
  */
 QLabel* KsNUMATVDialog::_setupStatusPerStream(int stream_id,
 	QVBoxLayout* parent_layout, const KsTopoViewsContext& numatv_ctx)
 {
-	// Status, topology file and load button for file dialog setups
-	QHBoxLayout* stat_topo_load_layout = new QHBoxLayout{};
-	QVBoxLayout* status_topofile_layout = new QVBoxLayout{};
+	// Topology file and select button for file dialog setups
+	QHBoxLayout* topo_select_layout = new QHBoxLayout{};
 	
 	QString topo_fpath{};
-	QString status_text{"NOT LOADED"};
-	QString status_txt_color{"red"};
 
 	if (numatv_ctx.existsFor(stream_id)) {
-		status_text = "LOADED";
-		status_txt_color = "green";
-
 		const StreamNUMATopologyConfig* s_topo_cfg = numatv_ctx.observeConfig(stream_id);
 		const std::string& topol_fpath = s_topo_cfg->getTopoFilepath();
 		topo_fpath = QString::fromStdString(topol_fpath);
 	}
-
-	QLabel* status = new QLabel{status_text};
-	status->setStyleSheet("QLabel { color : " + status_txt_color + "; }");
 	
 	QLabel* topo_file_location = new QLabel{topo_fpath};
 
-	status_topofile_layout->addWidget(status);
-	status_topofile_layout->addStretch();
-	status_topofile_layout->addWidget(topo_file_location);
-
 	QPushButton* clear_btn = new QPushButton{"Clear"};
 	clear_btn->setFixedWidth(STRING_WIDTH("---Clear---"));
-	connect(clear_btn, &QPushButton::pressed, [topo_file_location, status] {
+	connect(clear_btn, &QPushButton::pressed, [topo_file_location] {
 		topo_file_location->setText("");
-		status->setText("NOT LOADED");
-		status->setStyleSheet("QLabel { color : red; }");
 	});
 
-	QPushButton* load_btn = _setupLoadBtnPerStream(topo_fpath, topo_file_location);
+	QPushButton* select_btn = _setupSelectBtnPerStream(topo_fpath, topo_file_location);
 
-	stat_topo_load_layout->addLayout(status_topofile_layout);
-	stat_topo_load_layout->addStretch();
-	stat_topo_load_layout->addWidget(clear_btn);
-	stat_topo_load_layout->addWidget(load_btn);
+	topo_select_layout->addStretch();
+	topo_select_layout->addWidget(clear_btn);
+	topo_select_layout->addWidget(select_btn);
 
-	parent_layout->addLayout(stat_topo_load_layout);
+	parent_layout->addLayout(topo_select_layout);
 	parent_layout->addStretch();
 
 	return topo_file_location;

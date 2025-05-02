@@ -761,7 +761,7 @@ private:
 	void _setupExplanation();
 	void _setupEndstage();
 	void _setupStreamHeader(int stream_id, QVBoxLayout* parent_layout);
-	QPushButton* _setupLoadBtnPerStream(QString last_fpath,
+	QPushButton* _setupSelectBtnPerStream(QString last_fpath,
 		QLabel* topo_file_location);
 	QLabel* _setupStatusPerStream(int stream_id, QVBoxLayout* parent_layout,
 		const KsTopoViewsContext& numatv_ctx);
