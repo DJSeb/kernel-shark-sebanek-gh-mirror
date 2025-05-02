@@ -476,9 +476,9 @@ With a loaded stream, the NUMA TV configuration dialog will be shown,
 with a brief explanation of what to do in this window and in the lower half will be
 a list of opened streams' NUMA TV configurations, namely what topology file to
 load data from and what type of topology view should be used for this stream.
-There are also two buttons, "Clear" and "Load...". Clear clears current
+There are also two buttons, "Clear" and "Select...". Clear clears current
 configuration's selected topology file (just the filepath to it, not the file
-itself). Load button will open up a file dialog, which either starts in the user's
+itself). Select button will open up a file dialog, which either starts in the user's
 Documents directory or in the directory of the currently applied topology file
 (applied = program already loaded this topology file and uses it for a stream).
 
@@ -501,10 +501,7 @@ Currently, only NUMA topology tree view is supported, along with the DEFAULT vie
 which does what KernelShark always has.
 
 Reopening the configuration dialog will show applied configuration values
-(currently in use by the program). If a file was loaded successfully, green text
-will spell out "LOADED", otherwise the text will be red with the message "NOT LOADED".
-The latter will also be shown if the user used the Clear button (so that the user
-notices no file will be loaded).
+(currently in use by the program).
 
 See figure 2 for a session where no topologies are loaded and figure 3 for
 a session where one topology is loaded.
