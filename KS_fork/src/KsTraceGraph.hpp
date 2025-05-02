@@ -71,9 +71,9 @@ public:
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-17)
-// Forward declaration of the KsStreamTopology class, so
+// Forward declaration of the KsStreamNUMATopology class, so
 // that it can be used in the KsTraceGraph class.
-class KsStreamTopology;
+class KsStreamNUMATopology;
 // END of change
 
 /**
@@ -134,7 +134,7 @@ public:
 	 * 
 	 * @return Reference to the NUMA TV context.
 	 */
-	KsNUMATVContext& getNUMATVContext() { return _numaTvCtx; }
+	KsTopoViewsContext& getNUMATVContext() { return _numaTvCtx; }
 	// END of change
 
 	void numatvHideTopologyWidget(bool hide);
@@ -180,22 +180,22 @@ private:
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-18)
 	
-	void _setup_numatv_topo_widget();
+	void _setupNumatvTopoWidget();
 
-	void _numatv_insert_topology_widget(int stream_id,
+	void _numatvEmplaceTopologyWidget(int stream_id,
 		const TopoNodeCorePU& brief_topo);
 
-	void _numatv_remove_topology_widget(int stream_id);
+	void _numatvRemoveTopologyWidget(int stream_id);
 
-	void _numatv_existing_topology_action(int stream_id,
+	void _numatvExistingTopologyAction(int stream_id,
 		QVector<int>& cpusToDraw);
 
-	void _numatv_redraw_topo_widgets(int stream_id,
+	void _numatvRedrawTopoWidgets(int stream_id,
 		QVector<int>& cpusToDraw);
 	
-	void _numatv_adjust_topo_task_padding(int stream_id);
+	void _numatvAdjustTopoWidgetHeight(int stream_id);
 
-	void _numatv_hide_stream_topo(int stream_id, bool hide);
+	void _numatvHideStreamTopo(int stream_id, bool hide);
 	// END of change
 
 	QString _t2str(uint64_t sec, uint64_t usec);
@@ -215,7 +215,7 @@ private:
 	/**
 	 * @brief Configuration object for topology data of all streams. 
 	 */
-	KsNUMATVContext _numaTvCtx;
+	KsTopoViewsContext _numaTvCtx;
 
 	/**
 	 * @brief Wrapper for the topology widget and the GL widget.
@@ -251,7 +251,7 @@ private:
 	QWidget	_topoSpace;
 	
 	/**
-	 * @brief Layout for KsStreamTopology widgets.
+	 * @brief Layout for KsStreamNUMATopology widgets.
 	 */
 	QVBoxLayout _topoLayout;
 
@@ -267,7 +267,7 @@ private:
 	 * produce faults). Every topology widget has a parent,
 	 * that being _topoSpace.
 	 */
-	std::map<int, KsStreamTopology*> _topoWidgets;
+	std::map<int, KsStreamNUMATopology*> _topoWidgets;
 	// END of change
 
 	KsGraphScrollArea	_scrollArea;
@@ -285,59 +285,57 @@ private:
 
 //NOTE: Changed here. (NUMA TV) (2025-04-17)
 /**
- * @brief Widget for displaying a topology of a stream as
- * a block tree. While any kind of Node-Core-PU topology can be
- * displayed, where Core holds PUs (CPUs in KShark) and Node
- * holds Cores, currently only NUMA topology is supported.
+ * @brief Widget for displaying NUMA topology of a stream as
+ * a block tree.
  */
-class KsStreamTopology : public QWidget {
+class KsStreamNUMATopology : public QWidget {
 private: // Qt parts
 	/// @brief Main layout of the widget.
-	QVBoxLayout _main_layout;
+	QVBoxLayout _mainLayout;
 
 	/// @brief Container of the topology tree.
 	QWidget _topo;
 	
 	/// @brief Layout of the topology tree.
-	QHBoxLayout _topo_layout;
+	QHBoxLayout _topoLayout;
 
 	/// @brief Label for the machine (stream) name and a root
 	/// of the topology tree.
 	QLabel _machine;
 
-	/// @brief Container of the nodes.
+	/// @brief Container of the nodes for NUMA nodes.
 	QWidget _nodes;
 
 	/// @brief Layout of the nodes.
-	QVBoxLayout _nodes_layout;
+	QVBoxLayout _nodesLayout;
 
 	/// @brief Container of the cores.
 	QWidget _cores;
 
 	/// @brief Layout of the cores.
-	QVBoxLayout _cores_layout;
+	QVBoxLayout _coresLayout;
 public:
-	explicit KsStreamTopology(int stream_id, const TopoNodeCorePU& brief_topo,
+	explicit KsStreamNUMATopology(int stream_id, const TopoNodeCorePU& brief_topo,
 		const KsTraceGraph* trace_graph, QWidget* parent = nullptr);
 
-	void hide_topology(bool hide);
+	void hideTopology(bool hide);
 
-	void resize_topology_widget(int new_height);
+	void resizeTopologyWidget(int new_height);
 
 private:
-	void _setup_widget_structure(int v_spacing);
+	void _setupWidgetStructure(int v_spacing);
 
-	void _setup_widget_layouts();
+	void _setupWidgetLayouts();
 
-	int _setup_topology_tree_core(int core_lid, int node_lid,
+	int _setupTopologyTreeCore(int core_lid, int node_lid,
 		int v_spacing, const TopoPUIds& PUs, const KsGLWidget* gl_widget,
 		QLabel* node_parent, unsigned int& node_reds,
 		unsigned int& node_greens, unsigned int& node_blues);
 
-	int _setup_topology_tree_node(int node_lid, int v_spacing,
+	int _setupTopologyTreeNode(int node_lid, int v_spacing,
 		const TopoCorePU& cores, const KsGLWidget* gl_widget);
 
-	void _setup_topology_tree(int stream_id, int v_spacing,
+	void _setupTopologyTree(int stream_id, int v_spacing,
 		const TopoNodeCorePU& brief_topo, KsGLWidget* gl_widget);
 };
 // END of change

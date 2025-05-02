@@ -66,7 +66,7 @@ Topology trees are always a part of a topology widget.
 *Topology tree node* - Node of a block tree visualising a brief topology.
 *Topology visualisation* - Interchangeable with topology tree.
 *Topology widget* - Qt widget with a topology tree and possibly task padding, shown in the wrapper topology
-widget, class KsStreamTopology.
+widget, class KsStreamNUMATopology.
 *Trace graph* - Qt widget housing GL widget, wrapper topology widget and controls for the GL widget, class
 KsTraceGraph.
 *View/view type* - Enumerated option of how to display topology of a stream. Default view is what KernelShark
@@ -226,10 +226,13 @@ make more views, with changes:
    for the view.
 2. Add a new item into the TopoViewType enumeration class specifying a view.
 3. Add a radio button to KsNUMATVDialog.
-4. Subclass KsStreamTopology as a child of some abstract class, which would be
+4. Subclass KsStreamNUMATopology as a child of some abstract class, which would be
    held by KsTraceGraph. Add a new class for the view.
 
-Not too much work, would be great for an extension of this modification.
+This sounds quick on paper, but it would take about an evening to properly implement
+currently. While that is not a lot of work still, it is a design change, as
+currently, the design fits only NUMA TV, no other topologies - hence it would
+need also documentation changes, API changes, context semantics and so on.
 
 ### "Why aren't topology views more interactive?"
 
@@ -412,7 +415,7 @@ topology widget's height is changed, but the widget lives on.
 
 ### Removal of topology widgets
 
-Topology widgets are removed only when a new one is to be inserted or
+Topology widgets are removed only when a new one is to be emplaced or
 when the trace graph holding them is to be destroyed. There are no
 other destruction instances.
 
