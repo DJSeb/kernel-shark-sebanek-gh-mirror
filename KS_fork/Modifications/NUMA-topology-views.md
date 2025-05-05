@@ -38,15 +38,12 @@ core, e.g. where hyperthreading is disabled, they are interchangeable.
 *Logical index* - Index given to a part of the topology by hwloc during topology discovery. Together
 with object type (i.e. core, NUMA node, PU), they form a unique identifier of a component in a given
 topology.
-*M* - Label noting a Machine node in the topology tree. This node is the root of the topology tree
-for a given stream. This node is colored like the stream would be if multiple streams were present
-in a given session.
-*NN* - Label noting a NUMA Node node in the topology tree. Color of these nodes is an average of the
-colors of its cores.
+*NN* - Label noting a NUMA node node in the topology tree. Color of these nodes is the average of the
+colors of its core nodes' colors.
 *Node* - Refers to either a structure containing cores in a topology (group, package or a NUMA node)
 or a topology tree node, explained below.
 *Node node* - Type of item at the layer below the root and above the core level. For NUMA TV, they
-are currently interchangeable for NUMA node nodes.
+are interchangeable for NUMA node nodes.
 *NUMA TV* - NUMA Topology Views, shortened.
 *NUMA TV Context* - Configuration object for a KernelShark process, which manages per stream
 configurations of which topologies are loaded, if any, and what view a stream is requesting to be
@@ -60,9 +57,8 @@ one package, which has four cores, each with just one PU. First two cores are al
 node and the other two are under another NUMA node. The machine's name is Greg and it has 512 GB of total
 memory.
 *Task padding* - Additional height of a topology widget used when KernelShark displays tasks for a stream.
-*Topology tree* - Qt widgets and layouts displayed as a block tree, root being a machine tree node, root's
-children are Node nodes and cores are tree's leaves. For a NUMA topology, Node nodes are NUMA node nodes.
-Topology trees are always a part of a topology widget.
+*Topology tree* - Qt widgets and layouts displayed as a rootless block tree, starting at Node nodes, then
+ending with core nodes, which are the tree's leaves. Topology trees are always part of a topology widget.
 *Topology tree node* - Node of a block tree visualising a brief topology.
 *Topology visualisation* - Interchangeable with topology tree.
 *Topology widget* - Qt widget with a topology tree and possibly task padding, shown in the wrapper topology
@@ -144,9 +140,9 @@ Lesson to learn from this is to consider every angle when using a singleton - an
 if it is already used, make sure that getting its instance is as limited as possible.
 If not for safety, then at least for easy refactoring into code without a singleton.
 
-#### PU column in topology widgets
+#### PU & machine columns in topology widgets
 
-There used to be four levels for a topology tree, where PUs would connect to
+There used to be four levels for a topology tree. PU nodes would connect to
 CPUs in the GL widget and take on the CPU's color. This idea was discarded for
 three reasons:
 1. There was color overload on the screen, which made using the
@@ -158,8 +154,11 @@ three reasons:
    too narrow. This would take attention away from KernelShark's main purpose.
    to visualise trace data.
 
-Displaying said column was deemed as redundant, so only the
-machine root, NUMA node level and core level were left.
+Machine node, acting as the tree's root, was also present, but was cut due to it not
+adding useful information during analyses.
+
+Displaying said columns was deemed as redundant, so only the
+NUMA node level and core level were left.
 
 #### Classic Qt tree for the topology trees
 
@@ -191,8 +190,7 @@ This is still a possibility and with a simple change in current source code,
 would be achievable as well. Only the label on NUMA node nodes in the topology
 tree and type of items hwloc should search for would have to change.
 
-It is left as an extension, as this was not part of the specification (and
-the project is pressed for time).
+It is left as an extension.
 
 ## Questions and answers
 
@@ -373,26 +371,23 @@ perfectly match with (possibly rearranged) CPU graphs of a stream.
 
 Topology widgets are created from a stream's topology configuration, namely
 from its brief topology data. Giving these to the constructor of a topology
-widget will then construct the topology tree, first layer being the root with
-a machine node (which also represents the stream, but uses hwloc terminology,
-hence "machine"), then construction is something like depth-first search:
+widget will then construct the topology tree, construction is something like
+depth-first search:
 1. Find a NUMA node in the brief topology.
 2. Find a core in the NUMA node.
 3. Construct a core node from the data of its PUs and logical index.
-4. Repeat steps 3-4 until all core nodes for a NUMA node have been created.
+4. Repeat steps 3-4 until all core nodes of a NUMA node have been created.
 5. Create a NUMA node node with data of its cores and logical index.
-6. Repeat steps 1-5 until all NUMA node nodes for a machine have been created.
-7. Finish construction of the machine node.
+6. Repeat steps 1-5 until all NUMA nodes of a machine have been created.
+7. If only one NUMA node is present, hide it to increase useful information space.
 8. Output the tree.
 
 Constructor of the topology widget also uses data from the GL widget, mainly
 the value of spacing between graphs in it and number of graphs. The topology
-widgets height is equal to the amount of graphs times their height + the amount
-of spacing between graphs times spacing value. In contrast, the machine node's
-height is the computed height of machine nodes + spacings between them.
-NUMA node nodes' and cores nodes' heights are computed similarly as heights
-of their children (for cores, heights of the CPU graphs an spacings between them)
-plus spacings between the children.
+widget's height is equal to the amount of graphs times their height + the amount
+of spacing between graphs times spacing value. NUMA node nodes' and cores nodes'
+heights are computed similarly as heights of their children (for cores, heights
+of the CPU graphs and spacings between them) plus spacings between the children.
 
 ### Updating topology widgets
 
@@ -533,7 +528,9 @@ graphs. If there are only tasks being drawn, there will be blank white space
 instead. The topology tree will include only nodes relevant to the CPUs shown in
 the GL widget (so if out of 8 CPUs, only 3 are marked as to show their graphs,
 then the topology tree will be constructed with cores and NUMA nodes of those
-three CPUs).
+three CPUs). If the topology has only single NUMA node detected (in which case
+there is no actual NUMA topology present), the node will be hidden (only Cores
+will be visible).
 
 If more streams are opened, each tree starts at its respective stream's CPU
 graphs.
@@ -541,10 +538,7 @@ graphs.
 Core nodes of the tree will be colored the average color of its CPUs (these colors
 are defined by KernelShark), NUMA nodes are colored from averages of core node
 colors. If a color is deemed too dark, white text is used for their labels,
-otherwise the nodes use black text color. The root node, representing the machine
-for which the topology exists and also the stream for which the GL widget is
-showing a trace file, is colored according to the color assigned to the stream by
-KernelShark (these are visible when there are more streams present in a session).
+otherwise the nodes use black text color.
 
 ### Scrolling in the GL widget with active topology widgets
 

@@ -299,10 +299,6 @@ private: // Qt parts
 	/// @brief Layout of the topology tree.
 	QHBoxLayout _topoLayout;
 
-	/// @brief Label for the machine (stream) name and a root
-	/// of the topology tree.
-	QLabel _machine;
-
 	/// @brief Container of the nodes for NUMA nodes.
 	QWidget _nodes;
 
@@ -332,7 +328,7 @@ private:
 		QLabel* node_parent, unsigned int& node_reds,
 		unsigned int& node_greens, unsigned int& node_blues);
 
-	int _setupTopologyTreeNode(int node_lid, int v_spacing,
+	void _setupTopologyTreeNode(int node_lid, int v_spacing,
 		const TopoCorePU& cores, const KsGLWidget* gl_widget);
 
 	void _setupTopologyTree(int stream_id, int v_spacing,
