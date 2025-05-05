@@ -189,7 +189,7 @@ void KsTopoViewsContext::clear()
  * up hwloc topology from the given XML file and creates the configuration
  * with data from the hwloc topology inspection. Other part of the
  * configuration is which view to use for a stream (currently either NUMATREE,
- * which visualises the topology in a topology tree in the main KernelShark
+ * which visualises the NUMA topology in a topology tree in the main KernelShark
  * window, or DEFAULT - no topology information shall be shown).
  * 
  * @param view Type of view to be used for the topology configuration.
@@ -204,17 +204,15 @@ StreamNUMATopologyConfig::StreamNUMATopologyConfig(TopoViewType view, const std:
         return;
     }
 
-    int n_numa_nodes = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE);
-	for (unsigned int i = 0; i < (unsigned int)n_numa_nodes; i++) {
-		hwloc_obj_t node = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, i);
-		// Iterate over the PUs in the cpuset
-		unsigned int id = 0;
-		hwloc_bitmap_foreach_begin(id, node->cpuset)
-			hwloc_obj_t pu = hwloc_get_pu_obj_by_os_index(topology, id);
-			hwloc_obj_t core_of_pu = hwloc_get_ancestor_obj_by_type(topology, HWLOC_OBJ_CORE, pu);
-			_brief_topo[node->logical_index][core_of_pu->logical_index][pu->logical_index] = pu->os_index;
-		hwloc_bitmap_foreach_end();
-	}
+    hwloc_obj_t machine = hwloc_get_root_obj(topology);
+    unsigned int id = 0;
+	hwloc_bitmap_foreach_begin(id, machine->cpuset)
+        hwloc_obj_t pu = hwloc_get_pu_obj_by_os_index(topology, id);
+        hwloc_obj_t core_of_pu = hwloc_get_ancestor_obj_by_type(topology, HWLOC_OBJ_CORE, pu);
+        int pu_nnode_osid = hwloc_bitmap_first(pu->nodeset);
+        hwloc_obj_t node = hwloc_get_numanode_obj_by_os_index(topology, pu_nnode_osid);
+        _brief_topo[node->logical_index][core_of_pu->logical_index][pu->logical_index] = pu->os_index;   
+    hwloc_bitmap_foreach_end();
     hwloc_topology_destroy(topology);
     topology = nullptr;
 }
