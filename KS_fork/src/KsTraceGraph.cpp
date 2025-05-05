@@ -1400,10 +1400,13 @@ int KsStreamNUMATopology::_setupTopologyTreeCore(int core_lid, int node_lid,
 /**
  * @brief Sets up a Node node of the topology tree - its height,
  * its color, its text, its tooltip and puts it in the nodes' layout.
- * Calls setup of the cores in the node.
+ * Also calls setup of the cores in the node. If given topology has only
+ * one NUMA node, the node is not created and containing widget is
+ * hidden.
  * 
  * @param node_lid Logical index of the node in the topology.
  * @param v_spacing Spacing between the graphs in KernelShark's GL widget.
+ * @param more_numas Whether the topology includes multiple NUMA nodes.
  * @param cores Collection of cores in the node.
  * @param gl_widget Pointer to the GL widget from which to get
  * CPU colors.
@@ -1453,8 +1456,6 @@ void KsStreamNUMATopology::_setupTopologyTreeNode(int node_lid, int v_spacing,
 		}
 		_nodes.setHidden(true);
 	}
-
-	
 }
 // END of change
 
