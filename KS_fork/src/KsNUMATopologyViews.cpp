@@ -64,7 +64,7 @@ static hwloc_topology_t get_hwloc_topology(const std::string& topo_fpath) {
     return topology;
 }
 
-// KsNUMATVContext
+// KsTopoViewsContext
 
 /**
  * @brief Checks for existence of a topology configuration for a given stream ID.
@@ -72,7 +72,7 @@ static hwloc_topology_t get_hwloc_topology(const std::string& topo_fpath) {
  * @param stream_id ID of the stream to check for.
  * @return True if the topology configuration exists for the stream ID, false otherwise.
  */
-bool KsNUMATVContext::exists_for(int stream_id) const
+bool KsTopoViewsContext::existsFor(int stream_id) const
 { return _active_numatvs.count(stream_id) > 0; }
 
 /**
@@ -87,7 +87,7 @@ bool KsNUMATVContext::exists_for(int stream_id) const
  * `-1` if the topology file is not valid or
  * `0` if the configuration was added successfully.
  */
-int KsNUMATVContext::add_config(int stream_id, TopoViewType view, const std::string& topology_file) {
+int KsTopoViewsContext::addConfig(int stream_id, TopoViewType view, const std::string& topology_file) {
     kshark_context *kshark_ctx(nullptr);
     int retval = -1;
     
@@ -99,7 +99,7 @@ int KsNUMATVContext::add_config(int stream_id, TopoViewType view, const std::str
     int stream_ncpus = stream->n_cpus;
     
     auto new_topo_cfg = StreamNUMATopologyConfig(view, topology_file);
-    int topo_npus = new_topo_cfg.get_topo_npus();
+    int topo_npus = new_topo_cfg.getTopologyNPUs();
     
     if (topo_npus == stream_ncpus) {
         _active_numatvs[stream_id] = std::move(new_topo_cfg);
@@ -125,20 +125,20 @@ int KsNUMATVContext::add_config(int stream_id, TopoViewType view, const std::str
  * `0` if the configuration was updated successfully or
  * `1` if the configuration was not changed (success).
  */
-int KsNUMATVContext::update_cfg(int stream_id, TopoViewType view, const std::string& topology_file) {
+int KsTopoViewsContext::updateConfig(int stream_id, TopoViewType view, const std::string& topology_file) {
     bool retval = -3;
     
-    if (exists_for(stream_id)) {
+    if (existsFor(stream_id)) {
         // Get old configuration
         StreamNUMATopologyConfig& topo_cfg = _active_numatvs.at(stream_id);
 
-        if (topology_file != topo_cfg.get_topo_fpath()) {
+        if (topology_file != topo_cfg.getTopoFilepath()) {
             // Topology file changed - create new topology
-            retval = add_config(stream_id, view, topology_file);    
-        } else if (topo_cfg.get_view_type() != view) {
+            retval = addConfig(stream_id, view, topology_file);    
+        } else if (topo_cfg.getViewType() != view) {
             // View type changed, but not the topology file
             // Just update the view type and request redraw
-            topo_cfg.set_view_type(view);
+            topo_cfg.setViewType(view);
             retval = 0;
         } else {
             // Nothing changed, request no action to be taken
@@ -159,8 +159,8 @@ int KsNUMATVContext::update_cfg(int stream_id, TopoViewType view, const std::str
  * @param stream_id ID of the stream to get the configuration for.
  * @return Observer pointer to the topology configuration or nullptr if it doesn't exist.
  */
-const StreamNUMATopologyConfig* KsNUMATVContext::observe_cfg(int stream_id) const {
-    if (exists_for(stream_id)) {
+const StreamNUMATopologyConfig* KsTopoViewsContext::observeConfig(int stream_id) const {
+    if (existsFor(stream_id)) {
         const StreamNUMATopologyConfig* topo_cfg = &(_active_numatvs.at(stream_id));
         return topo_cfg;
     }
@@ -173,13 +173,13 @@ const StreamNUMATopologyConfig* KsNUMATVContext::observe_cfg(int stream_id) cons
  * @param stream_id ID of the stream to delete the configuration for.
  * @return Number of configurations deleted (0 or 1).
  */
-int KsNUMATVContext::delete_cfg(int stream_id)
+int KsTopoViewsContext::deleteConfig(int stream_id)
 { return _active_numatvs.erase(stream_id); }
 
 /**
  * @brief Deletes all topology configurations from the context.
  */
-void KsNUMATVContext::clear()
+void KsTopoViewsContext::clear()
 { _active_numatvs.clear(); }
 
 // StreamNUMATopologyConfig
@@ -189,7 +189,7 @@ void KsNUMATVContext::clear()
  * up hwloc topology from the given XML file and creates the configuration
  * with data from the hwloc topology inspection. Other part of the
  * configuration is which view to use for a stream (currently either NUMATREE,
- * which visualises the topology in a topology tree in the main KernelShark
+ * which visualises the NUMA topology in a topology tree in the main KernelShark
  * window, or DEFAULT - no topology information shall be shown).
  * 
  * @param view Type of view to be used for the topology configuration.
@@ -204,17 +204,15 @@ StreamNUMATopologyConfig::StreamNUMATopologyConfig(TopoViewType view, const std:
         return;
     }
 
-    int n_numa_nodes = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE);
-	for (unsigned int i = 0; i < (unsigned int)n_numa_nodes; i++) {
-		hwloc_obj_t node = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, i);
-		// Iterate over the PUs in the cpuset
-		unsigned int id = 0;
-		hwloc_bitmap_foreach_begin(id, node->cpuset)
-			hwloc_obj_t pu = hwloc_get_pu_obj_by_os_index(topology, id);
-			hwloc_obj_t core_of_pu = hwloc_get_ancestor_obj_by_type(topology, HWLOC_OBJ_CORE, pu);
-			_brief_topo[node->logical_index][core_of_pu->logical_index][pu->logical_index] = pu->os_index;
-		hwloc_bitmap_foreach_end();
-	}
+    hwloc_obj_t machine = hwloc_get_root_obj(topology);
+    unsigned int id = 0;
+	hwloc_bitmap_foreach_begin(id, machine->cpuset)
+        hwloc_obj_t pu = hwloc_get_pu_obj_by_os_index(topology, id);
+        hwloc_obj_t core_of_pu = hwloc_get_ancestor_obj_by_type(topology, HWLOC_OBJ_CORE, pu);
+        int pu_nnode_osid = hwloc_bitmap_first(pu->nodeset);
+        hwloc_obj_t node = hwloc_get_numanode_obj_by_os_index(topology, pu_nnode_osid);
+        _brief_topo[node->logical_index][core_of_pu->logical_index][pu->logical_index] = pu->os_index;   
+    hwloc_bitmap_foreach_end();
     hwloc_topology_destroy(topology);
     topology = nullptr;
 }
@@ -277,7 +275,7 @@ StreamNUMATopologyConfig& StreamNUMATopologyConfig::operator=(StreamNUMATopology
  * 
  * @return File path to the topology file.
  */
-const std::string& StreamNUMATopologyConfig::get_topo_fpath() const
+const std::string& StreamNUMATopologyConfig::getTopoFilepath() const
 { return _topo_fpath; }
 
 /**
@@ -286,7 +284,7 @@ const std::string& StreamNUMATopologyConfig::get_topo_fpath() const
  * @return Type of the view to be used when visualising the stream's
  * topology.
  */
-TopoViewType StreamNUMATopologyConfig::get_view_type() const
+TopoViewType StreamNUMATopologyConfig::getViewType() const
 { return _applied_view; }
 
 /**
@@ -294,7 +292,7 @@ TopoViewType StreamNUMATopologyConfig::get_view_type() const
  * 
  * @param new_view New view type to be used.
  */
-void StreamNUMATopologyConfig::set_view_type(TopoViewType new_view)
+void StreamNUMATopologyConfig::setViewType(TopoViewType new_view)
 { _applied_view = new_view; }
 /**
  * @brief Getter for the brief topology from hwloc.
@@ -302,7 +300,7 @@ void StreamNUMATopologyConfig::set_view_type(TopoViewType new_view)
  * @return Map of nodes (their logical IDs) to their cores (map of their logical IDs
  * to their PUs (map of their logical IDs to their OS IDs)).
  */
-const TopoNodeCorePU& StreamNUMATopologyConfig::get_brief_topo() const
+const TopoNodeCorePU& StreamNUMATopologyConfig::getBriefTopology() const
 { return _brief_topo; }
 
 /**
@@ -349,7 +347,7 @@ QVector<int> StreamNUMATopologyConfig::rearrangeCPUsWithBriefTopo
  * @return Number of PUs in the topology or
  * -1 if the topology could not be loaded.
  */
-int StreamNUMATopologyConfig::get_topo_npus() const {
+int StreamNUMATopologyConfig::getTopologyNPUs() const {
     hwloc_topology_t topology = get_hwloc_topology(_topo_fpath);
     if (topology == nullptr) {
         return -1;
@@ -425,12 +423,12 @@ TopoNodeCorePU numatv_filter_by_PUs(const TopoNodeCorePU& brief_topo, const QVec
  * @param numatv_ctx NUMA TV context, containing the topology configurations.
  * @return True if the stream wants to show a topology widget, false otherwise.
  */
-bool numatv_stream_wants_topology_widget(int stream_id, const KsNUMATVContext& numatv_ctx)
+bool numatv_stream_wants_topology_widget(int stream_id, const KsTopoViewsContext& numatv_ctx)
 {
 	bool show_this_topo = false;
-	if (numatv_ctx.exists_for(stream_id)) {
-		const StreamNUMATopologyConfig* cfg_observer = numatv_ctx.observe_cfg(stream_id);
-		show_this_topo = (cfg_observer->get_view_type() != TopoViewType::DEFAULT);
+	if (numatv_ctx.existsFor(stream_id)) {
+		const StreamNUMATopologyConfig* cfg_observer = numatv_ctx.observeConfig(stream_id);
+		show_this_topo = (cfg_observer->getViewType() != TopoViewType::DEFAULT);
 	}
 		
 	return show_this_topo;

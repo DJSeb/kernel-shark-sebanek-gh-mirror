@@ -978,7 +978,7 @@ Everything else is necessary and required.
 ## 2025-04-19
 
 Today was mostly spent on code decomposition and bug fixes.
-KsStreamTopology's monster-constructor was broken up into setup functions
+KsStreamNUMATopology's monster-constructor was broken up into setup functions
 and some helper static functions were also created, namely for creating
 stylesheets for topology items.
 
@@ -1017,7 +1017,7 @@ the topology as an actual tree and not a forest implictly connected.
 ...
 
 Session support will actually be postponed until specifically request - current
-implementation might be problematic due to the static data of KsNUMATVContext, it
+implementation might be problematic due to the static data of KsTopoViewsContext, it
 being a singleton. They would logically belong to streams, but those their
 destruction code is hard to find.
 

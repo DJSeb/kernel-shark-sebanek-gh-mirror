@@ -100,7 +100,7 @@ else (TT_FONT_FILE)
 
 endif (TT_FONT_FILE)
 
-find_package(Qt6Widgets 6.3.0)
+find_package(Qt6Widgets 6.7.0)
 find_package(Qt6 COMPONENTS Network OpenGLWidgets StateMachine REQUIRED)
 
 find_package (Boost COMPONENTS unit_test_framework)
