@@ -720,7 +720,7 @@ void KsSession::loadUserPlugins(kshark_context *kshark_ctx, KsPluginManager *pm)
  * This is done to have an obvious dependency on the configuraton, instead of hiding
  * it in code's implementation - otherwise, it could just be inside the function.
  */
-void KsSession::saveTopology(int n_streams, const KsNUMATVContext& numatv_ctx) {
+void KsSession::saveTopology(int n_streams, const KsTopoViewsContext& numatv_ctx) {
 	kshark_config_doc *topology =
 		kshark_config_new("kshark.config.topology", KS_CONFIG_JSON);
 	json_object *jtopology = KS_JSON_CAST(topology->conf_doc);
@@ -734,10 +734,10 @@ void KsSession::saveTopology(int n_streams, const KsNUMATVContext& numatv_ctx) {
 		TopoViewType view = TopoViewType::DEFAULT;
 		std::string topo_fpath = "";
 
-		if (numatv_ctx.exists_for(i)) {
-			const StreamNUMATopologyConfig* stream_cfg = numatv_ctx.observe_cfg(i);
-			view = stream_cfg->get_view_type();
-			topo_fpath = stream_cfg->get_topo_fpath();
+		if (numatv_ctx.existsFor(i)) {
+			const StreamNUMATopologyConfig* stream_cfg = numatv_ctx.observeConfig(i);
+			view = stream_cfg->getViewType();
+			topo_fpath = stream_cfg->getTopoFilepath();
 		}
 
 		json_object_object_add(jtopo, "view",
@@ -763,7 +763,7 @@ void KsSession::saveTopology(int n_streams, const KsNUMATVContext& numatv_ctx) {
  * This is done to have an obvious dependency on the configuraton, instead of hiding
  * it in code's implementation - otherwise, it could just be inside the function.
  */
-void KsSession::loadTopology(KsTraceGraph* graph, KsNUMATVContext& numatv_ctx) {
+void KsSession::loadTopology(KsTraceGraph* graph, KsTopoViewsContext& numatv_ctx) {
 	kshark_config_doc *topology = kshark_config_alloc(KS_CONFIG_JSON);
 
 	if (!kshark_config_doc_get(_config, "NUMA TV", topology)) {
@@ -788,7 +788,7 @@ void KsSession::loadTopology(KsTraceGraph* graph, KsNUMATVContext& numatv_ctx) {
 		std::string topo_fpath = json_object_get_string(jtopo_fpath);
 		
 		if (QFile::exists(QString::fromStdString(topo_fpath))) {
-			numatv_ctx.add_config(stream_id, view, topo_fpath);
+			numatv_ctx.addConfig(stream_id, view, topo_fpath);
 		}
 
 		hide_topo_button &= !numatv_stream_wants_topology_widget(stream_id, numatv_ctx);
