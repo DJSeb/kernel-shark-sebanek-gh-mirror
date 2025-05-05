@@ -1321,6 +1321,7 @@ static QString make_topo_item_stylesheet(const KsPlot::Color& color) {
  * @param core_lid Logical index of the core in the topology.
  * @param node_lid Logical index of the owner node in the topology.
  * @param v_spacing Spacing between the graphs in KernelShark's GL widget.
+ * @param more_numas Whether the topology includes multiple NUMA nodes.
  * @param PUs Collection of PUs in the core.
  * @param gl_widget Pointer to the GL widget from which to get
  * CPU colors.
@@ -1334,14 +1335,28 @@ static QString make_topo_item_stylesheet(const KsPlot::Color& color) {
  * @return Height of the created core node.
  */
 int KsStreamNUMATopology::_setupTopologyTreeCore(int core_lid, int node_lid,
-	int v_spacing, const TopoPUIds& PUs, const KsGLWidget* gl_widget,
-	QLabel* node_parent, unsigned int& node_reds, unsigned int& node_greens,
+	int v_spacing, bool more_numas, const TopoPUIds& PUs,
+	const KsGLWidget* gl_widget, QWidget* node_parent,
+	unsigned int& node_reds, unsigned int& node_greens,
 	unsigned int& node_blues)
 {
 	QLabel* core = new QLabel(node_parent);
-	core->setText(QString("(NN %1) C %2").arg(node_lid).arg(core_lid));
-	core->setToolTip(QString{"Core %1 in NUMA Node %2"}
-		.arg(core_lid).arg(node_lid));
+
+	// Appropriately create the label and tooltip for the core node
+	// with regards to amount of NUMA nodes in the topology.
+	QString core_node_label;
+	QString core_node_tooltip;
+	if (more_numas) {
+		core_node_label = QString{"(NN %1) C %2"}.arg(node_lid).arg(core_lid);
+		core_node_tooltip = QString{"Core %1 in NUMA Node %2"}.arg(core_lid)
+			.arg(node_lid);
+	} else {
+		core_node_label = QString{"C %1"}.arg(core_lid);
+		core_node_tooltip = QString{"Core %1"}.arg(core_lid);
+	}
+	core->setText(core_node_label);
+	core->setToolTip(core_node_tooltip);
+
 	core->setAlignment(Qt::AlignCenter);
 	_coresLayout.addWidget(core);
 
@@ -1394,45 +1409,59 @@ int KsStreamNUMATopology::_setupTopologyTreeCore(int core_lid, int node_lid,
  * CPU colors.
  */
 void KsStreamNUMATopology::_setupTopologyTreeNode(int node_lid, int v_spacing,
-	const TopoCorePU& cores, const KsGLWidget* gl_widget)
+	bool more_numas, const TopoCorePU& cores, const KsGLWidget* gl_widget)
 {
-	QLabel* node = new QLabel(&_nodes);
-	node->setText(QString{"NN %1"}.arg(node_lid));
-	node->setAlignment(Qt::AlignCenter);
-	node->setToolTip(QString{"NUMA Node %1"}.arg(node_lid));
-	_nodesLayout.addWidget(node);
-
-	int node_height = 0;
 	unsigned int core_reds = 0;
 	unsigned int core_greens = 0;
 	unsigned int core_blues = 0;
 
-	for (const auto& [core_lid, PUs] : cores) {
-		int core_height = _setupTopologyTreeCore(core_lid,
-			node_lid, v_spacing, PUs, gl_widget, node, core_reds,
-			core_greens, core_blues);
-		node_height += core_height + v_spacing;
+	if (more_numas) {
+		QLabel* node = new QLabel(&_nodes);
+		node->setText(QString{"NN %1"}.arg(node_lid));
+		node->setAlignment(Qt::AlignCenter);
+		node->setToolTip(QString{"NUMA Node %1"}.arg(node_lid));
+		_nodesLayout.addWidget(node);
+
+		int node_height = 0;
+
+		for (const auto& [core_lid, PUs] : cores) {
+			int core_height = _setupTopologyTreeCore(core_lid,
+				node_lid, v_spacing, more_numas, PUs, gl_widget,
+				node, core_reds, core_greens, core_blues);
+			node_height += core_height + v_spacing;
+		}
+
+		node_height -= v_spacing; // One less core spacing
+		node->setFixedHeight(std::max(node_height, 0));
+
+		int cores_in_node = int(cores.size());
+		auto node_color = KsPlot::Color{
+			uint8_t(core_reds / cores_in_node),
+			uint8_t(core_greens / cores_in_node),
+			uint8_t(core_blues / cores_in_node)
+		};
+
+		node->setStyleSheet(make_topo_item_stylesheet(node_color));
+	} else {
+		// Forego any node manipulations and just create cores
+		// core_[color]s will be ignored, but are used because
+		// of _setupTopologyTreeCore's signature.
+		for (const auto& [core_lid, PUs] : cores) {
+			_setupTopologyTreeCore(core_lid,
+				node_lid, v_spacing, more_numas, PUs, gl_widget,
+				&_topo, core_reds, core_greens, core_blues);
+		}
+		_nodes.setHidden(true);
 	}
 
-	node_height -= v_spacing; // One less core spacing
-	node->setFixedHeight(std::max(node_height, 0));
-
-	int cores_in_node = int(cores.size());
-	auto node_color = KsPlot::Color{
-		uint8_t(core_reds / cores_in_node),
-		uint8_t(core_greens / cores_in_node),
-		uint8_t(core_blues / cores_in_node)
-	};
-
-	node->setStyleSheet(make_topo_item_stylesheet(node_color));
+	
 }
 // END of change
 
 //NOTE: Changed here. (NUMA TV) (2025-04-19)
 /**
  * @brief Sets up the topology tree - sets up topology widgets's height and
- * asks each NUMA node to be set up - if there's only one node (equivalent
- * to no NUMA topology), the nodes column is set to be hidden.
+ * asks each NUMA node to be set up.
  * 
  * @param stream_id Identifier of the stream.
  * @param v_spacing Spacing between the graphs in KernelShark's GL widget.
@@ -1453,16 +1482,10 @@ void KsStreamNUMATopology::_setupTopologyTree(int stream_id, int v_spacing,
 	resizeTopologyWidget(machine_height_or_gl_height);
 
 	// Setup nodes
+	bool more_numas = brief_topo.size() != 1;
 	for (const auto& [node_lid, cores] : brief_topo) {
-		_setupTopologyTreeNode(node_lid, v_spacing,
+		_setupTopologyTreeNode(node_lid, v_spacing, more_numas,
 			cores, gl_widget);
-	}
-
-	// Hide if only one node
-	if (brief_topo.size() == 1) {
-		_nodes.setHidden(true);
-	} else {
-		_nodes.setHidden(false);
 	}
 }
 // END of change
