@@ -1,6 +1,6 @@
+//NOTE: Changed here. (COUPLEBREAK) (2025-03-30)
 /* Copyright (C) 2025, David Jaromír Šebánek <djsebofficial@gmail.com> */
 
-//NOTE: Changed here. (COUPLEBREAK) (2025-03-30)
 /**
  *  @file    libkshark-couplebreak.c
  *  @brief   Interface for working with couplebreak events implementations.
