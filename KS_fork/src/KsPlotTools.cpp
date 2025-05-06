@@ -19,9 +19,6 @@
 
 // KernelShark
 #include "KsPlotTools.hpp"
-//NOTE: Changed here. (COUPLEBREAK) (2025-04-20)
-#include "libkshark-couplebreak.h"
-// END of change 
 
 namespace KsPlot
 {

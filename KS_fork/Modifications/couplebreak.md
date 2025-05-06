@@ -129,7 +129,7 @@ events as follows:
 - Finding couplebreak entry's event Id through its name will construct one on demand.
 - Getting all event Ids through the regular `kshark_get_all_event_ids` (and the stream interface method)
   does NOT return couplebreak event Ids. Use the newly added `kshark_get_couplebreak_ids` instead.
-  - This was one due to KernelShark expecting only as many events as in the trace data in many of its implementations - 
+  - This was done due to KernelShark expecting only as many events as in the trace data in many of its implementations - 
     because couplebreak events are on load, this would be inconsistent (and far too much work for this
     extension modification) - hence stream's two of the three new state variables have been introduced and they are used
     instead when talking about couplebreak.
