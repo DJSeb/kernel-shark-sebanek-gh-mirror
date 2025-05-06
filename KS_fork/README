@@ -12,13 +12,14 @@ changes there. They should be divided into:
 - **Couplebreak** - splitting events belonging to two processes (=: couple)
 - **Get Colors** - functions which allow access to KernelShark's GL widget's color table of tasks,
   CPUs and streams
-- **NUMA Topology Views** - viewing CPU plots with respect to NUMA topology
+- **NUMA Topology Views** - viewing CPU plots with respect to NUMA topology; introduces a new
+  dependency on `hwloc` program.
 - **No Boxes** - introduces API & behaviour to disallow KernelShark from drawing taskboxes between
   bins of some events in its graphs.
 
 A little update to KernelShark's code regarding checkboxes has also been made, to use newer and
 recommended Qt APIs for checking checked state. To see where this has happened, look for comments
-with `UPDATE CBOX STATES`.
+with `UPDATE CBOX STATES`. This also means KernelShark will now require Qt6 at least at version **6.7**.
 
 # KernelShark official README
 KernelShark is a front-end reader of tracing data.
