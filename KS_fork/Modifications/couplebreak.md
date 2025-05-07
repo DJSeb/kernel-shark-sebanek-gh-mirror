@@ -45,8 +45,8 @@ it, that is the most important goal.
 
 ### Couplebreak events, couples, integration with existing code.
 
-The main concepts here were couples and couplebreak events/entries. Couples, as mentioned
-above, are two processes, which "share" an event. For an example, a scheduler switch event will have a task that is being
+The main concepts here are couples and couplebreak events/entries. Couples, as mentioned
+above, are two processes, which "share" an event. For an example, a schedu_switch event will have a task that is being
 switched from and a task that is being switched to. These two tasks are a couple. Couplebreak entries (also called "target 
 entries" or "target events", sometimes with "waking" or "switch", which denote the origin events - "sched/sched_waking" 
 and "sched/sched_switch" respectively) are sort of altered twins to the actual events. They contain almost all the same
@@ -81,7 +81,7 @@ Upon name request, each couplebreak event will generate a name of this format: `
 
 Couplebreak entries will try to follow their origin event's intentions with the next task. Scheduler switches contain
 information on what task will run on the same CPU next, so the couplebreak event gets the next PID and makes it his owner.
-Scheduler's waking event also says on which task the awakened should run (but that's not definitive, more below), so
+Scheduler's waking event also says on which CPU the awakened should run (but that's not definitive, more below), so
 the target entries change their PID and their CPU to values that are given in the closest target entry of a switch to
 the awakened task (these include definitive information).
 
@@ -116,7 +116,7 @@ so no writes to any variable are done. They are as follows:
 - *get_couplebreak_event_name*: returns a couplebreak event's name
 
 There are also macros with values relevant to couplebreak, namely the couplebreak event Ids and flag positions.
-These could have been static const variables, but macros can be used in switch statements, making for prettier code.
+These could have been static const variables, but macros can be used in switch statements, making way for prettier code.
 
 ### Data stream API
 
@@ -163,16 +163,13 @@ instead of changing the owner PID of `sched/sched_switch` events and it works wi
 
 ## Extensions
 
-- Some couplebreak functions could be moved into a header file - currently, most of them are static functions hidden in
-  `libkshark-tepdata.c`, where they have access to most of their needs, but at the cost of not being callable anywhere 
-  else.
 - If there was a way to reuse the sorted array created when correcting CPUs of waking target events, it could erase
   creating the same array twice in some situations.
-- More events could support be supported, e.g. `sched/sched_migrate_task` could be split between the original CPU
+- More events could be supported, e.g. `sched/sched_migrate_task` could be split between the original CPU
   and the chosen CPU for migration (though this event doesn't have much to do with two processes, it does have a
   CPU "couple").
 - Another way to assign a range of numbers to couplebreak events is to for example get the origin event Ids and then
-  shift them all. This woul be useful if the reverse situation, that is getting the origin event's Id from the target was 
+  shift them all. This would be useful if the reverse situation, that is getting the origin event's Id from the target was 
   necessary, but we couldn't access anything other than the target event's Id and our knowledge of this shifting. As
   this situation would be incredibly rare and because being explicit is usually better, the explicit listing of event Ids
   was chosen.
