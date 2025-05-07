@@ -117,7 +117,7 @@ static void plugin_sched_swith_action(struct kshark_data_stream *stream,
 				    record->data, &next_pid_val);
 	pid = next_pid_val;
 	if (ret == 0 && pid >= 0) {
-		//NOTE: Changed here. (COUPLEBREAK, SCHED_EVENTS INTEROP) (2025-03-24)
+		//NOTE: Changed here. (COUPLEBREAK) (2025-03-24)
 		int64_t relevant_pid = (stream->couplebreak_on) ?
 			((struct kshark_entry*)entry->offset)->pid :
 			entry->pid;
@@ -131,7 +131,7 @@ static void plugin_sched_swith_action(struct kshark_data_stream *stream,
 			plugin_sched_set_prev_state(&ks_field, prev_state_val);
 
 		kshark_data_container_append(plugin_ctx->ss_data, entry, ks_field);
-		//NOTE: Changed here. (COUPLEBREAK, SCHED_EVENTS INTEROP) (2025-03-23)
+		//NOTE: Changed here. (COUPLEBREAK) (2025-03-23)
 		// Might be a little troublesome, since sched_events doesn't expect to
 		// change CPUs (which couplebreak does, if the task runs elsewhere eventually).
 		// Question is if that is even a problem (i.e. does sched_events do anything
@@ -174,7 +174,7 @@ int KSHARK_PLOT_PLUGIN_INITIALIZER(struct kshark_data_stream *stream)
 		__close(stream->stream_id);
 		return 0;
 	}
-	//NOTE: Changed here. (COUPLEBREAK, SCHED_EVENTS INTEROP) (2025-03-23)
+	//NOTE: Changed here. (COUPLEBREAK) (2025-03-23)
 	int relevant_sswitch_event_id = plugin_ctx->sched_switch_event->id;
 
 	if (stream->couplebreak_on) {
