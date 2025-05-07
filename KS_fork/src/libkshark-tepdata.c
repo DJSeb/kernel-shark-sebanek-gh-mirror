@@ -728,10 +728,9 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 			case REC_ENTRY: {
 				struct kshark_entry *entry;
 
-				/*NOTE: Changed here. ("COUPLEBREAK"). Just a note where
-				  to put events if we want to add more and have them appear
-				  before the event which triggers this addition.
-				*/
+				//NOTE: Changed here. ("COUPLEBREAK") (2025-03-21)
+				// Just a note where to put events if we want to add more and have
+				// them appear before the event which triggers this addition.
 				// Insert events BEFORE
 				// END of change
 
@@ -796,10 +795,9 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 				    tep_filter_match(adv_filter, rec) != FILTER_MATCH)
 					unset_event_filter_flag(kshark_ctx, entry);
 				
-				/*NOTE: Changed here. ("COUPLEBREAK"). Just a note where
-				  to put events if we want to add more and have them appear
-				  after the event which triggers this addition.
-				*/
+				//NOTE: Changed here. ("COUPLEBREAK") (2025-03-21)
+				// Just a note where to put events if we want to add more and have
+				// them appear after the event which triggers this addition.
 				// Insert events AFTER
 				// END of change
 				
@@ -838,7 +836,7 @@ static ssize_t get_records(struct kshark_context *kshark_ctx,
 
 	//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
 	if (stream->couplebreak_on) {
-		// Use the newest data to correct the cpu of the couplebreak events.
+		// Use the newest data to correct the cpu field of couplebreak events.
 		// The rec_list is not changed.
 		int op_result = correct_couplebreak_cpus(stream, *rec_list, total);
 		if (op_result == -ENOMEM) {

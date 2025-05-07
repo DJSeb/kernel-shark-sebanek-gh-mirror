@@ -9,7 +9,8 @@ changes there. They should be divided into:
   for a plugin developer)
 - **Preview Labels Changeable** - added function to be utilised by plugins, allows one to change
   the preview label in the main window
-- **Couplebreak** - splitting events belonging to two processes (=: couple)
+- **Couplebreak** - splitting events belonging to two processes (=: couple) & compatibility patch
+  for sched_events plugin with this feature
 - **Get Colors** - functions which allow access to KernelShark's GL widget's color table of tasks,
   CPUs and streams
 - **NUMA Topology Views** - viewing CPU plots with respect to NUMA topology; introduces a new
