@@ -1,0 +1,34 @@
+\chapter{KernelShark}
+
+Cíle/úvod této kapitoly...
+
+\section{Historie}
+
+Steven Rostedt, Yordan \& open-source, ...
+
+\section{Data k vizualizaci}
+trace-cmd, vlastní sběr s trace-cmd
+
+perf, ftrace
+
+\section{GUI}
+
+Qt6, desktopová aplikace
+
+co to tam vlastně vidím?
+
+\section{Architektura/moduly/dělení}
+
+Jako subsekce: sessions, main window, libkshark, trace graph...
+
+\section{Limity/nedostatky}
+
+ignorujme typos, ale ne deprecated warnings (UPDATE CBOX STATES)
+
+Ne-topologie - ale proč by ne?
+- SRP vs využití
+
+Nehezké stacky - jde to lépe
+- ftrace cool, ale vizualizace nerada (NoBoxes)
+
+Plugin depenency hell - sched\_events vs naps, modifikace dat \& couplebreak k záchraně

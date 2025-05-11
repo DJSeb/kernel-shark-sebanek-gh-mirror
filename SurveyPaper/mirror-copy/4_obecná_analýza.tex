@@ -1,0 +1,143 @@
+\chapter{Obecná analýza a stanovení požadavků}
+V této kapitole se podíváme na možná vylepšení schopností KernelSharku. Vytvoříme pro ně požadavky a sepíšeme jejich cíle a nutné vlastnosti. Dále obecně analyzujeme, jak se dají vylepšení vytvořit. Hlubší, technická analýza každého z vylepšení pak bude součástí detailnějších pohledů na návrh a implementace vylepšení v jejich samostatných kapitolách. 
+
+\section{Pluginy a modifikace}
+První možnou cestou k získání více informací z KernelSharku je přidání pluginů, které jeho schopnosti rozšíří. KernelShark již obsahuje oficiální pluginy a je možné se jejich strukturou inspirovat. Pluginy dokážou vykreslovat uživatelem definované tvary (s nimiž lze interagovat) do grafu, pozměňovat data záznamů událostí a přidávat nová menu tlačítka do hlavního okna. Pluginy tak zřejmě nejsou schopné všeho. Například nelze skrze pluginy vytvářet další záznamy, které by se pak zobrazily v grafu.
+
+Abychom mohli docílit všech vylepšení, tak vylepšení nemohou být jen pluginy, ale i modifikace kódu KernelSharku. Přímo u zdroje je pak možné manipulovat s celým programem, nicméně na oplátku bude potřeba nerozbít to, co již funguje, zajistit podobný styl s předchozím kódem a vyznačovat místa změn, aby byla respektována licence. Obecně lze od modifikací požadovat následující:
+\begin{itemize}
+    \item Vypnutá modifikace musí mít buď žádný, nebo minimální vliv na chod KernelSharku a jeho oficiálních pluginů. Pokud takový vliv má, musí být navržena tak, že se lze dostat ke starému chování.
+    \item Kód modifikací by měl být podobný ostatnímu kódu v KernelSharku pro zachování jednotného stylu. Kód modifikací by se také měl snažit měnit existující kód co nejméně, chovat se jako rozšíření co možná nejvíce. Změny existujícího kódu musí být označeny a pokud nejsou triviální, popsány.
+\end{itemize}
+
+\subsection{Označení modifikací v kódu}
+Licence KernelSharku, LGPL-2.1, vynucuje u provedených změn v softwaru s touto licencí jasné vyznačení změněných míst společně s datem změny. Každá změna spojena s modifikací tak bude ohraničena dvojicí komentářů:
+\begin{verbatim}
+    //NOTE: Changed here. ([TAG]) ([DATE])
+    ...
+    // END of change
+\end{verbatim}
+[TAG] je zkratkovité označení po typ modifikace, se kterou změna souvisí - každá modifikace musí mít takovou značku. [DATE] je datum napsání změny ve formátu YYYY-MM-DD. Pokud změna vznikne během vývoje nějaké modifikace, ale není na ni nutně vázána (například je to pomocná funkce s širším využitím), pak stačí ohraničit [TAG] uvozovkami.
+
+\section{Výběr vylepšení}
+Následující vylepšení byla vybrána tak, že KernelSharku dodávají lepší informace při analýze trasovacích událostí a nebo nám získání těchto informací nějak usnadňují. Součástí jejich popisu budou i názvy těchto vylepšení, které se použijí v dalších kapitolách. Názvy budou anglické pro zachování jednotného jazyka programu. Vylepšení jsou buď pluginy nebo modifikace zdrojového kódu KernelSharku - tato informace bude také součástí jejich popisu.
+
+\subsection{Lepší analýza zásobníku kernelu}
+
+\subsubsection*{Identifikace problémů k vyřešení}
+Zaznamenávací funkcionalita KernelSharku, tzv. Record okénko, dovoluje spustit program trace-cmd record pro vytvoření trasovacího souboru skrze GUI. Ačkoliv to není ihned zřejmé, tato funkcionalita dovoluje uživateli dodat argumenty trace-cmd, kterými upraví chování zaznamenávání. Pokud uživatel nezná tyto argumenty, nebude je schopen využít. Jedním z argumentů je \verb|-T|, který zapne zaznamenávání kernel zásobníku do události typu ftrace/kernel\_stack. Zásobník je zaznamenán po každé události, kromě události zaznamenání zásobníku.
+
+KernelShark již umí zobrazit události typu ftrace/kernel\_stack. Bere je jako každou jinou událost v trasovacích datech a tak je zobrazí jak v grafu, tak v seznamu událostí. Nicméně nás většinou nezajímá, že se nějaký zásobník trasoval, nýbrž spíš co v něm během události bylo. Z grafu toto nevyčteme, informační řádek nám nedokáže dát celou informaci, jelikož na ní nemá prostor. Seznam událostí je na tom trochu lépe, ale informace zásobníku je v textové formě víceřádková a vícero času má řádků tolik, že většina prostoru seznamu je zabrána jen touto událostí. Celý zásobník je ovšem viditelný pouze, pokud je daná událost v seznamu vybrána, jinak se zobrazí pouze jedna řádka ze zásobníku. To nám analýzu zpomalí o vybrání zásobníkové události.
+
+\subsubsection*{Extrakce požadavků}
+Zřejmě je zde co vylepšovat. Bylo by jistě příjemnější, kdyby bylo možné zobrazit obsah zásobníku přes záznam této události v grafu, nebo vidět nějakou podstatnou část v informačním řádku, namísto klikání mezi seznamem a grafem. Toto by nemělo být realizováno přes klikání na záznam samotný, jelikož takto uživatel záznamy zvýrazňuje. V tom případě by bylo vhodnější vytvořit tlačítko nad záznamy, jejichž zásobník si chceme zobrazit. To mohou být buď přímo záznamy se zásobníkem, nebo záznamy událostí po kterých byl zásobník zaznamenán. Abychom měli záznamy kde zobrazit, bylo by nejlepší vytvořit nějaké vyskakovací okénko. V tomto okénku by mohla být vedle zásobníku i další data, například po jakém typu události byl zásobník zaznamenán, nebo jakému procesu událost patřila. Přejetím kurzoru myši přes tlačítko bychom mohli donutit informační řádek k zobrazení nějaké zajímavé části zásobníku. Abychom toho byli schopni, bude nutno KernelShark dodatečně vylepšit o akce vyvolané při přejetí kurzorem myši přes objekty v graf. Nakonec by bylo vhodné umět toto chování nějak konfigurovat, třeba nezobrazovat tlačítka nad nějakým typem události, nebo měnit barvu tlačítek. K tomu by mohlo stačit konfigurační okénko vyvolané nějakým tlačítkem v hlavním okně.
+
+Co se zaznamenávání zásobníku týče, ačkoliv je možné vytvořit soubor s událostmi záznamů zásobníku, bylo by uživatelsky přívětivější, kdyby se dala tato možnost zapínat pomocí nějakého GUI prvku. Nejpřirozenějším výběrem by bylo zaškrtávací políčko, umístěné v Record okénku KernelSharku. Obsah okénka nemá se zbytkem programu další vazby, tedy není třeba řešit další kompatibilitu.   
+
+Vylepšení Record okénka je možné pouze jako modifikace, pluginy nemají k tomuto okénku přístup. Modifikaci budeme nazývat stručně jako \emph{Record Kstack}. Ovšem tlačítka nad záznamy a vyskakovací okénka je možné definovat čistě v pluginu. Jelikož bude plugin zaměřen na analýzu zásobníku, bude se nazývat \emph{Stacklook}.
+
+Record Kstack má jediný vlastní požadavek, přidání zaškrtávacího políčka do Record okénka, kterým se bude jasněji zapínat trasování zásobníku kernelu. Samozřejmě pro ni platí i obecné požadavky na modifikace. Plugin má požadavků více. Ty jsou shrnuty v seznamu pro přehlednost:
+\begin{itemize}
+    \item Nad podporovanými záznamy bude klikatelný objekt - po dvojitém kliknutí se zobrazí vyskakovací okénko.
+    \item Tlačítka se budou zobrazovat nad záznamy jak v CPU grafech, tak v grafech procesů.
+    \item Ve vyskakovacím okénku se zobrazí záznam zásobníku, název procesu, kterému událost záznamu patří a nějaká bližší informace specifická pro událost, nad kterou bylo tlačítko zobrazeno.
+    \item Plugin bude mít konfigurační okénko, kde se bude moci některé chování upravit. Minimální součástí musí být zapínání a vypínání kreslení tlačítek nad podporovanými záznamy, úprava barev tlačítek a nastavování maximálního počtu viditelných záznamů v grafu, při jehož překročení se tlačítka nebudou zobrazovat.
+    \item Informační řádek bude schopen zobrazit část zásobníku při přejetí kurzoru myši přes tlačítko. Která část zásobníku se zobrazí bude nastavitelné v konfiguraci pluginu. Jelikož informační řádek nemůže být změněn přes rozhraní pluginů a grafové objekty pluginů nereagují na přejetí myší, toto budou dodatečné modifikace, resp. modifikace \emph{Preview Labels Changeable} a \emph{Mouse Hover Plot Objects}.
+    \item Tlačítka mohou být barevná stejně jako je zabarven proces, kterému záznam pod tlačítkem náleží. Získání barev procesů, CPU a streamů není v KernelSharku možné, KernelShark dovoluje barevné tabulky jenom vytvořit nanovo, které ovšem nebudou synchronizovány s tabulkami využívanými KernelSharkem. Zpřístupnění těchto tabulek bude dodatečná modifikace s názvem \emph{Get Colors}.
+\end{itemize}
+
+Podporovanými událostmi budou sched\_switch a sched\_waking. Vybrány jsou proto, že budou podstatné i u dalších vylepšení. Tím se dá testovat izolace různých vylepšení, případně i jejich kompatibilita. Zároveň jsou toto ale časté události, u nichž analýza zásobníku může odhalit, na co se stále čeká (nějaký syscall nás může zdržovat, ten bychom měli být schopni nalézt v zásobníku).
+
+[TODO - tohle je takové mlhavé, bylo by lepší znát přesný důvod, proč jsou důležitými událostmi.]
+
+\subsection{Dělení vlastnictví událostí souvisejících se dvěma procesy}
+
+\subsubsection*{Identifikace problémů k vyřešení}
+Trasování ukládá mnoho různých událostí, přičemž některé jsou svázané se dvěma procesy. Tyto procesy jsou pak touto událostí spárované. Klasickým příkladem je událost sched\_switch, tedy přepnutí se z kontextu jednoho procesu na kontext procesu jiného na stejném CPU. Trace-cmd dokáže tuto informaci uchovat, nicméně přepnutí je vyvoláno jen přepínajícím procesem. Zaznamená se tak jen jedna událost a to pro tento proces. Druhý proces o přepnutí neví. Jediné, co ví, je že byl probuzen a má pracovat. KernelShark dkáže zobrazit ve svých CPU grafech tyto události v čase, dá se tedy zjistit, který proces byl přepnut do kterého na daném CPU. Nicméně tato informace není tak snadno zjistitelná v grafech procesů. Pouze graf procesu přepínajícího bude o události přepnutí vědět, přepínaný prostě začne pracovat po probuzení.
+
+Tento systém, ač většinou funkční, nutí procesy se dělit o informaci, která se týká obou. Informaci pak jeden z nich ztrácí ve svém procesovém grafu. To nutí i některé pluginy upravovat vlastníky událostí, aby dosáhli svých funkcionalit. To je ovšem problém - některé pluginy mohou vyžadovat jiná data, než která jim KernelShark po upravení události dokáže poskytnout. Tedy pluginy měnící vlastníky musejí být načteny buď někdy jindy, nebo jiné pluginy zakazovat. Příkladem mohou být oficiální plugin sched\_events a další z vylepšení, \emph{Naps}. Naps plugin potřebuje mít sched\_waking události v grafu procesu, který je probouzen. Vedle toho sched\_events plugin potřebuje mít sched\_switch události v grafech procesů, na které se přepíná. Dále pak zobrazuje své tvary mezi záznamy událostí typu sched\_switch a sched\_switch, nebo mezi záznamy událostí sched\_waking a sched\_switch. Tyto dva pluginy si pak vzájemně narušují očekávaná umístění těchto dvou typů událostí a ani jeden z pluginů nefunguje správně.
+
+Zřejmým řešením problému je pak odstranění nutnosti měnit vlastníky událostí. Například umět události rozdělit a každému z procesů dát jednu polovinu. Ale rozdělování implikuje, že by pak bylo nutné rozdělit i data z jedné události do vzniklých polovin. To ovšem není vhodné, jelikož oba procesy nejspíše budou potřebovat data celé události k efektivní analýze. Lepší bude trochu odlišný přístup. Namísto dělení události dovolíme druhému procesu z páru číst stejná data, ať už kopií události nebo odkazem na ní. Takto nerozdělíme událost samotnou, ale její vlastnictví.
+
+\subsubsection*{Extrakce požadavků}
+Podívejme se, co to znamená pro KernelShark. Záznamy událostí v KernelSharku obalují události z trace-cmd, nebo se na ně dokážou odkázat. Jelikož KernelShark používá hlavně své záznamy, bude lepší pracovat s nimi. Z architektury KernelSharku vychází, že můžeme buď přidat umělé záznamy, které se automaticky zobrazí v grafu, nebo v grafu jenom vykreslovat objekty simulující záznam. Druhý přístup není vhodný. Simulace chování by byla zbytečně složitá na implementaci a záznamy v grafu by neodpovídaly záznamům v seznamu. Naopak první přístup jenom vytvoří umělý záznam a KernelShark se postará o zbytek. O co víc, umělé záznamy už KernelShark sám vytváří během vytváření záznamů z trasovacích dat. Přístup je tedy nejen jednodušší na implementaci, ale už i používán. Vytvořené umělé záznamy by měly umět odkázat na záznam původní. Ten totiž obsahuje i původní událost a její data. Zároveň by umělé záznamy měly obsahovat data, díky kterým budou přiřazeny do správných grafů a bude možné je rozlišit od ostatních záznamů, například jménem.
+
+S vylepšením budou muset oficiální pluginy nebo ostatní části KernelSharku umět spolupracovat. Nové záznamy by jako ostatní záznamy měly podporovat rozhraní dotazů na záznamy. KernelShark by s nimi měl také umět alespoň základně pracovat, alespoň je umět kromě zobrazení i jednoduše filtrovat. Jelikož budeme měnit chování KernelSharku, bylo by dobré umět tuto změnu chování zapínat a vypínat. Toto nastavení by mělo být uložitelné do relací. Jediný oficiální plugin, který je nutno poupravit je sched\_events.
+
+Výše vypsané změny ukazují, že vylepšení nelze napsat jako plugin. Pouze modifikace bude schopná přidávat další záznamy do grafu a seznamu. Modifikaci nazveme \emph{Couplebreak}, podle jejího účelu rozdělit párovou událost mezi dva procesy.
+
+Pro přehlednost sepíšeme vlastní požadavky do seznamu:
+\begin{itemize}
+    \item Podporované události dvou procesů dají vzniknout dvěma záznamům - původci a cíli.
+    \item Modifikace bude navržena rozšiřitelně o další události.
+    \item Nové záznamy budou patřit tomu procesu z páru, který předtím událost nevlastnil.
+    \item Nové záznamy budou obsahovat odkaz na záznam s původní událostí.
+    \item Nové záznamy budou splňovat rozhraní dotazů na záznamy KernelSharku.
+    \item Nové záznamy bude možné filtrovat jednoduchým filtrem.
+    \item Vylepšení bude možno zapnout a vypnout. Toto nastavení bude možné uložit do a načíst z relací KernelSharku.
+    \item Součástí vylepšení bude i zajištění kompatibility s pluginem sched\_events.
+\end{itemize}
+
+Podporovanými událostmi budou sched\_switch a sched\_waking. Vybrány jsou proto, že budou podstatné i u dalších vylepšení. Tím se dá testovat izolace různých vylepšení, případně i jejich kompatibilita. Zároveň jsou to události, které pro Naps a sched\_events představují bez Couplebreaku problém a dá se na nich ukázat využitelnost vylepšení.
+
+\subsection{Vizualizace nečinnosti procesů}
+
+\subsubsection*{Identifikace problémů k vyřešení}
+Procesy se během běhu na CPU často střídají. Důvodů může být několik - proces třeba čeká na otevření souboru, nebo mu prostě vypršel čas na CPU a byl preemptivně přepnut. Vizualizace nečinnosti v KernelSharku chybí, ačkoliv data jsou dostupná v trasovacích událostech. Pokud uživatel potřebuje zjistit předchozí stav procesu (stav před přepnutím), musí si jej najít a vyčíst v seznamu procesů. Pokud uživatel chce zjstit, jak dlouho byl proces nečinný, než byl probuzen, nezbývá mu než manuálně najít událost přepnutí a následnou událost probuzení - tato událost ovšem patří nějakému jinému procesu. Nutno podotknout, že proces může být reaktivován i bez sched\_waking a samotné sched\_waking může být ignorováno (neobvyklá situace), nicméně tyto situace nebudeme pokrývat. [TODO: Možná bychom ale mohli, Couplebreak by dovolil se dostat k definitivní switch target události. Bylo by dobré probrat s vedoucím.]
+
+\subsubsection*{Extrakce požadavků}
+Vylepšení by mělo za úkol vizualizovat pauzu mezi přepnutím procesu (jeho sched\_switch) a probouzením jiným procesem (sched\_waking procesu, který první proces probouzí). Lze se inspirovat pluginem sched\_events, který kreslí obdélníky mezi událostmi pro něj zajímavými. Nicméně samotné obdélníky by nedokázaly nést informaci o předchozím stavu procesu, tedy nějaké barevné či textové označení bude také požadováno. Bez vylepšení Couplebreak bude nutné přesunout záznamy pro sched\_waking do grafu probouzeného procesu. S vylepšením bude stačit hledat záznamy cílových událostí probouzení. Neměli bychom se snažit kreslit obdélníky neustále. Velké množství by mohlo program zpomalovat a s mnoha záznamy na obrazovce by nebylo mezi některé obdélníky nakreslit. Jelikož všechny systémy nejsou stejné, toto by mělo být konfigurovatelné v nějakém grafickém okénku. Všechny tyto změny se dají provést v pluginu.
+
+Jelikož se bude zajímat o dobu, kdy jsou procesy nečinné, nazveme plugin \emph{Naps}, kdy naps (česky zdřímnutí) označují právě dobu nečinnosti procesu.
+
+Pro přehled si požadavky sepíšeme do seznamu:
+\begin{itemize}
+    \item Mezi událostmi sched\_switch procesu P1 a sched\_waking procesu P2, který probouzí P1, se bude vykreslovat obdélník a text. Vykreslený text bude název předchozího stavu P1 před přepnutím. Vykreslený obdélník bude měnit svou barvu dle předchozího stavu.
+    \item Plugin musí dostat sched\_waking události do grafů procesů, které jsou těmito událostmi probouzeny, aby mohl své grafické objekty vykreslovat.
+    \item Plugin bude spolupracovat s vylepšením Couplebreak. Namísto využívání sched\_waking událostí se využijí cílové události probouzení. Spolupráce musí být automatická.
+    \item Plugin bude možné konfigurovat skrze grafické okénko. Minimální konfigurovatelné nastavení bude maximální počet záznamů viditelných v grafu, než se plugin aktivuje. 
+\end{itemize}
+
+\subsection{Vizualizace NUMA topologie CPU vedle grafu}
+
+\subsubsection*{Identifikace problémů k vyřešení}
+KernelShark se primárně zabývá vizualizací trasovacích dat. Ovšem jenom z nich nelze vyčíst vše. Máme-li mnoho procesorů, je možné optimalizovat přístupy do paměti přes NUMA model. NUMA ve zkratce znamená, že některé procesory jsou blíže nějaké paměti či pamětem, což jejich přístupy zrychluje. To není ale tak podstatné jako to, že NUMA vytváří nějakou topologii procesorů - CPU se seskupují do NUMA uzlů. NUMA uzly určují skupinu procesorů a pamětí, ke kterým mají tyto procesory blízko. Právě tu KernelShark nedokáže nijak zohlednit - procesory v grafu označuje pouze z trasovacích dat a to pomocí indexů dodaných operačním systémem. S vědomostí topologie systému bychom ale mohli lépe analyzovat, které procesory pracují více než jiné. Program \emph{hwloc} byl navržen právě pro zkoumání a vizualizaci topologie systému, včetně topologie procesorů využívající NUMA technologii. Tento nástroj umí topologii systému i exportovat do souboru formátu XML a načíst data z takovýchto exportů. Co víc, hwloc dokáže zachytit i zdali jsou některá CPU součástí jednoho jádra a jeví se jako samostatná CPU díky hyperthreadingu. Spojením schopností obou programů bychom mohli dodat KernelSharku možnost zobrazovat NUMA topologii procesorů systému a zároveň z grafu KernelSharku vyčíst, která část topologie byla více namáhána, než část jiná.  
+
+\subsubsection*{Extrakce požadavků}
+KernelShark se zobrazováním topologií nijak nepočítá, není pro ně tedy žádná podpora. Topologie bude vytvořena pomocí programu hwloc. Nutné tedy bude vytvořit/zabrat místo v hlavním okně, kde se bude vizualizace topologie zobrazovat. Toto místo by bylo dobré umět schovat, pokud bychom topologická data v daný moment nepotřebovali a vybrané místo by byl nevyužitý prostor. Topologii by bylo nejlepší zobrazit takovým způsobem, že CPU grafy by na zobrazení přirozeně navazovaly. Hwloc nečísluje CPU stejně jako operační systém, povolíme si tedy reorganizaci CPU grafů tak, aby byla respektována topologie. Části topologie by měly být rozlišitelné, alespoň nějakým popiskem, nebo barvou. Struktura topologie by měla být jednoduše pochopitelná, zobrazení ve stromovém stylu by se dalo použít. Dále budeme muset dát uživateli nějaké okénko, ve kterém si vybere soubor s topologií, kterou chce zobrazit, a zdali topologii zobrazit chce. Soubor by vybíral pro každý otevřený stream zvlášť. KernelShark nijak nevynucuje stejný trasovaný systém v otevřených streamech, dává smysl toto respektovat a vybírat topologie pro každý stream odděleně. Toto vylepšení by také mělo být součástí ukládaných relací, už jen kvůli odstranění času stráveného hledáním a načtením souboru topologie. Nakonec, pokud systém nevyužívá NUMA technologii, pak nemusíme zobrazovat NUMA uzly a zobrazíme pouze jádra. Ta se zobrazí i kdyby byl hyperthreading vypnutý a jedno jádro by bylo ekvivalentní jednomu CPU.
+
+Vylepšení bude jistě modifikací, pluginy zde nemají využití. Modifikaci nazveme \emph{NUMA Topology Views}, zkratkovitě \emph{NUMA TV}.
+
+NUMA TV má tedy tyto požadavky:
+\begin{itemize}
+    \item Modifikace bude umět zpracovat topologická data z XML souboru vytvořeného programem hwloc. Z tohoto souboru bude hlavně chtít vyčíst NUMA topologii procesorů.
+    \item Zpracovaná topologická data budou zobrazena někde v hlavním okně. Místo zobrazení by mělo dovolovat přirozenou návaznost na CPU grafy. Ty mohou být přeuspořádány tak, aby respektovaly řazení v topologii.
+    \item Pokud nemáme topologická data k dispozici pro streamy, nebudeme topologii pro dané streamy zobrazovat.
+    \item Topologie budou zobrazovány jako stromy.
+    \item Každý prvek stromu bude viditelně pojmenován. Pokud by jméno bylo příliš dlouhé, lze použít popisky při najetí myši.
+    \item Topologie nebudou zobrazovat NUMA uzly, pokud existuje pouze jeden (a NUMA technologie je tedy nevyužitá).
+    \item Topologie budou vždy vykreslovat alespoň jádra v topologii. Ta budou vždy obsahovat alespoň jeden procesor.
+    \item Jádra budou zabarvena průměrnou barvou ze svých procesů. NUMA uzly budou zabarveny průměrnou barvou jader, která jsou součástí uzlu.
+    \item Místo s topologickými stromy bude možné schovat přes GUI prvek.
+    \item Modifikace bude mít konfigurační okénko, ve kterém si bude uživatel schopen vybrat soubor s topologickými daty a typ pohledu na stream - buď klasický, nebo se zobrazením topologie. Pokud nebude vybrána topologie, ale bude vybrán topologický pohled, bude namísto toho použit klasický pohled. Vybrání souboru topologie s odlišným počtem CPU, než jsou v daném streamu tuto topologii nezobrazí, použije klasický pohled a uživatele o nesrovnalosti informuje.
+    \item Modifikace bude uložitelná do relací.
+\end{itemize}
+
+\subsection{Dodatečná vylepšení}
+
+Následující odstavce v rychlosti představí vylepšení KernelSharku, na která se práce nesoustředí, ovšem jejich existence KernelShark udělá trochu příjemnějším k použití a nebo jsou užitečná ve vícero jiných vylepšeních.
+
+\subsubsection*{Aktualizace grafického kódu}
+KernelShark používá Qt6 v minimální verzi 6.3.0. Nicméně Qt6 verze 6.7.0 přináší nové rozhraní pro kontrolu statusu zaškrtávacího políčka a staré rozhraní označuje při kompilaci jako zastaralé. Tato verze bude již brzy součástí hlavních Linuxových distribucí a aktualizace těchto částí kódu v KernelSharku je na místě. Dodatečným vylepšením bude modifikace kódu KernelSharku, která bude nové rozhraní využívat. Název vylepšení bude samovysvětlující \emph{Update Cbox States}.
+
+\subsubsection*{Objekty v grafu reagují na najetí kurzoru myši}
+Grafová oblast KernelSharku dovoluje uživateli dodat další tvary ke kreslení a interakci. Takové tvary jsou velmi časté u pluginů, příkladem může být sched\_events nebo Stacklook. Tyto tvary mají předdefinovaná rozhraní KernelSharkem, nicméně součástí těchto rozhraní není reakce na najetí myší přes grafický objekt. KernelShark již dokáže událost najetí myši zpracovat, využívá ji při najetí na záznamy. Jednou uživatelskou interakcí s tvary je dvojité kliknutí myši na objekt. Cílem tohoto vylepšení je dodat grafickým objektům pro grafovou oblast možnost reagovat na najetí myši a to podobným způsobem, jako je definováno dvojité kliknutí. Název tohoto vylepšení bude \emph{Mouse Hover Plot Objects}.
+
+\subsubsection*{Využití barevných tabulek KernelSharku}
+KernelShark nedovoluje využívat barvy, které používá pro procesy, CPU a streamy. Jejich využití by ale mohlo v některých případech vylepšit organizaci informací, například Stacklook může zabarvovat svá tlačítka barvou procesů, kterým události patří. Lze tak i v CPU grafu idenitifikovat vlastnící proces události, jejíž záznam zásobníku si budeme chtít zobrazit. Navíc, pokud využijeme barvy, které používá KernelShark, pak se využité barvy budou měnit společně s jinou hodnotou barveného slideru, který KernelShark uživateli zpřístupňuje. Vylepšení \emph{Get Colors} dodá KernelSharku, ve formě modifikace, dodá funkce, kterými se získají barvy momentálně využívané KernelSharkem.
+
+\subsubsection*{Možnost měnit text v informačním řádku}
+KernelShark nedovoluje měnit obsah informačního řádku. Možnost jej měnit se může hodit, pokud nějaký plugin, jako například Stacklook, by chtěl zobrazit nějaké rychlé informace uživateli. Dodatečným vylepšením bude modifikace kódu KernelSharku, která možnost měnit text v informačním řáku dodá. Vylepšení dostane název \emph{Preview Labels Changable}.
+
+\subsubsection*{Obdélníky mezi záznamy}
+KernelShark při vykreslování grafu dokresluje obdélníky mezi jednotlivé grafické reprezentace záznamů. Tyto obdélníky jsou definovány a nakresleny během každého vykreslení na obrazovku. Ovšem ne všechny záznamy by se měly podílet na kreslení obdélníků, například záznamy zásobníku kernelu se dějí po přepnutí kontextu, kde by měl obdélník většinou skončit, a záznamy vytvořené Couplebreakem mohou chybně být začátky a konce jiných obdélníků. Vylepšení \emph{NoBoxes} jako modifikace dodá masku viditelnosti záznamů, kterou se zakáže účast na kreslení zmíněných obdélníků, a plugin, který touto maskou označí vybrané záznamy událostí. Toto opravné vylepšení bude nicméně fungovat jako best-effort při každém vykreslování a může tak produkovat vizuální anomálie v grafu. Řešení, které by anomáliím zamezilo, bude ponecháno jako rozšíření. [TODO: Nevím, jestli je tohle nejlepší formát pro vyřknutí: "Bylo by to hrozně moc práce, na kterou není čas, a je popravdě nepříjemně zvláštní, že to nefunguje už teď."]
