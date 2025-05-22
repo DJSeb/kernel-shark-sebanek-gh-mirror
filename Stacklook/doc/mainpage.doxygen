@@ -18,11 +18,11 @@
  * the same manner as anything to be found in this documentation. Additionally, non-documentation comments can
  * be found there, detailing some more obsure computation steps.
  *
- * As such, reading through the source code is recommended for a complete understanding.
+ * Reading through the source code is recommended for a deep and fully complete understanding.
  *
  * @section aslib Using the plugin as a library
  *   
- * Plugin was designed as a standalone shared library and not as a library to use in other projects. As such this kind
+ * Plugin was designed as a standalone shared library and not as a library to use in other projects. As such, this kind
  * of use of this plugin is discouraged, but not banned - after all, if someone is brave enough, they can utilise 
  * anything. It all depends on how familiar with all aspects of plugin's code someone willing to do this will be.
  */

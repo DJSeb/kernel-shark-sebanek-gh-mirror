@@ -26,10 +26,8 @@
 
 // Plugin headers
 #include "stacklook.h"
-#include "SlDetailedView.hpp"
 #include "SlButton.hpp"
 #include "SlConfig.hpp"
-#include "SlPrevState.hpp"
 
 // #########################################################################
 // Static variables
