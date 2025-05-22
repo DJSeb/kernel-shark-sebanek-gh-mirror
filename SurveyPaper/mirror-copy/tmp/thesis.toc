@@ -1,24 +1,96 @@
 \babel@toc {czech}{}\relax 
-\contentsline {chapter}{Úvod}{6}{chapter*.2}%
-\contentsline {chapter}{\numberline {1}Příbuzné práce}{7}{chapter.1}%
-\contentsline {chapter}{\numberline {2}Analýza řešení}{8}{chapter.2}%
-\contentsline {section}{\numberline {2.1}Extrakce požadavků}{8}{section.2.1}%
-\contentsline {section}{\numberline {2.2}Dělení řešení}{8}{section.2.2}%
-\contentsline {section}{\numberline {2.3}Požadavky pro~Stacklook}{8}{section.2.3}%
-\contentsline {section}{\numberline {2.4}Požadavky pro~Naps}{8}{section.2.4}%
-\contentsline {section}{\numberline {2.5}Požadavky pro~Couplebreak}{8}{section.2.5}%
-\contentsline {section}{\numberline {2.6}Požadavky pro~NUMA Topology Views}{8}{section.2.6}%
-\contentsline {chapter}{\numberline {3}Vývojová dokumentace}{9}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Stacklook}{9}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Naps}{9}{section.3.2}%
-\contentsline {section}{\numberline {3.3}Couplebreak}{9}{section.3.3}%
-\contentsline {section}{\numberline {3.4}NUMA Topology Views}{9}{section.3.4}%
-\contentsline {chapter}{\numberline {4}Rozšíření práce}{10}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Pluginy}{10}{section.4.1}%
-\contentsline {section}{\numberline {4.2}KernelShark}{10}{section.4.2}%
-\contentsline {chapter}{Závěr}{11}{chapter*.3}%
-\contentsline {chapter}{Seznam obr\'azk\r {u}}{12}{chapter*.4}%
-\contentsline {chapter}{Seznam tabulek}{13}{chapter*.5}%
-\contentsline {chapter}{Seznam použitých zkratek}{14}{chapter*.6}%
-\contentsline {chapter}{\numberline {A}Přílohy}{15}{appendix.A}%
-\contentsline {section}{\numberline {A.1}První příloha}{15}{section.A.1}%
+\contentsline {chapter}{Úvod}{8}{chapter*.2}%
+\contentsline {chapter}{\numberline {1}Trasování v Linuxu}{10}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Základy v kernelu}{10}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Nástroje pro sběr trasovacích dat}{10}{section.1.2}%
+\contentsline {chapter}{\numberline {2}Vizualizace trasovacích dat}{11}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Grafy a jejich obsahy}{11}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Nástroje k vizualizaci dat}{11}{section.2.2}%
+\contentsline {chapter}{\numberline {3}KernelShark}{12}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Historie}{12}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Data k vizualizaci}{12}{section.3.2}%
+\contentsline {section}{\numberline {3.3}GUI}{12}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Architektura/moduly/dělení}{12}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Limity/nedostatky}{12}{section.3.5}%
+\contentsline {chapter}{\numberline {4}Obecná analýza a stanovení požadavků}{13}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Pluginy a modifikace}{13}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Označení modifikací v kódu}{14}{subsection.4.1.1}%
+\contentsline {section}{\numberline {4.2}Výběr vylepšení}{14}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Lepší analýza zásobníku kernelu}{14}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Dělení vlastnictví událostí souvisejících se dvěma procesy}{16}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Vizualizace nečinnosti procesů}{18}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}Vizualizace NUMA topologie CPU vedle grafu}{19}{subsection.4.2.4}%
+\contentsline {subsection}{\numberline {4.2.5}Dodatečná vylepšení}{20}{subsection.4.2.5}%
+\contentsline {chapter}{\numberline {5}Record Kstack}{23}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Cíl}{23}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Analýza}{23}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Návrh}{23}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Implementace}{23}{subsection.5.2.2}%
+\contentsline {section}{\numberline {5.3}Vývojová dokumentace}{23}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Uživatelská dokumentace}{24}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}Uživatel GUI}{24}{subsection.5.4.1}%
+\contentsline {section}{\numberline {5.5}Rozšíření}{24}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Zhodnocení splněných požadavků}{24}{section.5.6}%
+\contentsline {chapter}{\numberline {6}Stacklook}{26}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Cíle}{26}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Analýza}{27}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Vývojová dokumentace}{29}{section.6.3}%
+\contentsline {subsection}{\numberline {6.3.1}Modifikované soubory}{29}{subsection.6.3.1}%
+\contentsline {subsection}{\numberline {6.3.2}Struktura pluginu}{29}{subsection.6.3.2}%
+\contentsline {section}{\numberline {6.4}Uživatelská dokumentace}{29}{section.6.4}%
+\contentsline {subsection}{\numberline {6.4.1}Instalace}{34}{subsection.6.4.1}%
+\contentsline {subsection}{\numberline {6.4.2}Uživatel GUI}{34}{subsection.6.4.2}%
+\contentsline {subsection}{\numberline {6.4.3}Vývojář pluginů}{34}{subsection.6.4.3}%
+\contentsline {section}{\numberline {6.5}Rozšíření}{34}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Zhodnocení splněných požadavků}{34}{section.6.6}%
+\contentsline {chapter}{\numberline {7}Couplebreak}{35}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Cíle}{35}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Analýza}{35}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Vývojová dokumentace}{36}{section.7.3}%
+\contentsline {subsection}{\numberline {7.3.1}Modifikované soubory}{36}{subsection.7.3.1}%
+\contentsline {subsection}{\numberline {7.3.2}Struktura modifikace}{36}{subsection.7.3.2}%
+\contentsline {section}{\numberline {7.4}Uživatelská dokumentace}{37}{section.7.4}%
+\contentsline {subsection}{\numberline {7.4.1}Uživatel GUI}{37}{subsection.7.4.1}%
+\contentsline {subsection}{\numberline {7.4.2}Vývojář pluginů}{37}{subsection.7.4.2}%
+\contentsline {subsection}{\numberline {7.4.3}Vývojář KernelSharku}{37}{subsection.7.4.3}%
+\contentsline {section}{\numberline {7.5}Rozšíření}{37}{section.7.5}%
+\contentsline {section}{\numberline {7.6}Zhodnocení splněných požadavků}{37}{section.7.6}%
+\contentsline {chapter}{\numberline {8}Naps}{38}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Cíle}{38}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Analýza}{38}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Vývojová dokumentace}{38}{section.8.3}%
+\contentsline {subsection}{\numberline {8.3.1}Modifikované soubory}{38}{subsection.8.3.1}%
+\contentsline {subsection}{\numberline {8.3.2}Struktura pluginu}{38}{subsection.8.3.2}%
+\contentsline {section}{\numberline {8.4}Uživatelská dokumentace}{38}{section.8.4}%
+\contentsline {subsection}{\numberline {8.4.1}Instalace}{38}{subsection.8.4.1}%
+\contentsline {subsection}{\numberline {8.4.2}Uživatel GUI}{38}{subsection.8.4.2}%
+\contentsline {subsection}{\numberline {8.4.3}Vývojář pluginů}{38}{subsection.8.4.3}%
+\contentsline {section}{\numberline {8.5}Rozšíření}{38}{section.8.5}%
+\contentsline {section}{\numberline {8.6}Zhodnocení splněných požadavků}{38}{section.8.6}%
+\contentsline {chapter}{\numberline {9}NUMA Topology Views}{39}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Cíle}{39}{section.9.1}%
+\contentsline {section}{\numberline {9.2}Analýza}{39}{section.9.2}%
+\contentsline {subsection}{\numberline {9.2.1}Terminologie}{39}{subsection.9.2.1}%
+\contentsline {section}{\numberline {9.3}Vývojová dokumentace}{39}{section.9.3}%
+\contentsline {subsection}{\numberline {9.3.1}Modifikované soubory}{39}{subsection.9.3.1}%
+\contentsline {subsection}{\numberline {9.3.2}Struktura modifikace}{39}{subsection.9.3.2}%
+\contentsline {section}{\numberline {9.4}Uživatelská dokumentace}{39}{section.9.4}%
+\contentsline {subsection}{\numberline {9.4.1}Nové závislosti KernelSharku}{39}{subsection.9.4.1}%
+\contentsline {subsection}{\numberline {9.4.2}Uživatel GUI}{39}{subsection.9.4.2}%
+\contentsline {subsection}{\numberline {9.4.3}Vývojář pluginů}{39}{subsection.9.4.3}%
+\contentsline {subsection}{\numberline {9.4.4}Vývojář KernelSharku}{39}{subsection.9.4.4}%
+\contentsline {section}{\numberline {9.5}Rozšíření}{39}{section.9.5}%
+\contentsline {section}{\numberline {9.6}Zhodnocení splněných požadavků}{39}{section.9.6}%
+\contentsline {chapter}{\numberline {10}Dodatečná vylepšení}{40}{chapter.10}%
+\contentsline {section}{\numberline {10.1}Aktualizace kódu zaškrtávacích políček}{40}{section.10.1}%
+\contentsline {section}{\numberline {10.2}Zpřístupnění barev užívaných v grafu}{40}{section.10.2}%
+\contentsline {section}{\numberline {10.3}Reakce objektů v grafu na přejetí myší}{41}{section.10.3}%
+\contentsline {section}{\numberline {10.4}Měnitelné nápisy v hlavičce grafu}{41}{section.10.4}%
+\contentsline {section}{\numberline {10.5}NoBoxes}{42}{section.10.5}%
+\contentsline {chapter}{Závěr}{44}{chapter*.28}%
+\contentsline {section}{\numberline {10.6}Shrnutí práce}{44}{section.10.6}%
+\contentsline {chapter}{Seznam obr\'azk\r {u}}{45}{chapter*.29}%
+\contentsline {chapter}{Seznam tabulek}{46}{chapter*.30}%
+\contentsline {chapter}{Seznam použitých zkratek}{47}{chapter*.31}%
+\contentsline {chapter}{\numberline {A}Přílohy}{48}{appendix.A}%
+\contentsline {section}{\numberline {A.1}První příloha}{48}{section.A.1}%
