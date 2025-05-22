@@ -23,7 +23,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread -fPIC -fno-common
 
 # Dependencies
 ## Ensure existing Qt6 and necessary components
-find_package(Qt6Widgets 6.3.0 REQUIRED)
+find_package(Qt6Widgets 6.7.0 REQUIRED)
 find_package(Qt6 COMPONENTS Network OpenGLWidgets StateMachine REQUIRED)
 
 ## For customisability by the user

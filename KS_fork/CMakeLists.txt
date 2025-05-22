@@ -100,7 +100,9 @@ else (TT_FONT_FILE)
 
 endif (TT_FONT_FILE)
 
+#NOTE: Changed here. (UPDATE CBOX STATES) (2025-05-18)
 find_package(Qt6Widgets 6.7.0)
+# END of change
 find_package(Qt6 COMPONENTS Network OpenGLWidgets StateMachine REQUIRED)
 
 find_package (Boost COMPONENTS unit_test_framework)
