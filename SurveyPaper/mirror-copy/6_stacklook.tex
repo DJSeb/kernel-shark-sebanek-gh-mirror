@@ -3,10 +3,6 @@ Tato kapitola se zabývá pluginem pro KernelShark, díky kterému bude jednodu�
 
 \section{Cíle}
 
-Cíle pluginu jsou obecné požadavky na pluginy, funkcionální požadavky a technické cíle.
-
-Pro zopakování a přehlednost jsou funkcionální požadavky zkopírovány z kapitoly \emph{Obecná analýza a stanovení požadavků}.
-
 \begin{itemize}
     \item Nad podporovanými záznamy bude klikatelný objekt - po dvojitém kliknutí se zobrazí vyskakovací okénko.
     \item Tlačítka se budou zobrazovat nad záznamy jak v CPU grafech, tak v grafech procesů.
@@ -15,302 +11,277 @@ Pro zopakování a přehlednost jsou funkcionální požadavky zkopírovány z k
     \item Informační řádek bude schopen zobrazit část zásobníku při přejetí kurzoru myši přes tlačítko. Která část zásobníku se zobrazí bude nastavitelné v konfiguraci pluginu. Jelikož informační řádek nemůže být změněn přes rozhraní pluginů a grafové objekty pluginů nereagují na přejetí myší, toto budou dodatečné modifikace, resp. modifikace \emph{Preview Labels Changeable} a \emph{Mouse Hover Plot Objects}.
     \item Tlačítka mohou být barevná stejně jako je zabarven proces, kterému záznam pod tlačítkem náleží. Získání barev procesů, CPU a streamů není v KernelSharku možné, KernelShark dovoluje barevné tabulky jenom vytvořit nanovo, které ovšem nebudou synchronizovány s tabulkami využívanými KernelSharkem. Zpřístupnění těchto tabulek bude dodatečná modifikace s názvem \emph{Get Colors}.
     \item Je nutné podporovat alespoň události typu sched/sched\_switch a sched/sched\_waking.
+    \item Plugin bude možné používat i pro KernelShark bez modifikací vytvořených jako součást této práce.
 \end{itemize}
 
-Techničtější cíle níže nejsou jádrem pluginu a jeho funkcionality, nicméně upřesňují, co může uživatel čekat od této implementace.
-
-\begin{itemize}
-    \item Plugin bude možné sestavit i pro KernelShark bez modifikací vytvořených jako součást této práce. Možnost bude zachytitelná při sestavení, výsledný programový kód se bude lišit.
-    \item Součástí pluginu bude uživatelská a technická dokumentace. Uživatelská dokumentace musí obsahovat instalaci a používání instalovaného pluginu. Technická dokumentace stručně popíše návrh a veřejné prvky pluginu (funkce, datové struktury, třídy a jejich metody). Komentáře v kódu by měly popsat každý prvek pluginu (tj. i privátní či pouze implementační). Technickou dokumentaci lze vytvořit pomocí komentářů v kódu.
-\end{itemize}
-
-První bod bude nejen zajímavým procvičením psaní CMake instrukcí, ale i psaním kódu, který může být kompilovatelný různými způsoby. Toto není jádrový cíl, protože pro desktopovou aplikaci nejspíš nebude tolik podstatný rozdíl výkonu mezi změnou chování za běhu programu či změnou chování při kompilaci.
-
-Druhý bod lze brát spíše jako samozřejmost, jelikož vydat nedokumentovaný kód postrádá na smyslu, pokud se nejedná o jednoduchou kalkulačku. Nicméně existence dokumentace není něco, co určuje fungování pluginu nebo bez čeho plugin nedokáže fungovat.
+Poslední bod existuje pro případné uživatele, kteří nechtějí používat modifikovaný KernelShark, dokud nejsou modifikace součástí oficiálního vydání. Plugin se tak může využívat i v úplné izolaci od ostatních změn z této práce, což souhlasí s obecnými požadavky na pluginy. Ostatní cíle vychází z kapitoly \emph{Obecná analýza a stanovení požadavků}. Jako samozřejmost se bere technická a uživatelská dokumentace a splnění obecných požadavků na pluginy.
 
 \section{Analýza}
+Tato sekce se pokusí zachytit postup, kterým se dostaneme k implementaci řešení. Jedná se o techničtější analýzu než analýza z kapitoly \emph{Obecná analýza a stanovení požadavků}.
 
-\subsection*{Struktura adresáře}
-
-Adresář pluginu bude obsahovat další adresáře. Jeden z nich pro samotný kód, další z nich pro dokumentaci uživatelskou a dokumentaci technickou, a adresář či adresáře pro sestavení. Na stejné úrovni bude žít i README, soubor s licencí a nejvyšší CMakeLists.txt. V těchto CMake instrukcích se nastaví proměnné sestavení, například typ sestavení, a případně se zavolá generace dokumentace. CMake instrukce zodpovědné za vytvoření binárního souboru dáme do aresáře se zdrojovým kódem, stejně tak to dělá KernelShark.
-
-\subsection*{Dokumentace}
-
-Jedním z technických cílů je dokumentace každého prvku pluginu pomocí zdrojových komentářů a existující technická a uživatelská dokumentace. Technická dokumentace bude vytvořena pomocí nástroje Doxygen, který nám i udává pěkný a známý formát pro komentáře. Technická dokumentace dostane navíc hlavní stránku a stránku s abstraktním návrhem pluginu.
-
-\subsection*{Cesta k řešení}
-
-Zamysleme se nyní nad tím, jak bychom vytvořili plugin pro KernelShark s našimi cíli. Nejlepším začátkem by bylo nechat se inspirovat oficálními pluginy, od nich se lze naučit, jak plugin propojit s KernelSharkem. Oficiální pluginy definují hlavičkový soubor v jazyce C, kde se definuje kontext pluginu. Tento kontext je pak struktura s globálně přístupnými daty pro plugin. S kontextem se i deklarují kontextové funkce ovládající jeho inicializaci a destrukci přes KernelSharkem definované makro. Krom toho se zde deklarují i další globálně přístupné prvky, které nevyžadují funkcionality C++. Tento hlavičkový soubor může své části implementovat jak C kódu, tak v C++ kódu. Oficiální pluginy mají v C napsanou hlavně definici kontextových funkcí, registraci handlerů pro různé události během načítání trasovacích dat, registrace handlerů na kreslení do grafu, inicializaci dat pro textový font a inicializaci ukazatelů na hlavní okno. Handlery jsou buď implementovány v C++, nebo, hlavně u jednoduchých handlerů událostí, ještě v tomto implementačním C souboru. Kód napsaný v C je tedy většinou použit na inicializaci pluginu a další části, většinou s komplikovanější business logikou, jsou implementovány v C++.
+Zamysleme se nyní nad tím, jak bychom vytvořili plugin pro KernelShark s našimi cíli. Nejlepším začátkem by bylo nechat se inspirovat oficálními pluginy, od nich se lze naučit, jak plugin propojit s KernelSharkem. Oficiální pluginy definují hlavičkový soubor v jazyce C, kde se definuje kontext pluginu. Tento kontext je pak struktura s globálně přístupnými daty pro plugin. S kontextem se i deklarují kontextové funkce ovládající jeho inicializaci a destrukci přes KernelSharkem definované makro. Krom toho se zde deklarují i další globálně přístupné prvky, které nevyžadují funkcionality C++. Tento hlavičkový soubor může své části implementovat jak C kódu, tak v C++ kódu. Oficiální pluginy mají v C napsanou hlavně definici kontextových funkcí, registraci handlerů pro různé události během načítání trasovacích dat, registrace handlerů na kreslení do grafu, inicializaci dat pro textový font a inicializaci ukazatelů na hlavní okno. Handlery jsou buď implementovány v C++, nebo, hlavně u jednoduchých handlerů událostí, ještě v implementačním C souboru. Kód napsaný v C je tedy většinou použit na inicializaci pluginu a další části, většinou s komplikovanější business logikou, jsou implementovány v C++.
 
 Postup oficiálních pluginů je dobrý, využijeme jej tedy též. Stacklook ovšem bude vyžadovat více C++ kódu. Jednotlivé soubory pak budou sloužit jednotlivým modulům Stacklooku, například modul konfigurace bude obsahovat datovou struktury či datové struktury, které konfiguraci tvoří. Pokud možno, hlavičkové soubory by pak měly reprezentovat každý jeden z modulů. Podobné postupy jsou hojně využívány, hlavně při dekompozicích souboru s kódem, který obsahuje vícero modulů najednou.
 
-Dle našich cílů lze vymezit moduly celkem přímo. Moduly budou následující:
-\begin{itemize}
-    \item \emph{Propojující modul} - Modul s kódem propojujícím KernelShark a plugin. Obsahem budou hlavně kontext pluginu a implementačně pomocné funkce, které využívají ostatní moduly. Součástí tohoto modulu bude právě část s C kódem a část v C++ pro zbytek hlavičkového C souboru. Právě v \uv{C++ části} (napsaná v C++) se ostatní moduly budou propojovat; zároveň tato část bude ukládat některá globální data s C++ typy.
-    \item \emph{Konfigurace} - Pro konfiguraci bude sloužit konfigurační modul, který bude obsahovat alespoň třídu pro konfigurační okénko. Pro oddělení této interaktivní složky vytvoříme i třídu pro data konfigurace samotné. Plugin pak bude využívat data hlavně z tohoto objektu a konfigurační okénko bude sloužit pouze jako GUI pro náhle aktuální konfigurace a její změnu.
-    \item \emph{Tlačítka} - Tlačítka budou vykreslována v grafu nad záznamy, budou tedy nějaký grafický objekt, na který lze klikat a který dokáže reagovat na přesun myš nad ním.
-    \item \emph{Detailní pohledy} - Detailní pohledy budou okénka zobrazující hlavně zaznamenaný kernel zásobník a nějaké informace o procesu a události, která záznamu zásobníku předcházela.
-    \item \emph{Předchozí stavy} - Mini-modul, bude dodávat data tlačítkům a detailním pohledům o stavu procesu před přepnutím kontextu na CPU. 
-\end{itemize}
+Z našich cílů lze celkem přímo vymezit moduly, ze kterých se bude plugin skládat: \emph{Propojující modul}, \emph{Konfigurace}, \emph{Tlačítka}, \emph{Detailní pohledy}.
 
-\subsubsection*{Moduly podrobněji}
+Propojující modul máme zčásti navržen díky oficiálním pluginům. V \uv{C části} (napsaná v jazyce C) nastavíme textový font používaný v pluginu, vybereme podporované události při načítání dat a registrujeme handlery. V \uv{C části} zároveň inicializujeme pluginový kontext. Tato část bude mít za úkol tento kontext i správně odstranit. V \uv{C++ části} definujeme handlery pro kreslení a přístup k hlavnímu oknu. Kreslící handler bude vyžadovat funkci na vytvoření tlačítek, tedy zde se propojí tlačítkový modul. Funkce vytvoření tlačítek bude potřebovat data pro barvu tlačítek, ta je v konfiguraci, takže se zde objeví i konfigurační modul. Tento modul bude také obsahovat podporované události a bude je sbírat do dat v kontextu pluginu.
 
-Nyní detailněji zanalyzujeme jak budou moduly vypadat. Propojující modul máme zčásti navržen díky oficiálním pluginům. V \uv{C části} (napsaná v jazyce C) nastavíme textový font používaný v pluginu, vybereme podporované události při načítání dat a registrujeme handlery. V \uv{C části} zároveň inicializujeme pluginový kontext. Tato část bude mít za úkol tento kontext i správně odstranit. V \uv{C++ části} definujeme handlery pro kreslení a přístup k hlavnímu oknu. Kreslící handler bude vyžadovat funkci na vytvoření tlačítek, tedy zde se propojí tlačítkový modul. Funkce vytvoření tlačítek bude potřebovat data pro barvu tlačítek, ta je v konfiguraci, takže se zde objeví i konfigurační modul.
-
-Konfigurace bude rozdělená mezi GUI okno a datová struktura s konfiguračními daty. Konfigurační objekt samotný implementujeme jako singleton. Důvodem je nutnost znát konfiguraci v různých částech programu a že konfigurace musí být vždy pouze jedna, což právě singleton splňuje. Prvky z cíle o konfigurací [TODO]
+Konfigurace bude rozdělená mezi GUI okno a datovou strukturu s konfiguračními daty, tzv. konfigurační objekt. Konfigurační objekt samotný implementujeme jako singleton. Důvodem je nutnost znát konfiguraci v různých částech programu a že konfigurace musí být vždy pouze jedna, což právě singleton splňuje. Prvky z cíle o konfiguraci můžeme jednoduše uložit jako čísla, pravdivostní hodnoty, textové řetězce a datovou strukturu pro barvy od KernelSharku. Aby bylo možné konfiguraci měnit pouze skrze konfigurační okno, tyto prvky schováme pomocí modifikátorů viditelnosti. Konfigurační objekt pak využije C++ mechanismus \uv{zpřátelení} přes klíčové slovo \texttt{friend} a označí konfigurační okno za svého přítele. Konfigurace pluginů KernelSharku nejsou persistentní, tak dodáme i nějaké výchozí hodnoty. Kvůli zobrazování zásobníku v informačním řádku, přidáme ke každému nastavení specifickému pro událost i offset od vrchu zásobníku. Tak budeme moci stanovit oblast zásobníku, ve které se většinou nachází ty nejzajímavější části zásobníku pro danou událost.
 
 Konfigurační okno využije framework Qt (specificky Qt6), stejně jako ostatní grafické prvky KernelSharku. Na barevná nastavení vytvoříme tlačítko, které na kliknutí vyvolá nějaké okno na výběr barvy, například výchozí barevný dialog od Qt. Pro pohodlí uživatele i někde blízko tlačítka výběru barvy zobrazíme i aktuálně použitou barvu. Nastavení maximálního počtu viditelných záznamů lze reprezentovat jako spinbox. Konfigurace pro specifické události, tj. zdali nad danými událostmi zobrazovat tlačítka nebo offset použitý při zobrazování části zásobníku v informačním řádku, lze reprezentovat pomocí zaškrtávacího tlačítka a dalšího spinboxu. Mimo požadavky navíc dodáme zaškrtávací tlačítko pro barvení tlačítek barvami jejich procesů.
 
+Modul tlačítek se bude hlavně skládat z třídy pro tlačítka. Ta by měla být v grafu jasně viditelná a ihned rozpoznatelná uživatelem. Tvar tlačítek by měl nějak ukazovat, kterému záznamu patří. Zde je několik možností a tvarů na výběr, nicméně nejjednodušším tvarem bude trojúhelník. Jeden z vrcholů bude směřovat dolů, ostatní dva vrcholy budou nad tímto vrcholem. Rozpoznatelnost těchto tlačítek nakonec zajistíme přidáním nápisu \texttt{STACK} do každého z nich. Reakci na dvojité kliknutí a přejetí kurzorem myši implementujeme jako to dělají ostatní tvary definované KernelSharkem. U přejetí využijeme naše modifikaci na reakci na přejetí kurzorem myši a modifikaci na změnu informačního řádku, přesně jak říká jeden z cílů. Speciálně pro sched\_switch budou tlačítka ještě obsahovat jedno písmeno symbolizující předchozí stav procesu před přepnutím. Takto nebude nutné se podívat do detailního pohledu, bude stačit se dívat do grafu. Nicméně uživatel bude muset znát zkratky pro možné předchozí stavy. Ty jsou součástí dokumentace Linuxu. [TODO: Sem se asi hodí zdroj.] Barva tlačítek bude určena hodnotami v konfiguračním objektu. Dodáme i možnost používat barvy procesů jako barvy tlačítek, to nám zajistí modifikace \emph{Get Colors}. Aby nemohlo více tlačítek splývat díky stejné barvě, tlačítka budou mít obrys, jehož barva bude také dána konfigurací a bude oddělená od (vnitřní) barvy tlačítka.
+
+Modul detailních pohledů bude hlavně obsahovat třídu pro okna těchto pohledů. V okně pak zobrazíme záznam zásobníku ve formě seznamu. Tento formát se hodí na jednoduché zvýraznění položky jedním kliknutím. Dodáme ale i možnost si data zobrazit jako prostý text - tento formát je naopak lepší když se kopírují data po jných částech než po položkách. Na vrchol zásobníku dodáme značku \texttt{top}, aby bylo jasné, kde se vrch zásobníku nachází. Jeden z cílů nám ještě udává nutnost zobrazit název procesu a nějaké bližší informace o události. Pro sched\_switch zde můžeme udat přechozí stav procesu před přepnutím, například zdali byl proces již ve stavu zombie, nebo zdali začal čekat na nějaká data a nebo zdali prostě běžel a byl preemptivně přepnut. Předchozí stav zapíšeme jak zkratkou, tak celým názvem (například \uv{S - sleep}, nebo \uv{Z - zombie}). Pro sched\_waking pouze napíšeme, že byl proces probuzen. Nakonec se zamyslíme nad tím, jak dlouho budou okna žít a kolik jich může být najednou pro jednu událost. Naše pohledová okna můžeme vytvořit jako podřízená oknu hlavnímu, tedy pokud je ukončeno hlavní okno, budou ukončena i jeho podřízená okna. Toto zajistí Qt framework. Počet oken pro jednu událost nebudeme omezovat, nic se tím nerozbije a implementace bude jednodušší. Tato rozhodnutí by měla mít ten efekt, že uživatel bude schopen stream, nazvěme jej A, pak bude schopen začít zkoumat stream jiný, nazvěme tento B. Okna otevřená ve streamu A zůstanou otevřená i po přepnutí do streamu B, do té doby dokud je uživatel sám nezavře, nebo dokud uživatel nezavře hlavní okno. Lze tak porovnávat zásobníky z různých běhů trasování.
+
+Na získání informací o předchozím stavu ještě dodáme mini-modul \emph{Předchozí stavy}. Nutně bude muset být schopen vytáhnout data o předchozím stavu ze záznamu události přepnutí v KernelSharku. Tato data pak bud muset umět dodat pluginu buď jako zkratka pro typ stavu (tlačítka a detailní pohledy), nebo jako celý název (detailní pohledy).
+
+Postupujme dále, podívejme se na informační řádek. Informační řádek nabízí pouze pět míst pro text. Pokud bychom museli zobrazovat konec zásobníku, nebo i prvky za koncem (například kvůli vysokému offsetu v konfiguraci), v informačním řádku pak vyznačíme, že jsme na konci zásobníku a místa, kde by byly prvky za koncem označíme nějakou čárou, třeba mínusem. Pokud ale zobrazujeme oblast zásobníku a za ní zásobník pokračuje, označíme toto třemi tečkami v posledním místě pro text v informačním řádku. Nakonec, pro jasnou identifikaci procesu z jehož záznamu zásobníku čerpáme bude první místo v informačním řádku obsazeno názvem tohoto procesu. Prvky v informačním řádku tedy budou vždy v následujícím pořadí:
+\begin{itemize}
+  \item Název procesu
+  \item Věc na zásobníku na offsetu X od vrcholu zásobníku, nebo \texttt{-}
+  \item Věc na offsetu X+1, nebo \texttt{-}
+  \item Věc na offsetu X+2, nebo \texttt{-}
+  \item \texttt{...}, nebo \texttt{(End of stack)}
+\end{itemize}
+Informační řádek bude vždy schopen zobrazit nejvýše tři prvky ze zásobníku.
+
+Nakonec se zamyslíme, jak získat data záznamů zásobníku kernelu. Tlačítka jsou nad záznamy, po kterých následuje záznam zásobníku. Tyto záznamy se vždy vytvoří na stejném CPU jako událost jim předcházející. Během načítání dat ale ještě nemáme události seřazené, ovšem při prvním kreslení už ano. Navíc neplatí, že všechny soubory trasovacích dat musí obsahovat záznamy zásobníku, lze systém trasovat i bez sbírání zásobníku. V tom přípaě nemá smysl, aby plugin cokoli kreslil. Do kontextu pluginu dodáme dvě proměnné, jednu jako indikátor \uv{hledali jsme záznam trasování zásobníku kernelu} a druhou jako \uv{záznam trasování zásobníku existuje}, přičemž obě začnou na pravdivostní hodnotě \uv{nepravda}. Při prvním kreslení prohledáme následníky všech záznamů námi podporovaných událostí. Pokud alespoň jeden záznam má za následníka záznam zásobníku, nastavíme druhou proměnnou v kontextu na \uv{pravda}. Ukazatel na tento záznam si pak poznamenáme i u záznamu předcházející události. Po prohledání všech podporovaných záznamů nastavíme i první proměnnou na \uv{pravdu}. Tak si zajistíme jediný chod při hledání těchto dat. Ačkoliv prohledávání může trvat dlouho, stane se tak pouze jednou a časová cena prohledávání tak není příliš výrazná.
+
+\subsection*{Plugin pro nemodifikovaný KernelShark}
+
+Každá část implementace využívající nějakou z našich modifikací bude obalena podmínkovým \texttt{ifndef} makrem s názvem \texttt{\_UNMODIFIED\_KSHARK}. Toto makro bude aktivováno pokud uživatel při sestavování tuto proměnnou definuje argumentem pro CMake, více v uživatelské dokumentaci v sekci o instalaci. Pokud je makro definováno, pak zvolí alternativní implementaci z \texttt{else} větve, která nevyužívá žádnou z modifikací; jinak kód nebude součástí kompilace.
+
 \section{Vývojová dokumentace}
-Cíle/úvod této sekce...
 
-\subsection{Modifikované soubory}
+\subsection*{Dokumentace pluginu}
+Dokumentace je napsána pro nástroj Doxygen. Dokumentovala se každá funkce i proměnná, nicméně vygenerovaná dokumentace obsahuje jenom prvky veřejné, pro skutečné implementační detaily je tedy doporučeno se podívat do zdrojového kódu. Dokumentace navíc obsahuje hlavní stránku a stránku s nástinem návrhu.
 
-\subsection{Struktura pluginu}
+\subsection*{Struktura projektového adresáře}
+
+Adresář pluginu obsahuje další adresáře. Adresář \uv{src} pro zdrojový kód a adresář \uv{doc} pro dokumentaci uživatelskou a dokumentaci technickou. Očekává se, že na této úrovni jsou i adresáře pro sestavení. Na stejné úrovni bude žije i README, soubor s licencí a nejvyšší CMakeLists.txt. V těchto CMake instrukcích se nastaví proměnné sestavení, například typ sestavení, a případně se zavolá generace dokumentace. CMake instrukce zodpovědné za vytvoření binárního souboru dáme do adresáře se zdrojovým kódem, stejně jako to dělá KernelShark.
+
+\subsection*{Přehled modulů pluginu}
+
+\begin{itemize}
+    \item \emph{Propojující modul} - Modul s kódem propojujícím KernelShark a plugin. Obsahem je hlavně kontext pluginu, funkce kontextu, handlery a implementačně pomocné funkce. Součástí tohoto modulu je část s C kódem a implementační část v C++ prvků z hlavičkového C souboru,. Právě v \uv{C++ části} (napsaná v C++) se ostatní moduly budou propojovat; zároveň tato část bude ukládat některá globální data s C++ typy. Soubory modulu jsou \emph{stacklook.h/c} a \emph{Stacklook.cpp}.
+    \item \emph{Konfigurace} - Modul se skládá ze dvou tříd, konfigurační objekt a konfigurační okénko. Konfigurační objekt obsahuje konfigurační data, která plugin zrovna využívá a je navržen jako singleton. Konfigurační okénko představuje GUI element, kterým se data v konfiguračním objektu manipulují. Soubory modulu jsou \emph{SlConfig.hpp/cpp}.
+    \item \emph{Tlačítka} - Tlačítka jsou vykreslována v grafu nad záznamy podporovaných událostí. Dokáží reagovat na dvojité kliknutí myši, čímž vyvolají detailní pohled na zaznamenaný zásobník, nebo přejetí nad nimi, kdy zobrazí část zásobníku v informačním řádku. Soubory modulu jsou \emph{SlButton.hpp/cpp}.
+    \item \emph{Detailní pohledy} - Detailní pohledy jsou grafická okna zobrazující zaznamenaný kernel zásobník, informace o události, která záznamu zásobníku předcházela, a informace o procesu vlastnící tuto událost. Soubory modulu jsou \emph{SlDetailedView.hpp/cpp}.
+    \item \emph{Předchozí stavy} - Mini-modul, dodává data tlačítkům a detailním pohledům o stavu procesu před přepnutím kontextu na CPU. Soubory modulu jsou \emph{SlPrevState.hpp/cpp}.
+\end{itemize}
 
 \section{Uživatelská dokumentace}
 
-[TODO: Přeložit]
-\begin{verbatim}
-This document serves as a simple to grasp manual for the "Stacklook" KernelShark plugin.
+Tato sekce popíše jak instalovat a používat plugin Stacklook v KernelSharku a co od něj během běhu očekávat, či na co si dát pozor. Obrázek \ref{SlWorking} ukazuje fungující plugin v akci.
 
-![Fig. 1](../images/SlWorking.png)
-Figure 1.
+\begin{figure}[p]\centering
+    \includegraphics[width=140mm]{img/Stacklook/SlWorking}
+    \caption{Fungující Stacklook}
+    \label{SlWorking}
+\end{figure}
 
-# "How do I build and install Stacklook?"
+\subsection{Jak sestavit a instalovat Stacklook}
 
-## Prerequisites
+\subsubsection*{Kompatibilita}
 
-- CMake of version at least 3.1.2
-- KernelShark and its dependencies
-  - version *2.4.0-couplebreak* and higher for custom KernelShark
-  - version *2.3.2* for unmodified KernelShark
-- Doxygen for documentation
+\begin{itemize}
+  \item CMake verze alespoň 3.1.2.
+  \item Pokud chcete plugin využívající modifikovaný KernelShark, pak je nutná verze alespoň 2.4.0-couplebreak. Pokud chcete plugin pro nemodifikovaný KernelShark, pak je nutná verze alespoň 2.3.2.
+  \item Závislosti KernelSharku (naleznete v README repozitáře KernelSharku), zejména Qt6.
+  \item Doxygen na technickou dokumentaci.
+\end{itemize}
 
-## Compatibility
+\subsubsection{Sestavení a instalace pouze pluginu}
 
-Plugin is compatible with KernelShark's **custom** version *2.4.0-couplebreak* and higher.
-Unmodified KernelShark usage is achievable through a build argument. Unmodified KernelShark removes
-these features from the plugin:
-- Buttons optionally being the same color as the task is in the graph
-- Mouse hover showing a preview of the kernel stack with an adjustable stack offset for it in the configuration
+\begin{enumerate}
+  \item V terminálu nastavte pracovní adresář na složku \texttt{build} (pokud ještě neexistuje, pak ji nejlépe vytvořte v kořenovém adresáři projektu).
+  \item Spusťte příkaz \texttt{cmake ..}. Pokud hlavní soubor \texttt{CMakeLists.txt} není v nadřazené složce, předejte programu CMake platnou cestu k němu.
+    \begin{itemize}
+      \item Používáte-li verzi KernelSharku bez modifikací, přidejte do příkazu argument \texttt{-D\_UNMODIFIED\_KSHARK}.
+      Sestavení pro nemodifikovaný KernelShark odstraňuje tyto funkce:
+      \begin{itemize}
+        \item Tlačítka mohou být stejné barvy, jako procesy, jimž patří záznamy s tlačítky.
+        \item Přejetí myši zobrazí část zásobníku v informačním řádku KernelSharku.
+      \end{itemize}
+      \item Pokud chcete generovat dokumentaci pomocí Doxygenu, přidejte do příkazu argument \texttt{-D\_DOXYGEN\_DOC=1}.
+      \item Výchozí typ sestavení je \texttt{RelWithDebInfo}. Chcete-li ho změnit (např. na \texttt{Release}), použijte argument \texttt{-DCMAKE\_BUILD\_TYPE=Release}.
+      \item Pokud se soubory Qt6 nenacházejí ve \texttt{/usr/include/qt6}, použijte argument \texttt{-D\_QT6\_INCLUDE\_DIR=[PATH]}, kde \texttt{[PATH]} nahradíte cestou k souborům Qt6.
+        \begin{itemize}
+          \item Pokyny pro sestavení předpokládají, že zadaný adresář má stejnou vnitřní strukturu jako výchozí možnost (tj. obsahuje složky QtCore, QtWidgets apod.).
+        \end{itemize}
+      \item Pokud se zdrojové soubory KernelSharku nenachází v \texttt{../KS\_fork/src}, použijte argument \texttt{-D\_KS\_INCLUDE\_DIR=[PATH]}, kde \texttt{[PATH]} nahradíte cestou ke zdrojovým souborům KernelSharku.
+      \item Pokud se sdílené knihovny KernelSharku (\texttt{.so} soubory) nenachází ve \texttt{/usr/local/lib64}, použijte argument \texttt{-D\_KS\_SHARED\_LIBS\_DIR=[PATH]}, kde \texttt{[PATH]} nahradíte cestou k sdíleným knihovnám KernelSharku.
+    \end{itemize}
+  \item Ve složce \texttt{build} spusťte příkaz \texttt{make}.
+    \begin{itemize}
+      \item Pokud je třeba sestavit jen část pluginu, napříkla pouze dokumentaci, můžete vybrat konkrétní cíl.
+      \item Pouhé spuštění \texttt{make} vytvoří: \emph{plugin} (cíl \texttt{stacklook}), \emph{symlink} na sdílený objekt pluginu (cíl \texttt{stacklook\_symlink}) a případně \emph{Doxygen dokumentaci} (cíl \texttt{docs}), pokud tak bylo specifikováno v předchozím kroku.
+    \end{itemize}
+  \item (\emph{Instalace}): Nahrajte plugin do KernelSharku, buď přes GUI, nebo při spouštění přes CLI s argumentem \texttt{-p} a cestou k symlinku nebo přímo k sdílenému objektu.
+    \begin{itemize}
+      \item \emph{DŮLEŽITÉ}: Vždy nainstalujte/nahrajte plugin před načtením relace, ve které byl aktivní! Jinak může dojít k neúplnému načtení konfiguračního rozhraní nebo k pádu celého programu.
+    \end{itemize}
+\end{enumerate}
 
-No other dependencies are necessary, except maybe the standard libraries of C and C++ and Doxygen for documentation. 
+K odstranění vytvořených binárních souborů použijte \texttt{make clean}.
 
-## Build and install only this plugin
+\subsubsection{Sestavení a instalace pomocí KernelSharku}
 
-1. Set your working directory in terminal as the build directory (best created in the project's root directory (see
-   [README](../../README.md)), if not already present).
-2. Run `cmake ..` command (if the main `CMakeLists.txt` file isn't in the parent folder, provide cmake with its
-   valid location).
-   - If using an unmodified KernelShark copy, add `-D_UNMODIFIED_KSHARK` to the command.
-   - If **Doxygen documentation** is desired, include `-D_DOXYGEN_DOC=1` in the command.
-   - By default, the **build type** will be `RelWithDebInfo` - to change this, e.g. to `Release`, use the option 
-     `-DCMAKE_BUILD_TYPE=Release`.
-   - If **Qt6 files** aren't in `/usr/include/qt6`, use the option `-D_QT6_INCLUDE_DIR=[PATH]`, where `[PATH]` is 
-     replaced by the path to the Qt6 files.
-     - Build instructions still expect that the specified directory has same inner structure as the default case (i.e. 
-       it contains `QtCore`, `QtWidgets`, etc.).
-   - If **KernelShark source files** aren't in the relative path `../KS_fork/src` from this directory, use
-     the option `-D_KS_INCLUDE_DIR=[PATH]`, where `[PATH]` is replaced by the path to KernelShark source files.
-   - If **KernelShark's shared libraries** (`.so` files) aren't in `/usr/local/lib64`, use the option
-     `-D_KS_SHARED_LIBS_DIR=[PATH]`, where `[PATH]` is replaced by the path to KernelShark shared libraries.
-3. Run `make` while still in the `build` directory.
-   - If only a part of building is necessary, select a target of your choice.
-   - Just running `make` builds: **the plugin** (target `stacklook`), **symlink** to the plugin SO 
-     (target `stacklook_symlink`) and, if specified, the **Doxygen documentation** (target 
-     `docs`).
-4. (**Installation**) Plug in the plugin into KernelShark - either via KernelShark's GUI or when starting it via the 
-   CLI with the `-p` option and location of the symlink or the SO itself.
-   - **IMPORTANT**: Always install/load the plugin before loading a session where said plugin was active! Failure to do
-     so will result in KernelShark not completely loading configuration menus or may even crash the whole program.
+\begin{enumerate}
+  \item Ujistěte se, že všechny zdrojové soubory (\texttt{.c}, \texttt{.cpp}, \texttt{.h}) Stacklooku se nacházejí ve složce \texttt{src/plugins} v adresáři projektu KernelShark.
+  \item Zkontrolujte, že soubor \texttt{CMakeLists.txt} v této podsložce obsahuje instrukce pro sestavení pluginu (inspirovat se můžete podle jiných pluginů pro GUI). Pokud chcete sestavovat pro nemodifikovaný KernelShark, upravte tomu odpovídajícím způsobem build skript.
+  \item Sestavte KernelShark (pluginy se sestavují automaticky). Lze sestavit i pouze plugin, pokud jste již předtím vytvořili instrukce sestavení.
+  \item (\emph{Instalace}): Spusťte KernelShark. Pluginy sestavené tímto způsobem se načítají automaticky. Pokud by se z nějakého důvodu nenačetly, najděte sdílený objekt stejně jako u ostatních oficiálních pluginů, opět buď přes GUI, nebo přes CLI.
+\end{enumerate}
 
-Use `make clean` to remove built binaries.
+\subsubsection{VAROVÁNÍ - načítání více verzí pluginu}
 
-## Building KernelShark from source and this plugin with it 
+Máte-li dvě nebo více sestavených verzí pluginu, \emph{NE}načítejte je současně do KernelSharku. Pokud to uděláte, \emph{DOJDE K PÁDU PROGRAMU}. Používejte vždy jen jednu z verzí, \emph{NIKDY OBOJE NAJEDNOU}.
 
-1. Ensure all source files (`.c`, `.cpp`, `.h`) of Naps are in the `src/plugins` subdirectory of your KernelShark 
-   project directory.
-2. Ensure the `CMakeLists.txt` file in said subdirectory contains instructions for building the plugin (copy the style 
-   of other Qt-using GUI plugins). Adjust the build instructions if `_UNMODIFIED_KSHARK` build is desired.
-3. Build KernelShark (plugins are built automatically).
-4. (**Installation**) Start KernelShark. Plugins built this way will be loaded automatically. If that for some reason 
-   failed, look for the SO as for any other default-built KernelShark plugin, again in GUI or via the CLI.
+\subsection{Jak zapnout/vypnout Stacklook}
 
-## WARNING - loading plugin twice
+Zapnutí pluginu je velmi jednoduché. Stačí spustit KernelShark a přejít na položku v panelu nástrojů \texttt{Tools > Manage Plotting plugins}. Pokud byl plugin načten přes příkazový řádek, zobrazí se v seznamu pluginů jako zaškrtnuté políčko se svým názvem. Pokud ne, lze plugin dohledat pomocí tlačítka \texttt{Tools > Add plugin} - stačí nalézt symlink, ale je možné vybrat i samotný soubor sdíleného objektu. Jak je vidět, plugin využívá standardní mechanismus načítání pluginů v KernelSharku. Obrázek~\ref{SlManagePlottingPlugins} ukazuje GUI pro zapínání a vypínání pluginů.
 
-If you have two or more versions of the plugin, do **NOT** load them at the same time - doing so **WILL CRASH** the 
-program. Use either one or the other, but **NEVER BOTH**.
+\begin{figure}[p]\centering
+    \includegraphics[height=140mm]{img/Stacklook/SlManagePlottingPlugins}
+    \caption{Okénko se správou pluginů}
+    \label{SlManagePlottingPlugins}
+\end{figure}
 
-# "How do I enable/disable Stacklook?"
+\subsection{Jak používat Stacklook}
 
-Enabling the plugin is very simple. All one has to do is open KernelShark and navigate to 
-`Tools > Manage Plotting plugins` toolbar menu button. If the plugin was loaded via the command-line interface,
-it will be shown in the list of plotting plugins as a checkbox plus the name, checkbox already being ticked.
-If not, it is possible to search for the plugin via provded `Tools > Add plugin` button - it's sufficient to
-find the symlink, but searching for the actual shared object file is possible too. As you can see, the plugin
-follows standard KernelShark plugin loading behaviour.
+\subsubsection{Konfigurace}
 
-![Fig. 2](../images/SlManagePlottingPlugins.png)
-Figure 2.
+Konfigurace pluginu může být provedena kdykoliv, i před načtením jakýchkoliv trasovacích dat. Pro otevření konfiguračního okna (viz obrázek~\ref{SlConfigWindow}) stačí v hlavním okně zvolit \texttt{Tools > Stacklook Configuration}. Vždy může být otevřeno jen jedno konfigurační okno.
 
-Ticked checkbox means the plugin is enabled, empty checkbox means the plugin is disabled.
+\begin{figure}[p]\centering
+    \includegraphics[width=140mm]{img/Stacklook/SlConfigWindow}
+    \caption{Konfigurační okno Stacklooku pro modifikovaný KernelShark}
+    \label{SlConfigWindow}
+\end{figure}
 
-# "How do I use Stacklook?"
+Používáte-li verzi pluginu pro nemodifikovaný KernelShark, bude v konfiguračním okně chybět zaškrtávací políčko pro barvení tlačítek barvami procesů a nastavení offsetu, použitého při zobrazování prvků zásobníku v informačním řádku, viz obrázek~\ref{SlUnmodifiedKsharkConfigWindow}.
 
-## Configuration
+\begin{figure}[p]\centering
+    \includegraphics[width=140mm]{img/Stacklook/SlUnmodifiedKsharkConfigWindow}
+    \caption{Konfigurační okno Stacklooku pro nemodifikovaný KernelShark}
+    \label{SlUnmodifiedKsharkConfigWindow}
+\end{figure}
 
-Plugin configuration can be done at any time, even before any trace file is loaded. To change it, simply open the 
-configuration dialog window through `Tools > Stacklook Configuration` in the main window. There can be only one 
-configuration window open (figure 3).
+Nyní si popíšeme jednotlivé možnosti konfigurace a jak je ovládat. Seřazeno shora dolů:
+\begin{itemize}
+  \item \emph{Limit záznamů v histogramu} - snížením této hodnoty omezíte, kdy se Stacklook aktivuje. Aktivace nastane pouze tehdy, pokud je viditelný počet záznamů menší nebo roven této hodnotě. Čím nižší číslo, tím větší přiblížení je třeba k aktivaci Stacklooku. Minimální hodnota je 0, maximální 1~000~000~000 (jedna miliarda), tato horní mez však bude pravděpodobně zřídka využita. Výchozí hodnota je 10~000 (deset tisíc).
+  
+  \item \emph{Použít barvy procesů pro tlačítka Stacklooku} - zaškrtnutím tohoto políčka (pokud je k dispozici) bude výplň tlačítek Stacklooku zabarvena barvou procesu, ke kterému patřila událost, pro niž Stacklook našel záznam zásobníku. Pokud políčko necháte nezaškrtnuté, použijí se barvy v konfiguraci Stacklooku (výchozí barvy na obrázku~\ref{SlDefaultColors}). Tato volba je ve výchozím stavu vypnutá.
+  
+  \begin{figure}[p]\centering
+      \includegraphics[width=140mm]{img/Stacklook/SlDefaultColors}
+      \caption{Tlačítka s výchozími barvami}
+      \label{SlDefaultColors}
+  \end{figure}
+  
+  \begin{figure}[p]\centering
+      \includegraphics[width=140mm]{img/Stacklook/SlTaskColors}
+      \caption{Tlačítka využívající barvy procesů}
+      \label{SlTaskColors}
+  \end{figure}
 
-![Fig. 3](../images/SlConfigWindow.png)
-Figure 3.
+  \item \emph{Barvy tlačítek Stacklooku a jejich obrysů} - tlačítka \texttt{Choose} otevřou dialog pro výběr barev, kde lze nastavit barvu výplně tlačítka nebo jeho obrys. Tato nastavení mají účinek pouze tehdy, pokud není dostupná nebo není aktivní volba barev podle procesů. Vedle tlačítek je zobrazen náhled aktuálně vybraných barev. Výchozí nastavení je bílá výplň a černý obrys. Příklad jiných barev si lze prohlédnout na obrázku~\ref{SlCustomDefaultColors}.
+  
+  \begin{figure}[p]\centering
+      \includegraphics[width=140mm]{img/Stacklook/SlCustomDefaultColors}
+      \caption{Tlačítka s konfigurovanými barvami}
+      \label{SlCustomDefaultColors}
+  \end{figure}
 
-If using the unmodified build, the configuration window will be missing the checkbox for task colors and the stack
-offset for the preview labels (figure 4).
+  \item \emph{Nastavení pro jednotlivé události} - Každá událost má své vlastní zaškrtávací políčko, kterým lze Stacklook zapnout nebo vypnout pro daný typ záznamu, a (pokud je k dispozici) číselník s offsetem do zásobníku kernelu, který slouží k určení \uv{nejzajímavější} oblasti v zásobníku pro danou událost. Maximální hodnota offsetu je 100~000~000 (sto milionů), minimální 0. I zde je nepravděpodobné, že by bylo třeba využít maximální hodnotu. Ve výchozím stavu jsou všechny události povoleny (zaškrtnuty) a offset je nastaven na 3.
 
-![Fig. 4](../images/SlUnmodifiedKsharkConfigWindow.png)
-Figure 4.
+  \begin{itemize}
+    \item Připomenutí - číselník offsetu se nezobrazí, pokud je použit nemodifikovaný KernelShark.
+  \end{itemize}
+\end{itemize}
 
-Now to explain each of the options and how to control them. In top to bottom order:
-- *Histogram entries limit* - Decrease this number to force Stacklook to activate only if there are less than or
-  equal to this many entries visible. Lesser the number, greater the zoom necessary to activate Stacklook. Minimum
-  is set to 0, maximum is 1 000 000 000 (one billion) - though this high of a value will hardly ever become useful.
-  By default, the value is 10 000 (ten thousand).
-- *Use task colors for Stacklook buttons* - Check this box (if present) to color Stacklook's buttons' filling color
-  according to the task which owned the event Stacklook found kernel stack trace for. Keep it disabled to use default
-  Stacklook button colors (figure 6). By default, this option is off.
-  ![Fig. 5](../images/SlDefaultColors.png)
-  Figure 5.
-  ![Fig. 6](../images/SlTaskColors.png)
-  Figure 6.
-- *Stacklook button & outline colors* - The "Choose" buttons will bring up a color dialog, allowing one to pick
-  a color to be used for Stacklook button's filling or a color its outline. These are effective only if the task color
-  checkbox either is not present or is not checked. Next to this button is a space to show what colors are currently
-  picked for the buttons. By default it is white for filling, black for outline. See example in figure 7 below.
-  ![Fig. 7](../images/SlCustomDefaultColors.png)
-  Figure 7.
-- *Per-event configurations* - Each event is assigned a checkbox toggling Stacklook on or off for an event entry and 
-  (if present) an spinbox with an offset into the kernel stack, which is used to read the "most interesting" events 
-  from the kernel stack trace. The maximum value of the offset is the 100 000 000 (one hundred million), minimum is 0. 
-  Again, the maximum value will probably never be used. By default, the values for each event are allowed (checked) and
-  offset of 3.
-  - To reiterate, the spinbox will not appear if the unmodified KernelShark version of the plugin is used. 
+Tlačítko \texttt{Apply} uloží provedené změny a zavře konfigurační okno - pokud toto tlačítko nebude stisknuto, změny se neprojeví. V ovládacích prvcích konfiguračního okna se zobrazují pouze aktuálně platné hodnoty konfigurace, konfigurační okno si po zavření neaplikované změny nepamatuje. Tlačítko \texttt{Close} i tlačítko s křížkem v pravém horním rohu okna změny zahodí a okno zavřou.
 
-The `Apply` button will save the changes made an close the dialog - if not pressed, changes made won't take effect. 
-Only active confguration values show up in the control elements - the configuraton window doesn't persist changes made 
-to it after closing, unless they were applied. The `Close` button and top-right corner X button will discard changes 
-made in the window and close the dialog.
+U Stacklooku nelze konfigurovat:
+\begin{itemize}
+\item Podporované události - plugin momentálně podporuje pouze události sched/sched\_switch a sched/sched\_waking.
+\item Text v oknech detailních pohledů.
+\item Text tlačítek.
+\item Velikost tlačítek.
+\item Pozice tlačítek.
+\end{itemize}
 
-There is no configuraton of:
-- Supported events - plugin currently only support `sched/sched_switch` and `sched/sched_waking`
-- The text in stacklook windows
-- The text in stacklook buttons
-- Stacklook button sizes
-- Stacklook button positions
+Konfigurace není persistentní. Její momentální stav se nikam neukládá, ani do relací.
 
-## In the graph
+\subsubsection{V grafu}
 
-After loading (and maybe configuring) the plugin, zoom in until less than the configured number of visible entries are 
-visible in the graph. A button will show up above each supported entry, colored by the default color in the 
-configuration, or if using custom KernelShark and having the corresponding option on, colored like the task in the 
-graph. The task color option is fully compatible with KernelShark's color slider.
+Po načtení (a případné konfiguraci) pluginu přibližte zobrazení tak, aby bylo v grafu viditelných méně záznamů, než je nastavený limit. Nad každým podporovaným záznamem se objeví tlačítko - buď ve výchozí barvě z konfigurace, nebo, pokud používáte upravený KernelShark a máte zapnutou příslušnou část nastavení, bude tlačítko obarveno podle procesu. Používání barev procesů je plně kompatibilní s barevným posuvníkem KernelSharku.
 
-The plugin won't show the buttons above event entries that aren't `sched/sched_switch` or `sched/sched_waking`, or if
-such entries are missing their kernel stack trace event.
+Plugin nezobrazí tlačítka nad nepodporovanými událostmi nebo pokud podporovaná událost nenajde záznam zásobníku, ze kterého by bylo možné čerpat data.
 
-### Hovering over buttons
+\emph{Pokud používáte modifikovaný KernelShark}, přejeďte kurzorem nad libovolné tlačítko a informační řádek KernelSharku. Obsah řádku se změní a zobrazí:
+\begin{itemize}
+  \item Název procesu jako první (nejlevější) položku.
+  \item Položku v zásobníku kernelu na pozici danou konfigurovaným offsetem od vrcholu zásobníku.
+  \item Položku v zásobníku kernelu následující po první.
+  \item Položku v zásobníku kernelu následující po druhé.
+  \item A nakonec buď tři tečky \texttt{...}, pokud stack obsahuje další položky, nebo zprávu \texttt{(End of stack)}, pokud už žádné další položky nezbývají.
+\end{itemize}
 
-*If using custom KernelShark*, hover over any button and look at the top-left quarter of the screen. You will see the
-preview label's contents change to have:
-- Task name as the leftmost (first) entry.
-- First item in the kernel stack, offset by configured number for this event type from the stack's top (where the
-  newer entries go)
-- Item in the kernel stack after the first item
-- Item in the kernel stack after the second item
-- Either three dots "...", signifying that the kernel stack has more entries than these or "(End of stack)" message,
-  signifying there are no more items to display after the ones shown.
+Pohleďme na obrázek~\ref{SlMouseHover} s malou ukázkou této funkcionality. Součástí je také okno Stacklooku (o nich více níže) a záznam zásobníku kernelu v hlavním okně v seznamu všech událostí. Vše je takto uspořádáné, aby bylo zřejmé, že položky v informačním řádku skutečně pocházejí ze zásobníku (použitý offset byl výchozí, tedy 3). Červený kruh zvýrazňuje záznam, nad kterým právě kurzor myši přejíždí.
 
-See figure 8 for a small showcase. Included is also the Stacklook window (more on that later below) and the kernel
-stack trace in the main window's list view of all events - both to really show that the items in the preview are 
-in the kernel stack (chosen offset was the default of 3). There's also a red circle highlighting the entry the mouse
-cursor hovered over. 
+\begin{figure}[p]\centering
+    \includegraphics[width=140mm]{img/Stacklook/SlMouseHover}
+    \caption{Reakce tlačítek na přejetí kurzorem myši}
+    \label{SlMouseHover}
+\end{figure}
 
-![Fig. 8](../images/SlMouseHover.png)
-Figure 8.
+Offset lze nastavit i tak vysoko, že se v náhledu zobrazí pouze poslední jedna, dvě nebo tři položky, případně žádná. V takovém případě Stacklook zobrazí pouze mínus a zprávu \texttt{(End of stack)} (viz obrázek~\ref{SlTooBigOffset}).
 
-It is possible to set the offset so high that only last one, two, three entries are shown or none at all in the 
-preview. In that case, Stacklook shows just a dash and a the "(End of stack)" message (figure 9). 
+\begin{figure}[p]\centering
+    \includegraphics[width=140mm]{img/Stacklook/SlTooBigOffset}
+    \caption{Chování informačního řádku při velkém offsetu do zásobníku}
+    \label{SlTooBigOffset}
+\end{figure}
 
-![Fig. 9](../images/SlTooBigOffset.png)
-Figure 9.
+Po dvojkliku na tlačítko Stacklooku se otevře nové okno detailního pohledu, také nazývané okno Stacklooku. Poku čteme odshora, tak v okně nejprve vidíme, že si prohlížíme zásobník kernelu nějakého procesu. Níže je napsáno, zda byl proces probuzen (zobrazuje se pouze u událostí sched/sched\_waking) nebo o jejím předchozím stavu (pouze u událostí sched/sched\_switch). Následují dvě rádiová tlačítka a zobrazení zásobníku kernelu k dané události. Rádiová tlačítka přepínají mezi různými způsoby zobrazení zásobníku:
+\begin{itemize}
+  \item Ve výchozím stavu je zobrazení ve formě surového textu, tedy zásobník je pouze řetězec s konci řádků. Toto je užitečné pro zkopírování zásobníku jako jednoho textu nebo pro zvýraznění konkrétní části položky v zásobníku.
+  \item Alternativně lze zásobník zobrazit jako seznam, což umožňuje jednodušší a rychlejší (namísto dvojitého kliknutí stačí jedno) zvýraznění jednotlivých položek.
+\end{itemize}
 
-### Double-clicking on buttons
+Pro jeden záznam může být otevřeno více oken, zároveň může být otevřeno více oken pro různé záznamy, v libovolné kombinaci.
 
-Upon double-clicking a Stacklook button, a new window will open. This is a *Stacklook window*, which shows a message
-that we are viewing a kernel stack of a task (whose name is shown at the sentence's end). Below it is a note about
-whether task has woken up (which shows only for `sched/sched_waking` events) or about its previous state (only for
-`sched/sched_switch` events). Then two radio buttons and the view with the kernel stack taken at the time of the event 
-entry is shown. The radio buttons toggle what kind of view is used for the kernel stack.
-- *By default*, the view is set as raw text, which means the kernel stack is just a string with newlines - this is 
-  useful for copying the stack as a single string or for highlighting only a specific part of a stack item.
-- *Alternatively*, the stack can be viewed in list view, which allows for simpler and quicker highlighting of a single 
-  line.
+Vše popsáno výše si můžete prohlédnout na obrázku~\ref{SlMultipleWindowsMultipleViewsTwoSameEntires}.
 
-Thre can be multiple windows present for a single entry, there can be multiple windows open for different entries and
-any mix of the two previous situations.
+\begin{figure}[p]\centering
+    \includegraphics[width=140mm]{img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEntires}
+    \caption{Několik oken detailních pohledů představující svou strukturu}
+    \label{SlMultipleWindowsMultipleViewsTwoSameEntires}
+\end{figure}
 
-All of the above for this section can be seen below in figure 10.
+Okno lze zavřít přes tlačítko \texttt{Close} v dolní části okna, nebo pomocí tlačítka s křížkem v hlavičce okna. Všechna okna se zavřou, pokud bude zavřeno hlavní okno KernelSharku. 
 
-![Fig. 10](../images/SlMultipleWindowsMultipleViewsTwoSameEntires.png)
-Figure 10.
+\subsection{Bugy a chyby}
 
-Toggle between the raw text view and the list view using two radio buttons above the stack view area.
+Pokud by se tlačítka Stacklook překrývala, bude tlačítko příslušící \emph{starší} události vykresleno nad tlačítkem pro událost \emph{pozdější}, avšak kliknutí nebo najetí myší na překryté tlačítko použije k interakci tlačítko pro \emph{pozdější} událost. Podle autorových znalostí jde o interní chování KernelSharku, které nelze na straně pluginu opravit.
 
-The window can be closed with the `Close` button at the very bottom of the window or with the X button of the 
-window's header. Last option is to close the main KernelShark window, which will close all of Stacklook's opened 
-windows.
+Načtení relace KernelSharku, kde byl Stacklook aktivní, bez předchozího načtení pluginu způsobí \emph{segmentation fault} a \emph{pád programu} při najetí myší na tlačítko Stacklook.
 
-## Using Stacklook as a library
+Pokud objevíte další problémy, kontaktujte autora přes e-mail \emph{djsebofficial@gmail.com}.
 
-See technical documentation, as this is not intended usage of the plugin and such usage explanations will be omitted.
+\subsection{Doporučení}
 
-# Bugs & glitches
-
-If multiple stacklook buttons would lay over one another, the one belonging to an *earlier* event will be 
-drawn above a button for an event happening *later*, **BUT** clicking on or hovering over overlaid buttons will select 
-the button for the *later* event. This is, to the author's knowledge, something internal to KernelShark and cannot be
-fixed on the plugin side.
-
-Opening a KernelShark session where Stacklook was active, but without preloading it will result in a segmentation
-fault and a **crash** upon hovering over a Stacklook button.
-
-If more are discovered, contact the author via e-mail `djsebofficial@gmail.com`.
-
-# Recommendations
-
-A few recommendations of usage by the author for the smoothest user experience.
-
-Always preload Stacklook before loading a session. It can save the program from nasty surprises.
-
-Do not open hundreds upon hundreds of stacklook windows, lest you wish your memory to suffer.
-
-It is recommended to not set the histogram limit in the configuration too high as to not make the plugin use
-too much memory with many of stacklook's buttons being present.
-
-While KernelShark's sessions work, they are a little buggy. This plugin attempts its best to not get in the way of
-their inner logic, but a warning should be issued that if the plugin isn't loaded beforehand, there might be
-unexpected behaviours, e.g. loading a session when the plugin was active won't add the plugin's menu to the
-`Tools` menu.
-\end{verbatim}
-\subsection{Instalace}
-
-\subsection{Uživatel GUI}
-
-\subsection{Vývojář pluginů}
+\begin{itemize}
+  \item Vždy načtěte Stacklook před načtením relace. Může to programu ušetřit nepříjemná překvapení.
+  \item Neotvírejte stovky a stovky oken Stacklooku, pokud nechcete zbytečně zatížit paměť.
+  \item Nedoporučuje se nastavovat příliš vysoký limit záznamů v histogramu v konfiguraci. Jinak by plugin mohl používat příliš mnoho paměti kvůli velkému množství naráz dostupných tlačítek Stacklooku.
+  \item I když relace v KernelSharku fungují, jsou trochu nestabilní. Tento plugin se snaží jejich vnitřní logiku nenarušovat, ale varuje, že pokud plugin není načten předem, mohou nastat neočekávané problémy. Například načtení relace s aktivním pluginem nepřidá do menu \texttt{Tools} odpovídající položku pro vyvolání konfiguračního okna.
+\end{itemize}
 
 \section{Rozšíření}
-Cíle/úvod této sekce...
 
-\section{Zhodnocení splněných požadavků}
+Plugin lze rozšířit o další podporované události. Hlavními místy pro tato rozšíření je pak propojující modul, kde se podporované události sbírají a do kontextu se ukládají jejich identifikátory, a mapová konstanta s hodnotami informací specifických pro typ události, která je uvnitř funkci tlačítek, jež vytváří detailní pohledy.

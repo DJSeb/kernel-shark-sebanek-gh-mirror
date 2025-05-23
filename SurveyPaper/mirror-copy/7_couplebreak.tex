@@ -2,7 +2,17 @@
 Couplebreak je modifikace zdrojového kódu KernelSharku a dává mu nové funkcionality...
 
 \section{Cíle}
-Hlavním cílem modifikace je dodat programu schopnost rozdělovat trasovací události, které náleží dvěma procesům. Z toho plynoucím cílem je i dodatečná kompatibilita této funkcionality s ostatními částmi programu a oficiálními pluginy.
+
+\begin{itemize}
+    \item Podporované události dvou procesů dají vzniknout dvěma záznamům - původci a cíli.
+    \item Modifikace bude navržena rozšiřitelně o další události.
+    \item Nové záznamy budou patřit tomu procesu z páru, který předtím událost nevlastnil.
+    \item Nové záznamy budou obsahovat odkaz na záznam s původní událostí.
+    \item Nové záznamy budou splňovat rozhraní dotazů na záznamy KernelSharku.
+    \item Nové záznamy bude možné filtrovat jednoduchým filtrem.
+    \item Vylepšení bude možno zapnout a vypnout. Toto nastavení bude možné uložit do a načíst z relací KernelSharku.
+    \item Součástí vylepšení bude i zajištění kompatibility s pluginem sched\_events.
+\end{itemize}
 
 \section{Analýza}
 Cíle/úvod této sekce...

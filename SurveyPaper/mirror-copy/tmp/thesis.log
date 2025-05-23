@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.22.0 (TeX Live 2025/TeX Live for SUSE Linux)  (format=lualatex 2025.4.7)  23 MAY 2025 00:55
+This is LuaHBTeX, Version 1.22.0 (TeX Live 2025/TeX Live for SUSE Linux)  (format=lualatex 2025.4.7)  23 MAY 2025 22:50
  restricted system commands enabled.
 **thesis.tex
 (./thesis.tex
@@ -1187,7 +1187,7 @@ Package hyperref Info: Option `pageanchor' set `false' on input line 44.
 
 warning  (file img/logo-cs.pdf) (pdf inclusion): PDF inclusion: found PDF versio
 n '1.5', but at most version '1.4' allowed
-<img/logo-cs.pdf, id=386, 506.45912pt x 156.49065pt>
+<img/logo-cs.pdf, id=382, 506.45912pt x 156.49065pt>
 File: img/logo-cs.pdf Graphic file (type pdf)
 <use img/logo-cs.pdf>
 Package luatex.def Info: img/logo-cs.pdf  used on input line 48.
@@ -1339,703 +1339,229 @@ Package microtype Info: Loading generic protrusion settings for font family
 [15]
 
 [16]
-
-[17]
-Overfull \hbox (11.57957pt too wide) in paragraph at lines 94--95
+Overfull \hbox (11.57957pt too wide) in paragraph at lines 70--71
 []\TU/lmr/m/n/12 Cí-lem vy-lep-šení je vi-zu-a-li-zo-vat pauzu mezi pře-pnu-
 tím pro-cesu (jeho sched_switch)|
  []
 
 
 
+[17]
+
 [18]
 
 [19]
+<img/modif-noboxes-bad.png, id=592, 888.921pt x 81.30376pt>
+File: img/modif-noboxes-bad.png Graphic file (type png)
+<use img/modif-noboxes-bad.png>
+Package luatex.def Info: img/modif-noboxes-bad.png  used on input line 104.
+(luatex.def)             Requested size: 398.33858pt x 36.43375pt.
+)
 
-[20])
+[20]
 
-[21]
-
-[22]
+[21<./img/modif-noboxes-bad.png>]
 \openout2 = 5_record_kstack.aux
  (./5_record_kstack.tex
 Kapitola 5.
 
 
-[23
+[22
 
 
 
 
 ]
-<img/modif-record-kstack.png, id=614, 1587.9325pt x 1355.0625pt>
+<img/modif-record-kstack.png, id=612, 1587.9325pt x 1355.0625pt>
 File: img/modif-record-kstack.png Graphic file (type png)
 <use img/modif-record-kstack.png>
 Package luatex.def Info: img/modif-record-kstack.png  used on input line 36.
 (luatex.def)             Requested size: 398.33858pt x 339.92268pt.
 )
 
-[24]
+[23]
 
-[25<./img/modif-record-kstack.png>]
+[24<./img/modif-record-kstack.png>]
 \openout2 = 6_stacklook.aux
  (./6_stacklook.tex
 Kapitola 6.
 
 
-[26
+[25
 
 
 
 
 ]
 
+[26]
+
 [27]
 
 [28]
-Overfull \hbox (131.2744pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 This document serves as a simple to grasp manual for the "Stac
-klook" KernelShark plugin.[] |
- []
-
-
-Overfull \hbox (143.63438pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 Plugin is compatible with KernelShark's **custom** version *2.
-4.0-couplebreak* and higher.[] |
- []
-
-
-Overfull \hbox (199.25432pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 Unmodified KernelShark usage is achievable through a build arg
-ument. Unmodified KernelShark removes[] |
- []
-
-
 
 [29]
-Overfull \hbox (13.85454pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 - Buttons optionally being the same color as the task is in th
-e graph[] |
- []
-
-
-Overfull \hbox (273.41423pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 - Mouse hover showing a preview of the kernel stack with an ad
-justable stack offset for it in the configuration[] |
- []
-
-
-Overfull \hbox (304.3142pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 No other dependencies are necessary, except maybe the standard
- libraries of C and C++ and Doxygen for documentation.[] |
- []
-
-
-Overfull \hbox (298.1342pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 1. Set your working directory in terminal as the build directo
-ry (best created in the project's root directory (see[] |
- []
-
-
-Overfull \hbox (273.41423pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 2. Run `cmake ..` command (if the main `CMakeLists.txt` file 
-isn't in the parent folder, provide cmake with its[] |
- []
-
-
-Overfull \hbox (131.2744pt too wide) in paragraph at lines 306--306
-[]   \TU/lmtt/m/n/12 - If using an unmodified KernelShark copy, add `-D_UNMODIFI
-ED_KSHARK` to the command.[] |
- []
-
-
-Overfull \hbox (131.2744pt too wide) in paragraph at lines 306--306
-[]   \TU/lmtt/m/n/12 - If **Doxygen documentation** is desired, include `-D_DOXY
-GEN_DOC=1` in the command.[] |
- []
-
-
-Overfull \hbox (279.59422pt too wide) in paragraph at lines 306--306
-[]   \TU/lmtt/m/n/12 - By default, the **build type** will be `RelWithDebInfo` 
-- to change this, e.g. to `Release`, use the option[] |
- []
-
-
-Overfull \hbox (13.83055pt too wide) in paragraph at lines 306--306
-[]   \TU/lmtt/m/n/12 - If **Qt6 files** aren't in `/usr/include/qt6`, use the op
-tion `-|
- []
-
-
-Overfull \hbox (316.67418pt too wide) in paragraph at lines 306--306
-[]     \TU/lmtt/m/n/12 - Build instructions still expect that the specified dire
-ctory has same inner structure as the default case (i.e.[] |
- []
-
-
-Overfull \hbox (242.51427pt too wide) in paragraph at lines 306--306
-[]   \TU/lmtt/m/n/12 - If **KernelShark source files** aren't in the relative pa
-th `../KS_fork/src` from this directory, use[] |
- []
-
-
-Overfull \hbox (273.41423pt too wide) in paragraph at lines 306--306
-[]     \TU/lmtt/m/n/12 the option `-D_KS_INCLUDE_DIR=[PATH]`, where `[PATH]` is replaced by the path to KernelShark source files.[] |
- []
-
-
-Overfull \hbox (211.60231pt too wide) in paragraph at lines 306--306
-[]   \TU/lmtt/m/n/12 - If **KernelShark's shared libraries** (`.so` files) aren'
-t in `/usr/local/lib64`, use the option[] |
- []
-
-
-Overfull \hbox (254.87425pt too wide) in paragraph at lines 306--306
-[]     \TU/lmtt/m/n/12 `-D_KS_SHARED_LIBS_DIR=[PATH]`, where `[PATH]` is replace
-d by the path to KernelShark shared libraries.[] |
- []
-
-
-Overfull \hbox (63.29448pt too wide) in paragraph at lines 306--306
-[]   \TU/lmtt/m/n/12 - If only a part of building is necessary, select a target of your choice.[] |
- []
-
-
-Overfull \hbox (193.07433pt too wide) in paragraph at lines 306--306
-[]   \TU/lmtt/m/n/12 - Just running `make` builds: **the plugin** (target `stack
-look`), **symlink** to the plugin SO[] |
- []
-
-
-Overfull \hbox (143.63438pt too wide) in paragraph at lines 306--306
-[]     \TU/lmtt/m/n/12 (target `stacklook_symlink`) and, if specified, the **Dox
-ygen documentation** (target[] |
- []
-
-
-Overfull \hbox (304.3142pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 4. (**Installation**) Plug in the plugin into KernelShark - ei
-ther via KernelShark's GUI or when starting it via the[] |
- []
-
-
-Overfull \hbox (38.57451pt too wide) in paragraph at lines 306--306
-[]   \TU/lmtt/m/n/12 CLI with the `-p` option and location of the symlink or the
- SO itself.[] |
- []
-
-
-Overfull \hbox (322.85417pt too wide) in paragraph at lines 306--306
-[]   \TU/lmtt/m/n/12 - **IMPORTANT**: Always install/load the plugin before load
-ing a session where said plugin was active! Failure to do[] |
- []
-
-
-Overfull \hbox (291.95421pt too wide) in paragraph at lines 306--306
-[]     \TU/lmtt/m/n/12 so will result in KernelShark not completely loading conf
-iguration menus or may even crash the whole program.[] |
- []
-
-
-Overfull \hbox (285.77422pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 1. Ensure all source files (`.c`, `.cpp`, `.h`) of Naps are in
- the `src/plugins` subdirectory of your KernelShark[] |
- []
-
-
-Overfull \hbox (316.67418pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 2. Ensure the `CMakeLists.txt` file in said subdirectory conta
-ins instructions for building the plugin (copy the style[] |
- []
-
-
-Overfull \hbox (242.51427pt too wide) in paragraph at lines 306--306
-[]   \TU/lmtt/m/n/12 of other Qt-using GUI plugins). Adjust the build instructio
-ns if `_UNMODIFIED_KSHARK` build is desired.[] |
- []
-
-
-Overfull \hbox (310.49419pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 4. (**Installation**) Start KernelShark. Plugins built this wa
-y will be loaded automatically. If that for some reason[] |
- []
-
-
-Overfull \hbox (242.51427pt too wide) in paragraph at lines 306--306
-[]   \TU/lmtt/m/n/12 failed, look for the SO as for any other default-built Kern
-elShark plugin, again in GUI or via the CLI.[] |
- []
-
+<img/Stacklook/SlWorking.png, id=648, 1156.32pt x 614.295pt>
+File: img/Stacklook/SlWorking.png Graphic file (type png)
+<use img/Stacklook/SlWorking.png>
+Package luatex.def Info: img/Stacklook/SlWorking.png  used on input line 80.
+(luatex.def)             Requested size: 398.33858pt x 211.6133pt.
 
 
 [30]
-Overfull \hbox (298.1342pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 If you have two or more versions of the plugin, do **NOT** loa
-d them at the same time - doing so **WILL CRASH** the[] |
- []
-
-
-Overfull \hbox (137.45439pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 Enabling the plugin is very simple. All one has to do is open KernelShark and navigate to[] |
- []
-
-
-Overfull \hbox (180.71434pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 `Tools > Manage Plotting plugins` toolbar menu button. If the plugin was loaded via the command-|
- []
-
-
-Overfull \hbox (254.87425pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 it will be shown in the list of plotting plugins as a checkbox
- plus the name, checkbox already being ticked.[] |
- []
-
-
-Overfull \hbox (254.87425pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 If not, it is possible to search for the plugin via provded `T
-ools > Add plugin` button - it's sufficient to[] |
- []
-
-
-Overfull \hbox (261.05424pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 find the symlink, but searching for the actual shared object 
-file is possible too. As you can see, the plugin[] |
- []
-
-
-Overfull \hbox (137.45439pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 Ticked checkbox means the plugin is enabled, empty checkbox me
-ans the plugin is disabled.[] |
- []
-
-
-Overfull \hbox (285.77422pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 Plugin configuration can be done at any time, even before any trace file is loaded. To change it, simply open the[] |
- []
-
-
-Overfull \hbox (273.41423pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 configuration dialog window through `Tools > Stacklook Configu
-ration` in the main window. There can be only one[] |
- []
-
-
-Overfull \hbox (291.95421pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 If using the unmodified build, the configuration window will 
-be missing the checkbox for task colors and the stack[] |
- []
-
-
-Overfull \hbox (100.37444pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 Now to explain each of the options and how to control them. In
- top to bottom order:[] |
- []
-
-
-Overfull \hbox (279.59422pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 - *Histogram entries limit* - Decrease this number to force St
-acklook to activate only if there are less than or[] |
- []
-
-
-Overfull \hbox (291.95421pt too wide) in paragraph at lines 306--306
-[]  \TU/lmtt/m/n/12 equal to this many entries visible. Lesser the number, great
-er the zoom necessary to activate Stacklook. Minimum[] |
- []
-
-
-Overfull \hbox (298.1342pt too wide) in paragraph at lines 306--306
-[]  \TU/lmtt/m/n/12 is set to 0, maximum is 1 000 000 000 (one billion) - though
- this high of a value will hardly ever become useful.[] |
- []
-
-
-Overfull \hbox (298.1342pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 - *Use task colors for Stacklook buttons* - Check this box (if
- present) to color Stacklook's buttons' filling color[] |
- []
-
-
-Overfull \hbox (310.49419pt too wide) in paragraph at lines 306--306
-[]  \TU/lmtt/m/n/12 according to the task which owned the event Stacklook found kernel stack trace for. Keep it disabled to use default[] |
- []
-
-
-Overfull \hbox (13.84254pt too wide) in paragraph at lines 306--306
-[]  \TU/lmtt/m/n/12 Stacklook button colors (figure 6). By default, this option is off.[] |
+Overfull \hbox (15.69807pt too wide) in paragraph at lines 115--116
+\TU/lmtt/m/n/12 /usr/local/lib64\TU/lmr/m/n/12 , po-u-žijte ar-gu-ment \TU/lmt
+t/m/n/12 -D_KS_SHARED_LIBS_DIR=[PATH]\TU/lmr/m/n/12 ,|
  []
 
 
 
 [31]
-Overfull \hbox (273.41423pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 - *Stacklook button & outline colors* - The "Choose" buttons 
-will bring up a color dialog, allowing one to pick[] |
- []
-
-
-Overfull \hbox (316.67418pt too wide) in paragraph at lines 306--306
-[]  \TU/lmtt/m/n/12 a color to be used for Stacklook button's filling or a color
- its outline. These are effective only if the task color[] |
- []
-
-
-Overfull \hbox (304.3142pt too wide) in paragraph at lines 306--306
-[]  \TU/lmtt/m/n/12 checkbox either is not present or is not checked. Next to th
-is button is a space to show what colors are currently[] |
- []
-
-
-Overfull \hbox (273.41423pt too wide) in paragraph at lines 306--306
-[]  \TU/lmtt/m/n/12 picked for the buttons. By default it is white for filling, black for outline. See example in figure 7 below.[] |
- []
-
-
-Overfull \hbox (304.3142pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 - *Per-event configurations* - Each event is assigned a checkb
-ox toggling Stacklook on or off for an event entry and[] |
- []
-
-
-Overfull \hbox (298.1342pt too wide) in paragraph at lines 306--306
-[]  \TU/lmtt/m/n/12 (if present) an spinbox with an offset into the kernel stack
-, which is used to read the "most interesting" events[] |
- []
-
-
-Overfull \hbox (316.67418pt too wide) in paragraph at lines 306--306
-[]  \TU/lmtt/m/n/12 from the kernel stack trace. The maximum value of the offset
- is the 100 000 000 (one hundred million), minimum is 0.[] |
- []
-
-
-Overfull \hbox (322.85417pt too wide) in paragraph at lines 306--306
-[]  \TU/lmtt/m/n/12 Again, the maximum value will probably never be used. By def
-ault, the values for each event are allowed (checked) and[] |
- []
-
-
-Overfull \hbox (242.51427pt too wide) in paragraph at lines 306--306
-[]  \TU/lmtt/m/n/12 - To reiterate, the spinbox will not appear if the unmodifie
-d KernelShark version of the plugin is used.[] |
- []
-
-
-Overfull \hbox (298.1342pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 The `Apply` button will save the changes made an close the dia
-log - if not pressed, changes made won't take effect.[] |
- []
-
-
-Overfull \hbox (316.67418pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 Only active confguration values show up in the control element
-s - the configuraton window doesn't persist changes made[] |
- []
-
-
-Overfull \hbox (44.7545pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 to it after closing, unless they were applied. The `Close` but
-ton and top-|
- []
-
-
-Overfull \hbox (180.71434pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 - Supported events - plugin currently only support `sched/sche
-d_switch` and `sched/sched_waking`[] |
- []
-
-
-Overfull \hbox (316.67418pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 After loading (and maybe configuring) the plugin, zoom in unti
-l less than the configured number of visible entries are[] |
- []
-
-
-Overfull \hbox (248.69426pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 visible in the graph. A button will show up above each support
-ed entry, colored by the default color in the[] |
- []
-
-
-Overfull \hbox (291.95421pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 configuration, or if using custom KernelShark and having the 
-corresponding option on, colored like the task in the[] |
- []
-
-
-Overfull \hbox (88.01445pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 graph. The task color option is fully compatible with KernelSh
-ark's color slider.[] |
- []
-
-
-Overfull \hbox (310.49419pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 The plugin won't show the buttons above event entries that are
-n't `sched/sched_switch` or `sched/sched_waking`, or if[] |
- []
-
-
-Overfull \hbox (38.57451pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 *If using custom KernelShark*, hover over any button and look at the top-|
- []
-
-
-Overfull \hbox (285.77422pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 - First item in the kernel stack, offset by configured number for this event type from the stack's top (where the[] |
- []
-
-
-Overfull \hbox (304.3142pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 - Either three dots "...", signifying that the kernel stack ha
-s more entries than these or "(End of stack)" message,[] |
- []
-
-
-Overfull \hbox (13.85454pt too wide) in paragraph at lines 306--306
-[]  \TU/lmtt/m/n/12 signifying there are no more items to display after the ones
- shown.[] |
- []
-
+<img/Stacklook/SlManagePlottingPlugins.png, id=672, 189.1065pt x 378.213pt>
+File: img/Stacklook/SlManagePlottingPlugins.png Graphic file (type png)
+<use img/Stacklook/SlManagePlottingPlugins.png>
+Package luatex.def Info: img/Stacklook/SlManagePlottingPlugins.png  used on inp
+ut line 148.
+(luatex.def)             Requested size: 199.17941pt x 398.33858pt.
+<img/Stacklook/SlConfigWindow.png, id=674, 252.34274pt x 194.52675pt>
+File: img/Stacklook/SlConfigWindow.png Graphic file (type png)
+<use img/Stacklook/SlConfigWindow.png>
+Package luatex.def Info: img/Stacklook/SlConfigWindow.png  used on input line 1
+60.
+(luatex.def)             Requested size: 398.33858pt x 307.10844pt.
+<img/Stacklook/SlUnmodifiedKsharkConfigWindow.png, id=676, 251.7405pt x 172.845
+75pt>
+File: img/Stacklook/SlUnmodifiedKsharkConfigWindow.png Graphic file (type png)
+<use img/Stacklook/SlUnmodifiedKsharkConfigWindow.png>
+Package luatex.def Info: img/Stacklook/SlUnmodifiedKsharkConfigWindow.png  used
+ on input line 168.
+(luatex.def)             Requested size: 398.33858pt x 273.52315pt.
+<img/Stacklook/SlDefaultColors.png, id=678, 1135.8435pt x 390.86024pt>
+File: img/Stacklook/SlDefaultColors.png Graphic file (type png)
+<use img/Stacklook/SlDefaultColors.png>
+Package luatex.def Info: img/Stacklook/SlDefaultColors.png  used on input line 
+180.
+(luatex.def)             Requested size: 398.33858pt x 137.07747pt.
+<img/Stacklook/SlTaskColors.png, id=679, 1138.85475pt x 394.47375pt>
+File: img/Stacklook/SlTaskColors.png Graphic file (type png)
+<use img/Stacklook/SlTaskColors.png>
+Package luatex.def Info: img/Stacklook/SlTaskColors.png  used on input line 186
+.
+(luatex.def)             Requested size: 398.33858pt x 137.97157pt.
+<img/Stacklook/SlCustomDefaultColors.png, id=681, 1139.457pt x 399.29175pt>
+File: img/Stacklook/SlCustomDefaultColors.png Graphic file (type png)
+<use img/Stacklook/SlCustomDefaultColors.png>
+Package luatex.def Info: img/Stacklook/SlCustomDefaultColors.png  used on input
+ line 194.
+(luatex.def)             Requested size: 398.33858pt x 139.5836pt.
 
 
 [32]
-Overfull \hbox (291.95421pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 See figure 8 for a small showcase. Included is also the Stackl
-ook window (more on that later below) and the kernel[] |
- []
 
+[33<./img/Stacklook/SlWorking.png><./img/Stacklook/SlManagePlottingPlugins.png>]
 
-Overfull \hbox (279.59422pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 stack trace in the main window's list view of all events - bot
-h to really show that the items in the preview are[] |
- []
+[34<./img/Stacklook/SlConfigWindow.png><./img/Stacklook/SlUnmodifiedKsharkConfig
+Window.png>]
 
+[35<./img/Stacklook/SlDefaultColors.png><./img/Stacklook/SlTaskColors.png><./img
+/Stacklook/SlCustomDefaultColors.png>]
 
-Overfull \hbox (304.3142pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 in the kernel stack (chosen offset was the default of 3). Ther
-e's also a red circle highlighting the entry the mouse[] |
- []
+[36]
+<img/Stacklook/SlMouseHover.png, id=720, 920.238pt x 477.58424pt>
+File: img/Stacklook/SlMouseHover.png Graphic file (type png)
+<use img/Stacklook/SlMouseHover.png>
+Package luatex.def Info: img/Stacklook/SlMouseHover.png  used on input line 237
+.
+(luatex.def)             Requested size: 398.33858pt x 206.72723pt.
+<img/Stacklook/SlTooBigOffset.png, id=722, 319.1925pt x 272.81924pt>
+File: img/Stacklook/SlTooBigOffset.png Graphic file (type png)
+<use img/Stacklook/SlTooBigOffset.png>
+Package luatex.def Info: img/Stacklook/SlTooBigOffset.png  used on input line 2
+45.
+(luatex.def)             Requested size: 398.33858pt x 340.46954pt.
+<img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEntires.png, id=724, 785.93
+625pt x 290.88675pt>
+File: img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEntires.png Graphic fi
+le (type png)
+<use img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEntires.png>
+Package luatex.def Info: img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEnt
+ires.png  used on input line 261.
+(luatex.def)             Requested size: 398.33858pt x 147.43593pt.
 
-
-Overfull \hbox (273.41423pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 It is possible to set the offset so high that only last one, 
-two, three entries are shown or none at all in the[] |
- []
-
-
-Overfull \hbox (186.88234pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 preview. In that case, Stacklook shows just a dash and a the 
-"(End of stack)" message (figure 9).[] |
- []
-
-
-Overfull \hbox (304.3142pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 Upon double-clicking a Stacklook button, a new window will ope
-n. This is a *Stacklook window*, which shows a message[] |
- []
-
-
-Overfull \hbox (291.95421pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 that we are viewing a kernel stack of a task (whose name is sh
-own at the sentence's end). Below it is a note about[] |
- []
-
-
-Overfull \hbox (291.95421pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 whether task has woken up (which shows only for `sched/sched_w
-aking` events) or about its previous state (only for[] |
- []
-
-
-Overfull \hbox (316.67418pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 `sched/sched_switch` events). Then two radio buttons and the 
-view with the kernel stack taken at the time of the event[] |
- []
-
-
-Overfull \hbox (131.2744pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 entry is shown. The radio buttons toggle what kind of view is used for the kernel stack.[] |
- []
-
-
-Overfull \hbox (291.95421pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 - *By default*, the view is set as raw text, which means the 
-kernel stack is just a string with newlines - this is[] |
- []
-
-
-Overfull \hbox (248.69426pt too wide) in paragraph at lines 306--306
-[]  \TU/lmtt/m/n/12 useful for copying the stack as a single string or for highl
-ighting only a specific part of a stack item.[] |
- []
-
-
-Overfull \hbox (316.67418pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 - *Alternatively*, the stack can be viewed in list view, which
- allows for simpler and quicker highlighting of a single[] |
- []
-
-
-Overfull \hbox (310.49419pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 Thre can be multiple windows present for a single entry, there
- can be multiple windows open for different entries and[] |
- []
-
-
-Overfull \hbox (20.03453pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 ![Fig. 10](../images/SlMultipleWindowsMultipleViewsTwoSameEnti
-res.png)[] |
- []
-
-
-Overfull \hbox (211.6143pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 Toggle between the raw text view and the list view using two 
-radio buttons above the stack view area.[] |
- []
-
-
-Overfull \hbox (261.05424pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 The window can be closed with the `Close` button at the very 
-bottom of the window or with the X button of the[] |
- []
-
-
-Overfull \hbox (279.59422pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 window's header. Last option is to close the main KernelShark window, which will close all of Stacklook's opened[] |
- []
-
-
-Overfull \hbox (310.49419pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 See technical documentation, as this is not intended usage of the plugin and such usage explanations will be omitted.[] |
- []
-
-
-Overfull \hbox (236.33427pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 If multiple stacklook buttons would lay over one another, the one belonging to an *earlier* event will be[] |
+Overfull \hbox (30.23756pt too wide) in paragraph at lines 274--275
+[]\TU/lmr/m/n/12 Po-kud ob-je-víte další pro-blémy, kon-tak-tujte au-tora p
+řes e-mail \TU/lmr/m/it/12 dj-se-bo-f-fi-cial@gmail.com\TU/lmr/m/n/12 . |
  []
 
 
 
-[33]
-Overfull \hbox (316.67418pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 drawn above a button for an event happening *later*, **BUT** 
-clicking on or hovering over overlaid buttons will select[] |
- []
+[37]
 
+[38<./img/Stacklook/SlMouseHover.png><./img/Stacklook/SlTooBigOffset.png>])
 
-Overfull \hbox (310.49419pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 the button for the *later* event. This is, to the author's kno
-wledge, something internal to KernelShark and cannot be[] |
- []
+[39]
 
-
-Overfull \hbox (285.77422pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 Opening a KernelShark session where Stacklook was active, but without preloading it will result in a segmentation[] |
- []
-
-
-Overfull \hbox (81.83446pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 If more are discovered, contact the author via e-mail `djsebof
-ficial@gmail.com`.[] |
- []
-
-
-Overfull \hbox (75.65446pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 A few recommendations of usage by the author for the smoothest
- user experience.[] |
- []
-
-
-Overfull \hbox (180.71434pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 Always preload Stacklook before loading a session. It can save
- the program from nasty surprises.[] |
- []
-
-
-Overfull \hbox (162.17436pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 Do not open hundreds upon hundreds of stacklook windows, lest you wish your memory to suffer.[] |
- []
-
-
-Overfull \hbox (254.87425pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 It is recommended to not set the histogram limit in the config
-uration too high as to not make the plugin use[] |
- []
-
-
-Overfull \hbox (291.95421pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 While KernelShark's sessions work, they are a little buggy. Th
-is plugin attempts its best to not get in the way of[] |
- []
-
-
-Overfull \hbox (254.87425pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 their inner logic, but a warning should be issued that if the plugin isn't loaded beforehand, there might be[] |
- []
-
-
-Overfull \hbox (248.69426pt too wide) in paragraph at lines 306--306
-[]\TU/lmtt/m/n/12 unexpected behaviours, e.g. loading a session when the plugin was active won't add the plugin's menu to the[] |
- []
-
-)
-
-[34]
+[40<./img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEntires.png>]
 \openout2 = 7_couplebreak.aux
- (./7_couplebreak.tex
+
+(./7_couplebreak.tex
 Kapitola 7.
 
 
-[35
+[41
 
 
 
 
 ]
 
-[36])
+[42])
 
-[37]
+[43]
 \openout2 = 8_naps.aux
  (./8_naps.tex
 Kapitola 8.
 )
 
-[38
+[44
 
 
 
 
 ]
+
+[45]
 \openout2 = 9_numatv.aux
  (./9_numatv.tex
 Kapitola 9.
-)
-
-[39
 
 
+[46
 
 
-]
+
+
+])
+
+[47]
 \openout2 = 10_dodatečné.aux
  (./10_dodatečné.tex
 Kapitola 10.
 
 
-[40
+[48
 
 
 
 
 ]
-<img/modif-get-colors-traced.png, id=694, 675.42056pt x 226.94131pt>
+<img/modif-get-colors-traced.png, id=783, 675.42056pt x 226.94131pt>
 File: img/modif-get-colors-traced.png Graphic file (type png)
 <use img/modif-get-colors-traced.png>
 Package luatex.def Info: img/modif-get-colors-traced.png  used on input line 28
 .
 (luatex.def)             Requested size: 398.33858pt x 133.84225pt.
-<img/modif-preview-labels-changeable.png, id=696, 549.85425pt x 93.34875pt>
+<img/modif-preview-labels-changeable.png, id=785, 549.85425pt x 93.34875pt>
 File: img/modif-preview-labels-changeable.png Graphic file (type png)
 <use img/modif-preview-labels-changeable.png>
 Package luatex.def Info: img/modif-preview-labels-changeable.png  used on input
@@ -2043,27 +1569,22 @@ Package luatex.def Info: img/modif-preview-labels-changeable.png  used on input
 (luatex.def)             Requested size: 398.33858pt x 67.62695pt.
 
 
-[41]
-<img/modif-noboxes-bad.png, id=706, 888.921pt x 81.30376pt>
-File: img/modif-noboxes-bad.png Graphic file (type png)
-<use img/modif-noboxes-bad.png>
-Package luatex.def Info: img/modif-noboxes-bad.png  used on input line 66.
-(luatex.def)             Requested size: 398.33858pt x 36.43375pt.
-<img/modif-noboxes-good.png, id=709, 616.10175pt x 78.89474pt>
+[49]
+<img/modif-noboxes-good.png, id=795, 616.10175pt x 78.89474pt>
 File: img/modif-noboxes-good.png Graphic file (type png)
 <use img/modif-noboxes-good.png>
-Package luatex.def Info: img/modif-noboxes-good.png  used on input line 80.
+Package luatex.def Info: img/modif-noboxes-good.png  used on input line 70.
 (luatex.def)             Requested size: 398.33858pt x 51.0089pt.
 )
 
-[42]
+[50]
 
-[43<./img/modif-get-colors-traced.png><./img/modif-preview-labels-changeable.png
-><./img/modif-noboxes-bad.png><./img/modif-noboxes-good.png>]
+[51<./img/modif-get-colors-traced.png><./img/modif-preview-labels-changeable.png
+><./img/modif-noboxes-good.png>]
 \openout2 = zaver.aux
  (./zaver.tex)
 
-[44
+[52
 
 
 
@@ -2080,7 +1601,7 @@ LaTeX Warning: Empty bibliography on input line 15.
 \openout9 = thesis.lof
 
 
-[45
+[53
 
 
 
@@ -2093,11 +1614,11 @@ LaTeX Warning: Empty bibliography on input line 15.
 \openout10 = thesis.lot
 
 
-[46
+[54
 
 ]
 
-[47
+[55
 
 ]
 P\v {r}\'{\i }loha A.
@@ -2111,7 +1632,7 @@ See the caption package documentation for explanation.
 
 
 
-[48
+[56
 
 ] (./tmp/thesis.aux (./tmp/title.aux) (./tmp/uvod.aux)
 (./tmp/1_trasování_v_linuxu.aux) (./tmp/2_vizualizace_traceů.aux)
@@ -2123,33 +1644,32 @@ LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `thesis.out' has not changed.
-(rerunfilecheck)             Checksum: 94E8BBEFCF4479C765CF7E042968BFD0;14574.
+(rerunfilecheck)             Checksum: E286200A4F8F0C2A2CF591364D047C51;14535.
 Package logreq Info: Writing requests to 'thesis.run.xml'.
 
 \openout1 = thesis.run.xml
 )
 
 Here is how much of LuaTeX's memory you used:
- 30199 strings out of 475506
+ 30374 strings out of 475506
  125081,1648299 words of node,token memory allocated
  728 words of node memory still in use:
    8 hlist, 2 vlist, 2 rule, 1 local_par, 8 glue, 5 kern, 1 penalty, 2 margin_ke
 rn, 5 glyph, 16 attribute, 72 glue_spec, 10 attribute_list, 1 write, 1 pdf_actio
 n nodes
-   avail lists: 1:1,2:1649,3:1281,4:170,5:632,6:134,7:8203,8:1,9:717,10:25,11:86
-2
- 52160 multiletter control sequences out of 65536+600000
+   avail lists: 2:1649,3:468,4:174,5:758,6:137,7:8935,8:1,9:738,10:27,11:942
+ 52274 multiletter control sequences out of 65536+600000
  53 fonts using 4107383 bytes
- 89i,6n,90p,1726b,3497s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 89i,6n,90p,2213b,3497s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/fonts/texlive-lm/lmroman10-regular.otf></usr/share/fonts/texlive-lm/
 lmroman10-bold.otf></usr/share/fonts/texlive-lm/lmmono12-regular.otf>{/usr/share
 /texmf/fonts/enc/dvips/lm/lm-rm.enc}</usr/share/fonts/texlive-lm/lmroman12-itali
 c.otf></usr/share/fonts/texlive-lm/lmroman12-regular.otf></usr/share/fonts/texli
 ve-lm/lmroman17-regular.otf></usr/share/fonts/texlive-lm/lmroman12-bold.otf></us
 r/share/texmf/fonts/type1/public/lm/lmr12.pfb>
-Output written on thesis.pdf (48 pages, 1258710 bytes).
+Output written on thesis.pdf (56 pages, 2084075 bytes).
 
-PDF statistics: 810 PDF objects out of 1000 (max. 8388607)
- 169 named destinations out of 1000 (max. 131072)
- 776 words of extra memory for PDF output out of 10000 (max. 100000000)
+PDF statistics: 906 PDF objects out of 1000 (max. 8388607)
+ 200 named destinations out of 1000 (max. 131072)
+ 768 words of extra memory for PDF output out of 10000 (max. 100000000)
 

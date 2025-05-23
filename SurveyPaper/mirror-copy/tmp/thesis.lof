@@ -3,15 +3,25 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Ne všechny obdélníky mezi záznamy by se měly vykreslovat, některé tvoří iluzi opravdové práce.}}{21}{figure.caption.18}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {5.1}{\ignorespaces Zvýraznění změn této modifikace viditelných v GUI}}{25}{figure.caption.18}%
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Zvýraznění změn této modifikace viditelných v GUI}}{24}{figure.caption.19}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {6.1}{\ignorespaces Fungující Stacklook}}{33}{figure.caption.24}%
+\contentsline {figure}{\numberline {6.2}{\ignorespaces Okénko se správou pluginů}}{33}{figure.caption.29}%
+\contentsline {figure}{\numberline {6.3}{\ignorespaces Konfigurační okno Stacklooku pro modifikovaný KernelShark}}{34}{figure.caption.31}%
+\contentsline {figure}{\numberline {6.4}{\ignorespaces Konfigurační okno Stacklooku pro nemodifikovaný KernelShark}}{34}{figure.caption.32}%
+\contentsline {figure}{\numberline {6.5}{\ignorespaces Tlačítka s výchozími barvami}}{35}{figure.caption.33}%
+\contentsline {figure}{\numberline {6.6}{\ignorespaces Tlačítka využívající barvy procesů}}{35}{figure.caption.34}%
+\contentsline {figure}{\numberline {6.7}{\ignorespaces Tlačítka s konfigurovanými barvami}}{35}{figure.caption.35}%
+\contentsline {figure}{\numberline {6.8}{\ignorespaces Reakce tlačítek na přejetí kurzorem myši}}{38}{figure.caption.37}%
+\contentsline {figure}{\numberline {6.9}{\ignorespaces Chování informačního řádku při velkém offsetu do zásobníku}}{38}{figure.caption.38}%
+\contentsline {figure}{\numberline {6.10}{\ignorespaces Několik oken detailních pohledů představující svou strukturu}}{40}{figure.caption.39}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\addvspace {10\p@ }
-\contentsline {figure}{\numberline {10.1}{\ignorespaces Stacklook tlačítko využívá barvu, kterou KernelShark udělil procesu.}}{43}{figure.caption.24}%
-\contentsline {figure}{\numberline {10.2}{\ignorespaces Při přejetí kurzorem myši se vlevo nahoře informační řádek změní.}}{43}{figure.caption.25}%
-\contentsline {figure}{\numberline {10.3}{\ignorespaces Ne všechny obdélníky mezi záznamy by se měly vykreslovat, některé tvoří iluzi opravdové práce.}}{43}{figure.caption.26}%
-\contentsline {figure}{\numberline {10.4}{\ignorespaces Vylepšení donutí některé obdélníky k tomu, aby nebyli nakresleny.}}{43}{figure.caption.27}%
+\contentsline {figure}{\numberline {10.1}{\ignorespaces Stacklook tlačítko využívá barvu, kterou KernelShark udělil procesu.}}{51}{figure.caption.41}%
+\contentsline {figure}{\numberline {10.2}{\ignorespaces Při přejetí kurzorem myši se vlevo nahoře informační řádek změní.}}{51}{figure.caption.42}%
+\contentsline {figure}{\numberline {10.3}{\ignorespaces Vylepšení donutí některé obdélníky k tomu, aby nebyli nakresleny.}}{51}{figure.caption.43}%
 \addvspace {10\p@ }

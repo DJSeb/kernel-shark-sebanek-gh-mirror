@@ -58,23 +58,13 @@ Příklad použití: tlačítka Stacklooku (v červeném kroužku) žádají na 
 
 \section{NoBoxes}
 
-Během vývoje se ukázalo, že některé záznamy by se neměly účastnit kreslení obdélníčků mezi záznamy (přesněji, mezi biny). Těmito záznamy jsou ty pro události od Couplebreaku a pro ftrace/kernel\_stack událost. Záznamy od Couplebreaku nezaznamenávají opravdovou práci. Události se zásobníkem dělají nepořádek hlavně po událostech typu sched/sched\_switch, po které by žádný obdélníček neměl být nakreslen, jelikož se přepnul CPU kontext. Jenže událost se zásobníkem je dle KernelSharku validní práce a tak se kreslí další obdélník.
+Vykreslování obdélníků se děje při každém vykreslení grafu. Ovlivnit obdélníky dokáže v této chvíli máloco. Pracuje se zde s biny, tedy sdruženími jednoho či více záznamů. V binech se pak lze spolehnout na málo, nejvíce na data viditelnosti, ve kterých mohou být nastaveny některé bity jako přepínače chování. Viditelnost binu lze ovlivnit viditelností záznamů, které sdružuje. Tak byla představena nová maska pro nastavování sedmého bitu pole viditelnosti pro záznamy, KS\_PLUGIN\_UNTOUCHED\_MASK. Tato maska značí, zdali se záznam účastní kreslení mezi-záznamových obdélníčků. Pokud bin využije viditelnost záznamu, který má daný bit nastaven na 0, bude moci toto nastavení detekovat. Při vykreslování obdélníčků pak žádné obdélníčky nezačínají a nekončí u binů s tímto bitem vynulovaným.
 
-Příklad špatného zobrazování je na obrázku \ref{obr03:modif-noboxes-bad}. Na tomto obrázku je ftrace/kernel\_stack událost vyznačená velkou svislou čarou vpravo, couplebreak/sched\_waking[target] je událost s velkou svislou čarou vlevo. Událost ftrace/kernel\_stack vytváří velký obdélník až do konce grafu, ačkoliv se událo po přepnutí kontextu a procesor ve skutečnosti po zachycení dále nepracuje. Událost couplebreak/sched\_waking[target], ačkoli neprovádí žádnou skutečnou práci na procesoru, vytváří dojem, že ano právě díky nakreslenému obdélníčku. V grafu CPU 1 je také velký obdélník, který začíná u události zachycení zásobníku kernelu a neměl by tedy být kreslen. Události zachycení zásobníku jsou časté a v grafu je více obdélníku spojených právě s nimi.
-
-\begin{figure}[p]\centering
-    \includegraphics[width=140mm]{img/modif-noboxes-bad}
-    \caption{Ne všechny obdélníky mezi záznamy by se měly vykreslovat, některé tvoří iluzi opravdové práce.}
-    \label{obr03:modif-noboxes-bad}
-\end{figure}
-
-Toto chování je nepříjemné a tak byla snaha jej opravit. Nicméně KernelShark vykreslování obdélníčků řeší pro každé vykreslení zvlášť a pouze podle vlastností binů, tedy sdružení jednoho či více záznamů. V binech se pak lze spolehnout na málo, ale nejlépe na data viditelnosti, ve kterých mohou být nastaveny některé bity jako přepínače chování. Viditelnost binu lze ovlivnit viditelností záznamů, které sdružuje. Tak byla představena nová maska pro nastavování sedmého bitu pole viditelnosti pro záznamy, KS\_PLUGIN\_UNTOUCHED\_MASK. Tato maska značí, zdali se záznam účastní kreslení mezi-záznamových obdélníčků. Pokud bin využije viditelnost záznamu, který má daný bit nastaven na 0, bude moci toto nastavení detekovat. Při vykreslování obdélníčků pak žádné obdélníčky nezačínají a nekončí u binů s tímto bitem vynulovaným.
-
-Maska byla přidána do enumerace pro masky viditelnosti. Tento výčet již předtím počítal s nějakým rozšířením, tak bylo jedno z volných bitových míst zabráno naší novou maskou. Rozšíření počítalo s nějakou KS\_X\_VIEW\_FILTER\_MASK pro volná místa - nicméně naše maska je spíše podobná masce KS\_PLUGIN\_UNTOUCHED\_MASK.
+Maska byla vložena do enumerace pro masky viditelnosti. Tento výčet již předtím počítal s nějakým rozšířením, tak bylo jedno z volných bitových míst zabráno naší novou maskou. Rozšíření počítalo s nějakou KS\_X\_VIEW\_FILTER\_MASK pro volná místa - nicméně naše maska je spíše podobná masce KS\_PLUGIN\_UNTOUCHED\_MASK.
 
 Na výběr záznamů, kterým se nastaví bit na 0, byl vytvořen plugin pro tuto modifikaci, nese název NoBoxes. V jeho kódu jsou zapsány události, na jejichž záznamy má být maska použita, plugin pak lze zapínat a vypínat jako každý jiný. Pokud plugin není načten, modifikace nemá na chod KernelSharku vliv.
 
-Příklad fungujícího vylepšení je na obrázku \ref{obr04:modif-noboxes-good}. Oproti minulému obrázku (obrázek \ref{obr03:modif-noboxes-bad}) ubylo několik obdélníků a graf nyní odpovídá skutečné práci.
+Příklad fungujícího vylepšení je na obrázku \ref{obr04:modif-noboxes-good}. Oproti minulému obrázku (obrázek~\ref{obr03:modif-noboxes-bad}) ubylo několik obdélníků a graf nyní odpovídá skutečné práci.
 
 \begin{figure}[p]\centering
     \includegraphics[width=140mm]{img/modif-noboxes-good}
@@ -82,4 +72,4 @@ Příklad fungujícího vylepšení je na obrázku \ref{obr04:modif-noboxes-good
     \label{obr04:modif-noboxes-good}
 \end{figure}
 
-Problém tohoto vylepšení je ale právě vykreslování obdélníků. Vykreslování se děje často a použitá implementace tohoto vylepšení při grafických změnách v hlavním okně KernelSharku často i přes vytvořené filtrování obdélník vykreslí. Při častých změnách pak nastává problikávání obdélníků, ačkoliv by vůbec kresleny být neměly. Oprava byla označena za rozšíření, jelikož objem práce k tomuto dodatku byl odhadnut na příliš velký.
+Problém tohoto vylepšení je ale právě vykreslování obdélníků. Vykreslování se děje často a použitá implementace tohoto vylepšení při grafických změnách v hlavním okně KernelSharku často i přes vytvořené filtrování obdélník vykreslí. Při častých změnách pak nastává problikávání obdélníků, ačkoliv by vůbec kresleny být neměly. Oprava byla označena za rozšíření, jelikož objem práce k tomuto dodatku byl odhadnut na příliš velký a vytvořený best-effort přístup funguje, ačkoliv ne dokonale.
