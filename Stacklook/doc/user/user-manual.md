@@ -57,7 +57,7 @@ Use `make clean` to remove built binaries.
 
 ## Building KernelShark from source and this plugin with it 
 
-1. Ensure all source files (`.c`, `.cpp`, `.h`) of Naps are in the `src/plugins` subdirectory of your KernelShark 
+1. Ensure all source files (`.c`, `.cpp`, `.h`) of Stacklook are in the `src/plugins` subdirectory of your KernelShark 
    project directory.
 2. Ensure the `CMakeLists.txt` file in said subdirectory contains instructions for building the plugin (copy the style 
    of other Qt-using GUI plugins). Adjust the build instructions if `_UNMODIFIED_KSHARK` build is desired.
