@@ -19,11 +19,11 @@ Od pluginů se bude obecně očekávat tento seznam:
 
 \subsection{Označení modifikací v kódu}
 Licence KernelSharku, LGPL-2.1, vynucuje u provedených změn v softwaru s touto licencí jasné vyznačení změněných míst společně s datem změny. Každá změna spojena s modifikací tak bude ohraničena dvojicí komentářů:
-\begin{verbatim}
+\begin{code}
     //NOTE: Changed here. ([TAG]) ([DATE])
     ...
     // END of change
-\end{verbatim}
+\end{code}
 [TAG] je zkratkovité označení po typ modifikace, se kterou změna souvisí - každá modifikace musí mít takovou značku. [DATE] je datum napsání změny ve formátu YYYY-MM-DD. Pokud změna vznikne během vývoje nějaké modifikace, ale není na ni nutně vázána (například je to pomocná funkce s širším využitím), pak stačí ohraničit [TAG] uvozovkami.
 
 \section{Výběr vylepšení}
@@ -67,7 +67,7 @@ Podporovanými událostmi budou sched\_switch a sched\_waking. Vybrány jsou pro
 Procesy se během běhu na CPU často střídají. Důvodů může být několik - proces třeba čeká na otevření souboru, nebo mu prostě vypršel čas na CPU a byl preemptivně přepnut. Vizualizace nečinnosti v KernelSharku chybí, ačkoliv data jsou dostupná v trasovacích událostech. Pokud uživatel potřebuje zjistit předchozí stav procesu (stav před přepnutím), musí si jej najít a vyčíst v seznamu procesů. Pokud uživatel chce zjstit, jak dlouho byl proces nečinný, než byl probuzen, nezbývá mu než manuálně najít událost přepnutí a následnou událost probuzení - tato událost ovšem patří nějakému jinému procesu.
 
 \subsubsection*{Extrakce požadavků}
-Cílem vylepšení je vizualizovat pauzu mezi přepnutím procesu (jeho sched\_switch) a probouzením jiným procesem (sched\_waking procesu, který první proces probouzí). Lze se inspirovat pluginem sched\_events, který kreslí obdélníky mezi událostmi pro něj zajímavými. Nicméně samotné obdélníky by nedokázaly nést informaci o předchozím stavu procesu, tedy nějaké barevné či textové označení bude také požadováno. Bez vylepšení Couplebreak bude nutné přesunout záznamy pro sched\_waking do grafu probouzeného procesu. S vylepšením bude stačit hledat záznamy cílových událostí probouzení. Neměli bychom se snažit kreslit obdélníky neustále. Velké množství by mohlo program zpomalovat. Mnoho záznamů na obrazovce také znamená, že budou v grafu blízko u sebe a obdělníky by pak pro sebe neměly prostor. Jelikož všechny systémy nejsou stejné, toto by mělo být konfigurovatelné v nějakém grafickém okénku. Všechny tyto změny se dají provést v pluginu.
+Cílem vylepšení je vizualizovat pauzu mezi přepnutím procesu (sched\_switch) a probouzením jiným procesem (sched\_waking procesu, který první proces probouzí). Lze se inspirovat pluginem sched\_events, který kreslí obdélníky mezi událostmi pro něj zajímavými. Nicméně samotné obdélníky by nedokázaly nést informaci o předchozím stavu procesu, tedy nějaké barevné či textové označení bude také požadováno. Bez vylepšení Couplebreak bude nutné přesunout záznamy pro sched\_waking do grafu probouzeného procesu. S vylepšením bude stačit hledat záznamy cílových událostí probouzení. Neměli bychom se snažit kreslit obdélníky neustále. Velké množství by mohlo program zpomalovat. Mnoho záznamů na obrazovce také znamená, že budou v grafu blízko u sebe a obdělníky by pak pro sebe neměly prostor. Jelikož všechny systémy nejsou stejné, toto by mělo být konfigurovatelné v nějakém grafickém okénku. Všechny tyto změny se dají provést v pluginu.
 
 Jelikož se bude zajímat o dobu, kdy jsou procesy nečinné, nazveme plugin \emph{Naps}, kdy naps (česky zdřímnutí) označují právě dobu nečinnosti procesu.
 
@@ -98,10 +98,12 @@ KernelShark nedovoluje využívat barvy, které používá pro procesy, CPU a st
 KernelShark nedovoluje měnit obsah informačního řádku. Možnost jej měnit se může hodit, pokud nějaký plugin, jako například Stacklook, by chtěl zobrazit nějaké rychlé informace uživateli. Dodatečným vylepšením bude modifikace kódu KernelSharku, která možnost měnit text v informačním řáku dodá. Vylepšení dostane název \emph{Preview Labels Changable}.
 
 \subsubsection*{Obdélníky mezi záznamy}
-KernelShark při vykreslování grafu dokresluje obdélníky mezi jednotlivé grafické reprezentace záznamů. Tyto obdélníky jsou definovány a nakresleny během každého vykreslení na obrazovku. Ovšem ne všechny záznamy by se měly podílet na kreslení obdélníků, například záznamy zásobníku kernelu se dějí po přepnutí kontextu, kde by měl obdélník většinou skončit, a záznamy vytvořené Couplebreakem mohou chybně být začátky a konce jiných obdélníků. Vylepšení \emph{NoBoxes} jako modifikace dodá masku viditelnosti záznamů, kterou se zakáže účast na kreslení zmíněných obdélníků, a plugin, který touto maskou označí vybrané záznamy událostí. Toto opravné vylepšení bude nicméně fungovat jako best-effort při každém vykreslování a může tak produkovat vizuální anomálie v grafu. Řešení, které by anomáliím zamezilo, bude ponecháno jako rozšíření. Příklad špatného zobrazování je na obrázku \ref{obr03:modif-noboxes-bad}. Na tomto obrázku je ftrace/kernel\_stack událost vyznačená velkou svislou čarou vpravo, couplebreak/sched\_waking[target] je událost s velkou svislou čarou vlevo. Událost ftrace/kernel\_stack vytváří velký obdélník až do konce grafu, ačkoliv se událo po přepnutí kontextu a procesor ve skutečnosti po zachycení dále nepracuje. Událost couplebreak/sched\_waking[target], ačkoli neprovádí žádnou skutečnou práci na procesoru, vytváří dojem, že ano právě díky nakreslenému obdélníčku. V grafu CPU 1 je také velký obdélník, který začíná u události zachycení zásobníku kernelu a neměl by tedy být kreslen. Události zachycení zásobníku jsou časté a v grafu je více obdélníku spojených právě s nimi.
+KernelShark při vykreslování grafu dokresluje obdélníky mezi jednotlivé grafické reprezentace záznamů. Tyto obdélníky jsou definovány a nakresleny během každého vykreslení na obrazovku. Ovšem ne všechny záznamy by se měly podílet na kreslení obdélníků, například záznamy zásobníku kernelu se dějí po přepnutí kontextu, kde by měl obdélník většinou skončit, a záznamy vytvořené Couplebreakem mohou chybně být začátky a konce jiných obdélníků. Vylepšení \emph{NoBoxes} jako modifikace dodá masku viditelnosti záznamů, kterou se zakáže účast na kreslení zmíněných obdélníků, a plugin, který touto maskou označí vybrané záznamy událostí.
+
+Příklad špatného zobrazování je na obrázku \ref{obr03:modif-noboxes-bad}. Na tomto obrázku je ftrace/kernel\_stack událost vyznačená velkou svislou čarou vpravo, couplebreak/sched\_waking[target] je událost s velkou svislou čarou vlevo. Událost ftrace/kernel\_stack vytváří velký obdélník až do konce grafu, ačkoliv se událo po přepnutí kontextu a procesor ve skutečnosti po zachycení dále nepracuje. Událost couplebreak/sched\_waking[target], ačkoli neprovádí žádnou skutečnou práci na procesoru, vytváří dojem, že pracuje právě díky nakreslenému obdélníčku. V grafu CPU 1 je také velký obdélník, který začíná u události zachycení zásobníku kernelu a neměl by tedy být kreslen. Události zachycení zásobníku jsou časté a v grafu je více obdélníků spojených právě s nimi.
 
 \begin{figure}[p]\centering
-    \includegraphics[width=140mm]{img/modif-noboxes-bad}
+    \includegraphics[width=140mm]{img/Modifikace/modif-noboxes-bad}
     \caption{Ne všechny obdélníky mezi záznamy by se měly vykreslovat, některé tvoří iluzi opravdové práce.}
     \label{obr03:modif-noboxes-bad}
 \end{figure}

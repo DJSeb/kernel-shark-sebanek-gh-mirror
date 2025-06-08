@@ -1,8 +1,7 @@
 \chapter{Couplebreak}
-Couplebreak je modifikace zdrojového kódu KernelSharku a dává mu nové funkcionality...
+V této kapitole se detailně seznámíme s modifikací pro KernelShark, která je schopna rozdělovat události a vytvářet pro ně záznamy KernelSharku. Tímto se zjemní dělení informací, což prospěje analýze a zároveň bude představovat formu kompatibility pro pluginy s jistými nároky. Představeny budou cíle, analýza řešení, návrh a použití tohoto vylepšení. Konečnou částí pak budou rozšíření, která by mohla tuto modifikaci dále zlepšit.
 
 \section{Cíle}
-
 \begin{itemize}
     \item Podporované události dvou procesů dají vzniknout dvěma záznamům - původci a cíli.
     \item Modifikace bude navržena rozšiřitelně o další události.
@@ -10,31 +9,28 @@ Couplebreak je modifikace zdrojového kódu KernelSharku a dává mu nové funkc
     \item Nové záznamy budou obsahovat odkaz na záznam s původní událostí.
     \item Nové záznamy budou splňovat rozhraní dotazů na záznamy KernelSharku.
     \item Nové záznamy bude možné filtrovat jednoduchým filtrem.
-    \item Vylepšení bude možno zapnout a vypnout. Toto nastavení bude možné uložit do a načíst z relací KernelSharku.
+    \item Vylepšení bude možno zapnout a vypnout. Toto nastavení bude možné uložit do relací KernelSharku a načíst je z nich.
     \item Součástí vylepšení bude i zajištění kompatibility s pluginem sched\_events.
+    \item Podporovány budou alespoň události sched\_switch a sched\_waking.
+\end{itemize}
+
+\section{Terminologie}
+\begin{itemize}
+    \item \emph{Couple/pár} je označení pro dva procesy, které sdílí nějakou událost. Například trasovací událost sched\_waking, kdy nějaký proces rozhodne o probuzení jiného procesu, přirozeně obsahuje dva procesy - probouzejícího a probouzeného. Páry se dají často rozdělit na procesy cílové a počáteční.
+    \item \emph{Couplebreak událost} je fiktivní událost vytvořená Couplebreakem. Couplebreak momentálně vytváří pouze události cílové. Modifikace toto vyznačuje v sufixu jména události jako \uv{[target]}. Navíc každá taková událost v KernelSharku obsahuje ve svém jméně prefix \uv{couplebreak/}, podobně jako události plánovače úloh obsahují prefix \uv{sched/}. Couplebreak události mají speciální ID začínající na hodnotě \texttt{-10 000}, které se postupně vždy o 1 snižuje.
+    \item \emph{Couplebreak záznam} je záznam vytvářený Couplebreakem pro Couplebreak událost. Významnou vlastností těchto záznamů je, že odkazují na záznam s událostí, kvůli které byla Couplebreak událost vytvořena.
+    \item \emph{Origin/počáteční proces} je proces z páru, pro který existuje nějaká událost, se kterou tento proces ovlivní druhý proces z páru.
+    \item \emph{Origin event/počáteční událost} je označení pro událost, která náleží počátečnímu procesu.
+    \item \emph{Target/cílový proces} je proces z páru, pro který existuje nějaká událost, která tento proces nějak ovlivní. 
+    \item \emph{Target event/cílová událost} je označení pro událost, která náleží cílovému procesu.
+    \item Termíny \emph{(datový) stream, záznam, událost, relace} jsou převzaty z terminologie KernelSharku.
 \end{itemize}
 
 \section{Analýza}
 Cíle/úvod této sekce...
 
-
-\subsection*{Finální podoba}
-Cíle/úvod této sekce...
-
-Terminologie Couplebreaku je následující:
-\begin{itemize}
-    \item \emph{Couple/pár} je označení pro dva procesy, které sdílí nějakou událost. Například trasovací událost sched\_waking, kdy nějaký proces rozhodne o probuzení jiného procesu, přirozeně obsahuje dva procesy - probouzejícího a probouzeného. Páry se dají často rozdělit na procesy cílové a počáteční.
-    \item \emph{Couplebreak událost} je fiktivní událost vytvořená Couplebreakem. Takto vytvořené události mohou být počáteční i cílové, Couplebreak toto vyznačuje v sufixu jména události jako „[origin]“ nebo „[target]“. Každá taková událost v KernelSharku obsahuje ve svém jméně prefix „couplebreak/“, podobně jako události scheduleru obsahují prefix „sched/“. Tyto události mají pevně stanovené negativní hodnoty identifikátorů.
-    \item \emph{Couplebreak záznam} je záznam vytvářený Couplebreakem pro Couplebreak událost. Tyto záznamy obsahují odkaz na 
-    \item \emph{Origin/počáteční proces} je proces z páru, pro který existuje nějaká událost, se kterou tento proces ovlivní druhý proces z páru.
-    \item \emph{Origin event/počáteční událost} je označení pro událost, která náleží počátečnímu procesu. Tento typ událostí momentálně není vytvářen Couplebreakem.
-    \item \emph{Target/cílový proces} je proces z páru, pro který existuje nějaká událost, která tento proces nějak ovlivní. 
-    \item \emph{Target event/cílová událost} je označení pro událost, která náleží cílovému procesu. Pouze tento typ událostí je momentálně vytvářen Couplebreakem.
-    \item Termíny \emph{(datový) stream, záznam, událost} jsou převzaty z terminologie KernelSharku.
-\end{itemize}
-
 \section{Vývojová dokumentace}
-Cíle/úvod této sekce...
+Tato sekce hodlá předat čtenáři strukturu modifikace, podle které se lze v modifikaci orientovat. Zde bude představen seznam změněných souborů, tj. místa, kde se lze s kódem vylepšení setkat, a rozdělení modifikace do modulů, tj. abstraktnější dělení modifikace než pouze na funkce a atové struktury.
 
 \subsection{Modifikované soubory}
 Modifikace používá značku COUPLEBREAK v ohraničeních změn. Níže je abecedně seřazený seznam spolu s krátkým popiskem změn uvnitř souboru.
@@ -44,17 +40,20 @@ Modifikace používá značku COUPLEBREAK v ohraničeních změn. Níže je abec
     \item \emph{KsUtils.hpp/cpp} - v těchto souborech byla definována pomocná C++ funkce k získání identifikátorů všech Couplebreak událostí aktivních ve streamu.
     \item \emph{libkshark.h/c} - v těchto souborech byla upravena datová struktura pro datové streamy, datová struktura definující rozhraní streamů, inicializace hodnot při alokaci a konstrukci nového streamu a nakonec byla přidána definice nové funkce v rozhraní streamů pro získání identifikátorů všech Couplebreak událostí aktivních ve streamu.
     \item \emph{libkshark-configio.c} - do tohoto souboru se přidalo ukládání stavu Couplebreaku do relací.
-    \item \emph{libkshark-couplebreak.h/c} - v těchto souborech jsou definovány identifikátory pro jednotlivé Couplebreak události jako makra, pozice indikátorů v bitové masce aktivních Couplebreak událostí ve streamech a pomocné funkce s Couplebreakem spojené: získání původního záznamu, získání pozice indikátoru z ID původní události, získání pozice indikátoru z ID Couplebreak události, získání ID Couplebreak události z pozice indikátoru, zda je daná událost Couplebreak událostí a získání jména Couplebreak události z ID události.
+    \item \emph{libkshark-couplebreak.h/c} - v těchto souborech jsou definovány identifikátory pro jednotlivé Couplebreak události jako makra, pozice indikátorů v bitové masce aktivních Couplebreak událostí ve streamech a pomocné funkce s Couplebreakem spojené.
     \item \emph{libkshark-tepdata.c} - zde se Couplebreak záznamy vytvářejí a upravují; zároveň jsou zde upravené implementace rozhraní streamů a nastavování přidaných datových polí streamů.
     \item \emph{sched\_events.c} - zde byl plugin upraven tak, aby respektoval aktivní Couplebreak a aktivně ho využíval ve svůj prospěch.
 \end{itemize}
 
 \subsection{Struktura modifikace}
-Couplebreak se dá rozdělit na pět částí: nové API, integrace s datovými streamy, spolupráce s relacemi, spolupráce sched\_events s Couplebreakem a konfigurace Couplebreaku. 
 
-Nové API...
+Modifikace rozdělíme na moduly. Nebudeme ovšem dělit jen dle funkcionalit. Modifikace obsahuje i několik částí, které ji integrují do existujících modulů KernelSharku. Jejich seskupením do \uv{integračního modulu} bychom přišli o mnoho informací a navíc ne každá integrace má stejné cíle jako jiná. Proto budou integrační části samostatnými moduly.
 
-Integrace s datovými streamy...
+Couplebreak se dá rozdělit do pěti modulů: Couplebreak API, integrace s datovými streamy, spolupráce s relacemi, spolupráce sched\_events s Couplebreakem a konfigurace Couplebreaku. 
+
+Couplebreak API...
+
+Integrace s datovými streamy... proměnné, změny funkcí pro stream API
 
 Spolupráce s relacemi...
 
@@ -64,7 +63,71 @@ Konfigurace Couplebreaku...
 
 \section{Uživatelská dokumentace}
 
-Cíle/úvod této sekce...
+\begin{code}
+## GUI
+
+All a GUI user has to do is navigate to the `Tools` menu and click on `Couplebreak Settings`, which should be just below
+the `Record` button. A configuration window for each stream will pop up, along with an explanation of this modification.
+
+Checking the checkboxes for which couplebreak should activate and applying them will have the affected streams insert new
+couplebreak events, which can be filtered, selected, found and interacted with.
+
+Couplebreak entries can be filtered by the simple checkbox filter as any other event, advanced filtering is currently
+NOT supported. The entries will be visible in the main window's list view and in the graph. They might overlap with
+their origin events, but even if that happens, their nature as a "twin" of the origin event makes this a non-issue.
+
+## API
+
+### Couplebreak API
+
+Check for couplebreak events via the provided couplebreak event Id macros. Check the flag bitmask for present
+couplebreak event types in a stream with the flag position macros. Query for flag position, event Id, event name or
+origin event via the provided functions.
+
+To detect a couplebreak event, look for entries with event Ids same as any of the "COUPLEBREAK_\[EVENT ABBREVIATION\]T_ID"
+macros, where \[EVENT ABBREVIATION\] is something like SW, which symbolises `sched/sched_waking`. The T symbolises target.
+
+By including the couplebreak header file, your code agrees to respect the possibility of being used when couplebreak is
+active.
+
+### Data streams
+
+Streams' new state variables `couplebreak_on`, `n_couplebreak_evts` and `couplebreak_evts_flags` are now present. Use
+`n_couplebreak_evts` to check how many couplebreak events there are in a stream. The flags bitmask sets each bit to 1
+if a couplebreak event for a type of an event was created. Positions are 0-indexed (0th bit is least significant bit) and 
+each bit flags an event as present as follows:
+- 0 -> `couplebreak/sched_switch[target]` (event ID: `COUPLEBREAK_SST_ID`)
+- 1 -> `couplebreak/sched_waking[target]` (event ID: `COUPLEBREAK_SWT_ID`)
+The bitmask also serves as list of supported events.
+
+It is recommended to not touch these, same as not touching `n_events` in streams, as this modification depends on them 
+heavily.
+
+Every function of a stream interface can be used in the same manner as for any other events, but couplebreak events will
+most likely either redirect the request to their origin Id or construct values on the fly, they will not read the trace
+data source.
+
+### Couplebreak event entries
+
+Couplebreak events are dynamically added and have no way of checking their "original data", except redirecting requests
+for those to their origin entry or reconstructing that data as if being made anew, who must have been found in the data 
+source for the current trace graph. Consequences of this are as follows:
+- Couplebreak events **MUST NEVER** have their `event_id` and `offset` fields changed.
+  - Offset has been changed to the origin entry's address - everything will break if this is changed.
+  - Event Id is created on data load and cannot be found later somewhere else - asking for the original will just
+    redirect to `entry->event_id`. Changing a couplebreak entry's event Id is the same as breaking it.
+
+The entries can be used in plugins (e.g. `sched_event`'s couplebreak integration) and they shine especially well when
+something needs to have an event in one task plot, but it cannot be done without editing an entry, possibly creating
+an incompatiblity with other plugins. Using couplebreak events can resolve this. 
+
+# Bugs
+
+There have been two occurences of possibly parallel execution of KernelShark causing a crash when correcting CPUs of
+`sched/sched_waking` events. These were only encountered during session support development. As such, they may have already
+been resolved. However, because of their unexpected appearences, they must be at least mentioned. If one encounters such
+an issue, it is recommended to simply restart the program and try again.
+\end{code}
 
 \subsection{Uživatel GUI}
 
@@ -74,6 +137,12 @@ Cíle/úvod této sekce...
 
 \section{Rozšíření}
 
-Cíle/úvod této sekce...
+Více událostí - včetně vytváření \uv{[origin]} událostí...
 
-\section{Zhodnocení splněných požadavků}
+Optimalizace průchodů daty při opravě CPU pro sched\_waking...
+
+Méně Couplebreak proměnných v kshark\_data\_stream...
+
+get\_all\_event\_ids vs get\_couplebreak\_evt\_ids...
+
+Změny funkcí ve stream API a oddělení od ostatních custom events jako missed\_events...

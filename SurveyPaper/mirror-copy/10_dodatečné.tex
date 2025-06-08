@@ -25,7 +25,7 @@ Tuto modifikaci využívají pluginy Stacklook a Naps pro barvy procesů, a modi
 Příklad: Stacklook nabízí možnost barvit tlačítka dle barev procesů, kterým patří, viz obrázek \ref{obr01:modif-get-colors}.
 
 \begin{figure}[p]\centering
-    \includegraphics[width=140mm]{img/modif-get-colors-traced.png}
+    \includegraphics[width=140mm]{img/Modifikace/modif-get-colors-traced.png}
     \caption{Stacklook tlačítko využívá barvu, kterou KernelShark udělil procesu.}
     \label{obr01:modif-get-colors}
 \end{figure}
@@ -51,25 +51,25 @@ I zde se objevuje bug ze sekce o zpřístupnění barev využívaných v grafu, 
 Příklad použití: tlačítka Stacklooku (v červeném kroužku) žádají na přejetí myší o zobrazení několika prvků zásobníku kernelu, viz obrázek \ref{obr02:modif-preview-labels-changeable}.
 
 \begin{figure}[p]\centering
-    \includegraphics[width=140mm]{img/modif-preview-labels-changeable.png}
+    \includegraphics[width=140mm]{img/Modifikace/modif-preview-labels-changeable.png}
     \caption{Při přejetí kurzorem myši se vlevo nahoře informační řádek změní.}
     \label{obr02:modif-preview-labels-changeable}
 \end{figure}
 
 \section{NoBoxes}
 
-Vykreslování obdélníků se děje při každém vykreslení grafu. Ovlivnit obdélníky dokáže v této chvíli máloco. Pracuje se zde s biny, tedy sdruženími jednoho či více záznamů. V binech se pak lze spolehnout na málo, nejvíce na data viditelnosti, ve kterých mohou být nastaveny některé bity jako přepínače chování. Viditelnost binu lze ovlivnit viditelností záznamů, které sdružuje. Tak byla představena nová maska pro nastavování sedmého bitu pole viditelnosti pro záznamy, KS\_PLUGIN\_UNTOUCHED\_MASK. Tato maska značí, zdali se záznam účastní kreslení mezi-záznamových obdélníčků. Pokud bin využije viditelnost záznamu, který má daný bit nastaven na 0, bude moci toto nastavení detekovat. Při vykreslování obdélníčků pak žádné obdélníčky nezačínají a nekončí u binů s tímto bitem vynulovaným.
+Jak popsala čtvrtá kapitola, chtěli bychom některé záznamy při vykreslování ignorovat, jinak se nám může zobrazovat falešná práce v grafu. Vykreslování obdélníků mezi záznamy se děje při každém vykreslení grafu. Ovlivnit obdélníky dokáže v této chvíli máloco. Pracuje se zde s biny, tedy sdruženími jednoho či více záznamů. V binech se pak nelze na mnoho spolehnout, ale můžeme použít data viditelnosti, u kterých KernelShark ukládá i nastavení speciálních chování. Viditelnost binu lze ovlivnit viditelností záznamů, které sdružuje.
 
-Maska byla vložena do enumerace pro masky viditelnosti. Tento výčet již předtím počítal s nějakým rozšířením, tak bylo jedno z volných bitových míst zabráno naší novou maskou. Rozšíření počítalo s nějakou KS\_X\_VIEW\_FILTER\_MASK pro volná místa - nicméně naše maska je spíše podobná masce KS\_PLUGIN\_UNTOUCHED\_MASK.
+Vylepšení vytvořilo novou masku viditelnosti pro záznamy, KS\_DRAW\_TASKBOX\_MASK. Tato maska značí, zdali se záznam účastní kreslení mezi-záznamových obdélníčků. Vykreslování pak bylo upraveno tak, že pokud bin využije viditelnost záznamu, který se nemá účastnit kreslení obdélníků, pak obdélníky budou při kreslení tento bin ignorovat.
 
-Na výběr záznamů, kterým se nastaví bit na 0, byl vytvořen plugin pro tuto modifikaci, nese název NoBoxes. V jeho kódu jsou zapsány události, na jejichž záznamy má být maska použita, plugin pak lze zapínat a vypínat jako každý jiný. Pokud plugin není načten, modifikace nemá na chod KernelSharku vliv.
+Na výběr záznamů, kteří budou masku používat, byl vytvořen plugin pro tuto modifikaci, nese název NoBoxes. V jeho kódu jsou zapsány události, na jejichž záznamy má být maska použita, plugin pak lze zapínat a vypínat jako každý jiný. Pokud plugin není načten, modifikace nemá na chod KernelSharku vliv.
 
 Příklad fungujícího vylepšení je na obrázku \ref{obr04:modif-noboxes-good}. Oproti minulému obrázku (obrázek~\ref{obr03:modif-noboxes-bad}) ubylo několik obdélníků a graf nyní odpovídá skutečné práci.
 
 \begin{figure}[p]\centering
-    \includegraphics[width=140mm]{img/modif-noboxes-good}
+    \includegraphics[width=140mm]{img/Modifikace/modif-noboxes-good}
     \caption{Vylepšení donutí některé obdélníky k tomu, aby nebyli nakresleny.}
     \label{obr04:modif-noboxes-good}
 \end{figure}
 
-Problém tohoto vylepšení je ale právě vykreslování obdélníků. Vykreslování se děje často a použitá implementace tohoto vylepšení při grafických změnách v hlavním okně KernelSharku často i přes vytvořené filtrování obdélník vykreslí. Při častých změnách pak nastává problikávání obdélníků, ačkoliv by vůbec kresleny být neměly. Oprava byla označena za rozšíření, jelikož objem práce k tomuto dodatku byl odhadnut na příliš velký a vytvořený best-effort přístup funguje, ačkoliv ne dokonale.
+Problém tohoto vylepšení je ale právě vykreslování obdélníků. Vykreslování se děje často a použitá implementace tohoto vylepšení při grafických změnách v hlavním okně KernelSharku obdélník vykreslí i pokud by neměl projít novým filtrováním. Při častých změnách pak nastává problikávání obdélníků. Oprava byla označena za rozšíření, jelikož objem práce k tomuto dodatku byl odhadnut na příliš velký a vytvořený best-effort přístup funguje, ačkoliv ne dokonale.

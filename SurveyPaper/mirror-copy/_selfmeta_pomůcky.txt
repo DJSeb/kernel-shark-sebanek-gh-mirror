@@ -1,1 +1,23 @@
 „“ <- české uvozovky
+
+Vývojová dokumentace dle ChatGPT: {
+Vývojová dokumentace obvykle slouží jako most mezi uživatelskou a technickou dokumentací. Odpovídá na otázky typu:
+- Proč je software navržen tak, jak je? (rozhodnutí, architektonické vzory, kompromisy)
+- Jaké jsou klíčové komponenty a jak spolu komunikují?
+- Jaké jsou vývojové standardy a postupy?
+- Jak software nasadit a provozovat v dev/test prostředí?
+- Jak přidat novou funkcionalitu nebo opravit chybu?
+
+Tj. má usnadnit vstup novému vývojáři, který nepotřebuje hned detailní kód, ale potřebuje chápat kontext, strukturu a důvody.
+
++ 
+
+Pokud máš analýzu problému jako samostatný dokument, pak rozhodnutí a jejich zdůvodnění opravdu patří spíše tam.
+
+Vývojová dokumentace v tom případě může:
+- Odkazovat na rozhodnutí a analýzy, místo aby je obsahovala.
+- Popsat aktuální stav systému, strukturu a vztahy komponent.
+- Uvádět praktické informace pro vývoj (co kde najít, co upravit, jak běží build/deploy, kde jsou konfigurace apod.).
+
+Ve tvém případě to vypadá, že píšeš dokumentaci zaměřenou na orientaci ve zdrojáku a struktuře projektu — to je naprosto validní část vývojové dokumentace. Forma i rozsah se často přizpůsobují tomu, jak komplexní software je a jakou roli dokument hraje v týmu.
+}

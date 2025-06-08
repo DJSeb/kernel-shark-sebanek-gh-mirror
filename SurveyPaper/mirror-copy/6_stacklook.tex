@@ -112,7 +112,7 @@ Tato sekce popíše jak instalovat a používat plugin Stacklook v KernelSharku 
           \item Pokyny pro sestavení předpokládají, že zadaný adresář má stejnou vnitřní strukturu jako výchozí možnost (tj. obsahuje složky QtCore, QtWidgets apod.).
         \end{itemize}
       \item Pokud se zdrojové soubory KernelSharku nenachází v \texttt{../KS\_fork/src}, použijte argument \texttt{-D\_KS\_INCLUDE\_DIR=[PATH]}, kde \texttt{[PATH]} nahradíte cestou ke zdrojovým souborům KernelSharku.
-      \item Pokud se sdílené knihovny KernelSharku (\texttt{.so} soubory) nenachází ve \texttt{/usr/local/lib64}, použijte argument \texttt{-D\_KS\_SHARED\_LIBS\_DIR=[PATH]}, kde \texttt{[PATH]} nahradíte cestou k sdíleným knihovnám KernelSharku.
+      \item Pokud se sdílené knihovny KernelSharku (\texttt{.so} soubory) nenachází ve \texttt{/usr/local/lib64}, použijte \texttt{-D\_KS\_SHARED\_LIBS\_DIR=[PATH]} argument, kde \texttt{[PATH]} nahradíte cestou k sdíleným knihovnám KernelSharku.
     \end{itemize}
   \item Ve složce \texttt{build} spusťte příkaz \texttt{make}.
     \begin{itemize}
@@ -271,7 +271,7 @@ Pokud by se tlačítka Stacklook překrývala, bude tlačítko příslušící \
 
 Načtení relace KernelSharku, kde byl Stacklook aktivní, bez předchozího načtení pluginu způsobí \emph{segmentation fault} a \emph{pád programu} při najetí myší na tlačítko Stacklook.
 
-Pokud objevíte další problémy, kontaktujte autora přes e-mail \emph{djsebofficial@gmail.com}.
+Pokud objevíte další problémy, kontaktujte autora přes e-mailovou adresu \emph{djsebofficial@gmail.com}.
 
 \subsection{Doporučení}
 
