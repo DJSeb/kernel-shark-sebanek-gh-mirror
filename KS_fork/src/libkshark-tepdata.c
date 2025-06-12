@@ -435,7 +435,7 @@ typedef struct kshark_entry* (*custom_entry_creation_func)(
 	struct kshark_entry *origin_entry);
 // END of change
 
-//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+//NOTE: Changed here. ("COUPLEBREAK") (2025-03-21)
 /**
  * @brief Create a custom entry with a KernelShark context, data stream,
  * trace record, related entry, temporary record list node and the one after it,
