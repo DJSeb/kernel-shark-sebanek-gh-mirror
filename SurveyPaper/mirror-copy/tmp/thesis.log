@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.22.0 (TeX Live 2025/TeX Live for SUSE Linux)  (format=lualatex 2025.4.7)  8 JUN 2025 18:13
+This is LuaHBTeX, Version 1.22.0 (TeX Live 2025/TeX Live for SUSE Linux)  (format=lualatex 2025.4.7)  17 JUN 2025 23:13
  restricted system commands enabled.
 **thesis.tex
 (./thesis.tex
@@ -1187,7 +1187,7 @@ Package hyperref Info: Option `pageanchor' set `false' on input line 44.
 
 warning  (file img/logo-cs.pdf) (pdf inclusion): PDF inclusion: found PDF versio
 n '1.5', but at most version '1.4' allowed
-<img/logo-cs.pdf, id=422, 506.45912pt x 156.49065pt>
+<img/logo-cs.pdf, id=534, 506.45912pt x 156.49065pt>
 File: img/logo-cs.pdf Graphic file (type pdf)
 <use img/logo-cs.pdf>
 Package luatex.def Info: img/logo-cs.pdf  used on input line 48.
@@ -1268,22 +1268,24 @@ File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 
 ]
 
-[6])
+[6]
+
+[7])
 \tf@toc=\write8
 
 \openout8 = thesis.toc
 
 
-[7]
+[8]
 \openout2 = uvod.aux
  (./uvod.tex)
 
-[8
+[9
 
 
 ]
 
-[9]
+[10]
 \openout2 = 1_trasování_v_linuxu.aux
  (./1_trasování_v_linuxu.tex
 Kapitola 1.
@@ -1293,14 +1295,12 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             See the microtype manual for details.
 
 
-[10
+[11
 
 
 
 
 ]
-
-[11]
 
 [12]
 
@@ -1322,13 +1322,15 @@ Package microtype Info: Loading generic protrusion settings for font family
 
 [21]
 
-[22])
+[22]
 
-[23]
+[23])
+
+[24]
 \openout2 = 2_vizualizace_traceů.aux
  (./2_vizualizace_traceů.tex
 Kapitola 2.
-<img/Vizualizátory/hperfexample.png, id=672, 1121.3895pt x 477.58424pt>
+<img/Vizualizátory/hperfexample.png, id=817, 1121.3895pt x 477.58424pt>
 File: img/Vizualizátory/hperfexample.png Graphic file (type png)
 <use img/Vizualizátory/hperfexample.png>
 Package luatex.def Info: img/Vizualizátory/hperfexample.png  used on input lin
@@ -1336,7 +1338,7 @@ e 23.
 (luatex.def)             Requested size: 398.33858pt x 169.64197pt.
 
 
-[24
+[25
 
 
 
@@ -1345,7 +1347,7 @@ e 23.
 warning  (file img/Vizualizátory/brendan-gregg-example_cpu-linux-tar.pdf) (pdf 
 inclusion): PDF inclusion: found PDF version '1.5', but at most version '1.4' al
 lowed
-<img/Vizualizátory/brendan-gregg-example_cpu-linux-tar.pdf, id=680, 903.375pt 
+<img/Vizualizátory/brendan-gregg-example_cpu-linux-tar.pdf, id=825, 903.375pt 
 x 508.90125pt>
 File: img/Vizualizátory/brendan-gregg-example_cpu-linux-tar.pdf Graphic file (
 type pdf)
@@ -1353,7 +1355,7 @@ type pdf)
 Package luatex.def Info: img/Vizualizátory/brendan-gregg-example_cpu-linux-tar
 .pdf  used on input line 38.
 (luatex.def)             Requested size: 398.33858pt x 224.39868pt.
-<img/Vizualizátory/sunburstgraf.png, id=683, 1371.1225pt x 770.88pt>
+<img/Vizualizátory/sunburstgraf.png, id=828, 1371.1225pt x 770.88pt>
 File: img/Vizualizátory/sunburstgraf.png Graphic file (type png)
 <use img/Vizualizátory/sunburstgraf.png>
 Package luatex.def Info: img/Vizualizátory/sunburstgraf.png  used on input lin
@@ -1361,11 +1363,11 @@ e 47.
 (luatex.def)             Requested size: 398.33858pt x 223.9494pt.
 
 
-[25]
+[26]
 
-[26<./img/Vizualizátory/hperfexample.png><./img/Vizualizátory/brendan-gregg-ex
+[27<./img/Vizualizátory/hperfexample.png><./img/Vizualizátory/brendan-gregg-ex
 ample_cpu-linux-tar.pdf>]
-<img/Vizualizátory/traceshark-git-hub-example.png, id=713, 1505.625pt x 1620.0
+<img/Vizualizátory/traceshark-git-hub-example.png, id=857, 1505.625pt x 1620.0
 525pt>
 File: img/Vizualizátory/traceshark-git-hub-example.png Graphic file (type png)
 
@@ -1375,11 +1377,11 @@ d on input line 62.
 (luatex.def)             Requested size: 398.33858pt x 428.61972pt.
 )
 
-[27]
+[28]
 
-[28<./img/Vizualizátory/sunburstgraf.png>]
+[29<./img/Vizualizátory/sunburstgraf.png>]
 
-[29<./img/Vizualizátory/traceshark-git-hub-example.png>]
+[30<./img/Vizualizátory/traceshark-git-hub-example.png>]
 \openout2 = 3_kshark.aux
  (./3_kshark.tex
 Kapitola 3.
@@ -1390,44 +1392,38 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <5> on input line 8.
 
-LaTeX Warning: Citation 'SR-LinkedIn' on page 30 undefined on input line 8.
+LaTeX Warning: Citation 'SR-LinkedIn' on page 31 undefined on input line 8.
 
 
-LaTeX Warning: Citation 'SR-LinkedIn' on page 30 undefined on input line 8.
+LaTeX Warning: Citation 'SR-LinkedIn' on page 31 undefined on input line 8.
 
 
-LaTeX Warning: Citation 'LWM-Kshark' on page 30 undefined on input line 8.
+LaTeX Warning: Citation 'LWM-Kshark' on page 31 undefined on input line 8.
 
 
-LaTeX Warning: Citation 'YK-LinkedIn' on page 30 undefined on input line 8.
+LaTeX Warning: Citation 'YK-LinkedIn' on page 31 undefined on input line 8.
 
 
-LaTeX Warning: Citation 'YK-LinkedIn' on page 30 undefined on input line 8.
+LaTeX Warning: Citation 'YK-LinkedIn' on page 31 undefined on input line 8.
 
 
 
-[30
+[31
 
 
 
 
 ]
-
-LaTeX Warning: Reference `kshark-empty' on page 31 undefined on input line 34.
-
-<img/KernelShark/kshark-empty.png, id=744, 1156.32pt x 614.295pt>
+<img/KernelShark/kshark-empty.png, id=890, 1156.32pt x 614.295pt>
 File: img/KernelShark/kshark-empty.png Graphic file (type png)
 <use img/KernelShark/kshark-empty.png>
 Package luatex.def Info: img/KernelShark/kshark-empty.png  used on input line 3
 7.
 (luatex.def)             Requested size: 398.33858pt x 211.6133pt.
 
-LaTeX Warning: Reference `kshark-divs' on page 31 undefined on input line 43.
 
-
-
-[31]
-<img/KernelShark/kshark-divisions.png, id=752, 1156.32pt x 614.295pt>
+[32]
+<img/KernelShark/kshark-divisions.png, id=900, 1156.32pt x 614.295pt>
 File: img/KernelShark/kshark-divisions.png Graphic file (type png)
 <use img/KernelShark/kshark-divisions.png>
 Package luatex.def Info: img/KernelShark/kshark-divisions.png  used on input li
@@ -1435,29 +1431,19 @@ ne 46.
 (luatex.def)             Requested size: 398.33858pt x 211.6133pt.
 
 
-[32]
+[33]
 
-[33<./img/KernelShark/kshark-empty.png><./img/KernelShark/kshark-divisions.png>]
+[34<./img/KernelShark/kshark-empty.png><./img/KernelShark/kshark-divisions.png>]
 
-LaTeX Warning: Reference `kshark-advfiltering' on page 34 undefined on input li
-ne 87.
-
-
-
-[34]
-<img/KernelShark/kshark-advfilter-in-effect.png, id=774, 1155.71774pt x 611.283
+[35]
+<img/KernelShark/kshark-advfilter-in-effect.png, id=923, 1155.71774pt x 611.283
 75pt>
 File: img/KernelShark/kshark-advfilter-in-effect.png Graphic file (type png)
 <use img/KernelShark/kshark-advfilter-in-effect.png>
 Package luatex.def Info: img/KernelShark/kshark-advfilter-in-effect.png  used o
 n input line 90.
 (luatex.def)             Requested size: 398.33858pt x 210.68791pt.
-
-
-LaTeX Warning: Reference `kshark-record' on page 35 undefined on input line 100
-.
-
-<img/KernelShark/kshark-record.png, id=775, 1156.32pt x 614.295pt>
+<img/KernelShark/kshark-record.png, id=925, 1156.32pt x 614.295pt>
 File: img/KernelShark/kshark-record.png Graphic file (type png)
 <use img/KernelShark/kshark-record.png>
 Package luatex.def Info: img/KernelShark/kshark-record.png  used on input line 
@@ -1465,27 +1451,25 @@ Package luatex.def Info: img/KernelShark/kshark-record.png  used on input line
 (luatex.def)             Requested size: 398.33858pt x 211.6133pt.
 
 
-[35]
+[36]
 
-[36<./img/KernelShark/kshark-advfilter-in-effect.png><./img/KernelShark/kshark-r
+[37<./img/KernelShark/kshark-advfilter-in-effect.png><./img/KernelShark/kshark-r
 ecord.png>]
 
-[37])
+[38])
 
-[38]
+[39]
 \openout2 = 4_obecná_analýza.aux
  (./4_obecná_analýza.tex
 Kapitola 4.
 
 
-[39
+[40
 
 
 
 
 ]
-
-[40]
 
 [41]
 
@@ -1496,212 +1480,393 @@ Kapitola 4.
 [44]
 
 [45]
-<img/Modifikace/modif-noboxes-bad.png, id=842, 888.921pt x 81.30376pt>
+
+[46]
+<img/Modifikace/modif-noboxes-bad.png, id=991, 888.921pt x 81.30376pt>
 File: img/Modifikace/modif-noboxes-bad.png Graphic file (type png)
 <use img/Modifikace/modif-noboxes-bad.png>
 Package luatex.def Info: img/Modifikace/modif-noboxes-bad.png  used on input li
-ne 106.
+ne 109.
 (luatex.def)             Requested size: 398.33858pt x 36.43375pt.
 )
 
-[46]
+[47]
 
-[47<./img/Modifikace/modif-noboxes-bad.png>]
+[48<./img/Modifikace/modif-noboxes-bad.png>]
 \openout2 = 5_record_kstack.aux
  (./5_record_kstack.tex
 Kapitola 5.
 
 
-[48
+[49
 
 
 
 
 ]
-<img/Modifikace/modif-record-kstack.png, id=860, 1587.9325pt x 1355.0625pt>
+<img/Modifikace/modif-record-kstack.png, id=1009, 1587.9325pt x 1355.0625pt>
 File: img/Modifikace/modif-record-kstack.png Graphic file (type png)
 <use img/Modifikace/modif-record-kstack.png>
 Package luatex.def Info: img/Modifikace/modif-record-kstack.png  used on input 
-line 36.
+line 34.
 (luatex.def)             Requested size: 398.33858pt x 339.92268pt.
 )
 
-[49]
+[50]
 
-[50<./img/Modifikace/modif-record-kstack.png>]
+[51<./img/Modifikace/modif-record-kstack.png>]
 \openout2 = 6_stacklook.aux
  (./6_stacklook.tex
 Kapitola 6.
 
 
-[51
+[52
 
 
 
 
 ]
-
-[52]
 
 [53]
 
 [54]
 
 [55]
-<img/Stacklook/SlWorking.png, id=898, 1156.32pt x 614.295pt>
+
+[56]
+<img/Stacklook/SlWorking.png, id=1049, 1156.32pt x 614.295pt>
 File: img/Stacklook/SlWorking.png Graphic file (type png)
 <use img/Stacklook/SlWorking.png>
-Package luatex.def Info: img/Stacklook/SlWorking.png  used on input line 80.
+Package luatex.def Info: img/Stacklook/SlWorking.png  used on input line 90.
 (luatex.def)             Requested size: 398.33858pt x 211.6133pt.
 
 
-[56]
-
 [57]
-<img/Stacklook/SlManagePlottingPlugins.png, id=921, 189.1065pt x 378.213pt>
+
+[58]
+<img/Stacklook/SlManagePlottingPlugins.png, id=1067, 189.1065pt x 378.213pt>
 File: img/Stacklook/SlManagePlottingPlugins.png Graphic file (type png)
 <use img/Stacklook/SlManagePlottingPlugins.png>
 Package luatex.def Info: img/Stacklook/SlManagePlottingPlugins.png  used on inp
-ut line 148.
+ut line 158.
 (luatex.def)             Requested size: 199.17941pt x 398.33858pt.
-<img/Stacklook/SlConfigWindow.png, id=923, 252.34274pt x 194.52675pt>
+<img/Stacklook/SlConfigWindow.png, id=1069, 252.34274pt x 194.52675pt>
 File: img/Stacklook/SlConfigWindow.png Graphic file (type png)
 <use img/Stacklook/SlConfigWindow.png>
 Package luatex.def Info: img/Stacklook/SlConfigWindow.png  used on input line 1
-60.
+70.
 (luatex.def)             Requested size: 398.33858pt x 307.10844pt.
-<img/Stacklook/SlUnmodifiedKsharkConfigWindow.png, id=925, 251.7405pt x 172.845
-75pt>
+
+
+[59]
+
+[60<./img/Stacklook/SlWorking.png><./img/Stacklook/SlManagePlottingPlugins.png>]
+<img/Stacklook/SlUnmodifiedKsharkConfigWindow.png, id=1092, 251.7405pt x 172.84
+575pt>
 File: img/Stacklook/SlUnmodifiedKsharkConfigWindow.png Graphic file (type png)
 <use img/Stacklook/SlUnmodifiedKsharkConfigWindow.png>
 Package luatex.def Info: img/Stacklook/SlUnmodifiedKsharkConfigWindow.png  used
- on input line 168.
+ on input line 178.
 (luatex.def)             Requested size: 398.33858pt x 273.52315pt.
-<img/Stacklook/SlDefaultColors.png, id=927, 1135.8435pt x 390.86024pt>
+<img/Stacklook/SlDefaultColors.png, id=1094, 1135.8435pt x 390.86024pt>
 File: img/Stacklook/SlDefaultColors.png Graphic file (type png)
 <use img/Stacklook/SlDefaultColors.png>
 Package luatex.def Info: img/Stacklook/SlDefaultColors.png  used on input line 
-180.
+190.
 (luatex.def)             Requested size: 398.33858pt x 137.07747pt.
-<img/Stacklook/SlTaskColors.png, id=928, 1138.85475pt x 394.47375pt>
+<img/Stacklook/SlTaskColors.png, id=1095, 1138.85475pt x 394.47375pt>
 File: img/Stacklook/SlTaskColors.png Graphic file (type png)
 <use img/Stacklook/SlTaskColors.png>
-Package luatex.def Info: img/Stacklook/SlTaskColors.png  used on input line 186
+Package luatex.def Info: img/Stacklook/SlTaskColors.png  used on input line 196
 .
 (luatex.def)             Requested size: 398.33858pt x 137.97157pt.
-<img/Stacklook/SlCustomDefaultColors.png, id=930, 1139.457pt x 399.29175pt>
+<img/Stacklook/SlCustomDefaultColors.png, id=1097, 1139.457pt x 399.29175pt>
 File: img/Stacklook/SlCustomDefaultColors.png Graphic file (type png)
 <use img/Stacklook/SlCustomDefaultColors.png>
 Package luatex.def Info: img/Stacklook/SlCustomDefaultColors.png  used on input
- line 194.
+ line 204.
 (luatex.def)             Requested size: 398.33858pt x 139.5836pt.
 
 
-[58]
+[61]
 
-[59<./img/Stacklook/SlWorking.png><./img/Stacklook/SlManagePlottingPlugins.png>]
-
-[60<./img/Stacklook/SlConfigWindow.png><./img/Stacklook/SlUnmodifiedKsharkConfig
+[62<./img/Stacklook/SlConfigWindow.png><./img/Stacklook/SlUnmodifiedKsharkConfig
 Window.png>]
 
-[61<./img/Stacklook/SlDefaultColors.png><./img/Stacklook/SlTaskColors.png><./img
+[63<./img/Stacklook/SlDefaultColors.png><./img/Stacklook/SlTaskColors.png><./img
 /Stacklook/SlCustomDefaultColors.png>]
-
-[62]
-<img/Stacklook/SlMouseHover.png, id=974, 920.238pt x 477.58424pt>
+<img/Stacklook/SlMouseHover.png, id=1122, 920.238pt x 477.58424pt>
 File: img/Stacklook/SlMouseHover.png Graphic file (type png)
 <use img/Stacklook/SlMouseHover.png>
-Package luatex.def Info: img/Stacklook/SlMouseHover.png  used on input line 237
+Package luatex.def Info: img/Stacklook/SlMouseHover.png  used on input line 247
 .
 (luatex.def)             Requested size: 398.33858pt x 206.72723pt.
-<img/Stacklook/SlTooBigOffset.png, id=976, 319.1925pt x 272.81924pt>
+<img/Stacklook/SlTooBigOffset.png, id=1124, 319.1925pt x 272.81924pt>
 File: img/Stacklook/SlTooBigOffset.png Graphic file (type png)
 <use img/Stacklook/SlTooBigOffset.png>
 Package luatex.def Info: img/Stacklook/SlTooBigOffset.png  used on input line 2
-45.
+55.
 (luatex.def)             Requested size: 398.33858pt x 340.46954pt.
-<img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEntires.png, id=978, 785.93
-625pt x 290.88675pt>
+
+
+[64]
+
+[65<./img/Stacklook/SlMouseHover.png><./img/Stacklook/SlTooBigOffset.png>]
+<img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEntires.png, id=1140, 785.9
+3625pt x 290.88675pt>
 File: img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEntires.png Graphic fi
 le (type png)
 <use img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEntires.png>
 Package luatex.def Info: img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEnt
-ires.png  used on input line 261.
+ires.png  used on input line 271.
 (luatex.def)             Requested size: 398.33858pt x 147.43593pt.
 
 
-[63]
+[66]
 
-[64<./img/Stacklook/SlMouseHover.png><./img/Stacklook/SlTooBigOffset.png>])
+[67])
 
-[65]
+[68]
 
-[66<./img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEntires.png>]
+[69<./img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEntires.png>]
 \openout2 = 7_couplebreak.aux
 
 (./7_couplebreak.tex
 Kapitola 7.
 
+Overfull \hbox (10.36531pt too wide) in paragraph at lines 10--11
+\TU/lmr/m/n/12 zna-mená, že bude možné po-u-ží-vat \TU/lmtt/m/n/12 kshark_
+get_* \TU/lmr/m/n/12 funkce jako \TU/lmtt/m/n/12 kshark_get_pid\TU/lmr/m/n/12 ,|
+ []
 
-[67
+
+
+[70
 
 
 
 
 ]
 
-[68]
-
-[69]
-
-[70])
-
 [71]
+
+[72]
+
+[73]
+
+[74]
+
+[75]
+
+[76]
+
+[77]
+<img/Modifikace/modif-couplebreak-tools.png, id=1206, 509.5035pt x 301.125pt>
+File: img/Modifikace/modif-couplebreak-tools.png Graphic file (type png)
+<use img/Modifikace/modif-couplebreak-tools.png>
+Package luatex.def Info: img/Modifikace/modif-couplebreak-tools.png  used on in
+put line 152.
+(luatex.def)             Requested size: 398.33858pt x 235.42332pt.
+<img/Modifikace/modif-couplebreak-multiconf.png, id=1207, 348.1005pt x 178.266p
+t>
+File: img/Modifikace/modif-couplebreak-multiconf.png Graphic file (type png)
+<use img/Modifikace/modif-couplebreak-multiconf.png>
+Package luatex.def Info: img/Modifikace/modif-couplebreak-multiconf.png  used o
+n input line 158.
+(luatex.def)             Requested size: 398.33858pt x 203.99512pt.
+<img/Modifikace/modif-couplebreak-filter.png, id=1209, 247.52475pt x 373.99725p
+t>
+File: img/Modifikace/modif-couplebreak-filter.png Graphic file (type png)
+<use img/Modifikace/modif-couplebreak-filter.png>
+Package luatex.def Info: img/Modifikace/modif-couplebreak-filter.png  used on i
+nput line 168.
+(luatex.def)             Requested size: 398.33858pt x 601.92316pt.
+
+
+[78]
+
+[79<./img/Modifikace/modif-couplebreak-tools.png><./img/Modifikace/modif-coupleb
+reak-multiconf.png>]
+
+[80<./img/Modifikace/modif-couplebreak-filter.png>]
+
+[81]
+
+[82]
+LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <12> not available
+(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 230.
+
+
+[83]
+
+[84])
+
+[85]
 \openout2 = 8_naps.aux
  (./8_naps.tex
 Kapitola 8.
-)
 
-[72
+
+[86
 
 
 
 
 ]
 
-[73]
+[87]
+
+[88]
+<img/Naps/NapsWorking.png, id=1281, 1156.32pt x 224.63925pt>
+File: img/Naps/NapsWorking.png Graphic file (type png)
+<use img/Naps/NapsWorking.png>
+Package luatex.def Info: img/Naps/NapsWorking.png  used on input line 63.
+(luatex.def)             Requested size: 398.33858pt x 77.38408pt.
+
+
+[89]
+
+[90]
+<img/Naps/NapsManagePlottingPlugins.png, id=1299, 225.2415pt x 414.348pt>
+File: img/Naps/NapsManagePlottingPlugins.png Graphic file (type png)
+<use img/Naps/NapsManagePlottingPlugins.png>
+Package luatex.def Info: img/Naps/NapsManagePlottingPlugins.png  used on input 
+line 131.
+(luatex.def)             Requested size: 216.53868pt x 398.33858pt.
+<img/Naps/NapsConfigWindow.png, id=1302, 277.63725pt x 121.05225pt>
+File: img/Naps/NapsConfigWindow.png Graphic file (type png)
+<use img/Naps/NapsConfigWindow.png>
+Package luatex.def Info: img/Naps/NapsConfigWindow.png  used on input line 141.
+
+(luatex.def)             Requested size: 398.33858pt x 173.68523pt.
+<img/Naps/NapsConfigButton.png, id=1303, 596.2275pt x 235.47975pt>
+File: img/Naps/NapsConfigButton.png Graphic file (type png)
+<use img/Naps/NapsConfigButton.png>
+Package luatex.def Info: img/Naps/NapsConfigButton.png  used on input line 147.
+
+(luatex.def)             Requested size: 398.33858pt x 157.32506pt.
+
+
+[91]
+
+[92<./img/Naps/NapsWorking.png><./img/Naps/NapsManagePlottingPlugins.png>]
+
+[93<./img/Naps/NapsConfigWindow.png><./img/Naps/NapsConfigButton.png>]
+<img/Naps/NapsDefaultColors.png, id=1336, 361.95226pt x 27.10126pt>
+File: img/Naps/NapsDefaultColors.png Graphic file (type png)
+<use img/Naps/NapsDefaultColors.png>
+Package luatex.def Info: img/Naps/NapsDefaultColors.png  used on input line 157
+.
+(luatex.def)             Requested size: 398.33858pt x 29.82675pt.
+<img/Naps/NapsTaskLikeColors.png, id=1337, 357.13425pt x 34.9305pt>
+File: img/Naps/NapsTaskLikeColors.png Graphic file (type png)
+<use img/Naps/NapsTaskLikeColors.png>
+Package luatex.def Info: img/Naps/NapsTaskLikeColors.png  used on input line 16
+3.
+(luatex.def)             Requested size: 398.33858pt x 38.96144pt.
+<img/Naps/NapsConfigSuccess.png, id=1339, 242.1045pt x 118.64325pt>
+File: img/Naps/NapsConfigSuccess.png Graphic file (type png)
+<use img/Naps/NapsConfigSuccess.png>
+Package luatex.def Info: img/Naps/NapsConfigSuccess.png  used on input line 171
+.
+(luatex.def)             Requested size: 398.33858pt x 195.2134pt.
+<img/Naps/NapsDifferentWidths.png, id=1341, 247.52475pt x 29.51025pt>
+File: img/Naps/NapsDifferentWidths.png Graphic file (type png)
+<use img/Naps/NapsDifferentWidths.png>
+Package luatex.def Info: img/Naps/NapsDifferentWidths.png  used on input line 1
+87.
+(luatex.def)             Requested size: 398.33858pt x 47.4947pt.
+
+
+[94]
+
+[95<./img/Naps/NapsDefaultColors.png><./img/Naps/NapsTaskLikeColors.png><./img/N
+aps/NapsConfigSuccess.png><./img/Naps/NapsDifferentWidths.png>]
+
+[96])
+
+[97]
 \openout2 = 9_numatv.aux
  (./9_numatv.tex
 Kapitola 9.
 
 
-[74
-
-
-
-
-])
-
-[75]
-\openout2 = 10_dodatečné.aux
- (./10_dodatečné.tex
-Kapitola 10.
-
-
-[76
+[98
 
 
 
 
 ]
-<img/Modifikace/modif-get-colors-traced.png, id=1046, 675.42056pt x 226.94131pt
+warning  (file img/NUMATV/block-tree.pdf) (pdf inclusion): PDF inclusion: found 
+PDF version '1.5', but at most version '1.4' allowed
+<img/NUMATV/block-tree.pdf, id=1374, 845.04684pt x 426.79134pt>
+File: img/NUMATV/block-tree.pdf Graphic file (type pdf)
+<use img/NUMATV/block-tree.pdf>
+Package luatex.def Info: img/NUMATV/block-tree.pdf  used on input line 29.
+(luatex.def)             Requested size: 398.33858pt x 201.17805pt.
+
+
+[99]
+
+LaTeX Warning: Citation 'Hwloc-Docs' on page 100 undefined on input line 62.
+
+
+
+[100]
+
+LaTeX Warning: Reference `cbreak-cfg-subsec' on page 101 undefined on input lin
+e 75.
+
+
+
+[101]
+
+LaTeX Warning: Reference `numatv-grt' on page 102 undefined on input line 95.
+
+
+LaTeX Warning: Reference `numatv-cfg-subsec' on page 102 undefined on input lin
+e 95.
+
+
+
+[102]
+
+[103]
+
+[104]
+
+[105]
+
+[106]
+
+[107]
+
+[108]
+
+[109])
+
+[110]
+
+[111<./img/NUMATV/block-tree.pdf>]
+\openout2 = 10_dodatečné.aux
+ (./10_dodatečné.tex
+Kapitola 10.
+
+
+[112
+
+
+
+
+]
+<img/Modifikace/modif-get-colors-traced.png, id=1474, 675.42056pt x 226.94131pt
 >
 File: img/Modifikace/modif-get-colors-traced.png Graphic file (type png)
 <use img/Modifikace/modif-get-colors-traced.png>
 Package luatex.def Info: img/Modifikace/modif-get-colors-traced.png  used on in
 put line 28.
 (luatex.def)             Requested size: 398.33858pt x 133.84225pt.
-<img/Modifikace/modif-preview-labels-changeable.png, id=1048, 549.85425pt x 93.
+<img/Modifikace/modif-preview-labels-changeable.png, id=1476, 549.85425pt x 93.
 34875pt>
 File: img/Modifikace/modif-preview-labels-changeable.png Graphic file (type png
 )
@@ -1711,13 +1876,13 @@ ed on input line 54.
 (luatex.def)             Requested size: 398.33858pt x 67.62695pt.
 
 
-[77]
+[113]
 Overfull \hbox (5.00198pt too wide) in paragraph at lines 63--64
 \TU/lmr/m/n/12 BOX_MASK. Tato maska značí, zdali se zá-znam účastní kres-l
 ení mezi-záznamových|
  []
 
-<img/Modifikace/modif-noboxes-good.png, id=1058, 616.10175pt x 78.89474pt>
+<img/Modifikace/modif-noboxes-good.png, id=1486, 616.10175pt x 78.89474pt>
 File: img/Modifikace/modif-noboxes-good.png Graphic file (type png)
 <use img/Modifikace/modif-noboxes-good.png>
 Package luatex.def Info: img/Modifikace/modif-noboxes-good.png  used on input l
@@ -1725,14 +1890,15 @@ ine 70.
 (luatex.def)             Requested size: 398.33858pt x 51.0089pt.
 )
 
-[78]
+[114]
 
-[79<./img/Modifikace/modif-get-colors-traced.png><./img/Modifikace/modif-preview
--labels-changeable.png><./img/Modifikace/modif-noboxes-good.png>]
+[115<./img/Modifikace/modif-get-colors-traced.png><./img/Modifikace/modif-previe
+w-labels-changeable.png><./img/Modifikace/modif-noboxes-good.png>]
 \openout2 = zaver.aux
- (./zaver.tex)
 
-[80
+(./zaver.tex)
+
+[116
 
 
 
@@ -1749,7 +1915,7 @@ LaTeX Warning: Empty bibliography on input line 15.
 \openout9 = thesis.lof
 
 
-[81
+[117
 
 
 
@@ -1762,11 +1928,11 @@ LaTeX Warning: Empty bibliography on input line 15.
 \openout10 = thesis.lot
 
 
-[82
+[118
 
 ]
 
-[83
+[119
 
 ]
 P\v {r}\'{\i }loha A.
@@ -1780,7 +1946,7 @@ See the caption package documentation for explanation.
 
 
 
-[84
+[120
 
 ] (./tmp/thesis.aux (./tmp/title.aux) (./tmp/uvod.aux)
 (./tmp/1_trasování_v_linuxu.aux) (./tmp/2_vizualizace_traceů.aux)
@@ -1804,8 +1970,8 @@ Package rerunfilecheck Warning: File `thesis.out' has changed.
 (rerunfilecheck)                or use package `bookmark'.
 
 Package rerunfilecheck Info: Checksums for `thesis.out':
-(rerunfilecheck)             Before: 0367A282B47639EE4280A5E8B42D7E1A;15801
-(rerunfilecheck)             After:  8B25CFF570C1A25E2F20AD53569681DE;15815.
+(rerunfilecheck)             Before: 98D601BEE0E5C91C781A3C5548C0B8A8;20615
+(rerunfilecheck)             After:  F4305EAB6A2862AE3F8D1F04F1B377E6;20620.
 
 Package biblatex Warning: Please (re)run Biber on the file:
 (biblatex)                thesis
@@ -1817,60 +1983,28 @@ Package logreq Info: Writing requests to 'thesis.run.xml'.
 )
 
 Here is how much of LuaTeX's memory you used:
- 30843 strings out of 475506
+ 31181 strings out of 475506
  125081,1648299 words of node,token memory allocated
- 778 words of node memory still in use:
+ 790 words of node memory still in use:
    8 hlist, 2 vlist, 2 rule, 1 local_par, 10 glue, 5 kern, 1 penalty, 2 margin_k
-ern, 5 glyph, 24 attribute, 72 glue_spec, 14 attribute_list, 1 write, 3 pdf_acti
+ern, 5 glyph, 26 attribute, 72 glue_spec, 15 attribute_list, 1 write, 4 pdf_acti
 on nodes
-   avail lists: 1:1,2:1637,3:468,4:179,5:761,6:135,7:8935,8:2,9:738,10:27,11:942
+   avail lists: 2:1685,3:465,4:187,5:781,6:135,7:9306,8:2,9:747,10:27,11:968
+ 52809 multiletter control sequences out of 65536+600000
+ 83 fonts using 6502423 bytes
+ 89i,8n,90p,2213b,3524s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/share/fonts/texlive-lm/lmmonolt10-bold.otf></usr/share/fonts/texlive-lm/lm
+roman7-regular.otf></usr/share/fonts/texlive-lm/lmroman8-regular.otf></usr/share
+/fonts/texlive-lm/lmroman10-regular.otf></usr/share/fonts/texlive-lm/lmroman10-b
+old.otf></usr/share/fonts/texlive-lm/lmmono10-regular.otf></usr/share/fonts/texl
+ive-lm/lmmono12-regular.otf></usr/share/fonts/texlive-lm/lmroman12-italic.otf>{/
+usr/share/texmf/fonts/enc/dvips/lm/lm-rm.enc}</usr/share/fonts/texlive-lm/lmroma
+n12-regular.otf></usr/share/fonts/texlive-lm/lmroman17-regular.otf></usr/share/f
+onts/texlive-lm/lmroman12-bold.otf></usr/share/texmf/fonts/type1/public/lm/lmr12
+.pfb>
+Output written on thesis.pdf (120 pages, 3609992 bytes).
 
- 52631 multiletter control sequences out of 65536+600000
- 82 fonts using 6376015 bytes
- 89i,8n,90p,2213b,3497s stack positions out of 10000i,1000n,20000p,200000b,200000s
-
-warning  (pdf backend): unreferenced destination with name 'figure.caption.53'
-
-warning  (pdf backend): unreferenced destination with name 'figure.caption.60'
-
-warning  (pdf backend): unreferenced destination with name 'figure.caption.59'
-
-warning  (pdf backend): unreferenced destination with name 'figure.caption.58'
-
-warning  (pdf backend): unreferenced destination with name 'figure.caption.57'
-
-warning  (pdf backend): unreferenced destination with name 'figure.caption.54'
-
-warning  (pdf backend): unreferenced destination with name 'figure.caption.52'
-
-warning  (pdf backend): unreferenced destination with name 'figure.caption.48'
-
-warning  (pdf backend): unreferenced destination with name 'figure.caption.43'
-
-warning  (pdf backend): unreferenced destination with name 'figure.caption.38'
-
-warning  (pdf backend): unreferenced destination with name 'figure.caption.37'
-
-warning  (pdf backend): unreferenced destination with name 'figure.caption.23'
-
-warning  (pdf backend): unreferenced destination with name 'chapter*.65'
-
-warning  (pdf backend): unreferenced destination with name 'chapter*.64'
-
-warning  (pdf backend): unreferenced destination with name 'chapter*.63'
-
-warning  (pdf backend): unreferenced destination with name 'chapter*.62'
-</usr/share/fonts/texlive-lm/lmroman7-regular.otf></usr/share/fonts/texlive-lm/l
-mroman8-regular.otf></usr/share/fonts/texlive-lm/lmroman10-regular.otf></usr/sha
-re/fonts/texlive-lm/lmroman10-bold.otf></usr/share/fonts/texlive-lm/lmmono10-reg
-ular.otf></usr/share/fonts/texlive-lm/lmmono12-regular.otf></usr/share/fonts/tex
-live-lm/lmroman12-italic.otf>{/usr/share/texmf/fonts/enc/dvips/lm/lm-rm.enc}</us
-r/share/fonts/texlive-lm/lmroman12-regular.otf></usr/share/fonts/texlive-lm/lmro
-man17-regular.otf></usr/share/fonts/texlive-lm/lmroman12-bold.otf></usr/share/te
-xmf/fonts/type1/public/lm/lmr12.pfb>
-Output written on thesis.pdf (84 pages, 3234767 bytes).
-
-PDF statistics: 1200 PDF objects out of 1200 (max. 8388607)
- 288 named destinations out of 1000 (max. 131072)
- 848 words of extra memory for PDF output out of 10000 (max. 100000000)
+PDF statistics: 1649 PDF objects out of 1728 (max. 8388607)
+ 412 named destinations out of 1000 (max. 131072)
+ 1072 words of extra memory for PDF output out of 10000 (max. 100000000)
 
