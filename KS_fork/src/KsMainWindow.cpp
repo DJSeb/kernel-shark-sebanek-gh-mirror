@@ -16,6 +16,9 @@
 
 // C++11
 #include <thread>
+//NOTE: Changed here. (NUMA TV) (2025-06-17)
+#include <iostream>
+// END of change
 
 // Qt
 #include <QMenu>
@@ -1529,7 +1532,7 @@ void KsMainWindow::loadSession(const QString &fileName)
 
 	//NOTE: Changed here. (NUMA TV) (2025-04-20)
 	// Topology configurations have to be loaded before the graphs, otherwise
-	// we miss a cpuTopoReDraw, which would show the topology widgets for each stream.
+	// we miss a cpuReDraw, which would show the topology widgets for each stream.
 	_session.loadTopology(&_graph, _graph.getNUMATVContext());
 	pb.setValue(185);
 	// END of change
@@ -1870,6 +1873,7 @@ static void apply_numatv_update(int stream_id, TopoViewType view,
 {
 	// Proper file was given + config exists, applying means updating the configuration
 	int result = numatv_ctx.updateConfig(stream_id, view, topology_file.toStdString());
+	QString msg;
 	
 	switch (result) {
 	case 1:
@@ -1882,23 +1886,30 @@ static void apply_numatv_update(int stream_id, TopoViewType view,
 		break;
 	case -1:
 		// Topology was not created due to a CPU count mismatch - no need to redraw
-		printf("[INFO] Topology file '%s' doesn't have the same amount "
-			"of CPUs as stream '%d', topology configuration was not updated.\n",
-			topology_file.toStdString().c_str(), stream_id);
+		msg = QString{"[INFO] Topology file '%1' doesn't have the same amount "
+			"of CPUs as stream '%2', topology configuration was not updated."
+		}.arg(topology_file).arg(stream_id);
+		std::cout << msg.toStdString() << std::endl;
 		break;
 	case -2:
 		// Couldn't get Kshark context - no need to redraw
-		printf("[ERROR] Couldn't get Kshark context during topology update for stream '%d'\n",
-			stream_id);
+		msg = QString{
+			"[ERROR] Couldn't get Kshark context during topology update for stream '%1'"
+		}.arg(stream_id);
+		std::cerr << msg.toStdString() << std::endl;
 		break;
 	case -3:
 		// Couldn't find previous configuration - no need to redraw
-		printf("[ERROR] Couldn't find previous topology configuration for stream '%d', "
-			"topology configuration was not updated.\n", stream_id);
+		msg = QString{"[ERROR] Couldn't find previous topology configuration for stream '%1', "
+			"topology configuration was not updated."}.arg(stream_id);
+		std::cerr << msg.toStdString() << std::endl;
 		break;
 	default:
 		// Unknown error - no need to redraw
-		printf("[ERROR] Unknown error during topology update for stream '%d'\n", stream_id);
+		msg = QString{
+			"[ERROR] Unknown error during topology update for stream '%1'"
+		}.arg(stream_id);
+		std::cerr << msg.toStdString() << std::endl;
 		break;
 	}
 }
@@ -1925,6 +1936,7 @@ static void apply_numatv_remove(int stream_id, KsTopoViewsContext& numatv_ctx,
 	KsTraceGraph* graph)
 {
 	int result = numatv_ctx.deleteConfig(stream_id);
+	QString msg;
 	
 	switch (result) {
 	case 1:
@@ -1937,8 +1949,10 @@ static void apply_numatv_remove(int stream_id, KsTopoViewsContext& numatv_ctx,
 		break;
 	default:
 		// Unknown error - no need to redraw
-		printf("[ERROR] Unknown error during topology removal for stream '%d'\n",
-			stream_id);
+		msg = QString{
+			"[ERROR] Unknown error during topology removal for stream '%1'"
+		}.arg(stream_id);
+		std::cerr << msg.toStdString() << std::endl;
 		break;
 	}
 }
@@ -1972,7 +1986,7 @@ static void apply_numatv_new_topo(int stream_id, TopoViewType view,
 {
 	// Proper file was given + no config exists, applying means creating new topology
 	int result = numatv_ctx.addConfig(stream_id, view, topology_file.toStdString());
-	QString err_msg;
+	QString msg;
 
 	switch (result) {
 	case 0:
@@ -1984,21 +1998,22 @@ static void apply_numatv_new_topo(int stream_id, TopoViewType view,
 		break;
 	case -1:
 		// Topology was not created due to a CPU count mismatch - no need to redraw
-		printf("[INFO] Topology file '%s' doesn't have the same amount "
-			"of CPUs as stream '%d', topology configuration was not created.\n",
-			topology_file.toStdString().c_str(), stream_id);
+		msg = QString{"[INFO] Topology file '%1' doesn't have the same amount "
+			"of CPUs as stream '%2', topology configuration was not created."
+		}.arg(topology_file).arg(stream_id);
+		std::cout << msg.toStdString() << std::endl;
 		break;
 	case -2:
 		// Couldn't get Kshark context - no need to redraw
-		err_msg = QString{"[ERROR] Couldn't get Kshark context during topology "
+		msg = QString{"[ERROR] Couldn't get Kshark context during topology "
 			"creation for stream '%1'"}.arg(stream_id);
-		printf(err_msg.toStdString().c_str());
+		std::cerr << msg.toStdString() << std::endl;
 		break;
 	default:
 		// Unknown error - no need to redraw
-		err_msg = QString{"[ERROR] Unknown error during topology "
+		msg = QString{"[ERROR] Unknown error during topology "
 			"creation for stream '%1'"}.arg(stream_id);
-		printf(err_msg.toStdString().c_str());
+		std::cerr << msg.toStdString() << std::endl;
 		break;
 	}
 }
