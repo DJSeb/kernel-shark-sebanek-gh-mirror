@@ -48,7 +48,8 @@ are interchangeable for NUMA node nodes.
 *NUMA TV Context* - Configuration object for a KernelShark process, which manages per stream
 configurations of which topologies are loaded, if any, and what view a stream is requesting to be
 used during topology visualisation.
-*OS index*
+*OS index* - Index given to a hardware component by the operating system. It doesn't respect topology
+and isn't very useful for visualisations. KernelShark uses these for CPUs in default view.
 *Package* - Physical place where cores are installed (according to hwloc). Another type of a node in
 a topology.
 *PU* - Processing unit, in hwloc analogous to what KernelShark would call a CPU. Can be grouped in a core.
@@ -364,7 +365,7 @@ through it.
 ### Location of wrapper topology widget
 
 Wrapper topology widget is situated on the left of the GL widget. It is either
-completely or hidden by the topology button. This way, the topology tree will
+completely visible or hidden by the topology button. This way, the topology tree will
 perfectly match with (possibly rearranged) CPU graphs of a stream.
 
 ### Creating a topology widget
