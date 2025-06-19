@@ -100,6 +100,7 @@ if (Qt6Widgets_FOUND AND TT_FONT_FILE)
                         KsAdvFilteringDialog.hpp
                         #NOTE: Changed here. (NUMA TV) (2025-04-06)
                         KsNUMATopologyViews.hpp
+                        KsStreamNUMATopology.hpp
                         # END of change
                         )
 
@@ -121,6 +122,7 @@ if (Qt6Widgets_FOUND AND TT_FONT_FILE)
                                                             KsAdvFilteringDialog.cpp
                                                             #NOTE: Changed here. (NUMA TV) (2025-04-06)
                                                             KsNUMATopologyViews.cpp
+                                                            KsStreamNUMATopology.cpp
                                                             # END of change
                                                             )
 
