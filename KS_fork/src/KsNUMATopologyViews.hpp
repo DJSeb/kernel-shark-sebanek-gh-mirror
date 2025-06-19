@@ -94,6 +94,8 @@ private:
 public:
     bool existsFor(int stream_id) const;
 
+    bool stream_wants_topology_widget(int stream_id) const;
+
     int addConfig(int stream_id, TopoViewType view, const std::string& topology_file);
     
     int updateConfig(int stream_id, TopoViewType view, const std::string& topology_file);
@@ -114,8 +116,7 @@ int numatv_count_cores(const TopoNodeCorePU& brief_topo);
 TopoNodeCorePU numatv_filter_by_PUs(const TopoNodeCorePU& brief_topo,
     const QVector<int>& PUs);
 
-bool numatv_stream_wants_topology_widget(int stream_id,
-    const KsTopoViewsContext& numatv_ctx);
+
 
 #endif // _KS_NUMA_TV_HPP
 // END of change

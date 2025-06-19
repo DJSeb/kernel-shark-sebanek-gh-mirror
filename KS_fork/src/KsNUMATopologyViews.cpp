@@ -76,6 +76,23 @@ bool KsTopoViewsContext::existsFor(int stream_id) const
 { return _active_numatvs.count(stream_id) > 0; }
 
 /**
+ * @brief Checks whether a given stream wants to show a topology widget or
+ * use the default view (no topology widget).
+ * 
+ * @param stream_id ID of the stream to check for.
+ * @return True if the stream wants to show a topology widget, false otherwise.
+ */
+bool KsTopoViewsContext::stream_wants_topology_widget(int stream_id) const {
+	bool show_this_topo = false;
+	if (existsFor(stream_id)) {
+		const StreamNUMATopologyConfig* cfg_observer = observeConfig(stream_id);
+		show_this_topo = (cfg_observer->getViewType() != TopoViewType::DEFAULT);
+	}
+		
+	return show_this_topo;
+}
+
+/**
  * @brief Attempts to add a new topology configuration for a given stream ID.
  * Returns an exit code indicating success or failures.
  * 
@@ -413,25 +430,6 @@ TopoNodeCorePU numatv_filter_by_PUs(const TopoNodeCorePU& brief_topo, const QVec
     }
 
     return filtered_topo;
-}
-
-/**
- * @brief Checks whether a given stream wants to show a topology widget or
- * use the default view (no topology widget).
- * 
- * @param stream_id ID of the stream to check for.
- * @param numatv_ctx NUMA TV context, containing the topology configurations.
- * @return True if the stream wants to show a topology widget, false otherwise.
- */
-bool numatv_stream_wants_topology_widget(int stream_id, const KsTopoViewsContext& numatv_ctx)
-{
-	bool show_this_topo = false;
-	if (numatv_ctx.existsFor(stream_id)) {
-		const StreamNUMATopologyConfig* cfg_observer = numatv_ctx.observeConfig(stream_id);
-		show_this_topo = (cfg_observer->getViewType() != TopoViewType::DEFAULT);
-	}
-		
-	return show_this_topo;
 }
 
 // END of change
