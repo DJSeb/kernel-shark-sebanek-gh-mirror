@@ -2088,7 +2088,7 @@ void KsMainWindow::_updateNUMATVs(QVector<StreamNUMATVSettings> stream_numa) {
 		apply_numatv(stream_id, view, topology_file, numatv_ctx, graphPtr());
 
 		// Hide or show the topology widget if a topology view is asked for
-		hide_topo_button &= !(numatv_ctx.stream_wants_topology_widget(stream_id));
+		hide_topo_button &= !(numatv_ctx.streamWantsTopoWidget(stream_id));
 	}
 	
 	graphPtr()->numatvHideTopologyWidget(hide_topo_button);

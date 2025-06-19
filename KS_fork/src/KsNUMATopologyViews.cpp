@@ -82,7 +82,7 @@ bool KsTopoViewsContext::existsFor(int stream_id) const
  * @param stream_id ID of the stream to check for.
  * @return True if the stream wants to show a topology widget, false otherwise.
  */
-bool KsTopoViewsContext::stream_wants_topology_widget(int stream_id) const {
+bool KsTopoViewsContext::streamWantsTopoWidget(int stream_id) const {
 	bool show_this_topo = false;
 	if (existsFor(stream_id)) {
 		const StreamNUMATopologyConfig* cfg_observer = observeConfig(stream_id);

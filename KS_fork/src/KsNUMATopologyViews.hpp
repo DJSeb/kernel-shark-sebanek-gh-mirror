@@ -94,7 +94,7 @@ private:
 public:
     bool existsFor(int stream_id) const;
 
-    bool stream_wants_topology_widget(int stream_id) const;
+    bool streamWantsTopoWidget(int stream_id) const;
 
     int addConfig(int stream_id, TopoViewType view, const std::string& topology_file);
     

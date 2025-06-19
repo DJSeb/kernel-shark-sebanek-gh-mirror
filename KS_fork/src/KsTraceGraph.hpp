@@ -135,7 +135,6 @@ public:
 	 * @return Reference to the NUMA TV context.
 	 */
 	KsTopoViewsContext& getNUMATVContext() { return _numaTvCtx; }
-	// END of change
 
 	void numatvHideTopologyWidget(bool hide);
 
