@@ -11,9 +11,7 @@ Vizualizátory také mohou obsahovat funkcionality, které nejsou či nemohou b�
 
 \section{HPerf}
 
-[TODO: https://www.poirrier.ca/hperf/]
-
-HPerf je frontendová aplikace pro nástroj Perf. Perf samotný se již snaží o pěkné zobrazení dat v terminálu, HPerf jde o krok dál a z dat vytvořených od \texttt{perf record} dokáže vytvořit stránku v HTML s JavaScriptem (viz obrázek \ref{hperfexample}), kterou lze navíc stylově upravovat pomocí vlastních CSS pravidel. HPerf dokáže vykonat práci \texttt{perf annotate} a \texttt{perf report} a navíc přidává vlastní funkcionality, to vše v GUI, k níž potřebujete pouze internetový prohlížeč s podporou JavaScriptu. Program má také minimální závislosti, jimiž jsou již zmíněný internetový prohlížeč, Perf, pak nástroje \texttt{objdump} a volitelně \texttt{highlight}. Na sestavení pak stačí použít buď GCC, nebo Clang, a program Make.
+HPerf \cite{Hperf-Pages} je frontendová aplikace pro nástroj Perf. Perf samotný se již snaží o pěkné zobrazení dat v terminálu, HPerf jde o krok dál a z dat vytvořených od \texttt{perf record} dokáže vytvořit stránku v HTML s JavaScriptem (viz obrázek \ref{hperfexample}), kterou lze navíc stylově upravovat pomocí vlastních CSS pravidel. HPerf dokáže vykonat práci \texttt{perf annotate} a \texttt{perf report} a navíc přidává vlastní funkcionality, to vše v GUI, k níž potřebujete pouze internetový prohlížeč s podporou JavaScriptu. Program má také minimální závislosti, jimiž jsou již zmíněný internetový prohlížeč, Perf, pak nástroje \texttt{objdump} a volitelně \texttt{highlight}. Na sestavení pak stačí použít buď GCC, nebo Clang, a program Make.
 
 HPerf umí zobrazit assembly kód programu z dat a v okénku vedle i příslušnou část zdrojového kódu. Tato dvě okna jsou nezávislá. Okno se zdrojovým kódem navíc podporuje zvýrazňování syntaxe zkompilovaného jazyka.
 
@@ -28,11 +26,9 @@ HPerf dokáže pracovat s dlouhými trasovacími daty, ale velké binární soub
 \section{Flame Graphs}
 \label{flamegrafy}
 
-[TODO: https://github.com/brendangregg/FlameGraph a https://www.brendangregg.com/flamegraphs.html]
+Flame Graphs \cite{FlameGraphs-GitHub} jsou jedním z výtvorů Brendana Gregga, známé osobnosti ve vizualizaci trasovacích dat, momentálně zaměstnaným ve společnosti Intel. Flame Graphs jsou grafy, které zvýrazňují hierarchická data, primárně vytvořené pro zobrazení zásobníku systému. Nejníže jsou nejširší, tedy nejvíce časté, prvky z dat, které jsou abecedně seřazeny. Ve spodní vrstvě najdeme bloky odpovídající funkcím nejčastěji se vyskytujícím v nasbíraných datech. Čím širší blok, tím častěji se tato funkce na zásobníku objevuje. Nad každým blokem jsou pak \uv{potomci} (funkce volané z funkce v daném bloku). Tímto způsobem graf zobrazuje hierarchii volání.
 
-Flame Graphs jsou jedním z výtvorů Brendana Gregga, známé osobnosti ve vizualizaci trasovacích dat, momentálně zaměstnaným ve společnosti Intel. Flame Graphs jsou grafy, které zvýrazňují hierarchická data, primárně vytvořené pro zobrazení zásobníku systému. Nejníže jsou nejširší, tedy nejvíce časté, prvky z dat, které jsou abecedně seřazeny. Ve spodní vrstvě najdeme bloky odpovídající funkcím nejčastěji se vyskytujícím v nasbíraných datech. Čím širší blok, tím častěji se tato funkce na zásobníku objevuje. Nad každým blokem jsou pak \uv{potomci} (funkce volané z funkce v daném bloku). Tímto způsobem graf zobrazuje hierarchii volání.
-
-Své jméno dostaly podle jejich tvaru a původnímu výběru barev, což byly hlavně teplé barvy. FlameGraph může vypadat například jako na obrázku \ref{bg-flamegraf} (příklad ze stránek Brendana Gregga). Tyto grafy se dají použít kromě zkoumání času na CPU i na průzkum času stráveném mimo CPU (např. když je proces blokován čekáním na data, nebo při preemptivním přepnutí), analýzu alokací paměti nebo celkem nově na vizualizaci profilování na GPU či AI akcelerátoru společně s celým zásobníkem, tzv. AI FlameGraphs. AI FlameGraphs mohou analyzovat výkonostní nedostatky běžící umělé inteligence a efektivně tak určit místa, kde by měly existovat optimalizace. Tím se může výrazně zlepšit spotřeba energie, pro kterou jsou umělé inteligence nechvalně známy.
+Své jméno dostaly podle jejich tvaru a původnímu výběru barev, což byly hlavně teplé barvy. FlameGraph může vypadat například jako na obrázku \ref{bg-flamegraf} (příklad ze stránek Brendana Gregga \cite{FlameGraphs-Pages}). Tyto grafy se dají použít kromě zkoumání času na CPU i na průzkum času stráveném mimo CPU (např. když je proces blokován čekáním na data, nebo při preemptivním přepnutí), analýzu alokací paměti nebo celkem nově na vizualizaci profilování na GPU či AI akcelerátoru společně s celým zásobníkem, tzv. AI Flame Graphs. AI Flame Graphs mohou analyzovat výkonostní nedostatky běžící umělé inteligence a efektivně tak určit místa, kde by měly existovat optimalizace. Tím se může výrazně zlepšit spotřeba energie, pro kterou jsou umělé inteligence nechvalně známy.
 
 \begin{figure}[p]\centering
     \includegraphics[width=140mm]{img/Vizualizátory/brendan-gregg-example_cpu-linux-tar.pdf}
@@ -40,9 +36,8 @@ Své jméno dostaly podle jejich tvaru a původnímu výběru barev, což byly h
     \label{bg-flamegraf}
 \end{figure}
 
-Tato vizualizace je velmi rozšířena a existuje mnoho implementací. Některé mění barvy prvků tak, aby se ukázala příslušnost v kódu, některé vytváří \uv{rampouchové grafy}, tj. FlameGraph otočený vzhůru nohama, s chladnými barvami. Tento typ vizualizace se pak hodí, pokud jsou zásobníky dlouhé a vrchní oblast by byla příliš řídká. Zajímavou změnou jsou \uv{sunburst grafy}, kdy se FlameGraph transformuje do koláčového grafu, jak ukazuje obrázek \ref{sunburstgraf}, získaný z \href{https://github.com/Etsukata/d3js_trace?tab=readme-ov-file#readme}{GitHubu projektu s tímto cílem}.
+Tato vizualizace je velmi rozšířena a existuje mnoho implementací. Některé mění barvy prvků tak, aby se ukázala příslušnost v kódu, některé vytváří \uv{rampouchové grafy}, tj. FlameGraph otočený vzhůru nohama, s chladnými barvami. Tento typ vizualizace se pak hodí, pokud jsou zásobníky dlouhé a vrchní oblast by byla příliš řídká. Zajímavou změnou jsou \uv{sunburst grafy}, kdy se FlameGraph transformuje do koláčového grafu, jak ukazuje obrázek \ref{sunburstgraf}, získaný z GitHubu tohoto projektu \cite{SunburstGraphs}.
 
-[TODO: Brát obrázky z internetu není úplně OK]
 \begin{figure}[p]\centering
     \includegraphics[width=140mm]{img/Vizualizátory/sunburstgraf.png}
     \caption{Ukázka sunburst grafu v akci}
@@ -53,11 +48,8 @@ Brendan Gregg nabízí i Perl program na vytváření FlameGraphů z dat Perfu n
 
 \section{TraceShark}
 
-[TODO: https://github.com/cunctator/traceshark]
+Prvním \uv{žraločím} nástrojem který si představíme je je TraceShark \cite{TraceShark}. Tento vizualizátor se zaměřuje na vizualizaci událostí plánovače úloh v kernelu, specificky na události přepínání kontextu, probuzení procesu, vytváření a zavírání procesů, frekvenci CPU a neaktivitu CPU. Tyto události musí být sesbírány buď přes Perf nebo Ftrace (či frontendy pro Ftrace, jako Trace-cmd). Nástroj je open-source a stále ve fázi vývoje, seznam podporovaných událostí tedy může dále růst. Ukázku GUI lze vidět na obrázku \ref{traceshark-github}, který je veřejně dostupný na GitHubu projektu. Mezi KernelSharkem a TraceSharkem neexistuje přímá spojitost, nicméně sdílí podobné rozhraní, některé cíle a podobné jméno.
 
-Prvním \uv{žraločím} nástrojem který si představíme je je TraceShark. Tento vizualizátor se zaměřuje na vizualizaci událostí plánovače úloh v kernelu, specificky na události přepínání kontextu, probuzení procesu, vytváření a zavírání procesů, frekvenci CPU a neaktivitu CPU. Tyto události musí být sesbírány buď přes Perf nebo Ftrace (či frontendy pro Ftrace, jako Trace-cmd). Nástroj je open-source a stále ve fázi vývoje, seznam podporovaných událostí tedy může dále růst. Ukázku GUI lze vidět na obrázku \ref{traceshark-github}, který je veřejně dostupný na \href{https://github.com/cunctator/traceshark/blob/master/doc/ts-screenshot5.png}{GitHub repozitáři projektu}. Mezi KernelSharkem a TraceSharkem neexistuje přímá spojitost, nicméně sdílí podobné rozhraní, některé cíle a podobné jméno.
-
-[TODO: Brát obrázky z internetu není úplně OK]
 \begin{figure}[p]\centering
     \includegraphics[width=140mm]{img/Vizualizátory/traceshark-git-hub-example.png}
     \caption{Ukázka GUI TraceSharku}

@@ -351,6 +351,7 @@ INPUT ./img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEntires.png
 INPUT ./img/Stacklook/SlMultipleWindowsMultipleViewsTwoSameEntires.png
 OUTPUT tmp/7_couplebreak.aux
 INPUT ./7_couplebreak.tex
+INPUT /home/djseb-wsl/.cache/texmf/fonts/luatex-cache/generic/fonts/otl/lmroman10-bolditalic.luc
 INPUT ./img/Modifikace/modif-couplebreak-tools.png
 INPUT ./img/Modifikace/modif-couplebreak-tools.png
 INPUT ./img/Modifikace/modif-couplebreak-multiconf.png
@@ -380,6 +381,20 @@ OUTPUT tmp/9_numatv.aux
 INPUT ./9_numatv.tex
 INPUT ./img/NUMATV/block-tree.pdf
 INPUT ./img/NUMATV/block-tree.pdf
+INPUT ./img/NUMATV/numatv-2.png
+INPUT ./img/NUMATV/numatv-2.png
+INPUT ./img/NUMATV/numatv-3.png
+INPUT ./img/NUMATV/numatv-3.png
+INPUT ./img/NUMATV/numatv-5.png
+INPUT ./img/NUMATV/numatv-5.png
+INPUT ./img/NUMATV/numatv-6.png
+INPUT ./img/NUMATV/numatv-6.png
+INPUT ./img/NUMATV/numatv-8.png
+INPUT ./img/NUMATV/numatv-8.png
+INPUT ./img/NUMATV/numatv-4.png
+INPUT ./img/NUMATV/numatv-4.png
+INPUT ./img/NUMATV/PerStreamCfg.pdf
+INPUT ./img/NUMATV/PerStreamCfg.pdf
 OUTPUT tmp/10_dodatečné.aux
 INPUT ./10_dodatečné.tex
 INPUT ./img/Modifikace/modif-get-colors-traced.png
@@ -394,8 +409,6 @@ OUTPUT tmp/literatura.aux
 INPUT ./literatura.tex
 INPUT ./tmp/thesis.lof
 OUTPUT tmp/thesis.lof
-INPUT ./tmp/thesis.lot
-OUTPUT tmp/thesis.lot
 INPUT ./tmp/thesis.aux
 INPUT ./tmp/title.aux
 INPUT ./tmp/uvod.aux

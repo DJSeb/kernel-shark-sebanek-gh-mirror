@@ -25,14 +25,15 @@
 \contentsline {section}{\numberline {3.4}Pluginy}{36}{section.3.4}%
 \contentsline {section}{\numberline {3.5}Architektura programu}{38}{section.3.5}%
 \contentsline {chapter}{\numberline {4}Obecná analýza a stanovení požadavků}{40}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Pluginy a modifikace}{40}{section.4.1}%
-\contentsline {subsection}{\numberline {4.1.1}Označení modifikací v kódu}{41}{subsection.4.1.1}%
-\contentsline {section}{\numberline {4.2}Výběr vylepšení}{41}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Lepší analýza zásobníku kernelu}{41}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Dělení vlastnictví událostí souvisejících se dvěma procesy}{43}{subsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.2.3}Vizualizace nečinnosti procesů}{44}{subsection.4.2.3}%
-\contentsline {subsection}{\numberline {4.2.4}Vizualizace NUMA topologie CPU vedle grafu}{45}{subsection.4.2.4}%
-\contentsline {subsection}{\numberline {4.2.5}Dodatečná vylepšení}{46}{subsection.4.2.5}%
+\contentsline {section}{\numberline {4.1}Jazyk dokumenatace}{40}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Pluginy a modifikace}{40}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Označení modifikací v kódu}{41}{subsection.4.2.1}%
+\contentsline {section}{\numberline {4.3}Výběr vylepšení}{41}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Lepší analýza zásobníku kernelu}{41}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Dělení vlastnictví událostí souvisejících se dvěma procesy}{43}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Vizualizace nečinnosti procesů}{44}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}Vizualizace NUMA topologie CPU vedle grafu}{45}{subsection.4.3.4}%
+\contentsline {subsection}{\numberline {4.3.5}Dodatečná vylepšení}{46}{subsection.4.3.5}%
 \contentsline {chapter}{\numberline {5}Record Kstack}{49}{chapter.5}%
 \contentsline {section}{\numberline {5.1}Cíl}{49}{section.5.1}%
 \contentsline {section}{\numberline {5.2}Analýza}{49}{section.5.2}%
@@ -56,97 +57,106 @@
 \contentsline {subsection}{\numberline {6.2.4}Získání záznamů zásobníku}{56}{subsection.6.2.4}%
 \contentsline {subsection}{\numberline {6.2.5}Plugin pro nemodifikovaný KernelShark}{56}{subsection.6.2.5}%
 \contentsline {section}{\numberline {6.3}Vývojová dokumentace}{56}{section.6.3}%
-\contentsline {section}{\numberline {6.4}Uživatelská dokumentace}{57}{section.6.4}%
-\contentsline {subsection}{\numberline {6.4.1}Jak sestavit a instalovat Stacklook}{57}{subsection.6.4.1}%
-\contentsline {subsubsection}{Sestavení a instalace pouze pluginu}{58}{section*.62}%
-\contentsline {subsubsection}{Sestavení a instalace pomocí KernelSharku}{59}{section*.63}%
-\contentsline {subsubsection}{VAROVÁNÍ - načítání více verzí pluginu}{59}{section*.64}%
-\contentsline {subsection}{\numberline {6.4.2}Jak zapnout/vypnout Stacklook}{59}{subsection.6.4.2}%
-\contentsline {subsection}{\numberline {6.4.3}Jak používat Stacklook}{59}{subsection.6.4.3}%
-\contentsline {subsubsection}{Konfigurace}{59}{section*.66}%
-\contentsline {subsubsection}{V grafu}{64}{section*.72}%
-\contentsline {subsection}{\numberline {6.4.4}Bugy a chyby}{66}{subsection.6.4.4}%
-\contentsline {subsection}{\numberline {6.4.5}Doporučení}{67}{subsection.6.4.5}%
-\contentsline {section}{\numberline {6.5}Rozšíření}{67}{section.6.5}%
-\contentsline {section}{\numberline {6.6}Kritika}{67}{section.6.6}%
-\contentsline {section}{\numberline {6.7}Zhodnocení splnění požadavků}{68}{section.6.7}%
-\contentsline {chapter}{\numberline {7}Couplebreak}{70}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Cíle}{70}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Terminologie}{70}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Analýza}{71}{section.7.3}%
-\contentsline {subsection}{\numberline {7.3.1}Vytváření umělých záznamů}{71}{subsection.7.3.1}%
-\contentsline {subsection}{\numberline {7.3.2}Stav Couplebreaku}{73}{subsection.7.3.2}%
-\contentsline {subsection}{\numberline {7.3.3}Úprava rozhraní datových streamů}{73}{subsection.7.3.3}%
-\contentsline {subsection}{\numberline {7.3.4}Nové Couplebreak API}{74}{subsection.7.3.4}%
-\contentsline {subsection}{\numberline {7.3.5}Konfigurace}{74}{subsection.7.3.5}%
-\contentsline {subsection}{\numberline {7.3.6}Filtry}{75}{subsection.7.3.6}%
-\contentsline {subsection}{\numberline {7.3.7}Propojení s relacemi}{75}{subsection.7.3.7}%
-\contentsline {subsection}{\numberline {7.3.8}Kompatibilita sched\_events s Couplebreakem}{75}{subsection.7.3.8}%
-\contentsline {subsection}{\numberline {7.3.9}Zamítnutá alternativní řešení}{75}{subsection.7.3.9}%
-\contentsline {section}{\numberline {7.4}Vývojová dokumentace}{76}{section.7.4}%
-\contentsline {subsection}{\numberline {7.4.1}Modifikované a nové soubory}{76}{subsection.7.4.1}%
-\contentsline {subsection}{\numberline {7.4.2}Struktura modifikace}{77}{subsection.7.4.2}%
-\contentsline {section}{\numberline {7.5}Uživatelská dokumentace}{78}{section.7.5}%
-\contentsline {subsection}{\numberline {7.5.1}Instalace}{78}{subsection.7.5.1}%
-\contentsline {subsection}{\numberline {7.5.2}Uživatel GUI}{78}{subsection.7.5.2}%
-\contentsline {subsection}{\numberline {7.5.3}Vývojář}{78}{subsection.7.5.3}%
-\contentsline {subsection}{\numberline {7.5.4}Bugy a chyby}{82}{subsection.7.5.4}%
-\contentsline {section}{\numberline {7.6}Rozšíření}{82}{section.7.6}%
-\contentsline {section}{\numberline {7.7}Kritika}{84}{section.7.7}%
-\contentsline {section}{\numberline {7.8}Zhodnocení splnění požadavků}{84}{section.7.8}%
-\contentsline {chapter}{\numberline {8}Naps}{86}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Cíle}{86}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Analýza}{86}{section.8.2}%
-\contentsline {subsection}{\numberline {8.2.1}Propojení s KernelSharkem}{86}{subsection.8.2.1}%
-\contentsline {subsection}{\numberline {8.2.2}Kreslení obdélníků do grafu}{87}{subsection.8.2.2}%
-\contentsline {subsection}{\numberline {8.2.3}Nap obdélníky}{87}{subsection.8.2.3}%
-\contentsline {subsection}{\numberline {8.2.4}Konfigurace}{88}{subsection.8.2.4}%
-\contentsline {subsection}{\numberline {8.2.5}Plugin pro nemodifikovaný KernelShark}{88}{subsection.8.2.5}%
-\contentsline {section}{\numberline {8.3}Vývojová dokumentace}{88}{section.8.3}%
-\contentsline {section}{\numberline {8.4}Uživatelská dokumentace}{89}{section.8.4}%
-\contentsline {subsection}{\numberline {8.4.1}Instalace}{89}{subsection.8.4.1}%
-\contentsline {subsubsection}{Předpoklady}{89}{section*.101}%
-\contentsline {subsubsection}{Sestavení a instalace pouze pluginu}{89}{section*.102}%
-\contentsline {subsubsection}{Sestavení a instalace pomocí KernelSharku}{91}{section*.103}%
-\contentsline {subsubsection}{VAROVÁNÍ - načítání více verzí pluginu}{91}{section*.104}%
-\contentsline {subsection}{\numberline {8.4.2}Naps v GUI}{91}{subsection.8.4.2}%
-\contentsline {subsubsection}{Jak zapnout Naps}{91}{section*.105}%
-\contentsline {subsubsection}{Konfigurace}{91}{section*.107}%
-\contentsline {subsubsection}{Naps v grafech}{94}{section*.113}%
-\contentsline {subsection}{\numberline {8.4.3}Bugy a chyby}{96}{subsection.8.4.3}%
-\contentsline {subsection}{\numberline {8.4.4}Doporučení}{96}{subsection.8.4.4}%
-\contentsline {section}{\numberline {8.5}Rozšíření}{96}{section.8.5}%
-\contentsline {section}{\numberline {8.6}Kritika}{96}{section.8.6}%
-\contentsline {section}{\numberline {8.7}Zhodnocení splnění požadavků}{97}{section.8.7}%
-\contentsline {chapter}{\numberline {9}NUMA Topology Views}{98}{chapter.9}%
-\contentsline {section}{\numberline {9.1}Cíle}{98}{section.9.1}%
-\contentsline {section}{\numberline {9.2}Terminologie}{99}{section.9.2}%
-\contentsline {section}{\numberline {9.3}Analýza}{100}{section.9.3}%
-\contentsline {subsection}{\numberline {9.3.1}Hwloc}{100}{subsection.9.3.1}%
-\contentsline {subsection}{\numberline {9.3.2}Hlášení chyb}{101}{subsection.9.3.2}%
-\contentsline {subsection}{\numberline {9.3.3}Konfigurační dialog}{101}{subsection.9.3.3}%
-\contentsline {subsection}{\numberline {9.3.4}Konfigurace NUMA TV}{102}{subsection.9.3.4}%
-\contentsline {subsection}{\numberline {9.3.5}Grafická reprezentace topologie/GRT}{103}{subsection.9.3.5}%
-\contentsline {subsection}{\numberline {9.3.6}Životnosti}{103}{subsection.9.3.6}%
-\contentsline {subsection}{\numberline {9.3.7}Relace}{103}{subsection.9.3.7}%
-\contentsline {subsection}{\numberline {9.3.8}Zamítnutá alternativní řešení}{103}{subsection.9.3.8}%
-\contentsline {section}{\numberline {9.4}Vývojová dokumentace}{104}{section.9.4}%
-\contentsline {subsection}{\numberline {9.4.1}Modifikované a nové soubory}{104}{subsection.9.4.1}%
-\contentsline {subsection}{\numberline {9.4.2}Struktura modifikace}{105}{subsection.9.4.2}%
-\contentsline {section}{\numberline {9.5}Uživatelská dokumentace}{105}{section.9.5}%
-\contentsline {section}{\numberline {9.6}Rozšíření}{109}{section.9.6}%
-\contentsline {section}{\numberline {9.7}Kritika}{109}{section.9.7}%
-\contentsline {section}{\numberline {9.8}Zhodnocení splnění požadavků}{110}{section.9.8}%
-\contentsline {chapter}{\numberline {10}Dodatečná vylepšení}{112}{chapter.10}%
-\contentsline {section}{\numberline {10.1}Aktualizace kódu zaškrtávacích políček}{112}{section.10.1}%
-\contentsline {section}{\numberline {10.2}Zpřístupnění barev užívaných v grafu}{112}{section.10.2}%
-\contentsline {section}{\numberline {10.3}Reakce objektů v grafu na přejetí myší}{113}{section.10.3}%
-\contentsline {section}{\numberline {10.4}Měnitelné nápisy v hlavičce grafu}{113}{section.10.4}%
-\contentsline {section}{\numberline {10.5}NoBoxes}{114}{section.10.5}%
-\contentsline {chapter}{Závěr}{116}{chapter*.143}%
-\contentsline {section}{\numberline {10.6}Shrnutí práce}{116}{section.10.6}%
-\contentsline {chapter}{Seznam obr\'azk\r {u}}{117}{chapter*.144}%
-\contentsline {chapter}{Seznam tabulek}{118}{chapter*.145}%
-\contentsline {chapter}{Seznam použitých zkratek}{119}{chapter*.146}%
-\contentsline {chapter}{\numberline {A}Přílohy}{120}{appendix.A}%
-\contentsline {section}{\numberline {A.1}První příloha}{120}{section.A.1}%
+\contentsline {section}{\numberline {6.4}Uživatelská dokumentace}{59}{section.6.4}%
+\contentsline {subsection}{\numberline {6.4.1}Jak sestavit a instalovat Stacklook}{59}{subsection.6.4.1}%
+\contentsline {subsubsection}{Sestavení a instalace pouze pluginu}{60}{section*.67}%
+\contentsline {subsubsection}{Sestavení a instalace pomocí KernelSharku}{61}{section*.68}%
+\contentsline {subsubsection}{VAROVÁNÍ - načítání více verzí pluginu}{61}{section*.69}%
+\contentsline {subsection}{\numberline {6.4.2}Jak zapnout/vypnout Stacklook}{61}{subsection.6.4.2}%
+\contentsline {subsection}{\numberline {6.4.3}Jak používat Stacklook}{61}{subsection.6.4.3}%
+\contentsline {subsubsection}{Konfigurace}{61}{section*.71}%
+\contentsline {subsubsection}{V grafu}{66}{section*.77}%
+\contentsline {subsection}{\numberline {6.4.4}Doporučení}{68}{subsection.6.4.4}%
+\contentsline {section}{\numberline {6.5}Bugy a chyby}{68}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Rozšíření}{69}{section.6.6}%
+\contentsline {section}{\numberline {6.7}Kritika}{69}{section.6.7}%
+\contentsline {section}{\numberline {6.8}Zhodnocení splnění požadavků}{70}{section.6.8}%
+\contentsline {chapter}{\numberline {7}Couplebreak}{72}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Cíle}{72}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Terminologie}{72}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Analýza}{73}{section.7.3}%
+\contentsline {subsection}{\numberline {7.3.1}Vytváření umělých záznamů}{73}{subsection.7.3.1}%
+\contentsline {subsection}{\numberline {7.3.2}Stav Couplebreaku}{75}{subsection.7.3.2}%
+\contentsline {subsection}{\numberline {7.3.3}Úprava rozhraní datových streamů}{75}{subsection.7.3.3}%
+\contentsline {subsection}{\numberline {7.3.4}Nové Couplebreak API}{76}{subsection.7.3.4}%
+\contentsline {subsection}{\numberline {7.3.5}Konfigurace}{76}{subsection.7.3.5}%
+\contentsline {subsection}{\numberline {7.3.6}Filtry}{77}{subsection.7.3.6}%
+\contentsline {subsection}{\numberline {7.3.7}Propojení s relacemi}{77}{subsection.7.3.7}%
+\contentsline {subsection}{\numberline {7.3.8}Kompatibilita sched\_events s Couplebreakem}{77}{subsection.7.3.8}%
+\contentsline {subsection}{\numberline {7.3.9}Zamítnutá alternativní řešení}{77}{subsection.7.3.9}%
+\contentsline {section}{\numberline {7.4}Vývojová dokumentace}{78}{section.7.4}%
+\contentsline {subsection}{\numberline {7.4.1}Struktura modifikace}{78}{subsection.7.4.1}%
+\contentsline {subsection}{\numberline {7.4.2}Úpravy mimo logiku modifikace}{81}{subsection.7.4.2}%
+\contentsline {subsection}{\numberline {7.4.3}Vyvíjení pro KernelShark s Couplebreakem}{81}{subsection.7.4.3}%
+\contentsline {section}{\numberline {7.5}Uživatelská dokumentace}{82}{section.7.5}%
+\contentsline {subsection}{\numberline {7.5.1}Instalace}{82}{subsection.7.5.1}%
+\contentsline {subsection}{\numberline {7.5.2}GUI}{82}{subsection.7.5.2}%
+\contentsline {section}{\numberline {7.6}Bugy a chyby}{84}{section.7.6}%
+\contentsline {section}{\numberline {7.7}Rozšíření}{84}{section.7.7}%
+\contentsline {section}{\numberline {7.8}Kritika}{87}{section.7.8}%
+\contentsline {section}{\numberline {7.9}Zhodnocení splnění požadavků}{87}{section.7.9}%
+\contentsline {chapter}{\numberline {8}Naps}{89}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Cíle}{89}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Analýza}{89}{section.8.2}%
+\contentsline {subsection}{\numberline {8.2.1}Propojení s KernelSharkem}{89}{subsection.8.2.1}%
+\contentsline {subsection}{\numberline {8.2.2}Kreslení obdélníků do grafu}{90}{subsection.8.2.2}%
+\contentsline {subsection}{\numberline {8.2.3}Nap obdélníky}{90}{subsection.8.2.3}%
+\contentsline {subsection}{\numberline {8.2.4}Konfigurace}{91}{subsection.8.2.4}%
+\contentsline {subsection}{\numberline {8.2.5}Plugin pro nemodifikovaný KernelShark}{91}{subsection.8.2.5}%
+\contentsline {section}{\numberline {8.3}Vývojová dokumentace}{91}{section.8.3}%
+\contentsline {section}{\numberline {8.4}Uživatelská dokumentace}{93}{section.8.4}%
+\contentsline {subsection}{\numberline {8.4.1}Instalace}{93}{subsection.8.4.1}%
+\contentsline {subsubsection}{Předpoklady}{93}{section*.116}%
+\contentsline {subsubsection}{Sestavení a instalace pouze pluginu}{93}{section*.117}%
+\contentsline {subsubsection}{Sestavení a instalace pomocí KernelSharku}{95}{section*.118}%
+\contentsline {subsubsection}{VAROVÁNÍ - načítání více verzí pluginu}{95}{section*.119}%
+\contentsline {subsection}{\numberline {8.4.2}Naps v GUI}{95}{subsection.8.4.2}%
+\contentsline {subsubsection}{Jak zapnout Naps}{95}{section*.120}%
+\contentsline {subsubsection}{Konfigurace}{95}{section*.122}%
+\contentsline {subsubsection}{Naps v grafech}{98}{section*.128}%
+\contentsline {section}{\numberline {8.5}Bugy a chyby}{100}{section.8.5}%
+\contentsline {subsection}{\numberline {8.5.1}Doporučení}{100}{subsection.8.5.1}%
+\contentsline {section}{\numberline {8.6}Rozšíření}{100}{section.8.6}%
+\contentsline {section}{\numberline {8.7}Kritika}{101}{section.8.7}%
+\contentsline {section}{\numberline {8.8}Zhodnocení splnění požadavků}{101}{section.8.8}%
+\contentsline {chapter}{\numberline {9}NUMA Topology Views}{102}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Cíle}{102}{section.9.1}%
+\contentsline {section}{\numberline {9.2}Terminologie}{103}{section.9.2}%
+\contentsline {section}{\numberline {9.3}Analýza}{104}{section.9.3}%
+\contentsline {subsection}{\numberline {9.3.1}Hwloc}{104}{subsection.9.3.1}%
+\contentsline {subsection}{\numberline {9.3.2}Hlášení chyb}{105}{subsection.9.3.2}%
+\contentsline {subsection}{\numberline {9.3.3}Konfigurační dialog}{105}{subsection.9.3.3}%
+\contentsline {subsection}{\numberline {9.3.4}Konfigurace NUMA~TV}{106}{subsection.9.3.4}%
+\contentsline {subsection}{\numberline {9.3.5}Grafická reprezentace topologie}{107}{subsection.9.3.5}%
+\contentsline {subsubsection}{Topologický strom}{107}{section*.133}%
+\contentsline {subsubsection}{Místo pro topologický strom}{108}{section*.134}%
+\contentsline {subsubsection}{Skrývající tlačítko}{109}{section*.135}%
+\contentsline {subsection}{\numberline {9.3.6}Relace}{109}{subsection.9.3.6}%
+\contentsline {subsection}{\numberline {9.3.7}Zařazení mezi existující kód}{110}{subsection.9.3.7}%
+\contentsline {subsection}{\numberline {9.3.8}Zamítnutá alternativní řešení}{110}{subsection.9.3.8}%
+\contentsline {section}{\numberline {9.4}Vývojová dokumentace}{111}{section.9.4}%
+\contentsline {subsection}{\numberline {9.4.1}Struktura modifikace}{111}{subsection.9.4.1}%
+\contentsline {subsection}{\numberline {9.4.2}Úpravy mimo logiku modifikace}{113}{subsection.9.4.2}%
+\contentsline {subsection}{\numberline {9.4.3}Vyvíjení pro KernelShark s NUMA~TV}{114}{subsection.9.4.3}%
+\contentsline {section}{\numberline {9.5}Uživatelská dokumentace}{114}{section.9.5}%
+\contentsline {subsection}{\numberline {9.5.1}Stav při otevření KernelSharku}{114}{subsection.9.5.1}%
+\contentsline {subsection}{\numberline {9.5.2}Konfigurace}{116}{subsection.9.5.2}%
+\contentsline {subsection}{\numberline {9.5.3}GUI}{116}{subsection.9.5.3}%
+\contentsline {subsubsection}{Kde jsou zobrazeny topologie}{116}{section*.148}%
+\contentsline {subsubsection}{Topologický strom}{118}{section*.152}%
+\contentsline {subsubsection}{Přeuspořádání CPU grafů}{118}{section*.154}%
+\contentsline {subsection}{\numberline {9.5.4}Podpora relací}{121}{subsection.9.5.4}%
+\contentsline {subsection}{\numberline {9.5.5}Bugy a chyby}{121}{subsection.9.5.5}%
+\contentsline {section}{\numberline {9.6}Rozšíření}{121}{section.9.6}%
+\contentsline {section}{\numberline {9.7}Kritika}{122}{section.9.7}%
+\contentsline {section}{\numberline {9.8}Zhodnocení splnění požadavků}{123}{section.9.8}%
+\contentsline {chapter}{\numberline {10}Dodatečná vylepšení}{127}{chapter.10}%
+\contentsline {section}{\numberline {10.1}Aktualizace kódu zaškrtávacích políček}{127}{section.10.1}%
+\contentsline {section}{\numberline {10.2}Zpřístupnění barev užívaných v grafu}{127}{section.10.2}%
+\contentsline {section}{\numberline {10.3}Reakce objektů v grafu na přejetí myší}{128}{section.10.3}%
+\contentsline {section}{\numberline {10.4}Měnitelné nápisy v hlavičce grafu}{128}{section.10.4}%
+\contentsline {section}{\numberline {10.5}NoBoxes}{129}{section.10.5}%
+\contentsline {chapter}{Závěr}{131}{chapter*.168}%
+\contentsline {chapter}{Seznam obr\'azk\r {u}}{132}{chapter*.169}%
+\contentsline {chapter}{\numberline {A}Přílohy}{134}{appendix.A}%
+\contentsline {section}{\numberline {A.1}První příloha}{134}{section.A.1}%

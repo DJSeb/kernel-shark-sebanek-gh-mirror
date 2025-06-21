@@ -15,33 +15,40 @@
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {5.1}{\ignorespaces Zvýraznění změn této modifikace viditelných v GUI}}{51}{figure.caption.51}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {6.1}{\ignorespaces Fungující Stacklook}}{60}{figure.caption.60}%
-\contentsline {figure}{\numberline {6.2}{\ignorespaces Okénko se správou pluginů}}{60}{figure.caption.65}%
-\contentsline {figure}{\numberline {6.3}{\ignorespaces Konfigurační okno Stacklooku pro modifikovaný KernelShark}}{62}{figure.caption.67}%
-\contentsline {figure}{\numberline {6.4}{\ignorespaces Konfigurační okno Stacklooku pro nemodifikovaný KernelShark}}{62}{figure.caption.68}%
-\contentsline {figure}{\numberline {6.5}{\ignorespaces Tlačítka s výchozími barvami}}{63}{figure.caption.69}%
-\contentsline {figure}{\numberline {6.6}{\ignorespaces Tlačítka využívající barvy procesů}}{63}{figure.caption.70}%
-\contentsline {figure}{\numberline {6.7}{\ignorespaces Tlačítka s konfigurovanými barvami}}{63}{figure.caption.71}%
-\contentsline {figure}{\numberline {6.8}{\ignorespaces Reakce tlačítek na přejetí kurzorem myši}}{65}{figure.caption.73}%
-\contentsline {figure}{\numberline {6.9}{\ignorespaces Chování informačního řádku při velkém offsetu do zásobníku}}{65}{figure.caption.74}%
-\contentsline {figure}{\numberline {6.10}{\ignorespaces Několik oken detailních pohledů představující svou strukturu}}{69}{figure.caption.75}%
+\contentsline {figure}{\numberline {6.1}{\ignorespaces Fungující Stacklook}}{62}{figure.caption.65}%
+\contentsline {figure}{\numberline {6.2}{\ignorespaces Okénko se správou pluginů}}{62}{figure.caption.70}%
+\contentsline {figure}{\numberline {6.3}{\ignorespaces Konfigurační okno Stacklooku pro modifikovaný KernelShark}}{63}{figure.caption.72}%
+\contentsline {figure}{\numberline {6.4}{\ignorespaces Konfigurační okno Stacklooku pro nemodifikovaný KernelShark}}{63}{figure.caption.73}%
+\contentsline {figure}{\numberline {6.5}{\ignorespaces Tlačítka s výchozími barvami}}{65}{figure.caption.74}%
+\contentsline {figure}{\numberline {6.6}{\ignorespaces Tlačítka využívající barvy procesů}}{65}{figure.caption.75}%
+\contentsline {figure}{\numberline {6.7}{\ignorespaces Tlačítka s konfigurovanými barvami}}{65}{figure.caption.76}%
+\contentsline {figure}{\numberline {6.8}{\ignorespaces Reakce tlačítek na přejetí kurzorem myši}}{67}{figure.caption.78}%
+\contentsline {figure}{\numberline {6.9}{\ignorespaces Chování informačního řádku při velkém offsetu do zásobníku}}{67}{figure.caption.79}%
+\contentsline {figure}{\numberline {6.10}{\ignorespaces Několik oken detailních pohledů představující svou strukturu}}{71}{figure.caption.80}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {7.1}{\ignorespaces Submenu tools s modifikací tlačítkem pro konfiguraci Couplebreaku.}}{79}{figure.caption.84}%
-\contentsline {figure}{\numberline {7.2}{\ignorespaces Dva streamy jsou otevřené, v jednom z nich je aktivní Couplebreak.}}{79}{figure.caption.85}%
-\contentsline {figure}{\numberline {7.3}{\ignorespaces V jednoduchém filtru lze vybírat i Couplebreak události.}}{80}{figure.caption.86}%
+\contentsline {figure}{\numberline {7.1}{\ignorespaces Submenu tools s modifikací tlačítkem pro konfiguraci Couplebreaku.}}{83}{figure.caption.99}%
+\contentsline {figure}{\numberline {7.2}{\ignorespaces Dva streamy jsou otevřené, v jednom z nich je aktivní Couplebreak.}}{83}{figure.caption.100}%
+\contentsline {figure}{\numberline {7.3}{\ignorespaces V jednoduchém filtru lze vybírat i Couplebreak události.}}{85}{figure.caption.101}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {8.1}{\ignorespaces Fungující Naps}}{92}{figure.caption.100}%
-\contentsline {figure}{\numberline {8.2}{\ignorespaces Okénko se správou pluginů se záznamem pro plugin Naps}}{92}{figure.caption.106}%
-\contentsline {figure}{\numberline {8.3}{\ignorespaces Konfigurační dialog pro plugin Naps}}{93}{figure.caption.108}%
-\contentsline {figure}{\numberline {8.4}{\ignorespaces Tlačítko na vyvolání konfiguračního dialogu pluginu Naps}}{93}{figure.caption.109}%
-\contentsline {figure}{\numberline {8.5}{\ignorespaces Hrany obdélníku mají stejnou barvu, jako jeho vnitřek}}{95}{figure.caption.110}%
-\contentsline {figure}{\numberline {8.6}{\ignorespaces Hrany obdélníku používají barvu procesu}}{95}{figure.caption.111}%
-\contentsline {figure}{\numberline {8.7}{\ignorespaces Dialog signalizuje úspěšnou změnu konfigurace pluginu}}{95}{figure.caption.112}%
-\contentsline {figure}{\numberline {8.8}{\ignorespaces Obdélníky, které nejsou dostatečně široké, nezobrazí název předchozího stavu}}{95}{figure.caption.114}%
+\contentsline {figure}{\numberline {8.1}{\ignorespaces Fungující Naps}}{96}{figure.caption.115}%
+\contentsline {figure}{\numberline {8.2}{\ignorespaces Okénko se správou pluginů se záznamem pro plugin Naps}}{96}{figure.caption.121}%
+\contentsline {figure}{\numberline {8.3}{\ignorespaces Konfigurační dialog pro plugin Naps}}{97}{figure.caption.123}%
+\contentsline {figure}{\numberline {8.4}{\ignorespaces Tlačítko na vyvolání konfiguračního dialogu pluginu Naps}}{97}{figure.caption.124}%
+\contentsline {figure}{\numberline {8.5}{\ignorespaces Hrany obdélníku mají stejnou barvu, jako jeho vnitřek}}{99}{figure.caption.125}%
+\contentsline {figure}{\numberline {8.6}{\ignorespaces Hrany obdélníku používají barvu procesu}}{99}{figure.caption.126}%
+\contentsline {figure}{\numberline {8.7}{\ignorespaces Dialog signalizuje úspěšnou změnu konfigurace pluginu}}{99}{figure.caption.127}%
+\contentsline {figure}{\numberline {8.8}{\ignorespaces Obdélníky, které nejsou dostatečně široké, nezobrazí název předchozího stavu}}{99}{figure.caption.129}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {9.1}{\ignorespaces Blokový strom (vlevo) a klasická grafová reprezentace stromu (vpravo)}}{111}{figure.caption.117}%
+\contentsline {figure}{\numberline {9.1}{\ignorespaces Blokový strom (vlevo) a klasická grafová reprezentace stromu (vpravo)}}{115}{figure.caption.132}%
+\contentsline {figure}{\numberline {9.2}{\ignorespaces Neaktivní NUMA~TV v KernelSharku není vizuálně přítomna}}{115}{figure.caption.147}%
+\contentsline {figure}{\numberline {9.3}{\ignorespaces Aktivní NUMA~TV pro jeden otevřený stream}}{117}{figure.caption.149}%
+\contentsline {figure}{\numberline {9.4}{\ignorespaces Viditelný topologický strom a zelené skrývající tlačítko vlevo}}{119}{figure.caption.150}%
+\contentsline {figure}{\numberline {9.5}{\ignorespaces Skrytá plocha pro zobrazení topologií a zelené skrývající tlačítko vlevo}}{120}{figure.caption.151}%
+\contentsline {figure}{\numberline {9.6}{\ignorespaces Vysvětlivka zobrazená při přejetí kurzoru myši nad vrcholem v topologickém stromu}}{124}{figure.caption.153}%
+\contentsline {figure}{\numberline {9.7}{\ignorespaces Výchozí řazení CPU grafů podle OS indexů}}{125}{figure.caption.155}%
+\contentsline {figure}{\numberline {9.8}{\ignorespaces Obecný formát konfiguračních dialogů pro NUMA~TV a Couplebreak.}}{126}{figure.caption.160}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {10.1}{\ignorespaces Stacklook tlačítko využívá barvu, kterou KernelShark udělil procesu.}}{115}{figure.caption.140}%
-\contentsline {figure}{\numberline {10.2}{\ignorespaces Při přejetí kurzorem myši se vlevo nahoře informační řádek změní.}}{115}{figure.caption.141}%
-\contentsline {figure}{\numberline {10.3}{\ignorespaces Vylepšení donutí některé obdélníky k tomu, aby nebyli nakresleny.}}{115}{figure.caption.142}%
+\contentsline {figure}{\numberline {10.1}{\ignorespaces Stacklook tlačítko využívá barvu, kterou KernelShark udělil procesu.}}{130}{figure.caption.165}%
+\contentsline {figure}{\numberline {10.2}{\ignorespaces Při přejetí kurzorem myši se vlevo nahoře informační řádek změní.}}{130}{figure.caption.166}%
+\contentsline {figure}{\numberline {10.3}{\ignorespaces Vylepšení donutí některé obdélníky k tomu, aby nebyli nakresleny.}}{130}{figure.caption.167}%
 \addvspace {10\p@ }

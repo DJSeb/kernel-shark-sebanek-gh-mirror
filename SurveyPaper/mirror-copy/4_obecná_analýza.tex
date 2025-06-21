@@ -1,6 +1,9 @@
 \chapter{Obecná analýza a stanovení požadavků}
 V této kapitole se podíváme na možná vylepšení schopností KernelSharku. Vytvoříme pro ně požadavky a sepíšeme jejich cíle a nutné vlastnosti. Dále obecně analyzujeme, jak se dají vylepšení vytvořit. Hlubší, technická analýza každého z vylepšení pak bude součástí detailnějších pohledů na návrh a implementace vylepšení v jejich samostatných kapitolách. 
 
+\section{Jazyk dokumenatace}
+Jistě si všimneme, že tento dokument bakalářská práce je psán v češtině. Dokumentaci mimo tento dokument budeme psát anglicky. Důvodem je jž existující anglická dokumentace KernelSharku a jeho pluginů. Jelikož se jedná o open source projekt, pak je angličtina zároveň jazykem, kterému porozumí nejspíše největší množství uživatelů vylepšení.
+
 \section{Pluginy a modifikace}
 První možnou cestou rozšíření KernelSharku je přidání pluginů, které upraví zobrazované informace, nebo nějaké přidají. KernelShark již obsahuje oficiální pluginy a je možné se jejich strukturou inspirovat. Pluginy dokážou vykreslovat uživatelem definované tvary (s nimiž lze interagovat) do grafu, pozměňovat data záznamů událostí a přidávat nová menu tlačítka do hlavního okna. Pluginy tak zřejmě nejsou schopné všeho. Například nelze skrze pluginy vytvářet další záznamy, které by se pak zobrazily v grafu.
 

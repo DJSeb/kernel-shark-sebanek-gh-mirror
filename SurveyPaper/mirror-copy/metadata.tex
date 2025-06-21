@@ -44,18 +44,20 @@
 % Nepovinné poděkování (vedoucímu práce, konzultantovi, tomu, kdo
 % vám nosil pizzu a vařil čaj apod.)
 \def\Dedication{%
-\xxx{Poděkování.}
-    iLoveImg upscaling, VS Code, ChatGPT, Qt dokumentace, hwloc dokumentace, Linux kernel dokumentace, WSL, Yordan K., J. Kára, atd.
+{Poděkování.}
+    Chtěl bych především poděkovat svému vedoucímu, kterým byl RNDr. Jan Kára, Ph.D., a to za neustálou podporu a ochotu pomoci mi napsat tuto práci. Chtěl bych také poděkovat Michalu Koutnému, který mne a vedoucího dostal do kontaktu. Dále chci poděkovat Yordanu Karadzhovi, Ph.D., díky němu jsem byl schopen lépe pochopit KernelShark a vyvíjení pluginů pro něj. Nakonec bych chtěl poděkovat rodině a přátelům za neustálou podporu, malou i velkou.
 }
 
 % Abstrakt (doporučený rozsah cca 80-200 slov; nejedná se o zadání práce)
 \def\Abstract{%
-\xxx{Abstrakt.}
+{Abstrakt.}
+    Tato bakalářská práce se zabývá trasováním v operačním systému Linux s důrazem na aplikaci KernelShark. Teoretická část popisuje principy trasování a dostupné vizualizační nástroje, zatímco praktická část představuje návrh a realizaci několika vylepšení KernelSharku. Mezi hlavní rozšíření patří úprava grafického rozhraní pro efektivnější práci s Trace-cmd, rozdělování vybraných typů událostí, vizualizace NUMA topologie systému (zejména NUMA uzlů, jader a procesorů v jádrech), plugin pro sledování nečinnosti procesů a plugin pro příjemnější analýzu záznamů zásobníku jádra. Kromě toho byla přidána i drobnější technická vylepšení. Každé rozšíření je doplněno technickým popisem, vývojovou a uživatelskou dokumentací a zhodnocením, nakolik byla splněna stanovená očekávání.
 }
 
 % Anglická verze abstraktu
 \def\AbstractEN{%
-\xxx{Abstract.}
+{Abstract.}
+    This bachelor's thesis focuses on tracing in the Linux operating system with an emphasis on the KernelShark application. The theoretical part describes tracing principles and available visualization tools, while the practical part presents the design and implementation of several KernelShark enhancements. Key improvements include a GUI modification for more efficient work with Trace-cmd, splitting of selected event types, visualization of the system’s NUMA topology (mainly NUMA nodes, cores, and processors within cores), a plugin for monitoring process idleness, and a plugin for more user-friendly analysis of kernel stack trace records. Additionally, minor technical improvements were made. Each enhancement is accompanied by a technical description, development and user documentation, and an evaluation of how well the defined expectations were met.
 }
 
 % 3 až 5 klíčových slov (doporučeno) oddělených \sep

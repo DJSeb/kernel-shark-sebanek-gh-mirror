@@ -65,7 +65,7 @@
    <dc:title><rdf:Alt><rdf:li xml:lang="x-default">{Vizualizace trasování procesů v Linuxu}</rdf:li></rdf:Alt></dc:title>
    <dc:creator><rdf:Seq><rdf:li>{David Jaromír Šebánek}</rdf:li></rdf:Seq></dc:creator>
    <dc:publisher><rdf:Bag><rdf:li>Charles University</rdf:li></rdf:Bag></dc:publisher>
-   <dc:description><rdf:Alt><rdf:li xml:lang="x-default">Abstrakt. </rdf:li></rdf:Alt></dc:description>
+   <dc:description><rdf:Alt><rdf:li xml:lang="x-default">{Abstrakt.} Tato bakalářská práce se zabývá trasováním v operačním systému Linux s důrazem na aplikaci KernelShark. Teoretická část popisuje principy trasování a dostupné vizualizační nástroje, zatímco praktická část představuje návrh a realizaci několika vylepšení KernelSharku. Mezi hlavní rozšíření patří úprava grafického rozhraní pro efektivnější práci s Trace-cmd, rozdělování vybraných typů událostí, vizualizace NUMA topologie systému (zejména NUMA uzlů, jader a procesorů v jádrech), plugin pro sledování nečinnosti procesů a plugin pro příjemnější analýzu záznamů zásobníku jádra. Kromě toho byla přidána i drobnější technická vylepšení. Každé rozšíření je doplněno technickým popisem, vývojovou a uživatelskou dokumentací a zhodnocením, nakolik byla splněna stanovená očekávání. </rdf:li></rdf:Alt></dc:description>
    <dc:subject><rdf:Bag><rdf:li>{Linux</rdf:li>
      <rdf:li>trasování} </rdf:li></rdf:Bag></dc:subject>
   </rdf:Description> 
@@ -79,15 +79,15 @@
   </rdf:Description> 
   <rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/"> 
    <xmp:CreatorTool>LaTeX with hyperref</xmp:CreatorTool> 
-   <xmp:ModifyDate>2025-06-17T23:13:26+02:00</xmp:ModifyDate> 
-   <xmp:CreateDate>2025-06-17T23:13:26+02:00</xmp:CreateDate> 
-   <xmp:MetadataDate>2025-06-17T23:13:26+02:00</xmp:MetadataDate> 
+   <xmp:ModifyDate>2025-06-21T23:07:52+02:00</xmp:ModifyDate> 
+   <xmp:CreateDate>2025-06-21T23:07:52+02:00</xmp:CreateDate> 
+   <xmp:MetadataDate>2025-06-21T23:07:52+02:00</xmp:MetadataDate> 
   </rdf:Description> 
   <rdf:Description rdf:about="" xmlns:xmpRights = "http://ns.adobe.com/xap/1.0/rights/"> 
   </rdf:Description> 
   <rdf:Description rdf:about="" xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/"> 
    <xmpMM:DocumentID>uuid:C8CFC28F-88E1-7995-E9AD-F6D12EAD346B</xmpMM:DocumentID> 
-   <xmpMM:InstanceID>uuid:67839FB4-AFDC-FA7B-EEFC-4E9CB13373B6</xmpMM:InstanceID> 
+   <xmpMM:InstanceID>uuid:7EDB16DE-A5B1-447B-16C3-FD8980AD0F6F</xmpMM:InstanceID> 
   </rdf:Description> 
  </rdf:RDF> 
 </x:xmpmeta> 
