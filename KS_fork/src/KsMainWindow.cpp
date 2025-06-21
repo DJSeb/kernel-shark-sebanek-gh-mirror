@@ -1887,7 +1887,8 @@ static void apply_numatv_update(int stream_id, TopoViewType view,
 	case -1:
 		// Topology was not created due to a CPU count mismatch - no need to redraw
 		msg = QString{"[INFO] Topology file '%1' doesn't have the same amount "
-			"of CPUs as stream '%2', topology configuration was not updated."
+			"of CPUs as stream '%2' or isn't a Hwloc topology file, topology configuration "
+			"was not updated."
 		}.arg(topology_file).arg(stream_id);
 		std::cout << msg.toStdString() << std::endl;
 		break;
@@ -1999,7 +2000,8 @@ static void apply_numatv_new_topo(int stream_id, TopoViewType view,
 	case -1:
 		// Topology was not created due to a CPU count mismatch - no need to redraw
 		msg = QString{"[INFO] Topology file '%1' doesn't have the same amount "
-			"of CPUs as stream '%2', topology configuration was not created."
+			"of CPUs as stream '%2' or isn't a Hwloc topology file, topology configuration "
+			"was not created."
 		}.arg(topology_file).arg(stream_id);
 		std::cout << msg.toStdString() << std::endl;
 		break;

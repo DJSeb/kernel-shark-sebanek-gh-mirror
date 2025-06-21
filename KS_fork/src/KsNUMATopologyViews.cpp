@@ -116,6 +116,11 @@ int KsTopoViewsContext::addConfig(int stream_id, TopoViewType view, const std::s
     int stream_ncpus = stream->n_cpus;
     
     auto new_topo_cfg = StreamNUMATopologyConfig(view, topology_file);
+    if (new_topo_cfg.getBriefTopology().empty()) {
+        // Invalid file, cannot get any topology information
+        return -1;
+    }
+
     int topo_npus = new_topo_cfg.getTopologyNPUs();
     
     if (topo_npus == stream_ncpus) {
@@ -143,7 +148,7 @@ int KsTopoViewsContext::addConfig(int stream_id, TopoViewType view, const std::s
  * `1` if the configuration was not changed (success).
  */
 int KsTopoViewsContext::updateConfig(int stream_id, TopoViewType view, const std::string& topology_file) {
-    bool retval = -3;
+    int retval = -3;
     
     if (existsFor(stream_id)) {
         // Get old configuration
@@ -151,7 +156,7 @@ int KsTopoViewsContext::updateConfig(int stream_id, TopoViewType view, const std
 
         if (topology_file != topo_cfg.getTopoFilepath()) {
             // Topology file changed - create new topology
-            retval = addConfig(stream_id, view, topology_file);    
+            retval = addConfig(stream_id, view, topology_file);
         } else if (topo_cfg.getViewType() != view) {
             // View type changed, but not the topology file
             // Just update the view type and request redraw

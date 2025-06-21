@@ -195,6 +195,7 @@ void KsTraceGraph::_setupNumatvTopoWidget() {
 	_hideTopoBtn.setFixedHeight(_topoScrollArea.height());
 	_hideTopoBtn.setHidden(true);
 	_hideTopoBtn.setStyleSheet("QPushButton {background-color : green;}");
+	_hideTopoBtn.setText("<");
 
 	_topoSpace.setStyleSheet("QWidget {background-color : white;}");
 	_topoSpace.setLayout(&_topoLayout);

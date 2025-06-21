@@ -1780,20 +1780,20 @@ QPushButton* KsNUMATVDialog::_setupSelectBtnPerStream(QString last_fpath,
 
 	// Connect the button to actions
 
-	auto lamFileDialogAction = [file_dialog, topo_file_location] {
+	auto lamShowFileDialogAction = [file_dialog] {
 		file_dialog->show();
+	};
 
-		// Show the file dialog and get the selected files
-		if (file_dialog->exec() == QDialog::Accepted) {
-			QStringList selected_files = file_dialog->selectedFiles();
-			if (!selected_files.isEmpty()) {
-				// Set the label text to the selected file
-				topo_file_location->setText(selected_files[0]);
-			}
+	auto lamApplyChangesAction = [file_dialog, topo_file_location] {
+		QStringList selected_files = file_dialog->selectedFiles();
+		if (!selected_files.isEmpty()) {
+			// Set the label text to the selected file
+			topo_file_location->setText(selected_files[0]);
 		}
 	};
 
-	connect(select_btn, &QPushButton::pressed, lamFileDialogAction);
+	connect(select_btn, &QPushButton::pressed, lamShowFileDialogAction);
+	connect(file_dialog, &QDialog::accepted, lamApplyChangesAction);
 
 	return select_btn;
 }

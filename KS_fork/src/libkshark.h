@@ -391,7 +391,8 @@ struct kshark_data_stream {
 
 	/** 
 	 * @brief Bitmask record of couplebreak event types which were created in this stream.
-	 * Look into the documentation for a comprehensive list of which bits correspond to which events.
+	 * Look into the documentation or Couplebreak API for a comprehensive list of which
+	 * bits correspond to which events.
 	*/
 	int couplebreak_evts_flags;
 	// END of change

@@ -70,6 +70,7 @@ private:
 	void _setupTopologyTree(int stream_id, int v_spacing,
 		const TopoNodeCorePU& brief_topo, KsGLWidget* gl_widget);
 };
+// END of change
 
 #endif // _KS_STREAM_NUMA_TOPOLOGY_HPP
 // END of change

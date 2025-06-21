@@ -116,7 +116,5 @@ int numatv_count_cores(const TopoNodeCorePU& brief_topo);
 TopoNodeCorePU numatv_filter_by_PUs(const TopoNodeCorePU& brief_topo,
     const QVector<int>& PUs);
 
-
-
 #endif // _KS_NUMA_TV_HPP
 // END of change
