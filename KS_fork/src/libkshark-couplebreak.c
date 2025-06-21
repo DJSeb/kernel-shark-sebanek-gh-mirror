@@ -66,9 +66,9 @@ int couplebreak_id_to_flag_pos(int event_id) {
 
 	switch (event_id) {
 	case COUPLEBREAK_SST_ID:
-		return COUPLEBREAK_SST_ID;
+		return COUPLEBREAK_SSWITCH_FPOS;
 	case COUPLEBREAK_SWT_ID:
-		return COUPLEBREAK_SWT_ID;
+		return COUPLEBREAK_SWAKING_FPOS;
 	default:
 		return -1; 
 	}
@@ -114,7 +114,8 @@ bool is_couplebreak_event(int event_id) {
 }
 
 /**
- * @brief Get the couplebreak event name as a string.
+ * @brief Get the couplebreak event name as a string. User is responsible
+ * for freeing the returned string.
  * 
  * @param event_id The event Id of a couplebreak event.
  * @return Name of a couplebreak event or NULL if the event Id is invalid.

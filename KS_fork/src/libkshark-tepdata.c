@@ -435,7 +435,7 @@ typedef struct kshark_entry* (*custom_entry_creation_func)(
 	struct kshark_entry *origin_entry);
 // END of change
 
-//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+//NOTE: Changed here. ("COUPLEBREAK") (2025-03-21)
 /**
  * @brief Create a custom entry with a KernelShark context, data stream,
  * trace record, related entry, temporary record list node and the one after it,
@@ -1680,7 +1680,6 @@ static int couplebreak_find_event_id(struct kshark_data_stream *stream,
 	bool swt_exists = (stream->couplebreak_evts_flags &
 		(1 << couplebreak_origin_id_to_flag_pos(stream, sched_waking_id)));
 
-	// COUPLEBREAK TODO
 	// If such events exist, return the couplebreak event ID according to the name
 	if (sst_exists && is_sst_name) {
 		result = COUPLEBREAK_SST_ID;

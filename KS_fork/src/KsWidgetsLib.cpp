@@ -1636,19 +1636,19 @@ void KsCouplebreakDialog::_applyAction()
 void KsNUMATVDialog::_setupExplanation() {
 	// Static constants
 	static const QString EXPLANATION_TEXT = QString{
-		"NUMA Topology Views (NUMA TV for short) "
+		"NUMA Topology Views (NUMA TV) "
 		"feature allows KernelShark to show NUMA topology of a system "
 		"with the help of hwloc's topology exported to XML files."
 		"\n\nSelect a NUMA topology XML file to be loaded to prepare the "
-		"configuration and select the 'NUMA Tree view' to show a widget to "
+		"configuration and select the 'NUMA tree' to show a widget to "
 		"the left of the events plot. If all streams wish to use the default "
 		"view, this widget will be hidden, as if this feature never existed. "
-		"The widget can be close by the green button in its left."
+		"The widget can be closed by the green button in its left."
 		"\n\nDo beware that the topology file must have the same amount of CPUs "
 		"as the stream for which it is loaded, otherwise the file will not be used."
 		"\n\nClick 'Apply' to apply the changes, click 'Close' to close the dialog "
 		"without applying any changes."
-		"\n\nThis feature is experimental and not fully tested through. "
+		"\n\nThis feature is experimental. "
 		"Please use with caution and report any issues you encounter."
 		"\n\nNUMA Topology Views settings:"
 	};
@@ -1726,7 +1726,7 @@ QButtonGroup* KsNUMATVDialog::_setupRadiosPerStream(int stream_id,
 	QHBoxLayout* radio_btns_layout = new QHBoxLayout{};
 	QButtonGroup* applied_view_grp = new QButtonGroup{};
 	QRadioButton* default_view = new QRadioButton{"Default"};
-	QRadioButton* tree_view = new QRadioButton{"NUMA tree view"};
+	QRadioButton* tree_view = new QRadioButton{"NUMA tree"};
 
 	applied_view_grp->addButton(default_view,
 		static_cast<int>(TopoViewType::DEFAULT));
@@ -1780,20 +1780,20 @@ QPushButton* KsNUMATVDialog::_setupSelectBtnPerStream(QString last_fpath,
 
 	// Connect the button to actions
 
-	auto lamFileDialogAction = [file_dialog, topo_file_location] {
+	auto lamShowFileDialogAction = [file_dialog] {
 		file_dialog->show();
+	};
 
-		// Show the file dialog and get the selected files
-		if (file_dialog->exec() == QDialog::Accepted) {
-			QStringList selected_files = file_dialog->selectedFiles();
-			if (!selected_files.isEmpty()) {
-				// Set the label text to the selected file
-				topo_file_location->setText(selected_files[0]);
-			}
+	auto lamApplyChangesAction = [file_dialog, topo_file_location] {
+		QStringList selected_files = file_dialog->selectedFiles();
+		if (!selected_files.isEmpty()) {
+			// Set the label text to the selected file
+			topo_file_location->setText(selected_files[0]);
 		}
 	};
 
-	connect(select_btn, &QPushButton::pressed, lamFileDialogAction);
+	connect(select_btn, &QPushButton::pressed, lamShowFileDialogAction);
+	connect(file_dialog, &QDialog::accepted, lamApplyChangesAction);
 
 	return select_btn;
 }

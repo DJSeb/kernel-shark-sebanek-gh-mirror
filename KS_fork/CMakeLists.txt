@@ -7,7 +7,7 @@ project(kernel-shark)
 set(KS_APP_NAME "kernelshark")
 set(KS_VERSION_MAJOR 2)
 set(KS_VERSION_MINOR 6)
-set(KS_VERSION_PATCH 0)
+set(KS_VERSION_PATCH 1)
 set(KS_VERSION_DESCRIPTOR "numatv")
 set(KS_VERSION_STRING ${KS_VERSION_MAJOR}.${KS_VERSION_MINOR}.${KS_VERSION_PATCH}-${KS_VERSION_DESCRIPTOR})
 message("\n project: Kernel Shark: (version: ${KS_VERSION_STRING})\n")
@@ -52,30 +52,7 @@ find_package(TraceCmd   REQUIRED)
 
 find_package(JSONC      REQUIRED)
 #NOTE: Changed here. (NUMA TV) (2025-04-08)
-## Finds hwloc dependency with pkg-config and 
-## outputs variables given by hwloc.
-## This particular build instruction chain was found on the
-## internet in hwloc's documentation at
-## https://www.open-mpi.org/projects/hwloc/doc/v2.11.2/a00343.php
-include(FindPkgConfig)
-if(PKG_CONFIG_EXECUTABLE)
-  unset(HWLOC_FOUND CACHE)
-  pkg_search_module(HWLOC REQUIRED hwloc)
-  if(HWLOC_FOUND)
-    message(STATUS "HWLOC_LIBRARIES=${HWLOC_LIBRARIES}")
-    message(STATUS "HWLOC_LINK_LIBRARIES=${HWLOC_LINK_LIBRARIES}")
-    message(STATUS "HWLOC_LIBRARY_DIRS=${HWLOC_LIBRARY_DIRS}")
-    message(STATUS "HWLOC_LDFLAGS=${HWLOC_LDFLAGS}")
-    message(STATUS "HWLOC_LDFLAGS_OTHERS=${HWLOC_LDFLAGS_OTHERS}")
-    message(STATUS "HWLOC_INCLUDE_DIRS=${HWLOC_INCLUDE_DIRS}")
-    message(STATUS "HWLOC_CFLAGS=${HWLOC_CFLAGS}")
-    message(STATUS "HWLOC_CFLAGS_OTHER=${HWLOC_CFLAGS_OTHER}")
-  else()
-    message(FATAL_ERROR "HWLOC not found with pkg-config, add the path to hwloc.pc in PKG_CONFIG_PATH.")
-  endif()
-else()
-  message(FATAL_ERROR "PKG_CONFIG_EXECUTABLE: not found.")
-endif()
+find_package(HWLOC      REQUIRED)
 # END of change
 
 find_package(Doxygen)
@@ -100,7 +77,9 @@ else (TT_FONT_FILE)
 
 endif (TT_FONT_FILE)
 
+#NOTE: Changed here. (UPDATE CBOX STATES) (2025-05-18)
 find_package(Qt6Widgets 6.7.0)
+# END of change
 find_package(Qt6 COMPONENTS Network OpenGLWidgets StateMachine REQUIRED)
 
 find_package (Boost COMPONENTS unit_test_framework)

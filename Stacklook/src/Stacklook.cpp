@@ -26,10 +26,8 @@
 
 // Plugin headers
 #include "stacklook.h"
-#include "SlDetailedView.hpp"
 #include "SlButton.hpp"
 #include "SlConfig.hpp"
-#include "SlPrevState.hpp"
 
 // #########################################################################
 // Static variables
@@ -319,12 +317,12 @@ const struct kshark_entry* get_kstack_entry(const struct kshark_entry* kstack_ow
     bool is_kstack = (kstack_entry->event_id == ctx->kstack_event_id);
     bool is_correct_task = (relevant_owner_pid == kstack_entry->pid);
     
-    // This loop will usually stop either after one or iterations.
-    // Unless some plugin aggressively reorders and changes innards of
-    // entries, this will be the case.
+    // This loop will usually stop either after one or two iterations.
+    // This will be the case unless some plugin aggressively reorders
+    // and changes innards of entries.
     while (!(is_kstack && is_correct_task)) {
         // Move onto next entry on the same CPU
-        // NOTE: kernelstack trace will be on the same CPU as the event
+        // Kernelstack trace will be on the same CPU as the event
         // directly after which it is made.
         kstack_entry = kstack_entry->next;
         if (kstack_entry == nullptr)

@@ -1,0 +1,176 @@
+These should be interchangeable with GitLab issues and their comments.
+
+If any bug occurs, note it here and its environment + behaviour.
+If a bug has been solved, mark it and provide explanation (or a commit ID where it was solved).
+
+# Open bugs
+
+# Resolved/Ignored bugs
+
+1. Switching between trace files results in a segmentation fault.
+
+   - Status: CLOSED
+   - Cause: Most likely a double free in clean_opened_views.
+   - Solution: Changed semantics of detailed views - they may
+     stay after the trace file has been changed, but they will
+     be destroyed when closed by the user or when KernelShark's
+     main window closes (as its parent, it will close it
+     automatically)
+   - Environment: WSL-openSUSE-Tumbleweed
+
+2. Switching between trace files results in Stacklook's triangle buttons
+   losing the ability to assign color to trace files.
+
+   - Status: CLOSED
+   - Cause: Most likely staticness of a variable and lack of change after trace file switch.
+   - Solution: Function that restarts color table after tracefile load.
+   - Environment: WSL-openSUSE-Tumbleweed
+
+3. Adding the plugin again will have the program do a double free on exit.
+
+   - Status: CLOSED
+   - Cause: No protection from double plugin deload
+   - Solution: Introduce a guard check before attempting to deload the plugin.
+   - Environment: WSL-openSUSE-Tumbleweed
+
+4. Triangle buttons are drawn in the opposite order they're accessible, i.e.
+   clicking on/hovering over a button will select the button drawn UNDER the one
+   clicked at.
+
+   - Status: IGNORED
+   - Cause: Incorrect rendering ordering
+   - Possible solution(s):
+     1. Change how KernelShark is rendering plot objects
+     - Rejected: way too much work for this scope, but probably the only real solution.
+     - Attempted solution to reverse the drawn forwards list each time introduced more issues than wanted.
+     2. Change how plot objects are being added (in plugin or in kshark)
+     - Rejected: goes against the API
+     3. Change what the cursor is hovering over to objects added first (if possible)
+     - Rejected: Same reason as point 1
+   - Environment: WSL-openSUSE-Tumbleweed
+
+5. Loading user plugins via a session while they are already loaded upon KernelShark launch will result
+   in a double free on program exit.
+
+   - Status: CLOSED
+   - Cause: Plugins will attempt to close an already closed stream, visible through an invalid -1 stream id.
+   - Solution: Introduced a guard check against closing a stream with an invalid ID, therefore a stream already closed.
+   - Environment: WSL-openSUSE-Tumbleweed
+
+6. Loading a session with a user plugin, which uses newly introduced `getPidColors` member function of the
+   `KsGLWidget` class, will result in a segmentation fault and an immediate crash of the program.
+
+   - Status: CLOSED (somewhat)
+   - Cause: Unknown (object seems to already exist, but calling on its `_pidColors` field will return an unreadable
+     address). Problem happens only in this context, if the plugin was already loaded, this issue doesn't appear.
+   - Solution: Any user plugin using this function must include behaviour that will guard against this - which will
+     most likely be a default behaviour and an optional usage of the task color table (this was the approach chosen
+     for Naps and Stacklook). Codewise, the issue must be somewhere in the `importSession` function's calls, but fixing
+     this is beyond the scope of the project.
+   - Environment: WSL-openSUSE-Tumbleweed
+
+7. Opening KernelShark without preloading Stacklook in any way and then importing
+   session where Stacklook was loaded will result in a segmentation fault upon button
+   hover.
+
+- Status: IGNORED
+- Cause: Apparently KernelShark doesn't actually load the plugin, at least not fully.
+  This becomes very obvious once no configuration menu is available and program crashes when it would usually
+  work just fine.
+- Solution: Preload Stacklook. Real solution would be fixing this maybe-bug in KernelShark code, but that is
+  beyonf the scope of this project (like bug 6).
+- Environment: WSL-openSUSE-Tumbleweed
+
+8.  Events ftrace/kernel_stack and couplebreak/sched_waking\[target\] were drawing
+    taskboxes unnecessarily.
+
+    - Status: FIXED
+    - Cause: There is no way to say which bins should have a taskbox between each
+      other, so every event entry draws a taskbox, unless it's from the \<idle\> task
+    - Solution: New visibility mask introduced in NOBOXES modification + NoBoxes plugin
+      made to enable its functionality. Boxes starting at events with this bit unset will
+      not be drawn, boxes passing through bins with that mask will skip them until they find
+      a better bin to end at.
+    - Environment: (any) Linux
+
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
+Purpose of this file is to keep track of noticed issues and possibly great ideas (tracker),
+as well as quetions arisen during development (design decisions & encountered challenges).
+
+Can be written informally, but parts of it may be published.
+
+# Tracker
+
+(Bugs moved to [buglog](./Buglog.md)).
+
+## Performance concerns
+
+If any performance is deemed suspiciously low, note it here.
+If a concern is either solved or dismissed, write an explanation.
+
+1. Stacklook performed too badly when loading a trace without kernel stack.
+
+- **Solution**: check if the trace includes kernel stack trace events +
+  perform a on-load search of kernel stack entries, so that further searches are unnecessary.
+
+2. Explore optimizations to mouse hover detection
+
+- Note: Worth to meddle with KernelShark's insides, since that will be inevitable now anyway
+- **Solution**: Ignored, KernelShark behaves perfectly well with many entries and mouse hover over
+  plot objects implemented as is.
+
+## QnInA - Questions & Ideas & Answers
+
+Questions are the main points, ideas are prefixed via `I:`, answers via `A:`.
+Each idea may contain debate (pros and cons) and each answer should contain a reason.
+This is noted mostly as a journal to not attempt some approaches again and as design decisions
+documentation.
+
+- How to achieve better cohesion and less coupling between `Stacklook` and `sched_events`?
+
+  - **A**: Implement the splitting of events and work from there - sched_events and stacklook
+    then shouldn't interfere with each other.
+    - PRO - this will have to happen anyway, might as well leverage the feature
+    - CON - will require at least some rewrites to make both plugins behave nicely
+  - \[REJECTED\] I: Implement a "record changes history" to easily find out original values before modification
+    - PRO - easily finds any historical change
+    - PRO - a pretty lightweight and future-proof solution
+    - CON - changes all of KernelShark's plugins behaviour, i.e. breaking change
+    - CON - requires a lot of rewriting
+    - CON - would need a history data structure implementation
+    - CON - rare use case, since plugins shouldn't need to peek like that usually
+      - If a plugin needs some other plugin, they make a list of depenencies by design.
+        Plugins looking for original data should be able to read tep data themselves.
+        Linked list would only prove useful if it was impossible to read original data
+        for an intended functionality.
+    - Verdict: An option for sure.
+  - \[REJECTED\] I: Find out if it is possible to load original data and use them even after KernelShark
+    let other plugins do their work.
+    - CON - might need to store copies of a whole file, i.e. memory-unfriendly
+    - CON - semester project showed that this is most probably tedious work and either not directly
+      supported by KShark or not at all
+    - PRO - less rewrites of existing code
+    - PRO - separated only into plugin's code, i.e. no SRP violation
+
+- How to enable NUMA visualization support?
+
+  - **A**: Simply put, KernelShark's source code will be dissected and the visualization abilities
+    written by hand.
+    - Reason: KernelShark does not directly support reordering of CPUs in the graph, hence that
+      ability will need to be implemented. KernelShark also doesn't support different visualization
+      options, so that will also be added.
+
+- How to split events from trace-cmd to target and initiator where applicable?
+  - **A**: Try to intercept the incoming stream of files and add target's (initiators are the ones that are
+    collected by default) 'fake' event.
+    - Reason: Most straightforward, perfect place for implementation, simple integration with existing modules.
+  - \[REJECTED\] I: Don't add any events, but create a special filter through which normal events go through without a
+    hitch, but splittable events are drawn as if they were in the data.
+    - PRO: Less memory used by KernelShark holding real events.
+    - PRO: Consistency with trace-cmd output.
+    - CON: Cannot manipulate the drawn fake events, since they wouldn't hold data.
+      - Unless they were pointing to the initiator event and would change relevant fields -> seems to be a lot
+        of work for little benefit.
+    - Verdict: Dismissed, while a nice idea on paper, it is most likely too much work for the memory benefit
+      (abstract cost/value ratio isn't favourable).

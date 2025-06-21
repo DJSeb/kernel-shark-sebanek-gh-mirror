@@ -1,0 +1,86 @@
+%%% Vyplňte prosím základní údaje o závěrečné práci (odstraňte \xxx{...}).
+%%% Automaticky se pak vloží na všechna místa, kde jsou potřeba.
+
+% Druh práce:
+%	"bc" pro bakalářskou
+%	"mgr" pro diplomovou
+%	"phd" pro disertační
+%	"rig" pro rigorozní
+\def\ThesisType{bc}
+
+% Název práce v jazyce práce (přesně podle zadání)
+\def\ThesisTitle{{Vizualizace trasování procesů v Linuxu}}
+
+% Název práce v angličtině
+\def\ThesisTitleEN{{Visualization of tracing of processes in Linux}}
+
+% Jméno autora (vy)
+\def\ThesisAuthor{{David Jaromír Šebánek}}
+
+% Rok odevzdání
+\def\YearSubmitted{{2025}}
+
+% Název katedry nebo ústavu, kde byla práce oficiálně zadána
+% (dle Organizační struktury MFF UK:
+% https://www.mff.cuni.cz/cs/fakulta/organizacni-struktura,
+% případně plný název pracoviště mimo MFF)
+\def\Department{{Katedra distribuovaných a spolehlivých systémů}}
+\def\DepartmentEN{{Department of Distributed and Dependable Systems}}
+
+% Jedná se o katedru (department) nebo o ústav (institute)?
+\def\DeptType{{Katedra}}
+\def\DeptTypeEN{{Department}}
+
+% Vedoucí práce: Jméno a příjmení s~tituly
+\def\Supervisor{{RNDr. Jan Kára, Ph.D.}}
+
+% Pracoviště vedoucího (opět dle Organizační struktury MFF)
+\def\SupervisorsDepartment{{Katedra distribuovaných a spolehlivých systémů}}
+\def\SupervisorsDepartmentEN{{Department of Distributed and Dependable Systems}}
+
+% Studijní program (kromě rigorozních prací)
+\def\StudyProgramme{{Informatika (B0613A140006)}}
+
+% Nepovinné poděkování (vedoucímu práce, konzultantovi, tomu, kdo
+% vám nosil pizzu a vařil čaj apod.)
+\def\Dedication{%
+{Poděkování.}
+    Chtěl bych především poděkovat svému vedoucímu, kterým byl RNDr. Jan Kára, Ph.D., a to za neustálou podporu a ochotu pomoci mi napsat tuto práci. Chtěl bych také poděkovat Michalu Koutnému, který mne a vedoucího dostal do kontaktu. Dále chci poděkovat Yordanu Karadzhovi, Ph.D., díky němu jsem byl schopen lépe pochopit KernelShark a vyvíjení pluginů pro něj. Nakonec bych chtěl poděkovat rodině a přátelům za neustálou podporu, malou i velkou.
+}
+
+% Abstrakt (doporučený rozsah cca 80-200 slov; nejedná se o zadání práce)
+\def\Abstract{%
+{Abstrakt.}
+    Tato bakalářská práce se zabývá trasováním v operačním systému Linux s důrazem na aplikaci KernelShark. Teoretická část popisuje principy trasování a dostupné vizualizační nástroje, zatímco praktická část představuje návrh a realizaci několika vylepšení KernelSharku. Mezi hlavní rozšíření patří úprava grafického rozhraní pro efektivnější práci s Trace-cmd, rozdělování vybraných typů událostí, vizualizace NUMA topologie systému (zejména NUMA uzlů, jader a procesorů v jádrech), plugin pro sledování nečinnosti procesů a plugin pro příjemnější analýzu záznamů zásobníku jádra. Kromě toho byla přidána i drobnější technická vylepšení. Každé rozšíření je doplněno technickým popisem, vývojovou a uživatelskou dokumentací a zhodnocením, nakolik byla splněna stanovená očekávání.
+}
+
+% Anglická verze abstraktu
+\def\AbstractEN{%
+{Abstract.}
+    This bachelor's thesis focuses on tracing in the Linux operating system with an emphasis on the KernelShark application. The theoretical part describes tracing principles and available visualization tools, while the practical part presents the design and implementation of several KernelShark enhancements. Key improvements include a GUI modification for more efficient work with Trace-cmd, splitting of selected event types, visualization of the system’s NUMA topology (mainly NUMA nodes, cores, and processors within cores), a plugin for monitoring process idleness, and a plugin for more user-friendly analysis of kernel stack trace records. Additionally, minor technical improvements were made. Each enhancement is accompanied by a technical description, development and user documentation, and an evaluation of how well the defined expectations were met.
+}
+
+% 3 až 5 klíčových slov (doporučeno) oddělených \sep
+% Hodí se pro nalezení práce podle tématu.
+\def\ThesisKeywords{%
+{Linux\sep trasování}
+}
+
+\def\ThesisKeywordsEN{
+{Linux\sep tracing}
+}
+
+% Pokud některá z položek metadat obsahuje TeXové řídící sekvence, je potřeba
+% dodat i verzi v obyčejném textu, která se objeví v metadatech formátu XMP
+% zabudovaných do výstupního souboru PDF. Pokud si nejste jistí, prohlédněte si
+% vygenerovaný soubor thesis.xmpdata.
+\def\ThesisAuthorXMP{\ThesisAuthor}
+\def\ThesisTitleXMP{\ThesisTitle}
+\def\ThesisKeywordsXMP{\ThesisKeywords}
+\def\AbstractXMP{\Abstract}
+
+% Máte-li dlouhý abstrakt a nechceme se mu vejít na informační stranu,
+% můžete použít toto nastavení ke zmenšení písma informační strany.
+% (Uvažte nicméně zkrácení abstraktu, to je často lepší.)
+\def\InfoPageFont{}
+%\def\InfoPageFont{\small}  % odkomentujte pro zmenšení písma

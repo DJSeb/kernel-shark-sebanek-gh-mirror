@@ -39,7 +39,7 @@ if (NOT _TRACEEVENT_LIBS_DIR)
 endif()
 
 ## Ensure existing Qt6 and necessary components
-find_package(Qt6Widgets 6.3.0 REQUIRED)
+find_package(Qt6Widgets 6.7.0 REQUIRED)
 find_package(Qt6 COMPONENTS Network OpenGLWidgets StateMachine REQUIRED)
 
 ## For customisability by the user

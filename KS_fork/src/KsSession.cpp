@@ -791,7 +791,7 @@ void KsSession::loadTopology(KsTraceGraph* graph, KsTopoViewsContext& numatv_ctx
 			numatv_ctx.addConfig(stream_id, view, topo_fpath);
 		}
 
-		hide_topo_button &= !numatv_stream_wants_topology_widget(stream_id, numatv_ctx);
+		hide_topo_button &= !(numatv_ctx.streamWantsTopoWidget(stream_id));
 	}
 
 	graph->numatvHideTopologyWidget(hide_topo_button);

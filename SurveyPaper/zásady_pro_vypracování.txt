@@ -1,0 +1,21 @@
+Trasování procesů v operačním systému Linux tradičně probíhá
+pomocí aplikace perf / trace-cmd. Tato aplikace sbírá trasovací
+data, která je pak nutné pro následnou efektivní analýzu
+vhodně vizualizovat. Jedním z nástrojů pro vizualizaci trasovacích
+dat je aplikace Kernel Shark. Cílem práce je naimplementovat
+vylepšení do aplikace Kernel Shark, které umožní efektivní analýzu
+spících procesů (na co čekají, kdo je probudil, jestli spí v
+přerušitelném nebo nepřerušitelném typu spánku, atd.). Dalším
+vylepšením je pak vizualizace CPU cache topologie systému a
+přehledné řazení CPU při vizualizaci trasovacích dat s ohledem
+na tuto topologii.
+
+Součástí práce je i rešerše trasování v Linuxu, základních
+metod vizualizace trasovacích dat a demonstrace využití
+naimplementovaných vylepšení aplikace Kernel Shark na
+příkladech.
+
+Seznam odborné literatury:
+https://kernelshark.org/
+https://docs.kernel.org/trace/index.html
+https://www.brendangregg.com/overview.html

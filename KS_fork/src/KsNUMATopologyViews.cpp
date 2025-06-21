@@ -76,6 +76,23 @@ bool KsTopoViewsContext::existsFor(int stream_id) const
 { return _active_numatvs.count(stream_id) > 0; }
 
 /**
+ * @brief Checks whether a given stream wants to show a topology widget or
+ * use the default view (no topology widget).
+ * 
+ * @param stream_id ID of the stream to check for.
+ * @return True if the stream wants to show a topology widget, false otherwise.
+ */
+bool KsTopoViewsContext::streamWantsTopoWidget(int stream_id) const {
+	bool show_this_topo = false;
+	if (existsFor(stream_id)) {
+		const StreamNUMATopologyConfig* cfg_observer = observeConfig(stream_id);
+		show_this_topo = (cfg_observer->getViewType() != TopoViewType::DEFAULT);
+	}
+		
+	return show_this_topo;
+}
+
+/**
  * @brief Attempts to add a new topology configuration for a given stream ID.
  * Returns an exit code indicating success or failures.
  * 
@@ -99,6 +116,11 @@ int KsTopoViewsContext::addConfig(int stream_id, TopoViewType view, const std::s
     int stream_ncpus = stream->n_cpus;
     
     auto new_topo_cfg = StreamNUMATopologyConfig(view, topology_file);
+    if (new_topo_cfg.getBriefTopology().empty()) {
+        // Invalid file, cannot get any topology information
+        return -1;
+    }
+
     int topo_npus = new_topo_cfg.getTopologyNPUs();
     
     if (topo_npus == stream_ncpus) {
@@ -126,7 +148,7 @@ int KsTopoViewsContext::addConfig(int stream_id, TopoViewType view, const std::s
  * `1` if the configuration was not changed (success).
  */
 int KsTopoViewsContext::updateConfig(int stream_id, TopoViewType view, const std::string& topology_file) {
-    bool retval = -3;
+    int retval = -3;
     
     if (existsFor(stream_id)) {
         // Get old configuration
@@ -134,7 +156,7 @@ int KsTopoViewsContext::updateConfig(int stream_id, TopoViewType view, const std
 
         if (topology_file != topo_cfg.getTopoFilepath()) {
             // Topology file changed - create new topology
-            retval = addConfig(stream_id, view, topology_file);    
+            retval = addConfig(stream_id, view, topology_file);
         } else if (topo_cfg.getViewType() != view) {
             // View type changed, but not the topology file
             // Just update the view type and request redraw
@@ -413,25 +435,6 @@ TopoNodeCorePU numatv_filter_by_PUs(const TopoNodeCorePU& brief_topo, const QVec
     }
 
     return filtered_topo;
-}
-
-/**
- * @brief Checks whether a given stream wants to show a topology widget or
- * use the default view (no topology widget).
- * 
- * @param stream_id ID of the stream to check for.
- * @param numatv_ctx NUMA TV context, containing the topology configurations.
- * @return True if the stream wants to show a topology widget, false otherwise.
- */
-bool numatv_stream_wants_topology_widget(int stream_id, const KsTopoViewsContext& numatv_ctx)
-{
-	bool show_this_topo = false;
-	if (numatv_ctx.existsFor(stream_id)) {
-		const StreamNUMATopologyConfig* cfg_observer = numatv_ctx.observeConfig(stream_id);
-		show_this_topo = (cfg_observer->getViewType() != TopoViewType::DEFAULT);
-	}
-		
-	return show_this_topo;
 }
 
 // END of change

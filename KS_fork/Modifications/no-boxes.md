@@ -32,7 +32,7 @@ Figure 2 - noboxes are OFF.
 
 In this figure, *ftrace/kernel_stack* is the event with a large vertical line on the right, *couplebreak/sched_waking\[target\]* is the
 event with a large vertical line on the left; kernel stack event produces a large box until the end of the graph, waking target, while
-not doing any actual work on the CPU, makes it seem it does. There is also a large taskboxe going from the CPU graph below,
+not doing any actual work on the CPU, makes it seem it does. There is also a large taskbox in the CPU graph below,
 which starts at another kernel stack event. There are other kernel stack events drawing taskboxes, like the one between the two
 highlighted events, drawing a blue taskbox.
 

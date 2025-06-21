@@ -179,7 +179,7 @@ public:
 
 	bool getPlotInfo(const QPoint &point, int *sd, int *cpu, int *pid);
 
-	// NOTE: Changed here. (GET COLORS) (2025-03-22)
+	//NOTE: Changed here. (GET COLORS) (2025-03-22)
 	/**
 	 * @brief Getter of the color table for tasks, used internally by KernelShark.
 	 * 
