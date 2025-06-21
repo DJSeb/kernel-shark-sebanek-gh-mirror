@@ -5,6 +5,12 @@ If a bug has been solved, mark it and provide explanation (or a commit ID where 
 
 # Open bugs
 
+1. Randomly, but possibly related to sessions, the topology tree won't cover all CPUs (topology widget will be too short).
+   - Status: OPEN
+   - Cause: Unknown
+   - Solution: Unknown
+   - Environment: WSL-openSUSE-Tumbleweed 
+
 # Resolved/Ignored bugs
 
 1. Switching between trace files results in a segmentation fault.
