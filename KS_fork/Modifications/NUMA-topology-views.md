@@ -475,7 +475,7 @@ load data from and what type of topology view should be used for this stream.
 There are also two buttons, "Clear" and "Select...". Clear clears current
 configuration's selected topology file (just the filepath to it, not the file
 itself). Select button will open up a file dialog, which either starts in the user's
-Documents directory or in the directory of the currently applied topology file
+home directory or in the directory of the currently applied topology file
 (applied = program already loaded this topology file and uses it for a stream).
 
 At the very bottom are two buttons, "Apply" and "Close". Close will ignore any
@@ -486,11 +486,9 @@ the chosen values.
 Beware that if the chosen topology in a file has a different amount of PUs than
 KernelShark detected CPUs in its trace file, creation or update of this topology
 configuration is ignored (old values remain or the default choice of no topology
-file and DEFAULT view). Topology configuration changes will also be ignored if
-no actual topology file was chosen (cleared the path or it has been deleted in
-between choosing it and applying the changes), yet the NUMA tree view was set.
+file and DEFAULT view).
 
-Applying an empty filepath current configuration of a stream and program will
+Applying an empty filepath current configuration of a stream will have the program
 default to using DEFAULT view with no topology file.
 
 Currently, only NUMA topology tree view is supported, along with the DEFAULT view,
@@ -591,7 +589,7 @@ hidden (figure 7).
 ![Figure 6](./images/numatv-6.png)
 Figure 6.
 
-![Figure 7](./images/numatv-7.png)
+![Figure 7](./images/numatv-5.png)
 Figure 7.
 
 ### Tooltips on topology tree nodes
@@ -615,15 +613,13 @@ Importing a session automatically draws topology widgets, if any are desired.
 
 ## API
 
-NUMA TV presents among new classes also four new global functions:
+NUMA TV presents among new classes also three new global functions:
 - `numatv_count_PUs`: This function counts the number of PUs in a brief topology.
 - `numatv_count_cores`: This function counts the number of cores in a brief topology.
 - `numatv_filter_by_PUs`: This functions returns a brief topology, where its members contain or
   are PUs given in a vector. This function is very useful when some CPU graphs are hidden - by
   filtering the brief topology, we get a brief topology where only the visible CPUs are present,
   same for their cores and NUMA nodes.
-- `numatv_stream_wants_topology_widget`: This function checks whether a stream is requesting a
-  non-DEFAULT view in its configuration in the given NUMA TV context
 
 Any other API that got introduced is either explicitly labeled with "numatv" ot "topology" or "topo"
 somewhere (letters can be uppercase). If not, it belongs to a type with that label or a header
@@ -632,10 +628,6 @@ file with that label.
 Use carefully.
 
 # Bugs
-
-Qt may sometimes complain about recursive call when clicking the Load button in the configuration dialog. This has no bearing
-on actual work of the program, as Qt makes sure to detect these calls and stop them. This may happen if the Load button
-is clicked too fast.
 
 No others are known to the author. But the modification was rather significant and there are always possibilites something
 went wrong in secret.
