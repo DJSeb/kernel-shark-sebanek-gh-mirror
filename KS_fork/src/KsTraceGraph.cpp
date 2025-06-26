@@ -9,6 +9,11 @@
  *  @brief   KernelShark Trace Graph widget.
  */
 
+//NOTE: Changed here. (NUMA TV) (2025-06-25)
+// C++
+#include<algorithm>
+// END of change
+
 // KernelShark
 #include "KsUtils.hpp"
 #include "KsDualMarker.hpp"
@@ -1119,6 +1124,8 @@ void KsTraceGraph::_numatvExistingTopologyAction(int stream_id,
 		cpusToDraw = stream_cfg->rearrangeCPUsWithBriefTopo(cpusToDraw,
 			brief_topo);
 		hide_topo = cpusToDraw.isEmpty();
+	} else if (stream_view == TopoViewType::DEFAULT) {
+		std::sort(cpusToDraw.begin(), cpusToDraw.end());
 	}
 
 	_numatvEmplaceTopologyWidget(stream_id, brief_topo);
@@ -1147,6 +1154,7 @@ void KsTraceGraph::_numatvRedrawTopoWidgets(int stream_id,
 	} else {
 		_numatvEmplaceTopologyWidget(stream_id, {});
 		_numatvHideStreamTopo(stream_id, true);
+		std::sort(cpusToDraw.begin(), cpusToDraw.end());
 	}
 
 	clear_topo_layout(&_topoLayout);
