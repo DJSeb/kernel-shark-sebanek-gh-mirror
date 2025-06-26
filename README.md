@@ -31,7 +31,7 @@ It is composed of four main directories, each representing a portion of the thes
     topology given by the user to the program
   - _Other smaller additions to KernelShark's abilities_
 - **SurveyPaper** - directory containing the survey paper/bachelor thesis paper **in Czech** about the plugins & enhancements
-  above, along with `ExamplePrograms` directory in which files for showcasing above's abilities may be found (namely four topology
+  above, along with `ExampleData` directory in which files for showcasing above's abilities may be found (namely four topology
   XML files and two trace files with DAT extension).
 
 These five components' requirements are defined in the [project specification document](./ProjectSpecification.md). Each plugin has
@@ -47,7 +47,7 @@ See each directory for more details about that part of the project.
    (Czech in SurveyPaper thesis.pdf file, English in English user documentations).
    Czech documentation is more up to date, so reading the thesis file is suggested.
 3. Launch KernelShark. You can add plugins to be loaded on the terminal or latervia GUI.
-4. For example data, navigate to SurveyPaper/ExamplePrograms.
+4. For example data, navigate to SurveyPaper/ExampleData.
 5. Observe the modifications and plugins at work.
 
 ## Projects' status
