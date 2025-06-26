@@ -31,12 +31,22 @@ It is composed of four main directories, each representing a portion of the thes
     topology given by the user to the program
   - _Other smaller additions to KernelShark's abilities_
 - **SurveyPaper** - directory containing the survey paper **in Czech** about the plugins & enhancements above, along
-  with `ExamplePrograms` directory in which traces of simple programs showcasing above's abilities may be found.
+  with `ExamplePrograms` directory in which files for showcasing above's abilities may be found (namely two topology XML files
+  and two trace files with DAT extension).
 
 These five components' requirements are defined in the [project specification document](./ProjectSpecification.md). Each plugin has
 their own README and documentations, **KS_fork** includes a document detailing changes made there.
 
 See each directory for more details about that part of the project.
+
+## How to use parts of the project
+1. Build modified KernelShark in KS\_fork directory (CMakeLists.txt files are provided). Instructions are in the README in KS\_fork.
+2. Build plugins in their directories (CMakeLists.txt files are provided). Instructions are in user documentations
+   (Czech in SurveyPaper thesis.pdf file, English in English user documentations). Czech documentation is more up to date, so reading
+   the thesis file is suggested.
+3. Launch KernelShark. You can add plugins to be loaded on the terminal or latervia GUI.
+4. For example data, navigate to SurveyPaper/ExamplePrograms.
+5. Observe the modifications and plugins at work.
 
 ## Projects' status
 
@@ -65,7 +75,7 @@ Bachelor thesis project part WIP.
   - [x] Split events involving two processes
   - [x] NUMA topology visualisation
   - [x] sched_events interoperability with created plugin(s)
-- [ ] Final version
+- [x] Final version
 
 \* The most important things work.
 
@@ -135,9 +145,9 @@ _Functionalities:_
 
 _Demonstration:_
 
-- [ ] Create example trace files for demonstration
-  - [ ] Write a program that will do something with the kernel stack to see it with Stacklook.
-  - [ ] Create a trace file without kernel stack entries to show off inacting Stacklook.
+- [x] Create example trace files for demonstration
+  - [ABANDONED] Write a program that will do something with the kernel stack to see it with Stacklook.
+  - [x] Create a trace file without kernel stack entries to show off inacting Stacklook.
   - [x] Create/get a trace file to show off NUMA topology views
     - \[NOTE\] This might be just a matter of implementation of said feature and previous trace files might be reused.
 
@@ -152,29 +162,29 @@ _General SW goal:_
   - [x] Couplebreak
   - [x] NUMA Topology Views
 - [x] Revise README and other non-code parts of repository to reflect project extensions
-- [ ] _("Optional")_ Create proper design documents
+- [LATER] _("Optional")_ Create proper design documents
   - Would be quite good to include in technical documentation
 
 _Non-software goal - write survey paper:_
 
-- [ ] Survey paper
-  - [ ] Stack tracing (in Linux)
+- [x] Survey paper
+  - [x] Stack tracing (in Linux)
     - Mostly basics, some more info about KernelShark's stack tracer
     - Mainly to set context for the project
-  - [ ] Basic visualizations of trace data
+  - [x] Basic visualizations of trace data
     - Not exclusive to stack tracing, but mostly about it
-  - [ ] Theoretical part of KernelShark
-    - [ ] Basic overview of design
-    - [ ] How is it visualizing the data?
-    - [ ] What are the limitations?
+  - [x] Theoretical part of KernelShark
+    - [x] Basic overview of design
+    - [x] How is it visualizing the data?
+    - [x] What are the limitations?
       - I.e. why make the project in the first place?
-    - [ ] What is the job of plugins? / Removing limitations
-  - [ ] Theoretical part of Stacklook, Naps, NoBoxes & KShark modifications
-    - [ ] Overview of piece of SW's design
+    - [x] What is the job of plugins? / Removing limitations
+  - [x] Theoretical part of Stacklook, Naps & KShark modifications
+    - [x] Overview of piece of SW's design
       - Should be included in the documentation
-    - [ ] Purpose & limits
-    - [ ] Results of implementation
-      - [ ] "Ultra-documentation" - user, design and maybe interesting parts
+    - [x] Purpose & limits
+    - [x] Results of implementation
+      - [x] "Ultra-documentation" - user, design and maybe interesting parts
             of technical
-      - [ ] "How was development? What interesting things happened?"
-    - [ ] Extensions
+      - [x] "How was development? What interesting things happened?"
+    - [x] Extensions
