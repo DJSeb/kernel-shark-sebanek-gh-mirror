@@ -6,7 +6,7 @@ Documentation/**
 !Documentation/doxygen
 lib
 src/KsCmakeDef.hpp
-bin/**
+bin
 !bin/kshark-su-record
 
 build/install_manifest*
