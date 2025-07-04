@@ -1220,9 +1220,8 @@ static int tepdata_get_pid(struct kshark_data_stream *stream,
 		pid = entry->pid;
 	} else {
 		//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
+		// Reconstructs PID for couplebreak events
 		if (stream->couplebreak_on && is_couplebreak_event(entry->event_id)) {
-			// Couplebreak events have no fallback for a changed PID, which is why
-			// such changes are not allowed
 			return get_couplebreak_pid(stream, entry);
 		}
 		// END of change

@@ -1475,7 +1475,7 @@ void KsCouplebreakDialog::_setupExplanation() {
 		"\"couplebreak/(event name)[target]\" entries, positioned just after "
 		"the original (\"origin\") entry. "
 		"The setting is set per stream."
-		"\n\nThis feature is experimental and not fully tested through. "
+		"\n\nThis feature is experimental. "
 		"Plugins usually expect classical event ordering. "
 		"Please use with caution and report any issues you encounter."
 		"\n\nCouplebreak settings:"
