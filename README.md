@@ -39,10 +39,18 @@ their own README and documentations, **KS_fork** includes a document detailing c
 
 See each directory for more details about that part of the project.
 
+IMPORTANT NOTE: SurveyPaper contains the most up-to-date information, English documentations are slightly outdated,
+which becomes obvious upon comparison of runnning software with some images in English docs.
+
 ## Basic general setup and usage
 
-1. Build modified KernelShark in KS\_fork directory (CMakeLists.txt files are provided).
-   Instructions are in the README in KS\_fork.
+Potential users may either allow the script `build_all.sh` to build release builds of everything,
+that being modified KernelShark from KS_fork, plugins Stacklook and Naps for both modified and
+unmodified KernelShark and plugin NoBoxes (for modified KernelShark only). Other possibility is following
+the list below.
+
+1. Build modified KernelShark in KS_fork directory (CMakeLists.txt files are provided).
+   Instructions are in the README in KS_fork.
 2. Build plugins in their directories (CMakeLists.txt files are provided). Instructions are in user documentations
    (Czech in SurveyPaper thesis.pdf file, English in English user documentations).
    Czech documentation is more up to date, so reading the thesis file is suggested.
