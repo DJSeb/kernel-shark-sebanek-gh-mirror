@@ -54,7 +54,14 @@ the list below.
 2. Build plugins in their directories (CMakeLists.txt files are provided). Instructions are in user documentations
    (Czech in SurveyPaper thesis.pdf file, English in English user documentations).
    Czech documentation is more up to date, so reading the thesis file is suggested.
-3. Launch KernelShark. You can add plugins to be loaded on the terminal or latervia GUI.
+
+As for usage:
+
+3. Launch KernelShark (from here to `KS_fork/bin`, binary name `kernelshark`).
+   You can add plugins to be loaded on the terminal or later via GUI.
+   Each plugin's SO or symlink to it is in `[PLUGIN_NAME]/build/bin/plugin-[PLUGIN_NAME_LOWERCASE]`.
+   If the plugin was built for unmodified KernelShark, just look for `unmodif_build` subdirectory
+   instead of the `build` subdirectory.
 4. For example data, navigate to SurveyPaper/ExampleData.
 5. Observe the modifications and plugins at work.
 
