@@ -935,7 +935,8 @@ void KsMainWindow::_showEvents()
 	auto lamFilter = [=] (int sd, QVector<int> show) {
 		QVector<int> all = KsUtils::getEventIdList(sd);
 		//NOTE: Changed here. (COUPLEBREAK) (2025-03-21)
-		if (stream->couplebreak_on) {
+		kshark_data_stream *stream = kshark_get_data_stream(kshark_ctx, sd);
+		if (stream && stream->couplebreak_on) {
 			// We want to also filter the couplebreak events, if they exist.
 			all.append(KsUtils::getCouplebreakIdList(sd));
 		}
