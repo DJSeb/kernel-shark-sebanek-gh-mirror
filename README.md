@@ -14,7 +14,7 @@ This is the main repository for the semester project & bachelor thesis for Facul
 Charles University. It is, in general, concerned with improving existing software **KernelShark** with features
 explained below.
 
-It is composed of four main directories, each representing a portion of the thesis project.
+It is composed of five main directories, each representing a portion of the thesis project.
 
 - **Stacklook** - plugin for visualising stack traces via a more GUI-centric way
 - **Naps** - plugin for visualising timeslices between a task's switch and next waking
@@ -32,19 +32,19 @@ It is composed of four main directories, each representing a portion of the thes
   - _Other smaller additions to KernelShark's abilities_
 - **SurveyPaper** - directory containing the survey paper/bachelor thesis paper **in Czech** about the plugins & enhancements
   above, along with `ExampleData` directory in which files for showcasing above's abilities may be found (namely four topology
-  XML files and two trace files with DAT extension).
+  XML files and three trace files with DAT extension).
 
-These five components' requirements are defined in the [project specification document](./ProjectSpecification.md). Each plugin has
+These five components' requirements are somewhat defined in the [project specification document](./ProjectSpecification.md). Each plugin has
 their own README and documentations, **KS_fork** includes a document detailing changes made there.
 
 See each directory for more details about that part of the project.
 
-IMPORTANT NOTE: SurveyPaper contains the most up-to-date information, English documentations are slightly outdated,
-which becomes obvious upon comparison of runnning software with some images in English docs.
+IMPORTANT NOTE: SurveyPaper contains the most up-to-date documentation, albeit in Czech, English documentations are slightly outdated,
+which becomes obvious upon comparison of runnning software with some images in English documents.
 
 ## Basic general setup and usage
 
-Potential users may either allow the script `build_all.sh` to build release builds of everything,
+Potential users may either run the script `build_all.sh` to build release builds of everything,
 that being modified KernelShark from KS_fork, plugins Stacklook and Naps for both modified and
 unmodified KernelShark and plugin NoBoxes (for modified KernelShark only). Other possibility is following
 the list below.
