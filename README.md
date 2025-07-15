@@ -65,7 +65,8 @@ the list below.
 1. Build modified KernelShark in KS_fork directory (CMakeLists.txt files are provided).
    Instructions are in the README in KS_fork.
 2. Build plugins in their directories (CMakeLists.txt files are provided). Instructions are in user documentations
-   (Czech in SurveyPaper thesis.pdf file, English in English user documentations).
+   (Czech in SurveyPaper/thesis.pdf file, English in English user documentations, which are either in
+   KS_fork/Modifications or in plugins' directories).
    Czech documentation is more up to date, so reading the thesis file is suggested.
 
 As for usage:
