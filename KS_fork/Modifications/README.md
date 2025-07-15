@@ -1,14 +1,15 @@
 # Navigation
 
-Each of the documents below serve as technical and user documentations for each modification.
+Each of the documents below serve as technical and user documentations for each modification. They are, however, slightly
+out of date when compared to their Czech versions.
 
-- *[Couplebreak](./couplebreak.md)*
-- *[Get  Colors](./get-colors.md)*
-- *[Mouse Hover Plot Objects](./mouse-hover-plot-objects.md)*
-- *[No Boxes](./no-boxes.md)*
-- *[NUMA Topology Views](./NUMA-topology-views.md)*
-- *[Preview Labels Changeable](./preview-labels-changeable.md)*
-- *[Record Kstack](./record-kstack.md)*
+- _[Couplebreak](./couplebreak.md)_
+- _[Get Colors](./get-colors.md)_
+- _[Mouse Hover Plot Objects](./mouse-hover-plot-objects.md)_
+- _[No Boxes](./no-boxes.md)_
+- _[NUMA Topology Views](./NUMA-topology-views.md)_
+- _[Preview Labels Changeable](./preview-labels-changeable.md)_
+- _[Record Kstack](./record-kstack.md)_
 
 # Source code modifications navigation
 
@@ -21,6 +22,7 @@ closing comment, \[TAG\] being a modification tag and \[DATE OF CHANGE\] being a
 David Jaromír Šebánek (e-mail: `djsebofficial@gmail.com`). Direct all inquiries about this plugin there.
 
 # Acknowledgements and credits
+
 - The motivation for these changes was given by **Jan Kára RNDr.**, who also serves as project's **supervisor**.
 - **Authors of KernelShark** deserve a big kudos, as even though there were some hiccups, the program is impressively
   written and not too difficult to modify.
@@ -30,3 +32,4 @@ David Jaromír Šebánek (e-mail: `djsebofficial@gmail.com`). Direct all inquiri
   when an idea needed to be said out loud, they were there to listen (and nod until the idea was proven futile).
 - **Hwloc**, specifically its documentation and impressive tools to capture systems' topologies. The documentation was
   rich and full of useful knowledge, the tools already were prepared for all necessary operations needed by NUMA TV modification.
+
