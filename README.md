@@ -50,7 +50,8 @@ See each directory for more details about that part of the project.
 
 IMPORTANT NOTE: SurveyPaper contains the most up-to-date documentation, albeit in Czech, English documentations are slightly outdated,
 which becomes obvious upon comparison of runnning software with some images in English documents. It is strongly recommended
-to read the paper first or read it while working with th software.
+to read the paper first or read it while working with the software (assuming you can understand Czech or have the means
+to translate it).
 
 ## Basic general setup and usage
 
