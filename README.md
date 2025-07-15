@@ -1,6 +1,7 @@
 # Repository overview
 
 ## Mirrors
+
 This repository has two mirrors in case the primary repository is unavailable. Development expects that one of
 the mirrors will become the primary repository in the future.
 
@@ -51,6 +52,8 @@ IMPORTANT NOTE: SurveyPaper contains the most up-to-date documentation, albeit i
 which becomes obvious upon comparison of runnning software with some images in English documents.
 
 ## Basic general setup and usage
+
+To use anything, you have to first `git clone` this repository.
 
 Potential users may either run the script `build_all.sh` to build release builds of everything,
 that being modified KernelShark from KS_fork, plugins Stacklook and Naps for both modified and
