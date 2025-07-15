@@ -55,7 +55,9 @@ to translate it).
 
 ## Basic general setup and usage
 
-To use anything, you have to first `git clone` this repository.
+To use anything, you have to first `git clone` this repository. Second, make sure you have all dependencies listed
+in [KernelShark's README](./KS_fork/README), including the ones introduced by modifiactions (i.e. Qt of version at
+least 6.7 and Hwloc of version at least 2.11).
 
 Potential users may either run the script `build_all.sh` to build release builds of everything,
 that being modified KernelShark from KS_fork, plugins Stacklook and Naps for both modified and
