@@ -34,13 +34,13 @@ It is composed of five main directories, each representing a portion of the thes
   - This was a requested bug fix, but is presented as a plugin for easy on/off changes - flickering may be too much for some.
     It is not a necessity for the project, hence it's presented as "best effort" solution.
 - **KS_fork** - modified copy of KernelShark's source code with multiple additions, what many parts across different
-  documentations will call "custom KernelShark"
+  documentations will call "custom/modified KernelShark"
   - _Couplebreak_ functionality is a new ability of KernelShark to split some events (chosen in code) into two
   - _NUMA Topology Views_ functionality gives KernelShark the ability to show CPU plots with respect to the NUMA
     topology given by the user to the program
   - _Other smaller additions to KernelShark's abilities_
 - **SurveyPaper** - directory containing the survey paper/bachelor thesis paper **in Czech** about the plugins & enhancements
-  above, along with `ExampleData` directory in which files for showcasing above's abilities may be found (namely four topology
+  above, along with **ExampleData** directory in which files for showcasing above's abilities may be found (namely four topology
   XML files and three trace files with DAT extension).
 
 These five components' requirements are somewhat defined in the [project specification document](./ProjectSpecification.md). Each plugin has
@@ -48,15 +48,21 @@ their own README and documentations, **KS_fork** includes a document detailing c
 
 See each directory for more details about that part of the project.
 
-IMPORTANT NOTE: SurveyPaper contains the most up-to-date documentation, albeit in Czech, English documentations are slightly outdated,
-which becomes obvious upon comparison of runnning software with some images in English documents. It is strongly recommended
+### (IMPORTANT) Documentations
+
+SurveyPaper contains the most up-to-date documentation, albeit in Czech only, English documentations are slightly outdated,
+which becomes obvious upon comparison of runnning software with some images in English documents. English documentation also
+has a slightly different format, is more compact and its design sections badly need a revision. It is strongly recommended
 to read the paper first or read it while working with the software (assuming you can understand Czech or have the means
 to translate it).
+
+English documentation WILL be updated in the future as the project will be approaching a state when it can be submitted as a
+contribution to KernelShark.
 
 ## Basic general setup and usage
 
 To use anything, you have to first `git clone` this repository. Second, make sure you have all dependencies listed
-in [KernelShark's README](./KS_fork/README), including the ones introduced by modifiactions (i.e. Qt of version at
+in [KernelShark's README](./KS_fork/README), including the ones introduced by modifications (i.e. Qt of version at
 least 6.7 and Hwloc of version at least 2.11).
 
 Potential users may either run the script `build_all.sh` to build release builds of everything,
@@ -81,6 +87,8 @@ As for usage:
 4. For example data, navigate to SurveyPaper/ExampleData.
 5. Observe the modifications and plugins at work.
 
+If unmodified KernelShark is desired, it is recommended to install a version from its official repository on the internet.
+
 ## Projects' status
 
 ### Semester project (NPRG045) general tasks
@@ -98,16 +106,16 @@ Semester project part is finished.
 
 ### Bachelor thesis project general tasks
 
-Bachelor thesis project part WIP.
+Bachelor thesis project part.
 
 (Stacklook revision, Naps plugin, Couplebreak, NUMA Topology Views.)
 
 - [x] Brief project descrption
 - [x] Specification
 - [x] Basic working version\*
-  - [x] Split events involving two processes
+  - [x] Split events involving two processes (couplebreak)
   - [x] NUMA topology visualisation
-  - [x] sched_events interoperability with created plugin(s)
+  - [x] sched_events interoperability with created plugin(s) (couplebreak)
 - [x] Final version
 
 \* The most important things work.
