@@ -1,5 +1,12 @@
 # Repository overview
 
+## Mirrors
+This repository has two mirrors in case the primary repository is unavailable. Development expects that one of
+the mirrors will become the primary repository in the future.
+
+_GitLab mirror_: https://gitlab.mff.cuni.cz/sebaned/kernel-shark-sebanek-mirror
+_GitHub mirror_: https://github.com/DJSeb/kernel-shark-sebanek-gh-mirror
+
 ## Repository owner
 
 David Jaromír Šebánek (contact e-mail: `djsebofficial@gmail.com`)
