@@ -1,3 +1,5 @@
+NOTE: This document is outdated and will be revised in the future.
+
 # Purpose
 
 Visualise topology of a stream, from which we are reading trace data to get more information where a

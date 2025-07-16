@@ -1,3 +1,5 @@
+NOTE: This document is outdated and will be revised in the future.
+
 # Purpose
 
 Allow splitting of events, which involve two processes (a "couple" by definition of this modification),
